@@ -33,7 +33,10 @@ void main() {
         );
 
         expect(result.status, ServerStatus.error);
-        expect(result.serviceUrl, 'https://invalid-server-that-does-not-exist.test');
+        expect(
+          result.serviceUrl,
+          'https://invalid-server-that-does-not-exist.test',
+        );
         expect(result.displayName, 'invalid-server-that-does-not-exist.test');
       });
 
@@ -70,9 +73,12 @@ void main() {
         );
 
         final result = await ServerDiscoveryService.validateServer(config);
-        
+
         // タイムアウトまたはエラーの場合、適切なステータスが設定される
-        expect([ServerStatus.offline, ServerStatus.error], contains(result.status));
+        expect([
+          ServerStatus.offline,
+          ServerStatus.error,
+        ], contains(result.status));
       });
     });
 
@@ -108,27 +114,33 @@ void main() {
       test('adds HTTPS to URLs without protocol', () {
         expect(
           ServerDiscoveryService.discoverServer('example.com'),
-          completion(predicate<ServerConfig>((config) => 
-            config.serviceUrl.startsWith('https://')
-          )),
+          completion(
+            predicate<ServerConfig>(
+              (config) => config.serviceUrl.startsWith('https://'),
+            ),
+          ),
         );
       });
 
       test('preserves HTTP URLs', () {
         expect(
           ServerDiscoveryService.discoverServer('http://localhost:3000'),
-          completion(predicate<ServerConfig>((config) => 
-            config.serviceUrl.startsWith('http://localhost:3000')
-          )),
+          completion(
+            predicate<ServerConfig>(
+              (config) => config.serviceUrl.startsWith('http://localhost:3000'),
+            ),
+          ),
         );
       });
 
       test('removes multiple trailing slashes', () {
         expect(
           ServerDiscoveryService.discoverServer('https://example.com///'),
-          completion(predicate<ServerConfig>((config) => 
-            config.serviceUrl == 'https://example.com'
-          )),
+          completion(
+            predicate<ServerConfig>(
+              (config) => config.serviceUrl == 'https://example.com',
+            ),
+          ),
         );
       });
     });
@@ -155,7 +167,7 @@ void main() {
         );
 
         final result = await ServerDiscoveryService.testAuthMethods(config);
-        
+
         // OAuth対応サーバーの場合、OAuthメソッドがテストされる
         expect(result.containsKey('oauth'), isTrue);
       });
@@ -167,7 +179,7 @@ void main() {
         );
 
         final result = await ServerDiscoveryService.testAuthMethods(config);
-        
+
         // 不明なサーバーでも、App Passwordは通常サポートされると仮定
         expect(result['app_password'], isTrue);
       });

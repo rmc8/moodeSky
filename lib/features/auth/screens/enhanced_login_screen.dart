@@ -14,14 +14,15 @@ class EnhancedLoginScreen extends ConsumerStatefulWidget {
   const EnhancedLoginScreen({super.key});
 
   @override
-  ConsumerState<EnhancedLoginScreen> createState() => _EnhancedLoginScreenState();
+  ConsumerState<EnhancedLoginScreen> createState() =>
+      _EnhancedLoginScreenState();
 }
 
 class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   ServerConfig _selectedServer = ServerPresets.blueskyOfficial;
   AuthMethod _authMethod = AuthMethod.appPassword;
   bool _isPasswordVisible = false;
@@ -38,14 +39,16 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
   bool get _isAppPasswordFormat {
     final password = _passwordController.text;
     // App Password format: 4 groups of 4 alphanumeric characters separated by hyphens
-    final appPasswordRegex = RegExp(r'^[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}$');
+    final appPasswordRegex = RegExp(
+      r'^[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}$',
+    );
     return appPasswordRegex.hasMatch(password);
   }
 
   bool get _showAppPasswordWarning {
-    return _authMethod == AuthMethod.appPassword && 
-           _passwordController.text.isNotEmpty && 
-           !_isAppPasswordFormat;
+    return _authMethod == AuthMethod.appPassword &&
+        _passwordController.text.isNotEmpty &&
+        !_isAppPasswordFormat;
   }
 
   Future<void> _login() async {
@@ -63,14 +66,16 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
         method: _authMethod,
       );
 
-      final success = await ref.read(authNotifierProvider.notifier).login(credentials);
-      
+      final success = await ref
+          .read(authNotifierProvider.notifier)
+          .login(credentials);
+
       if (success) {
         // Save server preference if user chose to remember
         if (_rememberServer && _selectedServer.isCustom) {
           // TODO: Save to SharedPreferences
         }
-        
+
         if (mounted) {
           // Navigation will be handled by the auth state listener
           ScaffoldMessenger.of(context).showSnackBar(
@@ -112,7 +117,9 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
             action: SnackBarAction(
               label: 'コピー',
               onPressed: () {
-                Clipboard.setData(ClipboardData(text: _selectedServer.appPasswordUrl));
+                Clipboard.setData(
+                  ClipboardData(text: _selectedServer.appPasswordUrl),
+                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('URLをクリップボードにコピーしました')),
                 );
@@ -154,10 +161,7 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('MoodeSky ログイン'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('MoodeSky ログイン'), centerTitle: true),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -167,11 +171,7 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // App logo and title
-                const Icon(
-                  Icons.cloud_queue,
-                  size: 80,
-                  color: Colors.blue,
-                ),
+                const Icon(Icons.cloud_queue, size: 80, color: Colors.blue),
                 const SizedBox(height: 16),
                 Text(
                   'MoodeSky',
@@ -184,14 +184,14 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Bluesky client with deck-based UI',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Server selection
                 ServerSelectionWidget(
                   initialServer: _selectedServer,
@@ -201,9 +201,9 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                     });
                   },
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Authentication method selection
                 Card(
                   child: Padding(
@@ -213,19 +213,21 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.login, color: Theme.of(context).primaryColor),
+                            Icon(
+                              Icons.login,
+                              color: Theme.of(context).primaryColor,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'ログイン方法',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         // Authentication method tabs
                         Row(
                           children: [
@@ -233,7 +235,8 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                               Expanded(
                                 child: ChoiceChip(
                                   label: const Text('App Password'),
-                                  selected: _authMethod == AuthMethod.appPassword,
+                                  selected:
+                                      _authMethod == AuthMethod.appPassword,
                                   onSelected: (selected) {
                                     if (selected) {
                                       setState(() {
@@ -243,10 +246,11 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                                   },
                                 ),
                               ),
-                            
-                            if (_selectedServer.supportsAppPasswords && _selectedServer.supportsOAuth)
+
+                            if (_selectedServer.supportsAppPasswords &&
+                                _selectedServer.supportsOAuth)
                               const SizedBox(width: 8),
-                            
+
                             if (_selectedServer.supportsOAuth)
                               Expanded(
                                 child: ChoiceChip(
@@ -263,9 +267,9 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                               ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         // Authentication form based on selected method
                         if (_authMethod == AuthMethod.appPassword) ...[
                           // App Password login form
@@ -286,9 +290,9 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 16),
-                          
+
                           TextFormField(
                             controller: _passwordController,
                             decoration: InputDecoration(
@@ -300,11 +304,14 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                                 children: [
                                   IconButton(
                                     icon: Icon(
-                                      _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                                      _isPasswordVisible
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
                                     ),
                                     onPressed: () {
                                       setState(() {
-                                        _isPasswordVisible = !_isPasswordVisible;
+                                        _isPasswordVisible =
+                                            !_isPasswordVisible;
                                       });
                                     },
                                   ),
@@ -320,7 +327,8 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                             obscureText: !_isPasswordVisible,
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) => _login(),
-                            onChanged: (_) => setState(() {}), // Trigger rebuild for warning
+                            onChanged: (_) =>
+                                setState(() {}), // Trigger rebuild for warning
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'App Passwordを入力してください';
@@ -328,7 +336,7 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                               return null;
                             },
                           ),
-                          
+
                           // App Password warning and help
                           if (_showAppPasswordWarning) ...[
                             const SizedBox(height: 8),
@@ -336,7 +344,9 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: Colors.orange.withValues(alpha: 0.1),
-                                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                                border: Border.all(
+                                  color: Colors.orange.withValues(alpha: 0.3),
+                                ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Column(
@@ -344,7 +354,11 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(Icons.warning, color: Colors.orange, size: 20),
+                                      Icon(
+                                        Icons.warning,
+                                        color: Colors.orange,
+                                        size: 20,
+                                      ),
                                       const SizedBox(width: 8),
                                       const Text(
                                         'セキュリティ警告',
@@ -364,15 +378,17 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                               ),
                             ),
                           ],
-                          
+
                           const SizedBox(height: 12),
-                          
+
                           // App Password generation link
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: Colors.blue.withValues(alpha: 0.1),
-                              border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                color: Colors.blue.withValues(alpha: 0.3),
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Column(
@@ -380,7 +396,11 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    Icon(Icons.info, color: Colors.blue, size: 20),
+                                    Icon(
+                                      Icons.info,
+                                      color: Colors.blue,
+                                      size: 20,
+                                    ),
                                     const SizedBox(width: 8),
                                     const Text(
                                       'App Passwordについて',
@@ -404,15 +424,16 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.zero,
                                     minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          
+
                           const SizedBox(height: 16),
-                          
+
                           // Login button
                           FilledButton(
                             onPressed: _isLoading ? null : _login,
@@ -420,7 +441,9 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
                                   )
                                 : const Text('ログイン'),
                           ),
@@ -429,7 +452,9 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Column(
@@ -442,9 +467,8 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                                 const SizedBox(height: 16),
                                 Text(
                                   'OAuthによる安全なログイン',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -454,12 +478,16 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 FilledButton.icon(
-                                  onPressed: _isLoading ? null : _startOAuthFlow,
+                                  onPressed: _isLoading
+                                      ? null
+                                      : _startOAuthFlow,
                                   icon: _isLoading
                                       ? const SizedBox(
                                           width: 16,
                                           height: 16,
-                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
                                         )
                                       : const Icon(Icons.open_in_new),
                                   label: const Text('ブラウザでログイン'),
@@ -468,7 +496,7 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                             ),
                           ),
                         ],
-                        
+
                         // Remember server option
                         if (_selectedServer.isCustom) ...[
                           const SizedBox(height: 16),

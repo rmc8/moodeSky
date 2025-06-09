@@ -8,31 +8,39 @@ import 'package:moodesky/services/database/tables/settings.dart';
 part 'settings_dao.g.dart';
 
 @DriftAccessor(tables: [Settings])
-class SettingsDao extends DatabaseAccessor<AppDatabase> with _$SettingsDaoMixin {
+class SettingsDao extends DatabaseAccessor<AppDatabase>
+    with _$SettingsDaoMixin {
   SettingsDao(AppDatabase db) : super(db);
 
   // Get setting by key
   Future<Setting?> getSetting(String key, {String? accountDid}) {
-    return (select(settings)
-          ..where((t) => 
+    return (select(settings)..where(
+          (t) =>
               t.key.equals(key) &
-              (accountDid != null 
+              (accountDid != null
                   ? t.accountDid.equals(accountDid)
-                  : t.accountDid.isNull())))
+                  : t.accountDid.isNull()),
+        ))
         .getSingleOrNull();
   }
 
   // Get all settings for account (or global if accountDid is null)
   Future<List<Setting>> getSettings({String? accountDid}) {
-    return (select(settings)
-          ..where((t) => accountDid != null 
+    return (select(settings)..where(
+          (t) => accountDid != null
               ? t.accountDid.equals(accountDid)
-              : t.accountDid.isNull()))
+              : t.accountDid.isNull(),
+        ))
         .get();
   }
 
   // Set setting value
-  Future<void> setSetting(String key, String value, String type, {String? accountDid}) {
+  Future<void> setSetting(
+    String key,
+    String value,
+    String type, {
+    String? accountDid,
+  }) {
     return into(settings).insertOnConflictUpdate(
       SettingsCompanion.insert(
         key: key,
@@ -45,7 +53,11 @@ class SettingsDao extends DatabaseAccessor<AppDatabase> with _$SettingsDaoMixin 
   }
 
   // Set string setting
-  Future<void> setStringSetting(String key, String value, {String? accountDid}) {
+  Future<void> setStringSetting(
+    String key,
+    String value, {
+    String? accountDid,
+  }) {
     return setSetting(key, value, 'string', accountDid: accountDid);
   }
 
@@ -60,7 +72,11 @@ class SettingsDao extends DatabaseAccessor<AppDatabase> with _$SettingsDaoMixin 
   }
 
   // Set double setting
-  Future<void> setDoubleSetting(String key, double value, {String? accountDid}) {
+  Future<void> setDoubleSetting(
+    String key,
+    double value, {
+    String? accountDid,
+  }) {
     return setSetting(key, value.toString(), 'double', accountDid: accountDid);
   }
 
@@ -90,37 +106,42 @@ class SettingsDao extends DatabaseAccessor<AppDatabase> with _$SettingsDaoMixin 
 
   // Delete setting
   Future<int> deleteSetting(String key, {String? accountDid}) {
-    return (delete(settings)
-          ..where((t) => 
+    return (delete(settings)..where(
+          (t) =>
               t.key.equals(key) &
-              (accountDid != null 
+              (accountDid != null
                   ? t.accountDid.equals(accountDid)
-                  : t.accountDid.isNull())))
+                  : t.accountDid.isNull()),
+        ))
         .go();
   }
 
   // Delete all settings for account
   Future<int> deleteAccountSettings(String accountDid) {
-    return (delete(settings)..where((t) => t.accountDid.equals(accountDid))).go();
+    return (delete(
+      settings,
+    )..where((t) => t.accountDid.equals(accountDid))).go();
   }
 
   // Watch setting changes
   Stream<Setting?> watchSetting(String key, {String? accountDid}) {
-    return (select(settings)
-          ..where((t) => 
+    return (select(settings)..where(
+          (t) =>
               t.key.equals(key) &
-              (accountDid != null 
+              (accountDid != null
                   ? t.accountDid.equals(accountDid)
-                  : t.accountDid.isNull())))
+                  : t.accountDid.isNull()),
+        ))
         .watchSingleOrNull();
   }
 
   // Watch all settings
   Stream<List<Setting>> watchSettings({String? accountDid}) {
-    return (select(settings)
-          ..where((t) => accountDid != null 
+    return (select(settings)..where(
+          (t) => accountDid != null
               ? t.accountDid.equals(accountDid)
-              : t.accountDid.isNull()))
+              : t.accountDid.isNull(),
+        ))
         .watch();
   }
 }

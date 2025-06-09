@@ -7,15 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/core/providers/locale_provider.dart';
+import 'package:moodesky/core/providers/theme_provider.dart';
 import 'package:moodesky/features/auth/screens/login_screen.dart';
 import 'package:moodesky/features/home/screens/home_screen.dart';
+import 'package:moodesky/l10n/app_localizations.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: MoodeSkyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MoodeSkyApp()));
 }
 
 class MoodeSkyApp extends ConsumerWidget {
@@ -23,54 +22,69 @@ class MoodeSkyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp(
-      title: 'MoodeSky',
-      debugShowCheckedModeBanner: false,
-      
-      // Localization
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('ja', 'JP'), // Japanese
-        Locale('en', 'US'), // English
-        Locale('ko', 'KR'), // Korean  
-        Locale('de', 'DE'), // German
-        Locale('pt', 'BR'), // Brazilian Portuguese
-      ],
-      
-      // Theme
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueAccent,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          centerTitle: true,
+    final asyncLocale = ref.watch(localeNotifierProvider);
+    final lightTheme = ref.watch(lightThemeProvider);
+    final darkTheme = ref.watch(darkThemeProvider);
+    final themeMode = ref.watch(flutterThemeModeProvider);
+
+    return asyncLocale.when(
+      data: (locale) => MaterialApp(
+        title: 'MoodeSky',
+        debugShowCheckedModeBanner: false,
+
+        // Localization
+        locale: locale,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: SupportedLocales.locales,
+
+        // Theme
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: themeMode,
+
+        // App routing
+        home: const AppRouter(),
+      ),
+      loading: () => MaterialApp(
+        title: 'MoodeSky',
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: SupportedLocales.locales,
+        home: const Scaffold(body: Center(child: CircularProgressIndicator())),
+      ),
+      error: (error, stack) => MaterialApp(
+        title: 'MoodeSky',
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: SupportedLocales.locales,
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text('Failed to load app: $error'),
+              ],
+            ),
+          ),
         ),
       ),
-      
-      // Dark theme
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueAccent,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          centerTitle: true,
-        ),
-      ),
-      
-      themeMode: ThemeMode.system,
-      
-      // App routing
-      home: const AppRouter(),
     );
   }
 }
@@ -81,7 +95,7 @@ class AppRouter extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
-    
+
     return authState.when(
       initial: () => const LoadingScreen(),
       loading: () => const LoadingScreen(),
@@ -122,15 +136,15 @@ class LoadingScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'MoodeSky',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
             Text(
-              'Starting up...',
+              AppLocalizations.of(context)!.loadingText,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
@@ -146,11 +160,7 @@ class ErrorScreen extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
 
-  const ErrorScreen({
-    super.key,
-    required this.message,
-    this.onRetry,
-  });
+  const ErrorScreen({super.key, required this.message, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +178,7 @@ class ErrorScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Something went wrong',
+                AppLocalizations.of(context)!.errorTitle,
                 style: Theme.of(context).textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
@@ -183,7 +193,7 @@ class ErrorScreen extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: onRetry,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
+                  label: Text(AppLocalizations.of(context)!.retryButton),
                 ),
             ],
           ),

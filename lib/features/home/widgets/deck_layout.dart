@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/shared/widgets/post_item.dart';
 
 class DeckLayout extends ConsumerStatefulWidget {
   const DeckLayout({super.key});
@@ -26,7 +27,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Determine layout based on screen size
     if (screenWidth >= 1200) {
       // Desktop: Multi-column deck layout
@@ -43,127 +44,129 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   Widget _buildDesktopLayout() {
     // For now, show placeholder decks
     final decks = _getPlaceholderDecks();
-    
+
     return Row(
-      children: decks.map((deck) => 
-        Expanded(
-          child: Container(
-            margin: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              children: [
-                // Deck header
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      topRight: Radius.circular(8),
-                    ),
+      children: decks
+          .map(
+            (deck) => Expanded(
+              child: Container(
+                margin: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.2),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(deck.icon),
-                      const SizedBox(width: 8),
-                      Text(
-                        deck.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    // Deck header
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainer,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8),
                         ),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.more_vert),
-                        onPressed: () {
-                          // TODO: Show deck options
-                        },
+                      child: Row(
+                        children: [
+                          Icon(deck.icon),
+                          const SizedBox(width: 8),
+                          Text(
+                            deck.title,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(Icons.more_vert),
+                            onPressed: () {
+                              // TODO: Show deck options
+                            },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+
+                    // Deck content
+                    Expanded(child: _buildDeckContent(deck)),
+                  ],
                 ),
-                
-                // Deck content
-                Expanded(
-                  child: _buildDeckContent(deck),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ).toList(),
+          )
+          .toList(),
     );
   }
 
   Widget _buildTabletLayout() {
     final decks = _getPlaceholderDecks().take(3).toList();
-    
+
     return Row(
-      children: decks.map((deck) => 
-        Expanded(
-          child: Container(
-            margin: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              children: [
-                // Deck header
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      topRight: Radius.circular(8),
-                    ),
+      children: decks
+          .map(
+            (deck) => Expanded(
+              child: Container(
+                margin: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.2),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(deck.icon, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        deck.title,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    // Deck header
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainer,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8),
                         ),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.more_vert, size: 20),
-                        onPressed: () {
-                          // TODO: Show deck options
-                        },
+                      child: Row(
+                        children: [
+                          Icon(deck.icon, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            deck.title,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(Icons.more_vert, size: 20),
+                            onPressed: () {
+                              // TODO: Show deck options
+                            },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+
+                    // Deck content
+                    Expanded(child: _buildDeckContent(deck)),
+                  ],
                 ),
-                
-                // Deck content
-                Expanded(
-                  child: _buildDeckContent(deck),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ).toList(),
+          )
+          .toList(),
     );
   }
 
   Widget _buildMobileLayout() {
     final decks = _getPlaceholderDecks();
-    
+
     return PageView.builder(
       controller: PageController(),
       itemCount: decks.length,
@@ -174,7 +177,9 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+              color: Theme.of(
+                context,
+              ).colorScheme.outline.withValues(alpha: 0.2),
             ),
             borderRadius: BorderRadius.circular(8),
           ),
@@ -216,11 +221,9 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                   ],
                 ),
               ),
-              
+
               // Deck content
-              Expanded(
-                child: _buildDeckContent(deck),
-              ),
+              Expanded(child: _buildDeckContent(deck)),
             ],
           ),
         );
@@ -229,35 +232,39 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   }
 
   Widget _buildDeckContent(DeckInfo deck) {
+    if (deck.type == DeckType.home) {
+      return const PostListDemo();
+    }
+    
+    // Placeholder content for other deck types
     return ListView.builder(
-      padding: const EdgeInsets.all(8),
-      itemCount: 10, // Placeholder count
+      padding: const EdgeInsets.all(16),
+      itemCount: 5,
       itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          child: ListTile(
-            leading: const CircleAvatar(
-              child: Icon(Icons.person),
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
             ),
-            title: Text('Post ${index + 1}'),
-            subtitle: Text('This is a placeholder post in the ${deck.title} deck.'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.favorite_border),
-                  onPressed: () {
-                    // TODO: Like post
-                  },
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${deck.title} Item ${index + 1}',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-                IconButton(
-                  icon: const Icon(Icons.repeat),
-                  onPressed: () {
-                    // TODO: Repost
-                  },
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'This is placeholder content for the ${deck.title} deck.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
           ),
         );
       },
@@ -304,12 +311,4 @@ class DeckInfo {
 }
 
 // Deck types enum
-enum DeckType {
-  home,
-  notifications,
-  search,
-  profile,
-  list,
-  hashtag,
-  mentions,
-}
+enum DeckType { home, notifications, search, profile, list, hashtag, mentions }

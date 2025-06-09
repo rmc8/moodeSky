@@ -160,12 +160,12 @@ void main() {
         UserProfile(did: 'did:1', handle: 'user1.bsky.social'),
         UserProfile(did: 'did:2', handle: 'user2.bsky.social'),
       ];
-      
+
       const state = AuthState.authenticated(
         activeAccountDid: 'did:1',
         accounts: profiles,
       );
-      
+
       expect(state, isA<AuthAuthenticated>());
       state.when(
         initial: () => fail('Should be authenticated'),
@@ -189,7 +189,7 @@ void main() {
         message: 'Test error',
         errorType: AuthErrorType.networkError,
       );
-      
+
       expect(state, isA<AuthError>());
       state.when(
         initial: () => fail('Should be error'),
@@ -252,17 +252,17 @@ void main() {
         expiresAt: DateTime.now().add(const Duration(hours: 1)),
         sub: 'did:plc:example',
       );
-      
+
       const userProfile = UserProfile(
         did: 'did:plc:example',
         handle: 'user.bsky.social',
       );
-      
+
       final authSession = AuthSessionData.oauth(
         oauthSession: sessionData,
         profile: userProfile,
       );
-      
+
       final result = AuthResult.success(
         session: authSession,
         accountDid: 'did:plc:example',

@@ -13,14 +13,7 @@ import 'package:moodesky/services/database/tables/accounts.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(
-  tables: [
-    Accounts,
-  ],
-  daos: [
-    AccountDao,
-  ],
-)
+@DriftDatabase(tables: [Accounts], daos: [AccountDao])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
@@ -48,7 +41,7 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'moodesky.db'));
-    
+
     return NativeDatabase.createInBackground(file);
   });
 }

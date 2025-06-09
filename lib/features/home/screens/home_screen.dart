@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moodesky/core/providers/auth_provider.dart';
 import 'package:moodesky/features/home/widgets/account_switcher.dart';
 import 'package:moodesky/features/home/widgets/deck_layout.dart';
+import 'package:moodesky/features/settings/screens/settings_screen.dart';
+import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -22,13 +24,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final activeAccount = ref.watch(activeAccountProvider);
-    
+
     if (authState is! AuthAuthenticated) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -42,7 +40,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 color: Theme.of(context).colorScheme.surfaceContainer,
                 border: Border(
                   right: BorderSide(
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.2),
                   ),
                 ),
               ),
@@ -50,7 +50,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   // Account switcher
                   const AccountSwitcher(),
-                  
+
                   // Navigation
                   Expanded(
                     child: ListView(
@@ -81,7 +81,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         _buildNavItem(
                           context,
                           icon: Icons.settings,
-                          label: 'Settings',
+                          label: AppLocalizations.of(context)!.settingsTitle,
+                          onTap: () => _navigateToSettings(context),
                         ),
                       ],
                     ),
@@ -90,7 +91,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
           ],
-          
+
           // Main content area - Deck layout
           Expanded(
             child: Column(
@@ -109,15 +110,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               : null,
                           child: activeAccount?.avatar == null
                               ? Text(
-                                  activeAccount?.displayName?.substring(0, 1).toUpperCase() ??
-                                  activeAccount?.handle.substring(0, 1).toUpperCase() ??
-                                  '?',
+                                  activeAccount?.displayName
+                                          ?.substring(0, 1)
+                                          .toUpperCase() ??
+                                      activeAccount?.handle
+                                          .substring(0, 1)
+                                          .toUpperCase() ??
+                                      '?',
                                 )
                               : null,
                         ),
                         onPressed: () {
                           _showAccountSwitcher(context);
                         },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.settings),
+                        onPressed: () => _navigateToSettings(context),
                       ),
                       IconButton(
                         icon: const Icon(Icons.add),
@@ -127,25 +136,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ],
                   ),
-                
+
                 // Deck layout
-                const Expanded(
-                  child: DeckLayout(),
-                ),
+                const Expanded(child: DeckLayout()),
               ],
             ),
           ),
         ],
       ),
-      
+
       // Bottom navigation (mobile only)
       bottomNavigationBar: MediaQuery.of(context).size.width < 600
           ? NavigationBar(
               destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                ),
+                NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
                 NavigationDestination(
                   icon: Icon(Icons.notifications),
                   label: 'Notifications',
@@ -161,7 +165,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             )
           : null,
-      
+
       // Floating action button (mobile)
       floatingActionButton: MediaQuery.of(context).size.width < 600
           ? FloatingActionButton(
@@ -179,15 +183,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required IconData icon,
     required String label,
     bool isSelected = false,
+    VoidCallback? onTap,
   }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
       selected: isSelected,
-      onTap: () {
-        // TODO: Handle navigation
-      },
+      onTap:
+          onTap ??
+          () {
+            // TODO: Handle navigation
+          },
     );
+  }
+
+  void _navigateToSettings(BuildContext context) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const SettingsScreen()));
   }
 
   void _showAccountSwitcher(BuildContext context) {

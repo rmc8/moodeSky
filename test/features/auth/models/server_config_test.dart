@@ -83,7 +83,7 @@ void main() {
 
     test('blueskyOfficial has correct properties', () {
       final server = ServerPresets.blueskyOfficial;
-      
+
       expect(server.serviceUrl, 'https://bsky.social');
       expect(server.displayName, 'Bluesky Social');
       expect(server.isOfficial, true);
@@ -93,7 +93,7 @@ void main() {
 
     test('blueskyStaging has correct properties', () {
       final server = ServerPresets.blueskyStaging;
-      
+
       expect(server.serviceUrl, 'https://staging.bsky.dev');
       expect(server.displayName, 'Bluesky Staging');
       expect(server.isOfficial, true);
@@ -129,7 +129,10 @@ void main() {
         serviceUrl: 'https://custom.example.com',
         displayName: 'Custom',
       );
-      expect(server.appPasswordUrl, 'https://custom.example.com/settings/app-passwords');
+      expect(
+        server.appPasswordUrl,
+        'https://custom.example.com/settings/app-passwords',
+      );
     });
 
     test('oauthAuthUrl for custom server', () {

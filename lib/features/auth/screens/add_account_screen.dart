@@ -9,23 +9,22 @@ import 'package:moodesky/core/providers/auth_provider.dart';
 import 'package:moodesky/features/auth/models/server_config.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
-import 'package:moodesky/shared/widgets/language_selector.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class AddAccountScreen extends ConsumerStatefulWidget {
+  const AddAccountScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<AddAccountScreen> createState() => _AddAccountScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
   final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
   bool _obscurePassword = true;
-  bool _useOAuth = false; // Toggle between OAuth and App Password
+  bool _useOAuth = false; // App Password default for add account
   ServerConfig _selectedServer = ServerPresets.blueskyOfficial;
 
   @override
@@ -35,25 +34,70 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _signIn() async {
+  Future<void> _addAccount() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
     try {
-      if (_useOAuth) {
-        // OAuth sign in
-        await ref
-            .read(authNotifierProvider.notifier)
-            .signInWithOAuth(userIdentifier: _identifierController.text.trim());
-      } else {
-        // App password sign in
-        await ref
-            .read(authNotifierProvider.notifier)
-            .signInWithAppPassword(
-              identifier: _identifierController.text.trim(),
-              password: _passwordController.text,
+      final result = await ref
+          .read(authNotifierProvider.notifier)
+          .addAccount(
+            identifier: _identifierController.text.trim(),
+            password: _passwordController.text,
+            serverConfig: _selectedServer,
+            useOAuth: _useOAuth,
+          );
+
+      result.when(
+        success: (session, accountDid) {
+          if (mounted) {
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  AppLocalizations.of(context)!.accountAddedSuccess,
+                ),
+                backgroundColor: Colors.green,
+              ),
             );
+          }
+        },
+        failure: (error, errorDescription, errorType) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  AppLocalizations.of(context)!.accountAddFailed(error),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        cancelled: () {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  AppLocalizations.of(context)!.accountAddCancelled,
+                ),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.accountAddFailed(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -66,21 +110,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
 
-    // Show loading if auth is in progress
-    if (authState is AuthLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: LanguageSelector(isCompact: true, showLabel: false),
-          ),
-        ],
+        title: Text(AppLocalizations.of(context)!.addAccountTitle),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SafeArea(
         child: Center(
@@ -94,21 +130,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Logo
-                    Container(
-                      height: 80,
-                      margin: const EdgeInsets.only(bottom: 32),
-                      child: Center(
-                        child: Text(
-                          'MoodeSky',
-                          style: Theme.of(context).textTheme.headlineLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
+                    // Info card
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.info, color: Colors.blue, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppLocalizations.of(context)!.newAccountInfo,
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(
+                                        color: Colors.blue,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              AppLocalizations.of(context)!.multiAccountInfo,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
                               ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
+
+                    const SizedBox(height: 16),
 
                     // Auth method toggle
                     Card(
@@ -260,29 +316,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 );
                               },
                             ),
-                          ListTile(
-                            leading: const Icon(Icons.add),
-                            title: Text(
-                              AppLocalizations.of(context)!.customServerOption,
-                            ),
-                            subtitle: Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.customServerDescription,
-                            ),
-                            onTap: () {
-                              // TODO: カスタムサーバー追加ダイアログ
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.customServerComingSoon,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
                         ],
                       ),
                     ),
@@ -353,7 +386,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                       const SizedBox(height: 8),
 
-                      // App Password help and warning
+                      // App Password help
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -426,9 +459,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     const SizedBox(height: 24),
 
-                    // Sign in button
+                    // Add account button
                     FilledButton(
-                      onPressed: (_isLoading || _useOAuth) ? null : _signIn,
+                      onPressed: (_isLoading || _useOAuth) ? null : _addAccount,
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: _isLoading
@@ -446,7 +479,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       )!.oAuthInDevelopment
                                     : AppLocalizations.of(
                                         context,
-                                      )!.signInButton,
+                                      )!.addAccountButton,
                               ),
                       ),
                     ),
@@ -472,7 +505,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
-                                      AppLocalizations.of(context)!.loginError,
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.accountAddError,
                                       style: TextStyle(
                                         color: Theme.of(
                                           context,
@@ -493,21 +528,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   fontSize: 14,
                                 ),
                               ),
-                              // Show retry button for network errors
-                              if (authState.errorType ==
-                                  AuthErrorType.networkError) ...[
-                                const SizedBox(height: 12),
-                                FilledButton.tonal(
-                                  onPressed: () {
-                                    ref
-                                        .read(authNotifierProvider.notifier)
-                                        .refresh();
-                                  },
-                                  child: Text(
-                                    AppLocalizations.of(context)!.retryButton,
-                                  ),
-                                ),
-                              ],
                             ],
                           ),
                         ),
@@ -518,9 +538,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     // Help text
                     Text(
-                      _useOAuth
-                          ? AppLocalizations.of(context)!.helpTextOAuth
-                          : AppLocalizations.of(context)!.helpTextAppPassword,
+                      AppLocalizations.of(context)!.multiAccountHelpText,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(
                           context,

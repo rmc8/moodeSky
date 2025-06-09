@@ -1,0 +1,381 @@
+{
+  "@@locale": "en",
+  
+  "appTitle": "MoodeSky",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  
+  "loginTitle": "Sign In",
+  "@loginTitle": {
+    "description": "Title for the login screen"
+  },
+  
+  "addAccountTitle": "Add Account",
+  "@addAccountTitle": {
+    "description": "Title for the add account screen"
+  },
+  
+  "loginMethod": "Sign in method",
+  "@loginMethod": {
+    "description": "Label for authentication method selection"
+  },
+  
+  "authMethodOAuth": "OAuth",
+  "@authMethodOAuth": {
+    "description": "OAuth authentication method"
+  },
+  
+  "authMethodAppPassword": "App Password",
+  "@authMethodAppPassword": {
+    "description": "App Password authentication method"
+  },
+  
+  "oAuthInfo": "OAuth feature is under development. Please use App Password for now.",
+  "@oAuthInfo": {
+    "description": "Information about OAuth development status"
+  },
+  
+  "appPasswordRecommended": "App Password is the recommended sign-in method. It's secure and easy to revoke.",
+  "@appPasswordRecommended": {
+    "description": "Information about App Password recommendation"
+  },
+  
+  "serverSelectionTitle": "Select Server",
+  "@serverSelectionTitle": {
+    "description": "Title for server selection"
+  },
+  
+  "customServerOption": "Custom Server...",
+  "@customServerOption": {
+    "description": "Option to add custom server"
+  },
+  
+  "customServerDescription": "Add self-hosted server",
+  "@customServerDescription": {
+    "description": "Description for custom server option"
+  },
+  
+  "customServerComingSoon": "Custom server feature is under development",
+  "@customServerComingSoon": {
+    "description": "Message when custom server is clicked"
+  },
+  
+  "identifierLabel": "Handle or email",
+  "@identifierLabel": {
+    "description": "Label for identifier field"
+  },
+  
+  "identifierHint": "user.bsky.social",
+  "@identifierHint": {
+    "description": "Hint for identifier field"
+  },
+  
+  "passwordLabel": "App Password",
+  "@passwordLabel": {
+    "description": "Label for password field"
+  },
+  
+  "passwordHint": "Enter your app password",
+  "@passwordHint": {
+    "description": "Hint for password field"
+  },
+  
+  "identifierRequired": "Please enter your handle or email",
+  "@identifierRequired": {
+    "description": "Validation message for empty identifier"
+  },
+  
+  "passwordRequired": "Please enter your app password",
+  "@passwordRequired": {
+    "description": "Validation message for empty password"
+  },
+  
+  "signInButton": "Sign in",
+  "@signInButton": {
+    "description": "Text for sign in button"
+  },
+  
+  "oAuthInDevelopment": "OAuth in development",
+  "@oAuthInDevelopment": {
+    "description": "Button text when OAuth is selected"
+  },
+  
+  "addAccountButton": "Add Account",
+  "@addAccountButton": {
+    "description": "Text for add account button"
+  },
+  
+  "aboutAppPassword": "About App Password",
+  "@aboutAppPassword": {
+    "description": "Title for App Password information"
+  },
+  
+  "appPasswordDescription": "App Password is a secure password for apps only. It's safer than your regular password.",
+  "@appPasswordDescription": {
+    "description": "Description of App Password"
+  },
+  
+  "generateAppPassword": "Generate App Password →",
+  "@generateAppPassword": {
+    "description": "Link text to generate App Password"
+  },
+  
+  "copyButton": "Copy",
+  "@copyButton": {
+    "description": "Button text for copy action"
+  },
+  
+  "loginError": "Sign in error",
+  "@loginError": {
+    "description": "Title for login error"
+  },
+  
+  "accountAddError": "Account add error",
+  "@accountAddError": {
+    "description": "Title for account add error"
+  },
+  
+  "retryButton": "Retry",
+  "@retryButton": {
+    "description": "Button text for retry action"
+  },
+  
+  "helpTextOAuth": "OAuth is coming soon. Please use App Password to sign in for now.",
+  "@helpTextOAuth": {
+    "description": "Help text when OAuth is selected"
+  },
+  
+  "helpTextAppPassword": "App Password can be generated in your Bluesky settings. Please use App Password instead of your regular password.",
+  "@helpTextAppPassword": {
+    "description": "Help text when App Password is selected"
+  },
+  
+  "multiAccountInfo": "MoodeSky can manage multiple Bluesky accounts simultaneously. Enter your new account credentials.",
+  "@multiAccountInfo": {
+    "description": "Information about multi-account support"
+  },
+  
+  "newAccountInfo": "Add new account",
+  "@newAccountInfo": {
+    "description": "Title for new account information"
+  },
+  
+  "multiAccountHelpText": "You can log in to multiple accounts simultaneously and switch between them easily.",
+  "@multiAccountHelpText": {
+    "description": "Help text for multi-account feature"
+  },
+  
+  "accountAddedSuccess": "Account added successfully",
+  "@accountAddedSuccess": {
+    "description": "Success message when account is added"
+  },
+  
+  "accountAddedSuccessWithName": "Account \"{name}\" has been added",
+  "@accountAddedSuccessWithName": {
+    "description": "Success message with account name",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Account display name or handle"
+      }
+    }
+  },
+  
+  "accountAddFailed": "Failed to add account: {error}",
+  "@accountAddFailed": {
+    "description": "Error message when account add fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  
+  "accountAddCancelled": "Account addition was cancelled",
+  "@accountAddCancelled": {
+    "description": "Message when account addition is cancelled"
+  },
+  
+  "switchAccount": "Switch Account",
+  "@switchAccount": {
+    "description": "Title for account switcher"
+  },
+  
+  "signOutAll": "Sign Out All",
+  "@signOutAll": {
+    "description": "Button text to sign out all accounts"
+  },
+  
+  "signOutAllConfirmTitle": "Sign Out All Accounts",
+  "@signOutAllConfirmTitle": {
+    "description": "Title for sign out all confirmation dialog"
+  },
+  
+  "signOutAllConfirmMessage": "Are you sure you want to sign out of all accounts? You will need to sign in again.",
+  "@signOutAllConfirmMessage": {
+    "description": "Confirmation message for signing out all accounts"
+  },
+  
+  "cancelButton": "Cancel",
+  "@cancelButton": {
+    "description": "Button text for cancel action"
+  },
+  
+  "signOutButton": "Sign Out",
+  "@signOutButton": {
+    "description": "Button text for sign out action"
+  },
+  
+  "loadingText": "Loading...",
+  "@loadingText": {
+    "description": "Text shown during loading"
+  },
+  
+  "errorTitle": "Something went wrong",
+  "@errorTitle": {
+    "description": "Title for error screen"
+  },
+  
+  "languageLabel": "Language",
+  "@languageLabel": {
+    "description": "Label for language selection"
+  },
+  
+  "languageDescription": "Choose your preferred language for the app",
+  "@languageDescription": {
+    "description": "Description for language selection"
+  },
+  
+  "selectLanguage": "Select Language",
+  "@selectLanguage": {
+    "description": "Title for language selection dialog"
+  },
+  
+  "languageSettings": "Language Settings",
+  "@languageSettings": {
+    "description": "Title for language settings section"
+  },
+  
+  "appearanceSettings": "Appearance Settings",
+  "@appearanceSettings": {
+    "description": "Title for appearance settings section"
+  },
+  
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Title for settings screen"
+  },
+  
+  "accountSettings": "Account Settings",
+  "@accountSettings": {
+    "description": "Title for account settings section"
+  },
+  
+  "manageAccounts": "Manage Accounts",
+  "@manageAccounts": {
+    "description": "Label for manage accounts option"
+  },
+  
+  "manageAccountsDescription": "Add, remove, or switch between accounts",
+  "@manageAccountsDescription": {
+    "description": "Description for manage accounts option"
+  },
+  
+  "signOutAllDescription": "Sign out of all accounts and return to login screen",
+  "@signOutAllDescription": {
+    "description": "Description for sign out all option"
+  },
+  
+  "appInformation": "App Information",
+  "@appInformation": {
+    "description": "Title for app information section"
+  },
+  
+  "aboutApp": "About MoodeSky",
+  "@aboutApp": {
+    "description": "Label for about app option"
+  },
+  
+  "appVersion": "Version {version}",
+  "@appVersion": {
+    "description": "App version display",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "description": "Version number"
+      }
+    }
+  },
+  
+  "aboutAppDescription": "MoodeSky is a modern Bluesky client with deck-based interface and multi-account support.",
+  "@aboutAppDescription": {
+    "description": "Description shown in about dialog"
+  },
+  
+  "privacyPolicy": "Privacy Policy",
+  "@privacyPolicy": {
+    "description": "Label for privacy policy option"
+  },
+  
+  "termsOfService": "Terms of Service",
+  "@termsOfService": {
+    "description": "Label for terms of service option"
+  },
+  
+  "comingSoon": "Coming soon",
+  "@comingSoon": {
+    "description": "Message for features not yet implemented"
+  },
+  
+  "themeLabel": "Theme",
+  "@themeLabel": {
+    "description": "Label for theme selection"
+  },
+  
+  "themeDescription": "Choose your preferred theme for the app",
+  "@themeDescription": {
+    "description": "Description for theme selection"
+  },
+  
+  "selectTheme": "Select Theme",
+  "@selectTheme": {
+    "description": "Title for theme selection dialog"
+  },
+  
+  "themeSettings": "Theme Settings",
+  "@themeSettings": {
+    "description": "Title for theme settings section"
+  },
+  
+  "themeLight": "Light",
+  "@themeLight": {
+    "description": "Light theme option"
+  },
+  
+  "themeDark": "Dark",
+  "@themeDark": {
+    "description": "Dark theme option"
+  },
+  
+  "themeSystem": "System",
+  "@themeSystem": {
+    "description": "System theme option"
+  },
+  
+  "themeLightDescription": "Sky blue accent with bright, clean interface",
+  "@themeLightDescription": {
+    "description": "Description for light theme"
+  },
+  
+  "themeDarkDescription": "Sunset orange accent with comfortable dark interface",
+  "@themeDarkDescription": {
+    "description": "Description for dark theme"
+  },
+  
+  "themeSystemDescription": "Automatically follow system theme settings",
+  "@themeSystemDescription": {
+    "description": "Description for system theme"
+  }
+}

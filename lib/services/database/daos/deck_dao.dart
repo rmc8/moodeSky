@@ -13,28 +13,31 @@ class DeckDao extends DatabaseAccessor<AppDatabase> with _$DeckDaoMixin {
 
   // Get all decks ordered by position
   Future<List<Deck>> getAllDecks() {
-    return (select(decks)
-          ..orderBy([
-            (t) => OrderingTerm(expression: t.deckOrder, mode: OrderingMode.asc),
-          ]))
+    return (select(decks)..orderBy([
+          (t) => OrderingTerm(expression: t.deckOrder, mode: OrderingMode.asc),
+        ]))
         .get();
   }
 
   // Get decks for specific account
   Future<List<Deck>> getDecksForAccount(String accountDid) {
     return (select(decks)
-          ..where((t) => 
-              t.accountDid.equals(accountDid) | 
-              t.isCrossAccount.equals(true))
+          ..where(
+            (t) =>
+                t.accountDid.equals(accountDid) | t.isCrossAccount.equals(true),
+          )
           ..orderBy([
-            (t) => OrderingTerm(expression: t.deckOrder, mode: OrderingMode.asc),
+            (t) =>
+                OrderingTerm(expression: t.deckOrder, mode: OrderingMode.asc),
           ]))
         .get();
   }
 
   // Get deck by ID
   Future<Deck?> getDeckById(String deckId) {
-    return (select(decks)..where((t) => t.deckId.equals(deckId))).getSingleOrNull();
+    return (select(
+      decks,
+    )..where((t) => t.deckId.equals(deckId))).getSingleOrNull();
   }
 
   // Create new deck
@@ -55,10 +58,7 @@ class DeckDao extends DatabaseAccessor<AppDatabase> with _$DeckDaoMixin {
   // Update deck order
   Future<bool> updateDeckOrder(String deckId, int order) {
     return (update(decks)..where((t) => t.deckId.equals(deckId))).write(
-      DecksCompanion(
-        deckOrder: Value(order),
-        updatedAt: Value(DateTime.now()),
-      ),
+      DecksCompanion(deckOrder: Value(order), updatedAt: Value(DateTime.now())),
     );
   }
 
@@ -107,28 +107,30 @@ class DeckDao extends DatabaseAccessor<AppDatabase> with _$DeckDaoMixin {
     return (select(decks)
           ..where((t) => t.isFavorite.equals(true))
           ..orderBy([
-            (t) => OrderingTerm(expression: t.deckOrder, mode: OrderingMode.asc),
+            (t) =>
+                OrderingTerm(expression: t.deckOrder, mode: OrderingMode.asc),
           ]))
         .get();
   }
 
   // Watch all decks
   Stream<List<Deck>> watchAllDecks() {
-    return (select(decks)
-          ..orderBy([
-            (t) => OrderingTerm(expression: t.deckOrder, mode: OrderingMode.asc),
-          ]))
+    return (select(decks)..orderBy([
+          (t) => OrderingTerm(expression: t.deckOrder, mode: OrderingMode.asc),
+        ]))
         .watch();
   }
 
   // Watch decks for account
   Stream<List<Deck>> watchDecksForAccount(String accountDid) {
     return (select(decks)
-          ..where((t) => 
-              t.accountDid.equals(accountDid) | 
-              t.isCrossAccount.equals(true))
+          ..where(
+            (t) =>
+                t.accountDid.equals(accountDid) | t.isCrossAccount.equals(true),
+          )
           ..orderBy([
-            (t) => OrderingTerm(expression: t.deckOrder, mode: OrderingMode.asc),
+            (t) =>
+                OrderingTerm(expression: t.deckOrder, mode: OrderingMode.asc),
           ]))
         .watch();
   }

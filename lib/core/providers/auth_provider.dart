@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Project imports:
+import 'package:moodesky/features/auth/models/server_config.dart';
 import 'package:moodesky/services/bluesky_service.dart';
 import 'package:moodesky/services/database/database.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
@@ -29,9 +30,7 @@ AppDatabase database(DatabaseRef ref) {
 @Riverpod(keepAlive: true)
 FlutterSecureStorage secureStorage(SecureStorageRef ref) {
   return const FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      encryptedSharedPreferences: true,
-    ),
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(
       accessibility: KeychainAccessibility.first_unlock_this_device,
     ),
@@ -44,7 +43,7 @@ BlueskyService blueskyService(BlueskyServiceRef ref) {
   final database = ref.watch(databaseProvider);
   final secureStorage = ref.watch(secureStorageProvider);
   final authConfig = ref.watch(authConfigProvider);
-  
+
   return BlueskyService(
     database: database,
     secureStorage: secureStorage,
@@ -56,46 +55,52 @@ BlueskyService blueskyService(BlueskyServiceRef ref) {
 @Riverpod(keepAlive: true)
 class AuthNotifier extends _$AuthNotifier {
   late BlueskyService _blueskyService;
-  
+
   @override
   AuthState build() {
     _blueskyService = ref.watch(blueskyServiceProvider);
     _initializeAuth();
     return const AuthState.initial();
   }
-  
+
   // Initialize authentication state
   Future<void> _initializeAuth() async {
     state = const AuthState.loading();
-    
+
     try {
       final activeAccount = await _blueskyService.getActiveAccount();
-      
+
       if (activeAccount == null) {
         state = const AuthState.unauthenticated();
         return;
       }
-      
+
       // Check if session is valid and refresh if needed
-      final isValid = await _blueskyService.validateAndRefreshSession(activeAccount.did);
-      
+      final isValid = await _blueskyService.validateAndRefreshSession(
+        activeAccount.did,
+      );
+
       if (!isValid) {
         state = const AuthState.unauthenticated();
         return;
       }
-      
+
       final accounts = await _blueskyService.getAllAccounts();
-      final profiles = accounts.map((account) => UserProfile(
-        did: account.did,
-        handle: account.handle,
-        displayName: account.displayName,
-        description: account.description,
-        avatar: account.avatar,
-        banner: account.banner,
-        email: account.email,
-        isVerified: account.isVerified,
-      )).toList();
-      
+      final profiles = accounts
+          .map(
+            (account) => UserProfile(
+              did: account.did,
+              handle: account.handle,
+              displayName: account.displayName,
+              description: account.description,
+              avatar: account.avatar,
+              banner: account.banner,
+              email: account.email,
+              isVerified: account.isVerified,
+            ),
+          )
+          .toList();
+
       state = AuthState.authenticated(
         activeAccountDid: activeAccount.did,
         accounts: profiles,
@@ -107,26 +112,26 @@ class AuthNotifier extends _$AuthNotifier {
       );
     }
   }
-  
+
   // Sign in with OAuth
-  Future<void> signInWithOAuth({String? userIdentifier, String? pdsHost}) async {
+  Future<void> signInWithOAuth({
+    String? userIdentifier,
+    String? pdsHost,
+  }) async {
     state = const AuthState.loading();
-    
+
     try {
       final result = await _blueskyService.signInWithOAuth(
         userIdentifier: userIdentifier,
         pdsHost: pdsHost,
       );
-      
+
       result.when(
         success: (session, accountDid) async {
           await _updateAuthenticatedState();
         },
         failure: (error, errorDescription, errorType) {
-          state = AuthState.error(
-            message: error,
-            errorType: errorType,
-          );
+          state = AuthState.error(message: error, errorType: errorType);
         },
         cancelled: () {
           state = const AuthState.unauthenticated();
@@ -139,13 +144,15 @@ class AuthNotifier extends _$AuthNotifier {
       );
     }
   }
-  
+
   // Generic login method
   Future<bool> login(AuthCredentials credentials) async {
     switch (credentials.method) {
       case AuthMethod.oauth:
         await signInWithOAuth(
-          userIdentifier: credentials.identifier.isNotEmpty ? credentials.identifier : null,
+          userIdentifier: credentials.identifier.isNotEmpty
+              ? credentials.identifier
+              : null,
           pdsHost: Uri.parse(credentials.serviceUrl).host,
         );
         break;
@@ -157,7 +164,7 @@ class AuthNotifier extends _$AuthNotifier {
         );
         break;
     }
-    
+
     // Return true if authentication succeeded
     final currentState = state;
     return currentState is AuthAuthenticated;
@@ -170,23 +177,20 @@ class AuthNotifier extends _$AuthNotifier {
     String? pdsHost,
   }) async {
     state = const AuthState.loading();
-    
+
     try {
       final result = await _blueskyService.signInWithAppPassword(
         identifier: identifier,
         password: password,
         pdsHost: pdsHost,
       );
-      
+
       result.when(
         success: (session, accountDid) async {
           await _updateAuthenticatedState();
         },
         failure: (error, errorDescription, errorType) {
-          state = AuthState.error(
-            message: error,
-            errorType: errorType,
-          );
+          state = AuthState.error(message: error, errorType: errorType);
         },
         cancelled: () {
           state = const AuthState.unauthenticated();
@@ -199,7 +203,7 @@ class AuthNotifier extends _$AuthNotifier {
       );
     }
   }
-  
+
   // Switch account
   Future<void> switchAccount(String targetAccountDid) async {
     try {
@@ -212,7 +216,7 @@ class AuthNotifier extends _$AuthNotifier {
       );
     }
   }
-  
+
   // Sign out current account
   Future<void> signOut() async {
     try {
@@ -225,7 +229,7 @@ class AuthNotifier extends _$AuthNotifier {
       );
     }
   }
-  
+
   // Sign out all accounts
   Future<void> signOutAll() async {
     try {
@@ -238,12 +242,84 @@ class AuthNotifier extends _$AuthNotifier {
       );
     }
   }
-  
+
+  // Add account (multi-account support)
+  Future<AuthResult> addAccount({
+    required String identifier,
+    required String password,
+    required ServerConfig serverConfig,
+    bool useOAuth = false,
+  }) async {
+    try {
+      late AuthResult result;
+
+      if (useOAuth) {
+        // OAuth flow for additional account
+        final authResult = await _blueskyService.signInWithOAuth(
+          userIdentifier: identifier.isNotEmpty ? identifier : null,
+          pdsHost: Uri.parse(serverConfig.serviceUrl).host,
+        );
+
+        result = authResult.when(
+          success: (session, accountDid) =>
+              AuthResult.success(session: session, accountDid: accountDid),
+          failure: (error, errorDescription, errorType) => AuthResult.failure(
+            error: error,
+            errorDescription: errorDescription,
+            errorType: errorType,
+          ),
+          cancelled: () => AuthResult.failure(
+            error: 'OAuth cancelled',
+            errorType: AuthErrorType.userCancelled,
+          ),
+        );
+      } else {
+        // App Password flow for additional account
+        final authResult = await _blueskyService.signInWithAppPassword(
+          identifier: identifier,
+          password: password,
+          pdsHost: Uri.parse(serverConfig.serviceUrl).host,
+          isAdditionalAccount:
+              true, // Flag to indicate this is an additional account
+        );
+
+        result = authResult.when(
+          success: (session, accountDid) =>
+              AuthResult.success(session: session, accountDid: accountDid),
+          failure: (error, errorDescription, errorType) => AuthResult.failure(
+            error: error,
+            errorDescription: errorDescription,
+            errorType: errorType,
+          ),
+          cancelled: () => AuthResult.failure(
+            error: 'Authentication cancelled',
+            errorType: AuthErrorType.userCancelled,
+          ),
+        );
+      }
+
+      // If successful, fetch profile information and update state
+      result.whenOrNull(
+        success: (session, accountDid) async {
+          await _fetchAndUpdateProfileInfo(accountDid);
+          await _updateAuthenticatedState();
+        },
+      );
+
+      return result;
+    } catch (e) {
+      return AuthResult.failure(
+        error: 'Failed to add account: $e',
+        errorType: AuthErrorType.unknownError,
+      );
+    }
+  }
+
   // Remove account
   Future<void> removeAccount(String accountDid) async {
     try {
       await _blueskyService.removeAccount(accountDid);
-      
+
       // Update state after account removal
       final currentState = state;
       if (currentState is AuthAuthenticated) {
@@ -267,33 +343,57 @@ class AuthNotifier extends _$AuthNotifier {
       );
     }
   }
-  
+
   // Refresh authentication state
   Future<void> refresh() async {
     await _initializeAuth();
   }
-  
+
+  // Fetch and update profile information for a specific account
+  Future<void> _fetchAndUpdateProfileInfo(String accountDid) async {
+    try {
+      final profileInfo = await _blueskyService.getProfileInfo(accountDid);
+      if (profileInfo != null) {
+        await _blueskyService.updateAccountProfile(
+          accountDid: accountDid,
+          displayName: profileInfo.displayName,
+          description: profileInfo.description,
+          avatar: profileInfo.avatar,
+          banner: profileInfo.banner,
+        );
+      }
+    } catch (e) {
+      // Profile fetch failed, but account creation succeeded
+      // Continue without profile information
+      print('Failed to fetch profile info for $accountDid: $e');
+    }
+  }
+
   // Update authenticated state with current account information
   Future<void> _updateAuthenticatedState() async {
     final activeAccount = await _blueskyService.getActiveAccount();
-    
+
     if (activeAccount == null) {
       state = const AuthState.unauthenticated();
       return;
     }
-    
+
     final accounts = await _blueskyService.getAllAccounts();
-    final profiles = accounts.map((account) => UserProfile(
-      did: account.did,
-      handle: account.handle,
-      displayName: account.displayName,
-      description: account.description,
-      avatar: account.avatar,
-      banner: account.banner,
-      email: account.email,
-      isVerified: account.isVerified,
-    )).toList();
-    
+    final profiles = accounts
+        .map(
+          (account) => UserProfile(
+            did: account.did,
+            handle: account.handle,
+            displayName: account.displayName,
+            description: account.description,
+            avatar: account.avatar,
+            banner: account.banner,
+            email: account.email,
+            isVerified: account.isVerified,
+          ),
+        )
+        .toList();
+
     state = AuthState.authenticated(
       activeAccountDid: activeAccount.did,
       accounts: profiles,
@@ -305,7 +405,7 @@ class AuthNotifier extends _$AuthNotifier {
 @riverpod
 UserProfile? activeAccount(ActiveAccountRef ref) {
   final authState = ref.watch(authNotifierProvider);
-  
+
   return authState.maybeWhen(
     authenticated: (activeAccountDid, accounts) {
       return accounts.firstWhere(
@@ -321,7 +421,7 @@ UserProfile? activeAccount(ActiveAccountRef ref) {
 @riverpod
 List<UserProfile> availableAccounts(AvailableAccountsRef ref) {
   final authState = ref.watch(authNotifierProvider);
-  
+
   return authState.maybeWhen(
     authenticated: (_, accounts) => accounts,
     orElse: () => [],
@@ -337,17 +437,19 @@ bool isAuthenticated(IsAuthenticatedRef ref) {
 
 // Multi-account status provider
 @riverpod
-Future<MultiAccountStatus?> multiAccountStatus(MultiAccountStatusRef ref) async {
+Future<MultiAccountStatus?> multiAccountStatus(
+  MultiAccountStatusRef ref,
+) async {
   final authState = ref.watch(authNotifierProvider);
-  
+
   if (authState is! AuthAuthenticated) return null;
-  
+
   final blueskyService = ref.watch(blueskyServiceProvider);
   final accounts = await blueskyService.getAllAccounts();
-  
+
   final accountProfiles = <String, UserProfile>{};
   final accountTokenStatus = <String, bool>{};
-  
+
   for (final account in accounts) {
     accountProfiles[account.did] = UserProfile(
       did: account.did,
@@ -359,11 +461,12 @@ Future<MultiAccountStatus?> multiAccountStatus(MultiAccountStatusRef ref) async 
       email: account.email,
       isVerified: account.isVerified,
     );
-    
-    accountTokenStatus[account.did] = (account.accessJwt != null) ||
+
+    accountTokenStatus[account.did] =
+        (account.accessJwt != null) ||
         (account.accessJwt != null && account.refreshJwt != null);
   }
-  
+
   return MultiAccountStatus(
     activeAccountDid: authState.activeAccountDid,
     availableAccountDids: accounts.map((a) => a.did).toList(),

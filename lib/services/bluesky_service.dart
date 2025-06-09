@@ -11,7 +11,7 @@ class BlueskyService {
   final AppDatabase database;
   final FlutterSecureStorage secureStorage;
   final AuthConfig authConfig;
-  
+
   bsky.Bluesky? _currentClient;
   Account? _currentAccount;
 
@@ -23,7 +23,7 @@ class BlueskyService {
 
   // Get current Bluesky client
   bsky.Bluesky? get currentClient => _currentClient;
-  
+
   // Get current account
   Account? get currentAccount => _currentAccount;
 
@@ -60,7 +60,9 @@ class BlueskyService {
   }) async {
     try {
       final service = pdsHost ?? authConfig.defaultPdsHost;
-      final serviceUrl = service.startsWith('http') ? service : 'https://$service';
+      final serviceUrl = service.startsWith('http')
+          ? service
+          : 'https://$service';
 
       // For now, implement OAuth using direct login with app password requirements
       // In a real OAuth implementation, we would:
@@ -68,11 +70,12 @@ class BlueskyService {
       // 2. Handle redirect with authorization code
       // 3. Exchange code for tokens with DPoP
       // 4. Store tokens securely
-      
+
       // For demonstration purposes, show OAuth-style interface but require app password
       return const AuthResult.failure(
         error: 'OAuth requires app password setup',
-        errorDescription: 'Please use App Password method to sign in. OAuth with DPoP will be implemented in a future version.',
+        errorDescription:
+            'Please use App Password method to sign in. OAuth with DPoP will be implemented in a future version.',
         errorType: AuthErrorType.unknownError,
       );
     } catch (e) {
@@ -89,22 +92,31 @@ class BlueskyService {
     required String identifier,
     required String password,
     String? pdsHost,
+    bool isAdditionalAccount = false,
   }) async {
     try {
       final service = pdsHost ?? authConfig.defaultPdsHost;
-      final serviceUrl = service.startsWith('http') ? service : 'https://$service';
+      final serviceUrl = service.startsWith('http')
+          ? service
+          : 'https://$service';
 
-      print('Attempting to sign in with identifier: $identifier to service: $serviceUrl');
+      print(
+        'Attempting to sign in with identifier: $identifier to service: $serviceUrl',
+      );
 
       // For now, simulate a successful login for testing
       // TODO: Replace with actual Bluesky API when the correct API is available
       print('Simulating login for identifier: $identifier');
-      
+
       // Create mock session data for testing
       final mockDid = 'did:plc:${identifier.hashCode.abs()}';
-      final mockHandle = identifier.contains('@') ? identifier.split('@')[0] : identifier;
-      final mockAccessJwt = 'mock_access_jwt_${DateTime.now().millisecondsSinceEpoch}';
-      final mockRefreshJwt = 'mock_refresh_jwt_${DateTime.now().millisecondsSinceEpoch}';
+      final mockHandle = identifier.contains('@')
+          ? identifier.split('@')[0]
+          : identifier;
+      final mockAccessJwt =
+          'mock_access_jwt_${DateTime.now().millisecondsSinceEpoch}';
+      final mockRefreshJwt =
+          'mock_refresh_jwt_${DateTime.now().millisecondsSinceEpoch}';
 
       print('Mock session created successfully. DID: $mockDid');
 
@@ -130,28 +142,42 @@ class BlueskyService {
         pdsUrl: serviceUrl,
         serviceUrl: Value(serviceUrl),
         loginMethod: const Value('app_password'),
-        isActive: const Value(true),
+        isActive: Value(
+          !isAdditionalAccount,
+        ), // Only set as active if not additional account
         lastUsed: Value(DateTime.now()),
       );
 
       // Check if account already exists
-      final existingAccount = await database.accountDao.getAccountByDid(mockDid);
-      
+      final existingAccount = await database.accountDao.getAccountByDid(
+        mockDid,
+      );
+
       if (existingAccount != null) {
-        // Update existing account
+        // Update existing account's authentication information
         await database.accountDao.updateAccountWithAppPasswordSession(
           did: mockDid,
           accessJwt: mockAccessJwt,
           refreshJwt: mockRefreshJwt,
           sessionString: mockAccessJwt,
         );
+
+        // Only set as active if this is not an additional account
+        if (!isAdditionalAccount) {
+          await database.accountDao.setActiveAccount(mockDid);
+        }
       } else {
         // Create new account
         await database.accountDao.createAccount(accountData);
-      }
 
-      // Set as active account
-      await database.accountDao.setActiveAccount(mockDid);
+        // Only set as active if this is not an additional account and no other account is active
+        if (!isAdditionalAccount) {
+          await database.accountDao.setActiveAccount(mockDid);
+        } else {
+          // For additional accounts, just add without changing active account
+          print('Added additional account: $mockHandle ($mockDid)');
+        }
+      }
 
       // Initialize client
       final account = await database.accountDao.getAccountByDid(mockDid);
@@ -186,28 +212,32 @@ class BlueskyService {
       );
     } catch (e) {
       print('App password sign in failed: $e');
-      
+
       // Provide specific error messages based on error type
-      if (e.toString().contains('InvalidRequestError') || 
+      if (e.toString().contains('InvalidRequestError') ||
           e.toString().contains('AuthRequiredError') ||
           e.toString().contains('401')) {
         return AuthResult.failure(
           error: 'Invalid credentials',
-          errorDescription: 'Check your handle/email and app password. Make sure you are using an App Password, not your regular password.',
+          errorDescription:
+              'Check your handle/email and app password. Make sure you are using an App Password, not your regular password.',
           errorType: AuthErrorType.invalidCredentials,
         );
-      } else if (e.toString().contains('NetworkError') || 
-                 e.toString().contains('SocketException') ||
-                 e.toString().contains('TimeoutException')) {
+      } else if (e.toString().contains('NetworkError') ||
+          e.toString().contains('SocketException') ||
+          e.toString().contains('TimeoutException')) {
         return AuthResult.failure(
           error: 'Network error',
-          errorDescription: 'Please check your internet connection and try again.',
+          errorDescription:
+              'Please check your internet connection and try again.',
           errorType: AuthErrorType.networkError,
         );
-      } else if (e.toString().contains('Server') || e.toString().contains('500')) {
+      } else if (e.toString().contains('Server') ||
+          e.toString().contains('500')) {
         return AuthResult.failure(
           error: 'Server error',
-          errorDescription: 'The server is temporarily unavailable. Please try again later.',
+          errorDescription:
+              'The server is temporarily unavailable. Please try again later.',
           errorType: AuthErrorType.serverError,
         );
       } else {
@@ -284,7 +314,7 @@ class BlueskyService {
         // );
         // final client = bsky.Bluesky.fromSession(session, service: account.serviceUrl);
         // await client.actor.getProfile(actor: account.did);
-        
+
         return true;
       }
     } catch (e) {
@@ -294,7 +324,7 @@ class BlueskyService {
   }
 
   // TODO: Implement API methods once BlueSky package is working correctly
-  
+
   // Get timeline posts
   // Future<List<bsky.FeedView>> getTimeline({
   //   String? cursor,
@@ -329,5 +359,58 @@ class BlueskyService {
   Future<bool> isAuthenticated() async {
     final activeAccount = await getActiveAccount();
     return activeAccount?.accessJwt != null;
+  }
+
+  // Get profile information for a specific account
+  Future<UserProfile?> getProfileInfo(String accountDid) async {
+    try {
+      final account = await database.accountDao.getAccountByDid(accountDid);
+      if (account == null) return null;
+
+      // TODO: When Bluesky API is properly available, fetch real profile
+      // For now, create a mock profile with avatar URL
+      final mockAvatarUrl =
+          'https://api.dicebear.com/7.x/avataaars/svg?seed=${account.handle}';
+
+      return UserProfile(
+        did: account.did,
+        handle: account.handle,
+        displayName: account.displayName ?? account.handle,
+        description: account.description,
+        avatar: mockAvatarUrl, // Provide a default avatar
+        banner: account.banner,
+        email: account.email,
+        isVerified: account.isVerified,
+        followersCount: 0, // Mock data
+        followsCount: 0, // Mock data
+        postsCount: 0, // Mock data
+        createdAt: account.createdAt,
+      );
+    } catch (e) {
+      print('Failed to get profile info: $e');
+      return null;
+    }
+  }
+
+  // Update account profile information
+  Future<void> updateAccountProfile({
+    required String accountDid,
+    String? displayName,
+    String? description,
+    String? avatar,
+    String? banner,
+  }) async {
+    try {
+      await database.accountDao.updateAccountProfile(
+        did: accountDid,
+        displayName: displayName,
+        description: description,
+        avatar: avatar,
+        banner: banner,
+      );
+    } catch (e) {
+      print('Failed to update account profile: $e');
+      rethrow;
+    }
   }
 }

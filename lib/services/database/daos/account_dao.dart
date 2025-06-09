@@ -13,28 +13,34 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
 
   // Get all accounts ordered by usage
   Future<List<Account>> getAllAccounts() {
-    return (select(accounts)
-          ..orderBy([
-            (t) => OrderingTerm(expression: t.isActive, mode: OrderingMode.desc),
-            (t) => OrderingTerm(expression: t.lastUsed, mode: OrderingMode.desc),
-            (t) => OrderingTerm(expression: t.accountOrder, mode: OrderingMode.asc),
-          ]))
+    return (select(accounts)..orderBy([
+          (t) => OrderingTerm(expression: t.isActive, mode: OrderingMode.desc),
+          (t) => OrderingTerm(expression: t.lastUsed, mode: OrderingMode.desc),
+          (t) =>
+              OrderingTerm(expression: t.accountOrder, mode: OrderingMode.asc),
+        ]))
         .get();
   }
 
   // Get active account
   Future<Account?> getActiveAccount() {
-    return (select(accounts)..where((t) => t.isActive.equals(true))).getSingleOrNull();
+    return (select(
+      accounts,
+    )..where((t) => t.isActive.equals(true))).getSingleOrNull();
   }
 
   // Get account by DID
   Future<Account?> getAccountByDid(String did) {
-    return (select(accounts)..where((t) => t.did.equals(did))).getSingleOrNull();
+    return (select(
+      accounts,
+    )..where((t) => t.did.equals(did))).getSingleOrNull();
   }
 
   // Get account by handle
   Future<Account?> getAccountByHandle(String handle) {
-    return (select(accounts)..where((t) => t.handle.equals(handle))).getSingleOrNull();
+    return (select(
+      accounts,
+    )..where((t) => t.handle.equals(handle))).getSingleOrNull();
   }
 
   // Create new account
@@ -97,11 +103,13 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   Future<void> setActiveAccount(String did) async {
     await transaction(() async {
       // Deactivate all accounts
-      await (update(accounts)).write(const AccountsCompanion(
-        isActive: Value(false),
-        updatedAt: Value.absent(),
-      ));
-      
+      await (update(accounts)).write(
+        const AccountsCompanion(
+          isActive: Value(false),
+          updatedAt: Value.absent(),
+        ),
+      );
+
       // Activate specified account
       await (update(accounts)..where((t) => t.did.equals(did))).write(
         AccountsCompanion(
@@ -149,11 +157,12 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   // Get accounts that need token refresh
   Future<List<Account>> getAccountsNeedingRefresh() {
     final fiveMinutesFromNow = DateTime.now().add(const Duration(minutes: 5));
-    return (select(accounts)
-          ..where((t) => 
+    return (select(accounts)..where(
+          (t) =>
               t.loginMethod.equals('oauth') &
               t.tokenExpiry.isNotNull() &
-              t.tokenExpiry.isSmallerThanValue(fiveMinutesFromNow)))
+              t.tokenExpiry.isSmallerThanValue(fiveMinutesFromNow),
+        ))
         .get();
   }
 
@@ -198,27 +207,33 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
 
   // Get OAuth accounts (excluding app password accounts)
   Future<List<Account>> getOAuthAccounts() {
-    return (select(accounts)..where((t) => t.loginMethod.equals('oauth'))).get();
+    return (select(
+      accounts,
+    )..where((t) => t.loginMethod.equals('oauth'))).get();
   }
 
   // Get app password accounts
   Future<List<Account>> getAppPasswordAccounts() {
-    return (select(accounts)..where((t) => t.loginMethod.equals('app_password'))).get();
+    return (select(
+      accounts,
+    )..where((t) => t.loginMethod.equals('app_password'))).get();
   }
 
   // Watch active account changes
   Stream<Account?> watchActiveAccount() {
-    return (select(accounts)..where((t) => t.isActive.equals(true))).watchSingleOrNull();
+    return (select(
+      accounts,
+    )..where((t) => t.isActive.equals(true))).watchSingleOrNull();
   }
 
   // Watch all accounts
   Stream<List<Account>> watchAllAccounts() {
-    return (select(accounts)
-          ..orderBy([
-            (t) => OrderingTerm(expression: t.isActive, mode: OrderingMode.desc),
-            (t) => OrderingTerm(expression: t.lastUsed, mode: OrderingMode.desc),
-            (t) => OrderingTerm(expression: t.accountOrder, mode: OrderingMode.asc),
-          ]))
+    return (select(accounts)..orderBy([
+          (t) => OrderingTerm(expression: t.isActive, mode: OrderingMode.desc),
+          (t) => OrderingTerm(expression: t.lastUsed, mode: OrderingMode.desc),
+          (t) =>
+              OrderingTerm(expression: t.accountOrder, mode: OrderingMode.asc),
+        ]))
         .watch();
   }
 }
