@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:drift/drift.dart';
 
 @DataClassName('Post')
@@ -20,7 +21,7 @@ class Posts extends Table {
   TextColumn get authorAvatar => text().nullable()();
   
   // Post content
-  TextColumn get text => text()();
+  TextColumn get content => text()();
   TextColumn get facets => text().nullable()(); // JSON format for links, mentions, etc.
   TextColumn get embed => text().nullable()(); // JSON format for images, videos, etc.
   TextColumn get tags => text().nullable()(); // JSON array of hashtags
@@ -59,41 +60,33 @@ class Posts extends Table {
   BoolColumn get isPinned => boolean().withDefault(const Constant(false))();
   
   @override
-  Set<Column> get primaryKey => {id};
-  
-  @override
   List<Set<Column>> get uniqueKeys => [
     {uri}, // Post URI must be unique
     {accountDid, cid}, // CID per account must be unique
   ];
-  
-  @override
-  List<String> get customConstraints => [
-    'FOREIGN KEY (accountDid) REFERENCES accounts (did) ON DELETE CASCADE',
-  ];
 }
 
-// Extension for additional functionality
-extension PostExtensions on Post {
-  // Check if post is a reply
-  bool get isReply => replyParent != null;
-  
-  // Check if post is a root post
-  bool get isRootPost => replyParent == null;
-  
-  // Check if post is part of a thread
-  bool get isInThread => replyRoot != null;
-  
-  // Get total engagement count
-  int get totalEngagement => replyCount + repostCount + likeCount + quoteCount;
-  
-  // Check if post has media embed
-  bool get hasMedia => embed != null && embed!.isNotEmpty;
-  
-  // Check if post has content labels/warnings
-  bool get hasContentLabels => labels != null && labels!.isNotEmpty;
-  
-  // Get author identifier for display
-  String get authorIdentifier => 
-      authorDisplayName?.isNotEmpty == true ? authorDisplayName! : authorHandle;
-}
+// TODO: Extension for additional functionality (uncomment when Drift code generation is fixed)
+// extension PostExtensions on Post {
+//   // Check if post is a reply
+//   bool get isReply => replyParent != null;
+//   
+//   // Check if post is a root post
+//   bool get isRootPost => replyParent == null;
+//   
+//   // Check if post is part of a thread
+//   bool get isInThread => replyRoot != null;
+//   
+//   // Get total engagement count
+//   int get totalEngagement => replyCount + repostCount + likeCount + quoteCount;
+//   
+//   // Check if post has media embed
+//   bool get hasMedia => embed != null && embed!.isNotEmpty;
+//   
+//   // Check if post has content labels/warnings
+//   bool get hasContentLabels => labels != null && labels!.isNotEmpty;
+//   
+//   // Get author identifier for display
+//   String get authorIdentifier => 
+//       authorDisplayName?.isNotEmpty == true ? authorDisplayName! : authorHandle;
+// }

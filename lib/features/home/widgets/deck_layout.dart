@@ -1,0 +1,315 @@
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
+import 'package:moodesky/core/providers/auth_provider.dart';
+
+class DeckLayout extends ConsumerStatefulWidget {
+  const DeckLayout({super.key});
+
+  @override
+  ConsumerState<DeckLayout> createState() => _DeckLayoutState();
+}
+
+class _DeckLayoutState extends ConsumerState<DeckLayout> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // Determine layout based on screen size
+    if (screenWidth >= 1200) {
+      // Desktop: Multi-column deck layout
+      return _buildDesktopLayout();
+    } else if (screenWidth >= 600) {
+      // Tablet: 2-3 column layout
+      return _buildTabletLayout();
+    } else {
+      // Mobile: Single column with swipe navigation
+      return _buildMobileLayout();
+    }
+  }
+
+  Widget _buildDesktopLayout() {
+    // For now, show placeholder decks
+    final decks = _getPlaceholderDecks();
+    
+    return Row(
+      children: decks.map((deck) => 
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                // Deck header
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainer,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(deck.icon),
+                      const SizedBox(width: 8),
+                      Text(
+                        deck.title,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.more_vert),
+                        onPressed: () {
+                          // TODO: Show deck options
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Deck content
+                Expanded(
+                  child: _buildDeckContent(deck),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ).toList(),
+    );
+  }
+
+  Widget _buildTabletLayout() {
+    final decks = _getPlaceholderDecks().take(3).toList();
+    
+    return Row(
+      children: decks.map((deck) => 
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                // Deck header
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainer,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(deck.icon, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        deck.title,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.more_vert, size: 20),
+                        onPressed: () {
+                          // TODO: Show deck options
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Deck content
+                Expanded(
+                  child: _buildDeckContent(deck),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ).toList(),
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    final decks = _getPlaceholderDecks();
+    
+    return PageView.builder(
+      controller: PageController(),
+      itemCount: decks.length,
+      itemBuilder: (context, index) {
+        final deck = decks[index];
+        return Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            children: [
+              // Deck header with page indicator
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(deck.icon),
+                    const SizedBox(width: 8),
+                    Text(
+                      deck.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Page indicator
+                    Text(
+                      '${index + 1} / ${decks.length}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.more_vert),
+                      onPressed: () {
+                        // TODO: Show deck options
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Deck content
+              Expanded(
+                child: _buildDeckContent(deck),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDeckContent(DeckInfo deck) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(8),
+      itemCount: 10, // Placeholder count
+      itemBuilder: (context, index) {
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          child: ListTile(
+            leading: const CircleAvatar(
+              child: Icon(Icons.person),
+            ),
+            title: Text('Post ${index + 1}'),
+            subtitle: Text('This is a placeholder post in the ${deck.title} deck.'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.favorite_border),
+                  onPressed: () {
+                    // TODO: Like post
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.repeat),
+                  onPressed: () {
+                    // TODO: Repost
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<DeckInfo> _getPlaceholderDecks() {
+    return [
+      DeckInfo(
+        id: 'home',
+        title: 'Home',
+        icon: Icons.home,
+        type: DeckType.home,
+      ),
+      DeckInfo(
+        id: 'notifications',
+        title: 'Notifications',
+        icon: Icons.notifications,
+        type: DeckType.notifications,
+      ),
+      DeckInfo(
+        id: 'search',
+        title: 'Search',
+        icon: Icons.search,
+        type: DeckType.search,
+      ),
+    ];
+  }
+}
+
+// Deck information model
+class DeckInfo {
+  final String id;
+  final String title;
+  final IconData icon;
+  final DeckType type;
+
+  DeckInfo({
+    required this.id,
+    required this.title,
+    required this.icon,
+    required this.type,
+  });
+}
+
+// Deck types enum
+enum DeckType {
+  home,
+  notifications,
+  search,
+  profile,
+  list,
+  hashtag,
+  mentions,
+}

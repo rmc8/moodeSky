@@ -1,0 +1,36 @@
+# import_sorter configuration
+sort_patterns:
+  # Dart imports
+  - pattern: '^dart:'
+    comments: false
+    priority: 0
+  
+  # Flutter imports  
+  - pattern: '^package:flutter/'
+    comments: false
+    priority: 1
+    
+  # Third-party packages
+  - pattern: '^package:'
+    comments: false
+    priority: 2
+    
+  # Current package imports
+  - pattern: '^package:moodesky/'
+    comments: false
+    priority: 3
+    
+  # Relative imports
+  - pattern: '^\.\.?/'
+    comments: false
+    priority: 4
+
+# Convert relative imports to absolute
+dependencies:
+  moodesky: 'lib'
+
+# Other configuration
+ignore:
+  - '**/*.g.dart'
+  - '**/*.freezed.dart'
+  - '**/*.gr.dart'

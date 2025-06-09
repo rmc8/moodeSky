@@ -1,9 +1,11 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+// Package imports:
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../shared/models/auth_models.dart';
-import '../../services/database/database.dart';
-import '../../services/bluesky_service.dart';
+// Project imports:
+import 'package:moodesky/services/bluesky_service.dart';
+import 'package:moodesky/services/database/database.dart';
+import 'package:moodesky/shared/models/auth_models.dart';
 
 part 'auth_provider.g.dart';
 
@@ -335,7 +337,7 @@ Future<MultiAccountStatus?> multiAccountStatus(MultiAccountStatusRef ref) async 
       isVerified: account.isVerified,
     );
     
-    accountTokenStatus[account.did] = account.hasValidOAuthSession ||
+    accountTokenStatus[account.did] = (account.accessJwt != null) ||
         (account.accessJwt != null && account.refreshJwt != null);
   }
   

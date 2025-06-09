@@ -1,34 +1,24 @@
+// Dart imports:
 import 'dart:io';
 
+// Package imports:
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
-import 'tables/accounts.dart';
-import 'tables/decks.dart';
-import 'tables/posts.dart';
-import 'tables/settings.dart';
-
-import 'daos/account_dao.dart';
-import 'daos/deck_dao.dart';
-import 'daos/post_dao.dart';
-import 'daos/settings_dao.dart';
+// Project imports:
+import 'package:moodesky/services/database/daos/account_dao.dart';
+import 'package:moodesky/services/database/tables/accounts.dart';
 
 part 'database.g.dart';
 
 @DriftDatabase(
   tables: [
     Accounts,
-    Decks,
-    Posts,
-    Settings,
   ],
   daos: [
     AccountDao,
-    DeckDao,
-    PostDao,
-    SettingsDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {

@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:drift/drift.dart';
 
 @DataClassName('Setting')
@@ -23,48 +24,40 @@ class Settings extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
   
   @override
-  Set<Column> get primaryKey => {id};
-  
-  @override
   List<Set<Column>> get uniqueKeys => [
     {key, accountDid}, // Key per account must be unique (accountDid can be null for global)
   ];
-  
-  @override
-  List<String> get customConstraints => [
-    'FOREIGN KEY (accountDid) REFERENCES accounts (did) ON DELETE CASCADE',
-  ];
 }
 
-// Extension for type-safe value access
-extension SettingExtensions on Setting {
-  // Get string value
-  String get stringValue => value;
-  
-  // Get integer value
-  int? get intValue {
-    if (type != 'int') return null;
-    return int.tryParse(value);
-  }
-  
-  // Get boolean value
-  bool? get boolValue {
-    if (type != 'bool') return null;
-    return value.toLowerCase() == 'true';
-  }
-  
-  // Get double value
-  double? get doubleValue {
-    if (type != 'double') return null;
-    return double.tryParse(value);
-  }
-  
-  // Check if setting is global (not account-specific)
-  bool get isGlobal => accountDid == null;
-  
-  // Check if setting is account-specific
-  bool get isAccountSpecific => accountDid != null;
-}
+// TODO: Extension for type-safe value access (uncomment when Drift code generation is fixed)
+// extension SettingExtensions on Setting {
+//   // Get string value
+//   String get stringValue => value;
+//   
+//   // Get integer value
+//   int? get intValue {
+//     if (type != 'int') return null;
+//     return int.tryParse(value);
+//   }
+//   
+//   // Get boolean value
+//   bool? get boolValue {
+//     if (type != 'bool') return null;
+//     return value.toLowerCase() == 'true';
+//   }
+//   
+//   // Get double value
+//   double? get doubleValue {
+//     if (type != 'double') return null;
+//     return double.tryParse(value);
+//   }
+//   
+//   // Check if setting is global (not account-specific)
+//   bool get isGlobal => accountDid == null;
+//   
+//   // Check if setting is account-specific
+//   bool get isAccountSpecific => accountDid != null;
+// }
 
 // Predefined setting keys
 class SettingKeys {

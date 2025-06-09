@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:drift/drift.dart';
 
 @DataClassName('Deck')
@@ -41,8 +42,8 @@ class Decks extends Table {
   // Refresh and sync settings
   BoolColumn get autoRefresh => boolean().withDefault(const Constant(true))();
   IntColumn get refreshInterval => integer().withDefault(const Constant(60))(); // Seconds
-  DateTimeColumn get lastRefresh => dateTime().nullable();
-  DateTimeColumn get lastRead => dateTime().nullable();
+  DateTimeColumn get lastRefresh => dateTime().nullable()();
+  DateTimeColumn get lastRead => dateTime().nullable()();
   
   // Notification settings
   BoolColumn get notificationsEnabled => boolean().withDefault(const Constant(false))();
@@ -57,16 +58,8 @@ class Decks extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
   
   @override
-  Set<Column> get primaryKey => {id};
-  
-  @override
   List<Set<Column>> get uniqueKeys => [
     {deckId}, // Deck ID must be unique
-  ];
-  
-  @override
-  List<String> get customConstraints => [
-    'FOREIGN KEY (accountDid) REFERENCES accounts (did) ON DELETE CASCADE',
   ];
 }
 
@@ -94,57 +87,57 @@ enum DeckType {
   }
 }
 
-// Extension for additional functionality
-extension DeckExtensions on Deck {
-  // Get deck type enum
-  DeckType get typeEnum => DeckType.fromString(deckType);
-  
-  // Check if deck is account-specific
-  bool get isAccountSpecific => accountDid != null && !isCrossAccount;
-  
-  // Check if deck supports real-time updates
-  bool get supportsRealTime => deckType == 'home' || deckType == 'notifications';
-  
-  // Check if deck needs target identifier
-  bool get requiresTarget => [
-    'search', 'list', 'profile', 'thread', 
-    'custom_feed', 'hashtag', 'mentions'
-  ].contains(deckType);
-  
-  // Check if deck is favorited
-  bool get favorited => isFavorite;
-  
-  // Get display title with fallback
-  String get displayTitle {
-    if (title.isNotEmpty) return title;
-    
-    switch (deckType) {
-      case 'home':
-        return 'Home';
-      case 'notifications':
-        return 'Notifications';
-      case 'search':
-        return 'Search: ${targetIdentifier ?? ""}';
-      case 'list':
-        return 'List';
-      case 'profile':
-        return 'Profile';
-      case 'thread':
-        return 'Thread';
-      case 'custom_feed':
-        return 'Custom Feed';
-      case 'local':
-        return 'Local Timeline';
-      case 'hashtag':
-        return '#${targetIdentifier ?? ""}';
-      case 'mentions':
-        return 'Mentions';
-      default:
-        return 'Deck';
-    }
-  }
-  
-  // Check if deck has unread content
-  bool get hasUnread => lastRefresh != null && 
-      (lastRead == null || lastRead!.isBefore(lastRefresh!));
-}
+// TODO: Extension for additional functionality (uncomment when Drift code generation is fixed)
+// extension DeckExtensions on Deck {
+//   // Get deck type enum
+//   DeckType get typeEnum => DeckType.fromString(deckType);
+//   
+//   // Check if deck is account-specific
+//   bool get isAccountSpecific => accountDid != null && !isCrossAccount;
+//   
+//   // Check if deck supports real-time updates
+//   bool get supportsRealTime => deckType == 'home' || deckType == 'notifications';
+//   
+//   // Check if deck needs target identifier
+//   bool get requiresTarget => [
+//     'search', 'list', 'profile', 'thread', 
+//     'custom_feed', 'hashtag', 'mentions'
+//   ].contains(deckType);
+//   
+//   // Check if deck is favorited
+//   bool get favorited => isFavorite;
+//   
+//   // Get display title with fallback
+//   String get displayTitle {
+//     if (title.isNotEmpty) return title;
+//     
+//     switch (deckType) {
+//       case 'home':
+//         return 'Home';
+//       case 'notifications':
+//         return 'Notifications';
+//       case 'search':
+//         return 'Search: ${targetIdentifier ?? ""}';
+//       case 'list':
+//         return 'List';
+//       case 'profile':
+//         return 'Profile';
+//       case 'thread':
+//         return 'Thread';
+//       case 'custom_feed':
+//         return 'Custom Feed';
+//       case 'local':
+//         return 'Local Timeline';
+//       case 'hashtag':
+//         return '#${targetIdentifier ?? ""}';
+//       case 'mentions':
+//         return 'Mentions';
+//       default:
+//         return 'Deck';
+//     }
+//   }
+//   
+//   // Check if deck has unread content
+//   bool get hasUnread => lastRefresh != null && 
+//       (lastRead == null || lastRead!.isBefore(lastRefresh!));
+// }

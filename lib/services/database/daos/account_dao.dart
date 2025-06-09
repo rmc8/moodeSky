@@ -1,6 +1,9 @@
+// Package imports:
 import 'package:drift/drift.dart';
-import '../database.dart';
-import '../tables/accounts.dart';
+
+// Project imports:
+import 'package:moodesky/services/database/database.dart';
+import 'package:moodesky/services/database/tables/accounts.dart';
 
 part 'account_dao.g.dart';
 
@@ -45,7 +48,7 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   }
 
   // Update account with OAuth session data
-  Future<bool> updateAccountWithOAuthSession({
+  Future<int> updateAccountWithOAuthSession({
     required String did,
     required String accessJwt,
     required String refreshJwt,
@@ -72,7 +75,7 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   }
 
   // Update account with app password session
-  Future<bool> updateAccountWithAppPasswordSession({
+  Future<int> updateAccountWithAppPasswordSession({
     required String did,
     required String accessJwt,
     required String refreshJwt,
@@ -111,7 +114,7 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   }
 
   // Update last used timestamp
-  Future<bool> updateLastUsed(String did) {
+  Future<int> updateLastUsed(String did) {
     return (update(accounts)..where((t) => t.did.equals(did))).write(
       AccountsCompanion(
         lastUsed: Value(DateTime.now()),
@@ -126,7 +129,7 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   }
 
   // Clear session data (logout)
-  Future<bool> clearAccountSession(String did) {
+  Future<int> clearAccountSession(String did) {
     return (update(accounts)..where((t) => t.did.equals(did))).write(
       const AccountsCompanion(
         accessJwt: Value(null),
@@ -155,7 +158,7 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   }
 
   // Update account profile information
-  Future<bool> updateAccountProfile({
+  Future<int> updateAccountProfile({
     required String did,
     String? displayName,
     String? description,
@@ -174,7 +177,7 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   }
 
   // Update account order for multi-account management
-  Future<bool> updateAccountOrder(String did, int order) {
+  Future<int> updateAccountOrder(String did, int order) {
     return (update(accounts)..where((t) => t.did.equals(did))).write(
       AccountsCompanion(
         accountOrder: Value(order),
@@ -184,7 +187,7 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   }
 
   // Update account label
-  Future<bool> updateAccountLabel(String did, String? label) {
+  Future<int> updateAccountLabel(String did, String? label) {
     return (update(accounts)..where((t) => t.did.equals(did))).write(
       AccountsCompanion(
         accountLabel: Value(label),

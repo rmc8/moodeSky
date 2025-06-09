@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:drift/drift.dart';
 
 @DataClassName('Account')
@@ -63,37 +64,34 @@ class Accounts extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
   
   @override
-  Set<Column> get primaryKey => {id};
-  
-  @override
   List<Set<Column>> get uniqueKeys => [
     {did}, // DID must be unique
     {handle}, // Handle must be unique
   ];
 }
 
-// Extension for additional functionality
-extension AccountExtensions on Account {
-  // Check if OAuth session is valid
-  bool get hasValidOAuthSession {
-    return accessJwt != null && 
-           refreshJwt != null && 
-           dpopPrivateKey != null &&
-           (tokenExpiry == null || tokenExpiry!.isAfter(DateTime.now()));
-  }
-  
-  // Check if access token needs refresh (expires within 5 minutes)
-  bool get needsTokenRefresh {
-    if (tokenExpiry == null) return false;
-    return tokenExpiry!.isBefore(DateTime.now().add(const Duration(minutes: 5)));
-  }
-  
-  // Check if account uses OAuth
-  bool get isOAuthAccount => loginMethod == 'oauth';
-  
-  // Check if account uses app password
-  bool get isAppPasswordAccount => loginMethod == 'app_password';
-  
-  // Get display identifier (displayName or handle)
-  String get displayIdentifier => displayName?.isNotEmpty == true ? displayName! : handle;
-}
+// TODO: Extension for additional functionality (uncomment when Drift code generation is fixed)
+// extension AccountExtensions on Account {
+//   // Check if OAuth session is valid
+//   bool get hasValidOAuthSession {
+//     return accessJwt != null && 
+//            refreshJwt != null && 
+//            dpopPrivateKey != null &&
+//            (tokenExpiry == null || tokenExpiry!.isAfter(DateTime.now()));
+//   }
+//   
+//   // Check if access token needs refresh (expires within 5 minutes)
+//   bool get needsTokenRefresh {
+//     if (tokenExpiry == null) return false;
+//     return tokenExpiry!.isBefore(DateTime.now().add(const Duration(minutes: 5)));
+//   }
+//   
+//   // Check if account uses OAuth
+//   bool get isOAuthAccount => loginMethod == 'oauth';
+//   
+//   // Check if account uses app password
+//   bool get isAppPasswordAccount => loginMethod == 'app_password';
+//   
+//   // Get display identifier (displayName or handle)
+//   String get displayIdentifier => displayName?.isNotEmpty == true ? displayName! : handle;
+// }
