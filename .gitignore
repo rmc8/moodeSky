@@ -117,3 +117,39 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+
+# MoodeSky specific files
+# CLAUDE.md # コメントアウト - 開発ガイドとして含める
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Generated files (Drift, Riverpod, Freezed)
+*.g.dart
+*.freezed.dart
+
+# Security sensitive files
+keystore.properties
+google-services.json
+GoogleService-Info.plist
+
+# IDE specific
+.DS_Store
+*.iml
+.idea/
+.vscode/settings.json
+.vscode/launch.json
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
