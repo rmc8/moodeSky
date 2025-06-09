@@ -277,7 +277,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               onTap: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('${_selectedServer.appPasswordUrl}'),
+                                    content: Text(_selectedServer.appPasswordUrl),
                                     action: SnackBarAction(
                                       label: 'コピー',
                                       onPressed: () {
