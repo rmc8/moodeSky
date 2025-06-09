@@ -92,6 +92,26 @@ class UserProfile with _$UserProfile {
       _$UserProfileFromJson(json);
 }
 
+// Authentication method
+enum AuthMethod {
+  oauth,
+  appPassword,
+}
+
+// Authentication credentials
+@freezed
+class AuthCredentials with _$AuthCredentials {
+  const factory AuthCredentials({
+    required String identifier,
+    required String password,
+    required String serviceUrl,
+    required AuthMethod method,
+  }) = _AuthCredentials;
+
+  factory AuthCredentials.fromJson(Map<String, dynamic> json) =>
+      _$AuthCredentialsFromJson(json);
+}
+
 // Authentication error types
 enum AuthErrorType {
   networkError,

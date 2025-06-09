@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/features/auth/models/server_config.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -23,6 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _useOAuth = true; // Toggle between OAuth and App Password
+  ServerConfig _selectedServer = ServerPresets.blueskyOfficial;
 
   @override
   void dispose() {
@@ -135,6 +137,61 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                     
+                    const SizedBox(height: 16),
+                    
+                    // Server selection
+                    Card(
+                      child: ExpansionTile(
+                        leading: Icon(
+                          _selectedServer.isOfficial ? Icons.verified : Icons.dns,
+                          color: _selectedServer.isOfficial ? Colors.blue : Colors.grey[600],
+                        ),
+                        title: Text(_selectedServer.displayName),
+                        subtitle: Text(Uri.parse(_selectedServer.serviceUrl).host),
+                        children: [
+                          for (final server in ServerPresets.predefinedServers)
+                            Builder(
+                              builder: (context) {
+                                final isSelected = server.serviceUrl == _selectedServer.serviceUrl;
+                                return ListTile(
+                              leading: Icon(
+                                server.isOfficial ? Icons.verified : Icons.dns,
+                                color: server.isOfficial ? Colors.blue : Colors.grey[600],
+                              ),
+                              title: Text(
+                                server.displayName,
+                                style: TextStyle(
+                                  fontWeight: server.isOfficial ? FontWeight.bold : FontWeight.normal,
+                                ),
+                              ),
+                              subtitle: Text(Uri.parse(server.serviceUrl).host),
+                              trailing: isSelected ? const Icon(Icons.check, color: Colors.blue) : null,
+                              selected: isSelected,
+                              onTap: () {
+                                setState(() {
+                                  _selectedServer = server;
+                                });
+                              },
+                                );
+                              },
+                            ),
+                          ListTile(
+                            leading: const Icon(Icons.add),
+                            title: const Text('カスタムサーバー...'),
+                            subtitle: const Text('セルフホストサーバーを追加'),
+                            onTap: () {
+                              // TODO: カスタムサーバー追加ダイアログ
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('カスタムサーバー機能は開発中です'),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    
                     const SizedBox(height: 24),
                     
                     // Identifier field
@@ -181,6 +238,66 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           }
                           return null;
                         },
+                      ),
+                      
+                      const SizedBox(height: 8),
+                      
+                      // App Password help and warning
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.1),
+                          border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.info, color: Colors.blue, size: 16),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  'App Passwordについて',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'App Passwordはアプリ専用の安全なパスワードです。通常のパスワードより安全です。',
+                              style: TextStyle(fontSize: 11),
+                            ),
+                            const SizedBox(height: 6),
+                            InkWell(
+                              onTap: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('${_selectedServer.appPasswordUrl}'),
+                                    action: SnackBarAction(
+                                      label: 'コピー',
+                                      onPressed: () {
+                                        // TODO: URLをクリップボードにコピー
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                'App Passwordを生成 →',
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontSize: 11,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                     

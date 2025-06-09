@@ -140,6 +140,29 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
   
+  // Generic login method
+  Future<bool> login(AuthCredentials credentials) async {
+    switch (credentials.method) {
+      case AuthMethod.oauth:
+        await signInWithOAuth(
+          userIdentifier: credentials.identifier.isNotEmpty ? credentials.identifier : null,
+          pdsHost: Uri.parse(credentials.serviceUrl).host,
+        );
+        break;
+      case AuthMethod.appPassword:
+        await signInWithAppPassword(
+          identifier: credentials.identifier,
+          password: credentials.password,
+          pdsHost: Uri.parse(credentials.serviceUrl).host,
+        );
+        break;
+    }
+    
+    // Return true if authentication succeeded
+    final currentState = state;
+    return currentState is AuthAuthenticated;
+  }
+
   // Sign in with app password
   Future<void> signInWithAppPassword({
     required String identifier,
