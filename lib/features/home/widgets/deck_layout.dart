@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/core/providers/theme_provider.dart';
 import 'package:moodesky/shared/widgets/post_item.dart';
 
 class DeckLayout extends ConsumerStatefulWidget {
@@ -26,6 +27,10 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
 
   @override
   Widget build(BuildContext context) {
+    // テーマ変更を監視して再描画をトリガー
+    final currentTheme = ref.watch(currentThemeModeProvider);
+    final brightness = Theme.of(context).brightness;
+    
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Determine layout based on screen size
@@ -245,8 +250,9 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
           margin: const EdgeInsets.symmetric(vertical: 8),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
             border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
             ),
             borderRadius: BorderRadius.circular(8),
           ),

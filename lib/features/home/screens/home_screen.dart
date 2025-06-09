@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/core/providers/theme_provider.dart';
 import 'package:moodesky/features/home/widgets/account_switcher.dart';
 import 'package:moodesky/features/home/widgets/deck_layout.dart';
 import 'package:moodesky/features/settings/screens/settings_screen.dart';
@@ -24,6 +25,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final activeAccount = ref.watch(activeAccountProvider);
+    
+    // テーマ変更を監視して確実に更新されるようにする
+    final currentTheme = ref.watch(currentThemeModeProvider);
 
     if (authState is! AuthAuthenticated) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -137,8 +141,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ],
                   ),
 
-                // Deck layout
-                const Expanded(child: DeckLayout()),
+                // Deck layout - テーマに基づいてキーを変更し強制再構築
+                Expanded(
+                  child: DeckLayout(
+                    key: ValueKey('deck_layout_${currentTheme?.index ?? 0}'),
+                  ),
+                ),
               ],
             ),
           ),

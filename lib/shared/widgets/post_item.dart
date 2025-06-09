@@ -1,7 +1,11 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 // Project imports:
+import 'package:moodesky/core/providers/theme_provider.dart';
 import 'package:moodesky/core/theme/app_themes.dart';
 
 /// ポストアイテムの表示ウィジェット
@@ -248,11 +252,17 @@ class PostItem extends StatelessWidget {
 }
 
 /// デモ用のポストリスト
-class PostListDemo extends StatelessWidget {
+class PostListDemo extends ConsumerWidget {
   const PostListDemo({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // テーマ変更を監視して再描画をトリガー
+    ref.watch(currentThemeModeProvider);
+    
+    // PostItemStyleのインスタンスを作成（最新のコンテキストで）
+    final postStyle = PostItemStyle(context);
+    
     final demoPosts = [
       PostItem(
         authorName: 'MoodeSky Dev',
@@ -298,14 +308,21 @@ class PostListDemo extends StatelessWidget {
       itemCount: demoPosts.length,
       itemBuilder: (context, index) {
         final post = demoPosts[index];
-        return PostItemStyle.buildPostContainer(
-          context: context,
-          showTopBorder: index > 0, // 最初のアイテムは上ボーダーなし
-          child: InkWell(
-            onTap: post.onTap,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        // 各アイテムごとに最新のコンテキストでPostItemStyleを作成
+        return Consumer(
+          builder: (context, ref, child) {
+            // テーマ変更を確実に検知
+            final currentTheme = ref.watch(currentThemeModeProvider);
+            final brightness = Theme.of(context).brightness;
+            final itemPostStyle = PostItemStyle(context);
+            
+            return itemPostStyle.buildPostContainer(
+              showTopBorder: index > 0, // 最初のアイテムは上ボーダーなし
+              child: InkWell(
+                onTap: post.onTap,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 // ユーザー情報行
                 Row(
                   children: [
@@ -419,9 +436,11 @@ class PostListDemo extends StatelessWidget {
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );

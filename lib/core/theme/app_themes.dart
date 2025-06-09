@@ -198,16 +198,17 @@ class AppThemes {
 
 /// ポストアイテム用のスタイル
 class PostItemStyle {
+  final BuildContext context;
+  
+  const PostItemStyle(this.context);
+  
   /// ポストアイテムの装飾（上下線のみ）
-  static BoxDecoration getPostDecoration(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor = isDark ? const Color(0xFF3D3D3D) : const Color(0xFFE0E0E0);
-    
+  BoxDecoration getPostDecoration() {
     return BoxDecoration(
       color: Theme.of(context).colorScheme.surface,
       border: Border(
-        top: BorderSide(color: borderColor, width: 0.5),
-        bottom: BorderSide(color: borderColor, width: 0.5),
+        top: BorderSide(color: Theme.of(context).colorScheme.outline, width: 0.5),
+        bottom: BorderSide(color: Theme.of(context).colorScheme.outline, width: 0.5),
       ),
     );
   }
@@ -222,26 +223,19 @@ class PostItemStyle {
   static const EdgeInsets postMargin = EdgeInsets.zero;
   
   /// ポストの区切り線用Widget
-  static Widget buildPostDivider(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor = isDark ? const Color(0xFF3D3D3D) : const Color(0xFFE0E0E0);
-    
+  Widget buildPostDivider() {
     return Container(
       height: 0.5,
-      color: borderColor,
+      color: Theme.of(context).colorScheme.outline,
     );
   }
   
   /// ポストアイテムのContainer
-  static Widget buildPostContainer({
-    required BuildContext context,
+  Widget buildPostContainer({
     required Widget child,
     bool showTopBorder = true,
     bool showBottomBorder = true,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor = isDark ? const Color(0xFF3D3D3D) : const Color(0xFFE0E0E0);
-    
     return Container(
       width: double.infinity,
       padding: postPadding,
@@ -250,14 +244,28 @@ class PostItemStyle {
         color: Theme.of(context).colorScheme.surface,
         border: Border(
           top: showTopBorder 
-              ? BorderSide(color: borderColor, width: 0.5)
+              ? BorderSide(color: Theme.of(context).colorScheme.outline, width: 0.5)
               : BorderSide.none,
           bottom: showBottomBorder 
-              ? BorderSide(color: borderColor, width: 0.5)
+              ? BorderSide(color: Theme.of(context).colorScheme.outline, width: 0.5)
               : BorderSide.none,
         ),
       ),
       child: child,
+    );
+  }
+  
+  // 静的なファクトリーメソッドを後方互換性のために残す
+  static Widget buildPostContainerStatic({
+    required BuildContext context,
+    required Widget child,
+    bool showTopBorder = true,
+    bool showBottomBorder = true,
+  }) {
+    return PostItemStyle(context).buildPostContainer(
+      child: child,
+      showTopBorder: showTopBorder,
+      showBottomBorder: showBottomBorder,
     );
   }
 }
