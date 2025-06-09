@@ -23,7 +23,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   
   bool _isLoading = false;
   bool _obscurePassword = true;
-  bool _useOAuth = true; // Toggle between OAuth and App Password
+  bool _useOAuth = false; // Toggle between OAuth and App Password
   ServerConfig _selectedServer = ServerPresets.blueskyOfficial;
 
   @override
@@ -107,21 +107,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Sign in method',
+                              'ログイン方法',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(height: 8),
                             SegmentedButton<bool>(
                               segments: const [
                                 ButtonSegment(
-                                  value: true,
-                                  label: Text('OAuth'),
-                                  icon: Icon(Icons.security),
-                                ),
-                                ButtonSegment(
                                   value: false,
                                   label: Text('App Password'),
                                   icon: Icon(Icons.key),
+                                ),
+                                ButtonSegment(
+                                  value: true,
+                                  label: Text('OAuth'),
+                                  icon: Icon(Icons.security),
                                 ),
                               ],
                               selected: {_useOAuth},
@@ -131,6 +131,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   _passwordController.clear();
                                 });
                               },
+                            ),
+                            const SizedBox(height: 8),
+                            // Method explanation
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: _useOAuth 
+                                    ? Colors.orange.withValues(alpha: 0.1)
+                                    : Colors.blue.withValues(alpha: 0.1),
+                                border: Border.all(
+                                  color: _useOAuth 
+                                      ? Colors.orange.withValues(alpha: 0.3)
+                                      : Colors.blue.withValues(alpha: 0.3)
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    _useOAuth ? Icons.info : Icons.check_circle,
+                                    color: _useOAuth ? Colors.orange : Colors.blue,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _useOAuth 
+                                          ? 'OAuth機能は開発中です。現在はApp Passwordをご利用ください。'
+                                          : 'App Passwordは推奨されるログイン方法です。安全で取り消しも簡単です。',
+                                      style: TextStyle(
+                                        color: _useOAuth ? Colors.orange : Colors.blue,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -305,7 +342,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     
                     // Sign in button
                     FilledButton(
-                      onPressed: _isLoading ? null : _signIn,
+                      onPressed: (_isLoading || _useOAuth) ? null : _signIn,
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: _isLoading
@@ -314,7 +351,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 width: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : Text(_useOAuth ? 'Sign in with OAuth' : 'Sign in'),
+                            : Text(_useOAuth ? 'OAuth開発中' : 'ログイン'),
                       ),
                     ),
                     
@@ -325,21 +362,45 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         color: Theme.of(context).colorScheme.errorContainer,
                         child: Padding(
                           padding: const EdgeInsets.all(16),
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: Theme.of(context).colorScheme.onErrorContainer,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  authState.message,
-                                  style: TextStyle(
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
                                     color: Theme.of(context).colorScheme.onErrorContainer,
                                   ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'ログインエラー',
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onErrorContainer,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                authState.message,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onErrorContainer,
+                                  fontSize: 14,
                                 ),
                               ),
+                              // Show retry button for network errors
+                              if (authState.errorType == AuthErrorType.networkError) ...[
+                                const SizedBox(height: 12),
+                                FilledButton.tonal(
+                                  onPressed: () {
+                                    ref.read(authNotifierProvider.notifier).refresh();
+                                  },
+                                  child: const Text('再試行'),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -351,8 +412,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // Help text
                     Text(
                       _useOAuth
-                          ? 'OAuth is the recommended sign-in method for better security.'
-                          : 'App passwords can be created in your Bluesky settings.',
+                          ? 'OAuth機能は近日公開予定です。現在はApp Passwordでログインしてください。'
+                          : 'App PasswordはBlueskyの設定画面で生成できます。通常のパスワードではなく、App Passwordを使用してください。',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),

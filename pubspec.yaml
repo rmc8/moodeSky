@@ -48,7 +48,7 @@ dependencies:
 
   # Networking & API
   http: ^1.1.2
-  bluesky: ^0.11.0
+  bluesky: ^0.18.10
 
   # Internationalization
   intl: ^0.20.2
@@ -63,7 +63,6 @@ dependencies:
   # Serialization
   freezed_annotation: ^2.4.1
   json_annotation: ^4.8.1
-
   # AI (Optional) - 後で追加予定
   # langchain_dart: ^0.7.0
   # langchain_openai: ^0.7.0
@@ -94,7 +93,6 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
