@@ -170,37 +170,37 @@ class NotificationItem extends StatelessWidget {
     switch (type) {
       case 'like':
         return (
-          Icons.favorite,
+          Icons.favorite_rounded,
           Theme.of(context).colorScheme.likeColor,
           '${AppLocalizations.of(context).notificationLike}${postContent != null ? '\n"$postContent"' : ''}',
         );
       case 'repost':
         return (
-          Icons.repeat,
+          Icons.repeat_rounded,
           Theme.of(context).colorScheme.repostColor,
           '${AppLocalizations.of(context).notificationRepost}${postContent != null ? '\n"$postContent"' : ''}',
         );
       case 'follow':
         return (
-          Icons.person_add,
+          Icons.person_add_rounded,
           Theme.of(context).colorScheme.secondary,
           AppLocalizations.of(context).notificationFollow,
         );
       case 'mention':
         return (
-          Icons.alternate_email,
+          Icons.alternate_email_rounded,
           Theme.of(context).colorScheme.tertiary,
           '${AppLocalizations.of(context).notificationMention}${postContent != null ? '\n"$postContent"' : ''}',
         );
       case 'reply':
         return (
-          Icons.chat_bubble,
+          Icons.chat_bubble_rounded,
           Theme.of(context).colorScheme.primary,
           '${AppLocalizations.of(context).notificationReply}${postContent != null ? '\n"$postContent"' : ''}',
         );
       default:
         return (
-          Icons.notifications,
+          Icons.notifications_rounded,
           Theme.of(context).colorScheme.onSurfaceVariant,
           AppLocalizations.of(context).notification,
         );
@@ -282,13 +282,13 @@ class ProfilePostItem extends StatelessWidget {
       actionButtons: [
         _buildActionButton(
           context: context,
-          icon: Icons.chat_bubble_outline,
+          icon: Icons.chat_bubble_outline_rounded,
           count: replyCount,
           onTap: onReply,
         ),
         _buildActionButton(
           context: context,
-          icon: Icons.repeat,
+          icon: Icons.repeat_rounded,
           count: repostCount,
           isActive: isReposted,
           activeColor: Theme.of(context).colorScheme.repostColor,
@@ -296,7 +296,7 @@ class ProfilePostItem extends StatelessWidget {
         ),
         _buildActionButton(
           context: context,
-          icon: isLiked ? Icons.favorite : Icons.favorite_border,
+          icon: isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
           count: likeCount,
           isActive: isLiked,
           activeColor: Theme.of(context).colorScheme.likeColor,

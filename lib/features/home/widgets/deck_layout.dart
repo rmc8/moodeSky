@@ -79,7 +79,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.dashboard,
+            Icons.dashboard_rounded,
             size: 80,
             color: Theme.of(
               context,
@@ -112,7 +112,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                 builder: (context) => const AddDeckDialog(),
               );
             },
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add_rounded),
             label: Text(AppLocalizations.of(context).addDeckButton),
           ),
         ],
@@ -178,7 +178,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
           SizedBox(
             width: 48,
             child: IconButton(
-              icon: const Icon(Icons.add, size: 20),
+              icon: const Icon(Icons.add_rounded, size: 20),
               onPressed: () {
                 showDialog(
                   context: context,
@@ -322,7 +322,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                       Row(
                         children: [
                           Icon(
-                            Icons.group,
+                            Icons.group_rounded,
                             size: 12,
                             color: Theme.of(
                               context,
@@ -360,7 +360,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                 child: Padding(
                   padding: const EdgeInsets.all(2),
                   child: Icon(
-                    Icons.close,
+                    Icons.close_rounded,
                     size: 14,
                     color: Theme.of(
                       context,
@@ -431,7 +431,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                   width: 40,
                   height: 40,
                   child: IconButton(
-                    icon: const Icon(Icons.more_vert, size: 18),
+                    icon: const Icon(Icons.more_vert_rounded, size: 18),
                     onPressed: () {
                       // TODO: Show deck options
                     },
@@ -514,7 +514,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
           SizedBox(
             width: 44,
             child: IconButton(
-              icon: const Icon(Icons.add, size: 18),
+              icon: const Icon(Icons.add_rounded, size: 18),
               onPressed: () {
                 showDialog(
                   context: context,
@@ -691,7 +691,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                   width: 36,
                   height: 36,
                   child: IconButton(
-                    icon: const Icon(Icons.more_vert, size: 16),
+                    icon: const Icon(Icons.more_vert_rounded, size: 16),
                     onPressed: () {
                       // TODO: Show deck options
                     },
@@ -726,27 +726,27 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   IconData _getDeckIcon(String deckType) {
     switch (deckType) {
       case 'home':
-        return Icons.home;
+        return Icons.home_rounded;
       case 'notifications':
-        return Icons.notifications;
+        return Icons.notifications_rounded;
       case 'search':
-        return Icons.search;
+        return Icons.search_rounded;
       case 'list':
-        return Icons.list;
+        return Icons.list_rounded;
       case 'profile':
-        return Icons.person;
+        return Icons.person_rounded;
       case 'thread':
-        return Icons.forum;
+        return Icons.forum_rounded;
       case 'custom_feed':
-        return Icons.rss_feed;
+        return Icons.rss_feed_rounded;
       case 'local':
-        return Icons.people;
+        return Icons.people_rounded;
       case 'hashtag':
-        return Icons.tag;
+        return Icons.tag_rounded;
       case 'mentions':
-        return Icons.alternate_email;
+        return Icons.alternate_email_rounded;
       default:
-        return Icons.dashboard;
+        return Icons.dashboard_rounded;
     }
   }
 
@@ -1093,7 +1093,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
         radius: radius,
         backgroundColor: Theme.of(context).colorScheme.primary,
         child: Icon(
-          Icons.group,
+          Icons.group_rounded,
           size: iconSize,
           color: Colors.white,
         ),

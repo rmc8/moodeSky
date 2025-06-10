@@ -120,7 +120,7 @@ class PostItem extends StatelessWidget {
                 // リプライ
                 _buildActionButton(
                   context: context,
-                  icon: Icons.chat_bubble_outline,
+                  icon: Icons.chat_bubble_outline_rounded,
                   count: replyCount,
                   onTap: onReply,
                 ),
@@ -130,7 +130,7 @@ class PostItem extends StatelessWidget {
                 // リポスト
                 _buildActionButton(
                   context: context,
-                  icon: Icons.repeat,
+                  icon: Icons.repeat_rounded,
                   count: repostCount,
                   isActive: isReposted,
                   activeColor: Theme.of(context).colorScheme.repostColor,
@@ -142,7 +142,7 @@ class PostItem extends StatelessWidget {
                 // いいね
                 _buildActionButton(
                   context: context,
-                  icon: isLiked ? Icons.favorite : Icons.favorite_border,
+                  icon: isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                   count: likeCount,
                   isActive: isLiked,
                   activeColor: Theme.of(context).colorScheme.likeColor,
@@ -154,7 +154,7 @@ class PostItem extends StatelessWidget {
                 // メニュー
                 IconButton(
                   icon: Icon(
-                    Icons.more_horiz,
+                    Icons.more_horiz_rounded,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   onPressed: () {
@@ -388,7 +388,7 @@ class PostListDemo extends ConsumerWidget {
                     // リプライ
                     _buildActionButtonDemo(
                       context: context,
-                      icon: Icons.chat_bubble_outline,
+                      icon: Icons.chat_bubble_outline_rounded,
                       count: post.replyCount,
                       onTap: post.onReply,
                     ),
@@ -398,7 +398,7 @@ class PostListDemo extends ConsumerWidget {
                     // リポスト
                     _buildActionButtonDemo(
                       context: context,
-                      icon: Icons.repeat,
+                      icon: Icons.repeat_rounded,
                       count: post.repostCount,
                       isActive: post.isReposted,
                       activeColor: Theme.of(context).colorScheme.repostColor,
@@ -410,7 +410,7 @@ class PostListDemo extends ConsumerWidget {
                     // いいね
                     _buildActionButtonDemo(
                       context: context,
-                      icon: post.isLiked ? Icons.favorite : Icons.favorite_border,
+                      icon: post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                       count: post.likeCount,
                       isActive: post.isLiked,
                       activeColor: Theme.of(context).colorScheme.likeColor,
@@ -422,7 +422,7 @@ class PostListDemo extends ConsumerWidget {
                     // メニュー
                     IconButton(
                       icon: Icon(
-                        Icons.more_horiz,
+                        Icons.more_horiz_rounded,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       onPressed: () {
