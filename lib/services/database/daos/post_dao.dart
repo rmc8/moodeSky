@@ -40,9 +40,9 @@ class PostDao extends DatabaseAccessor<AppDatabase> with _$PostDaoMixin {
     DateTime? olderThan,
   }) {
     var query = select(posts)
-      ..where((t) => 
-          t.accountDid.equals(accountDid) &
-          t.deckType.equals(deckType))
+      ..where(
+        (t) => t.accountDid.equals(accountDid) & t.deckType.equals(deckType),
+      )
       ..orderBy([
         (t) => OrderingTerm(expression: t.indexedAt, mode: OrderingMode.desc),
       ])
@@ -79,10 +79,16 @@ class PostDao extends DatabaseAccessor<AppDatabase> with _$PostDaoMixin {
   }) {
     return (update(posts)..where((t) => t.uri.equals(uri))).write(
       PostsCompanion(
-        replyCount: replyCount != null ? Value(replyCount) : const Value.absent(),
-        repostCount: repostCount != null ? Value(repostCount) : const Value.absent(),
+        replyCount: replyCount != null
+            ? Value(replyCount)
+            : const Value.absent(),
+        repostCount: repostCount != null
+            ? Value(repostCount)
+            : const Value.absent(),
         likeCount: likeCount != null ? Value(likeCount) : const Value.absent(),
-        quoteCount: quoteCount != null ? Value(quoteCount) : const Value.absent(),
+        quoteCount: quoteCount != null
+            ? Value(quoteCount)
+            : const Value.absent(),
       ),
     );
   }
@@ -98,9 +104,15 @@ class PostDao extends DatabaseAccessor<AppDatabase> with _$PostDaoMixin {
     return (update(posts)..where((t) => t.uri.equals(uri))).write(
       PostsCompanion(
         isLiked: isLiked != null ? Value(isLiked) : const Value.absent(),
-        isReposted: isReposted != null ? Value(isReposted) : const Value.absent(),
-        userRepostUri: userRepostUri != null ? Value(userRepostUri) : const Value.absent(),
-        userLikeUri: userLikeUri != null ? Value(userLikeUri) : const Value.absent(),
+        isReposted: isReposted != null
+            ? Value(isReposted)
+            : const Value.absent(),
+        userRepostUri: userRepostUri != null
+            ? Value(userRepostUri)
+            : const Value.absent(),
+        userLikeUri: userLikeUri != null
+            ? Value(userLikeUri)
+            : const Value.absent(),
       ),
     );
   }
@@ -108,9 +120,7 @@ class PostDao extends DatabaseAccessor<AppDatabase> with _$PostDaoMixin {
   // Mark post as read
   Future<bool> markPostAsRead(String uri) {
     return (update(posts)..where((t) => t.uri.equals(uri))).write(
-      const PostsCompanion(
-        isRead: Value(true),
-      ),
+      const PostsCompanion(isRead: Value(true)),
     );
   }
 
@@ -122,40 +132,48 @@ class PostDao extends DatabaseAccessor<AppDatabase> with _$PostDaoMixin {
   }) async {
     if (keepCount != null) {
       // Keep most recent posts
-      final recentPosts = await (select(posts)
-            ..where((t) => t.accountDid.equals(accountDid))
-            ..orderBy([
-              (t) => OrderingTerm(expression: t.indexedAt, mode: OrderingMode.desc),
-            ])
-            ..limit(keepCount))
-          .get();
+      final recentPosts =
+          await (select(posts)
+                ..where((t) => t.accountDid.equals(accountDid))
+                ..orderBy([
+                  (t) => OrderingTerm(
+                    expression: t.indexedAt,
+                    mode: OrderingMode.desc,
+                  ),
+                ])
+                ..limit(keepCount))
+              .get();
 
       if (recentPosts.isNotEmpty) {
         final oldestRecentPost = recentPosts.last;
-        return (delete(posts)
-              ..where((t) => 
+        return (delete(posts)..where(
+              (t) =>
                   t.accountDid.equals(accountDid) &
-                  t.indexedAt.isSmallerThanValue(oldestRecentPost.indexedAt)))
+                  t.indexedAt.isSmallerThanValue(oldestRecentPost.indexedAt),
+            ))
             .go();
       }
     }
 
-    return (delete(posts)
-          ..where((t) => 
+    return (delete(posts)..where(
+          (t) =>
               t.accountDid.equals(accountDid) &
-              t.fetchedAt.isSmallerThanValue(olderThan)))
+              t.fetchedAt.isSmallerThanValue(olderThan),
+        ))
         .go();
   }
 
   // Get unread post count
   Future<int> getUnreadPostCount(String accountDid) async {
-    final result = await (selectOnly(posts)
-          ..addColumns([posts.id.count()])
-          ..where(
-              posts.accountDid.equals(accountDid) &
-              posts.isRead.equals(false)))
-        .getSingle();
-    
+    final result =
+        await (selectOnly(posts)
+              ..addColumns([posts.id.count()])
+              ..where(
+                posts.accountDid.equals(accountDid) &
+                    posts.isRead.equals(false),
+              ))
+            .getSingle();
+
     return result.read(posts.id.count()) ?? 0;
   }
 
@@ -166,11 +184,13 @@ class PostDao extends DatabaseAccessor<AppDatabase> with _$PostDaoMixin {
     int limit = 50,
   }) {
     return (select(posts)
-          ..where((t) => 
-              t.accountDid.equals(accountDid) &
-              t.text.contains(searchTerm))
+          ..where(
+            (t) =>
+                t.accountDid.equals(accountDid) & t.text.contains(searchTerm),
+          )
           ..orderBy([
-            (t) => OrderingTerm(expression: t.indexedAt, mode: OrderingMode.desc),
+            (t) =>
+                OrderingTerm(expression: t.indexedAt, mode: OrderingMode.desc),
           ])
           ..limit(limit))
         .get();
@@ -184,7 +204,8 @@ class PostDao extends DatabaseAccessor<AppDatabase> with _$PostDaoMixin {
     return (select(posts)
           ..where((t) => t.accountDid.equals(accountDid))
           ..orderBy([
-            (t) => OrderingTerm(expression: t.indexedAt, mode: OrderingMode.desc),
+            (t) =>
+                OrderingTerm(expression: t.indexedAt, mode: OrderingMode.desc),
           ])
           ..limit(limit))
         .watch();

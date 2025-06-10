@@ -9,23 +9,18 @@ import 'package:path_provider/path_provider.dart';
 
 // Project imports:
 import 'package:moodesky/services/database/daos/account_dao.dart';
+import 'package:moodesky/services/database/daos/deck_dao.dart';
 import 'package:moodesky/services/database/tables/accounts.dart';
+import 'package:moodesky/services/database/tables/decks.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(
-  tables: [
-    Accounts,
-  ],
-  daos: [
-    AccountDao,
-  ],
-)
+@DriftDatabase(tables: [Accounts, Decks], daos: [AccountDao, DeckDao])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -35,10 +30,10 @@ class AppDatabase extends _$AppDatabase {
       },
       onUpgrade: (Migrator m, int from, int to) async {
         // Handle database migrations here
-        // Example:
-        // if (from < 2) {
-        //   await m.addColumn(accounts, accounts.newColumn);
-        // }
+        if (from < 2) {
+          // Add Decks table in version 2
+          await m.createTable(decks);
+        }
       },
     );
   }
@@ -48,7 +43,7 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'moodesky.db'));
-    
+
     return NativeDatabase.createInBackground(file);
   });
 }

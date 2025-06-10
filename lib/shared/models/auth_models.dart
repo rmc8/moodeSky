@@ -46,13 +46,13 @@ class AuthResult with _$AuthResult {
     required AuthSessionData session,
     required String accountDid,
   }) = AuthSuccess;
-  
+
   const factory AuthResult.failure({
     required String error,
     String? errorDescription,
     AuthErrorType? errorType,
   }) = AuthFailure;
-  
+
   const factory AuthResult.cancelled() = AuthCancelled;
 }
 
@@ -63,7 +63,7 @@ class AuthSessionData with _$AuthSessionData {
     required OAuthSessionData oauthSession,
     required UserProfile profile,
   }) = OAuthSession;
-  
+
   const factory AuthSessionData.appPassword({
     required AppPasswordSessionData appPasswordSession,
     required UserProfile profile,
@@ -93,10 +93,7 @@ class UserProfile with _$UserProfile {
 }
 
 // Authentication method
-enum AuthMethod {
-  oauth,
-  appPassword,
-}
+enum AuthMethod { oauth, appPassword }
 
 // Authentication credentials
 @freezed
@@ -183,11 +180,9 @@ class AuthConfig with _$AuthConfig {
 // Login request
 @freezed
 class LoginRequest with _$LoginRequest {
-  const factory LoginRequest.oauth({
-    String? userIdentifier,
-    String? pdsHost,
-  }) = OAuthLoginRequest;
-  
+  const factory LoginRequest.oauth({String? userIdentifier, String? pdsHost}) =
+      OAuthLoginRequest;
+
   const factory LoginRequest.appPassword({
     required String identifier,
     required String password,
@@ -201,7 +196,7 @@ class TokenRefreshResult with _$TokenRefreshResult {
   const factory TokenRefreshResult.success({
     required OAuthSessionData newSession,
   }) = TokenRefreshSuccess;
-  
+
   const factory TokenRefreshResult.failure({
     required String error,
     required bool requiresReauth,

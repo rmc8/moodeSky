@@ -19,7 +19,8 @@ class ServerSelectionWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ServerSelectionWidget> createState() => _ServerSelectionWidgetState();
+  ConsumerState<ServerSelectionWidget> createState() =>
+      _ServerSelectionWidgetState();
 }
 
 class _ServerSelectionWidgetState extends ConsumerState<ServerSelectionWidget> {
@@ -49,7 +50,8 @@ class _ServerSelectionWidgetState extends ConsumerState<ServerSelectionWidget> {
   }
 
   void _saveRecentServer(ServerConfig server) {
-    if (!server.isOfficial && !_recentServers.any((s) => s.serviceUrl == server.serviceUrl)) {
+    if (!server.isOfficial &&
+        !_recentServers.any((s) => s.serviceUrl == server.serviceUrl)) {
       setState(() {
         _recentServers.insert(0, server);
         if (_recentServers.length > 5) {
@@ -75,8 +77,10 @@ class _ServerSelectionWidgetState extends ConsumerState<ServerSelectionWidget> {
 
     try {
       final discoveredServer = await ServerDiscoveryService.discoverServer(url);
-      final validatedServer = await ServerDiscoveryService.validateServer(discoveredServer);
-      
+      final validatedServer = await ServerDiscoveryService.validateServer(
+        discoveredServer,
+      );
+
       setState(() {
         _validatedCustomServer = validatedServer;
         _isValidating = false;
@@ -132,9 +136,9 @@ class _ServerSelectionWidgetState extends ConsumerState<ServerSelectionWidget> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Predefined servers dropdown
             DropdownButtonFormField<ServerConfig>(
               value: _selectedServer,
@@ -148,13 +152,10 @@ class _ServerSelectionWidgetState extends ConsumerState<ServerSelectionWidget> {
                 ...ServerPresets.predefinedServers.map(
                   (server) => DropdownMenuItem(
                     value: server,
-                    child: ServerListItem(
-                      server: server,
-                      showStatus: true,
-                    ),
+                    child: ServerListItem(server: server, showStatus: true),
                   ),
                 ),
-                
+
                 // Recent servers
                 if (_recentServers.isNotEmpty) ...[
                   const DropdownMenuItem<ServerConfig>(
@@ -173,7 +174,7 @@ class _ServerSelectionWidgetState extends ConsumerState<ServerSelectionWidget> {
                     ),
                   ),
                 ],
-                
+
                 // Custom server option
                 const DropdownMenuItem<ServerConfig>(
                   enabled: false,
@@ -197,7 +198,7 @@ class _ServerSelectionWidgetState extends ConsumerState<ServerSelectionWidget> {
                 }
               },
             ),
-            
+
             // Server status and info
             if (_selectedServer != null) ...[
               const SizedBox(height: 12),
@@ -232,18 +233,21 @@ class ServerListItem extends StatelessWidget {
             radius: 12,
             backgroundImage: NetworkImage(server.icon!),
             onBackgroundImageError: (_, __) {},
-            child: server.icon == null ? 
-              Icon(server.isOfficial ? Icons.verified : Icons.dns, size: 12) : 
-              null,
+            child: server.icon == null
+                ? Icon(server.isOfficial ? Icons.verified : Icons.dns, size: 12)
+                : null,
           )
         else
           CircleAvatar(
             radius: 12,
-            child: Icon(server.isOfficial ? Icons.verified : Icons.dns, size: 12),
+            child: Icon(
+              server.isOfficial ? Icons.verified : Icons.dns,
+              size: 12,
+            ),
           ),
-        
+
         const SizedBox(width: 8),
-        
+
         // Server name and URL
         Flexible(
           child: Column(
@@ -255,7 +259,9 @@ class ServerListItem extends StatelessWidget {
                     child: Text(
                       server.displayName,
                       style: TextStyle(
-                        fontWeight: server.isOfficial ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: server.isOfficial
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -272,15 +278,15 @@ class ServerListItem extends StatelessWidget {
               ),
               Text(
                 Uri.parse(server.serviceUrl).host,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                 overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
         ),
-        
+
         // Status indicator
         if (showStatus) ...[
           const SizedBox(width: 4),
@@ -294,10 +300,7 @@ class ServerListItem extends StatelessWidget {
 class ServerStatusCard extends StatelessWidget {
   final ServerConfig server;
 
-  const ServerStatusCard({
-    super.key,
-    required this.server,
-  });
+  const ServerStatusCard({super.key, required this.server});
 
   @override
   Widget build(BuildContext context) {
@@ -339,25 +342,45 @@ class ServerStatusCard extends StatelessWidget {
               ServerStatusIndicator(status: server.status),
             ],
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Server capabilities
           Wrap(
             spacing: 8,
             runSpacing: 4,
             children: [
               if (server.supportsOAuth)
-                _buildCapabilityChip(context, Icons.security, 'OAuth', Colors.green),
+                _buildCapabilityChip(
+                  context,
+                  Icons.security,
+                  'OAuth',
+                  Colors.green,
+                ),
               if (server.supportsAppPasswords)
-                _buildCapabilityChip(context, Icons.password, 'App Password', Colors.blue),
+                _buildCapabilityChip(
+                  context,
+                  Icons.password,
+                  'App Password',
+                  Colors.blue,
+                ),
               if (server.supportsChat)
-                _buildCapabilityChip(context, Icons.chat, 'Chat', Colors.orange),
+                _buildCapabilityChip(
+                  context,
+                  Icons.chat,
+                  'Chat',
+                  Colors.orange,
+                ),
               if (server.supportsNotifications)
-                _buildCapabilityChip(context, Icons.notifications, 'Notifications', Colors.purple),
+                _buildCapabilityChip(
+                  context,
+                  Icons.notifications,
+                  'Notifications',
+                  Colors.purple,
+                ),
             ],
           ),
-          
+
           // Latency info
           if (server.latencyMs != null) ...[
             const SizedBox(height: 8),
@@ -367,9 +390,9 @@ class ServerStatusCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   '${server.latencyMs}ms',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -379,7 +402,12 @@ class ServerStatusCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCapabilityChip(BuildContext context, IconData icon, String label, Color color) {
+  Widget _buildCapabilityChip(
+    BuildContext context,
+    IconData icon,
+    String label,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -409,16 +437,13 @@ class ServerStatusCard extends StatelessWidget {
 class ServerStatusIndicator extends StatelessWidget {
   final ServerStatus status;
 
-  const ServerStatusIndicator({
-    super.key,
-    required this.status,
-  });
+  const ServerStatusIndicator({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
     Color color;
     IconData icon;
-    
+
     switch (status) {
       case ServerStatus.online:
         color = Colors.green;
@@ -441,14 +466,10 @@ class ServerStatusIndicator extends StatelessWidget {
         icon = Icons.help;
         break;
     }
-    
+
     return Tooltip(
       message: status.name.toUpperCase(),
-      child: Icon(
-        icon,
-        size: 16,
-        color: color,
-      ),
+      child: Icon(icon, size: 16, color: color),
     );
   }
 }
@@ -456,10 +477,7 @@ class ServerStatusIndicator extends StatelessWidget {
 class CustomServerDialog extends StatefulWidget {
   final Function(ServerConfig) onServerAdded;
 
-  const CustomServerDialog({
-    super.key,
-    required this.onServerAdded,
-  });
+  const CustomServerDialog({super.key, required this.onServerAdded});
 
   @override
   State<CustomServerDialog> createState() => _CustomServerDialogState();
@@ -501,7 +519,7 @@ class _CustomServerDialogState extends State<CustomServerDialog> {
           timeoutSeconds: _timeout,
         ),
       );
-      
+
       setState(() {
         _validatedServer = validatedServer;
         _nameController.text = validatedServer.displayName;
@@ -509,14 +527,17 @@ class _CustomServerDialogState extends State<CustomServerDialog> {
       });
     } catch (e) {
       setState(() {
-        _validatedServer = ServerPresets.customServer(
-          serviceUrl: url,
-          displayName: _nameController.text.trim().isEmpty ? 'Custom Server' : _nameController.text.trim(),
-        ).copyWith(
-          status: ServerStatus.error,
-          allowSelfSigned: _allowSelfSigned,
-          timeoutSeconds: _timeout,
-        );
+        _validatedServer =
+            ServerPresets.customServer(
+              serviceUrl: url,
+              displayName: _nameController.text.trim().isEmpty
+                  ? 'Custom Server'
+                  : _nameController.text.trim(),
+            ).copyWith(
+              status: ServerStatus.error,
+              allowSelfSigned: _allowSelfSigned,
+              timeoutSeconds: _timeout,
+            );
         _isValidating = false;
       });
     }
@@ -525,7 +546,9 @@ class _CustomServerDialogState extends State<CustomServerDialog> {
   void _addServer() {
     if (_validatedServer != null) {
       final finalServer = _validatedServer!.copyWith(
-        displayName: _nameController.text.trim().isEmpty ? _validatedServer!.displayName : _nameController.text.trim(),
+        displayName: _nameController.text.trim().isEmpty
+            ? _validatedServer!.displayName
+            : _nameController.text.trim(),
       );
       widget.onServerAdded(finalServer);
       Navigator.of(context).pop();
@@ -558,9 +581,9 @@ class _CustomServerDialogState extends State<CustomServerDialog> {
               ),
               onChanged: (_) => _validateUrl(),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Server name input
             TextField(
               controller: _nameController,
@@ -571,9 +594,9 @@ class _CustomServerDialogState extends State<CustomServerDialog> {
                 border: OutlineInputBorder(),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Validation status
             if (_isValidating)
               const Center(
@@ -592,16 +615,18 @@ class _CustomServerDialogState extends State<CustomServerDialog> {
               )
             else if (_validatedServer != null)
               ServerValidationResult(server: _validatedServer!),
-            
+
             const SizedBox(height: 16),
-            
+
             // Advanced options
             ExpansionTile(
               title: const Text('Advanced Options'),
               children: [
                 CheckboxListTile(
                   title: const Text('Allow self-signed certificates'),
-                  subtitle: const Text('⚠️ Less secure, use only for development'),
+                  subtitle: const Text(
+                    '⚠️ Less secure, use only for development',
+                  ),
                   value: _allowSelfSigned,
                   onChanged: (value) {
                     setState(() {
@@ -610,7 +635,7 @@ class _CustomServerDialogState extends State<CustomServerDialog> {
                     _validateUrl();
                   },
                 ),
-                
+
                 ListTile(
                   title: const Text('Request timeout'),
                   subtitle: Slider(
@@ -648,15 +673,12 @@ class _CustomServerDialogState extends State<CustomServerDialog> {
 class ServerValidationResult extends StatelessWidget {
   final ServerConfig server;
 
-  const ServerValidationResult({
-    super.key,
-    required this.server,
-  });
+  const ServerValidationResult({super.key, required this.server});
 
   @override
   Widget build(BuildContext context) {
     final isHealthy = server.isHealthy;
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -679,7 +701,9 @@ class ServerValidationResult extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  isHealthy ? 'Server validation successful!' : 'Server validation failed',
+                  isHealthy
+                      ? 'Server validation successful!'
+                      : 'Server validation failed',
                   style: TextStyle(
                     color: isHealthy ? Colors.green : Colors.red,
                     fontWeight: FontWeight.bold,
@@ -688,19 +712,16 @@ class ServerValidationResult extends StatelessWidget {
               ),
             ],
           ),
-          
+
           if (isHealthy) ...[
             const SizedBox(height: 8),
             Text('Protocol: ${server.protocolVersion}'),
             if (server.latencyMs != null)
               Text('Latency: ${server.latencyMs}ms'),
-            
+
             const SizedBox(height: 4),
             Text(
-              'Supports: ${[
-                if (server.supportsOAuth) 'OAuth',
-                if (server.supportsAppPasswords) 'App Passwords',
-              ].join(', ')}',
+              'Supports: ${[if (server.supportsOAuth) 'OAuth', if (server.supportsAppPasswords) 'App Passwords'].join(', ')}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],

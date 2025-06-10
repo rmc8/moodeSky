@@ -2,18 +2,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 // Project imports:
+import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/features/auth/models/server_config.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
 
 /// テスト用のヘルパー関数とモッククラス
 
 /// テスト用のWidget作成ヘルパー
 class TestWidgetBuilder {
-  static Widget createApp({
-    Widget? home,
-    List<Override>? providerOverrides,
-  }) {
+  static Widget createApp({Widget? home, List<Override>? providerOverrides}) {
     return ProviderScope(
       overrides: providerOverrides ?? [],
       child: MaterialApp(
@@ -26,10 +26,7 @@ class TestWidgetBuilder {
     required Widget screen,
     List<Override>? providerOverrides,
   }) {
-    return createApp(
-      home: screen,
-      providerOverrides: providerOverrides,
-    );
+    return createApp(home: screen, providerOverrides: providerOverrides);
   }
 }
 
@@ -38,25 +35,27 @@ class MockAuthStates {
   static const AuthState initial = AuthState.initial();
   static const AuthState loading = AuthState.loading();
   static const AuthState unauthenticated = AuthState.unauthenticated();
-  
+
   static AuthState authenticated({
     String activeAccountDid = 'did:plc:test123',
     List<UserProfile>? accounts,
   }) {
-    final defaultAccounts = accounts ?? [
-      const UserProfile(
-        did: 'did:plc:test123',
-        handle: 'test.bsky.social',
-        displayName: 'Test User',
-      ),
-    ];
-    
+    final defaultAccounts =
+        accounts ??
+        [
+          const UserProfile(
+            did: 'did:plc:test123',
+            handle: 'test.bsky.social',
+            displayName: 'Test User',
+          ),
+        ];
+
     return AuthState.authenticated(
       activeAccountDid: activeAccountDid,
       accounts: defaultAccounts,
     );
   }
-  
+
   static AuthState error({
     String message = 'Test error',
     AuthErrorType? errorType,
@@ -77,7 +76,7 @@ class TestProfiles {
     description: 'A test user profile',
     isVerified: true,
   );
-  
+
   static const UserProfile secondUser = UserProfile(
     did: 'did:plc:test456',
     handle: 'test2.bsky.social',
@@ -85,7 +84,7 @@ class TestProfiles {
     description: 'Another test user profile',
     isVerified: false,
   );
-  
+
   static List<UserProfile> multipleUsers = [defaultUser, secondUser];
 }
 
@@ -97,14 +96,14 @@ class TestCredentials {
     serviceUrl: 'https://bsky.social',
     method: AuthMethod.oauth,
   );
-  
+
   static const AuthCredentials appPasswordCredentials = AuthCredentials(
     identifier: 'test@bsky.social',
     password: 'abcd-efgh-ijkl-mnop',
     serviceUrl: 'https://bsky.social',
     method: AuthMethod.appPassword,
   );
-  
+
   static AuthCredentials customServerCredentials({
     String serviceUrl = 'https://custom.server.com',
     AuthMethod method = AuthMethod.appPassword,
@@ -126,13 +125,13 @@ class TestAssertions {
     expect(find.text('Sign in method'), findsOneWidget);
     expect(find.byType(TextFormField), findsAtLeastNWidgets(1));
   }
-  
+
   /// エラー表示が正しく機能することを確認
   static void expectErrorDisplay(WidgetTester tester, String errorMessage) {
     expect(find.byIcon(Icons.error_outline), findsOneWidget);
     expect(find.text(errorMessage), findsOneWidget);
   }
-  
+
   /// ローディング状態が正しく表示されることを確認
   static void expectLoadingState(WidgetTester tester) {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -146,13 +145,13 @@ class TestDataGenerator {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return 'did:plc:test$timestamp';
   }
-  
+
   /// ランダムなハンドルを生成
   static String generateHandle({String domain = 'bsky.social'}) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return 'user$timestamp.$domain';
   }
-  
+
   /// テスト用のUserProfileを生成
   static UserProfile generateProfile({
     String? did,
@@ -161,7 +160,7 @@ class TestDataGenerator {
   }) {
     final generatedDid = did ?? generateDid();
     final generatedHandle = handle ?? generateHandle();
-    
+
     return UserProfile(
       did: generatedDid,
       handle: generatedHandle,
@@ -182,27 +181,48 @@ class TestProviders {
   }
 }
 
-/// モックのAuthNotifier  
-class MockAuthNotifier extends StateNotifier<AuthState> {
-  MockAuthNotifier(super.initialState);
-  
-  void setState(AuthState newState) {
-    state = newState;
+/// モックのAuthNotifier
+class MockAuthNotifier extends Mock implements AuthNotifier {
+  // Mock implementation will be handled by mockito
+  @override
+  AuthState get state => MockAuthStates.initial;
+
+  @override
+  set state(AuthState newState) {
+    // Mock implementation
   }
-  
+
+  @override
+  Future<AuthResult> addAccount({
+    required String identifier,
+    required String password,
+    required ServerConfig serverConfig,
+    bool useOAuth = false,
+  }) async {
+    // This will be mocked in tests
+    return const AuthResult.success(
+      session: AuthSessionData.appPassword(
+        appPasswordSession: AppPasswordSessionData(
+          accessJwt: 'test_jwt',
+          refreshJwt: 'test_refresh',
+          did: 'did:test:123',
+          handle: 'test.user',
+        ),
+        profile: UserProfile(did: 'did:test:123', handle: 'test.user'),
+      ),
+      accountDid: 'did:test:123',
+    );
+  }
+
   Future<bool> mockLogin(AuthCredentials credentials) async {
-    state = const AuthState.loading();
-    await Future.delayed(const Duration(milliseconds: 100)); // 非同期操作をシミュレート
-    
     // 成功パターン
-    if (credentials.identifier.isNotEmpty && 
-        (credentials.method == AuthMethod.oauth || credentials.password.isNotEmpty)) {
-      state = MockAuthStates.authenticated();
+    if (credentials.identifier.isNotEmpty &&
+        (credentials.method == AuthMethod.oauth ||
+            credentials.password.isNotEmpty)) {
       return true;
     }
-    
+
     // 失敗パターン
-    state = MockAuthStates.error(message: 'Invalid credentials');
     return false;
   }
 }
@@ -224,7 +244,7 @@ class CustomMatchers {
   static Matcher isAuthState<T extends AuthState>() {
     return isA<T>();
   }
-  
+
   /// UserProfileの特定フィールドをチェックするMatcher
   static Matcher hasUserHandle(String handle) {
     return predicate<UserProfile>(
@@ -232,7 +252,7 @@ class CustomMatchers {
       'has handle "$handle"',
     );
   }
-  
+
   /// ServerConfigの特定フィールドをチェックするMatcher
   static Matcher hasServerUrl(String url) {
     return predicate<dynamic>(

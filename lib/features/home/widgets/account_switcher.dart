@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/features/auth/screens/add_account_screen.dart';
+import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
 
 class AccountSwitcher extends ConsumerWidget {
@@ -26,10 +28,10 @@ class AccountSwitcher extends ConsumerWidget {
           Row(
             children: [
               Text(
-                'Switch Account',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                AppLocalizations.of(context)!.switchAccount,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               IconButton(
@@ -38,18 +40,13 @@ class AccountSwitcher extends ConsumerWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Current account
           if (activeAccount != null)
-            _buildAccountTile(
-              context,
-              ref,
-              activeAccount,
-              isActive: true,
-            ),
-          
+            _buildAccountTile(context, ref, activeAccount, isActive: true),
+
           // Other accounts
           if (availableAccounts.length > 1) ...[
             const SizedBox(height: 8),
@@ -59,9 +56,9 @@ class AccountSwitcher extends ConsumerWidget {
                 .where((account) => account.did != activeAccount?.did)
                 .map((account) => _buildAccountTile(context, ref, account)),
           ],
-          
+
           const SizedBox(height: 16),
-          
+
           // Add account button
           ListTile(
             leading: Container(
@@ -76,13 +73,17 @@ class AccountSwitcher extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.onSecondaryContainer,
               ),
             ),
-            title: const Text('Add Account'),
+            title: Text(AppLocalizations.of(context)!.addAccountButton),
             onTap: () {
               Navigator.of(context).pop();
-              // TODO: Navigate to add account
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const AddAccountScreen(),
+                ),
+              );
             },
           ),
-          
+
           // Sign out all button
           if (availableAccounts.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -99,7 +100,7 @@ class AccountSwitcher extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.onErrorContainer,
                 ),
               ),
-              title: const Text('Sign Out All'),
+              title: Text(AppLocalizations.of(context)!.signOutAll),
               onTap: () {
                 _showSignOutConfirmation(context, ref);
               },
@@ -125,7 +126,7 @@ class AccountSwitcher extends ConsumerWidget {
         child: account.avatar == null
             ? Text(
                 account.displayName?.substring(0, 1).toUpperCase() ??
-                account.handle.substring(0, 1).toUpperCase(),
+                    account.handle.substring(0, 1).toUpperCase(),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               )
             : null,
@@ -158,14 +159,12 @@ class AccountSwitcher extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sign Out All Accounts'),
-        content: const Text(
-          'Are you sure you want to sign out of all accounts? You will need to sign in again.',
-        ),
+        title: Text(AppLocalizations.of(context)!.signOutAllConfirmTitle),
+        content: Text(AppLocalizations.of(context)!.signOutAllConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelButton),
           ),
           FilledButton(
             onPressed: () async {
@@ -173,7 +172,7 @@ class AccountSwitcher extends ConsumerWidget {
               Navigator.of(context).pop(); // Close account switcher
               await ref.read(authNotifierProvider.notifier).signOutAll();
             },
-            child: const Text('Sign Out'),
+            child: Text(AppLocalizations.of(context)!.signOutButton),
           ),
         ],
       ),

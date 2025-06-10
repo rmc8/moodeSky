@@ -1,11 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "./scripts/notify_sound.sh",
-      "./scripts/notify_sound.sh *",
-      "afplay /System/Library/Sounds/*",
-      "paplay /usr/share/sounds/*"
+      "Bash(flutter *)",
+      "Bash(dart *)",
+      "Bash(paplay /usr/share/sounds/*)",
+      "Bash(afplay /System/Library/Sounds/*)",
+      "Bash(./scripts/notify_sound.sh *)"
     ],
-    "deny": []
+    "deny": [
+      "Bash(flutter run)"
+    ]
   }
 }

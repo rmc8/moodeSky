@@ -10,11 +10,7 @@ import 'package:moodesky/features/auth/models/server_config.dart';
 import 'package:moodesky/features/auth/widgets/server_selection_widget.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: ServerSelectionDemoApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: ServerSelectionDemoApp()));
 }
 
 class ServerSelectionDemoApp extends StatelessWidget {
@@ -25,18 +21,15 @@ class ServerSelectionDemoApp extends StatelessWidget {
     return MaterialApp(
       title: 'MoodeSky Server Selection Demo',
       debugShowCheckedModeBanner: false,
-      
+
       // Localization
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('ja', 'JP'),
-        Locale('en', 'US'),
-      ],
-      
+      supportedLocales: const [Locale('ja', 'JP'), Locale('en', 'US')],
+
       // Theme
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -44,12 +37,9 @@ class ServerSelectionDemoApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
         useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          centerTitle: true,
-        ),
+        appBarTheme: const AppBarTheme(elevation: 0, centerTitle: true),
       ),
-      
+
       // Dark theme
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -57,14 +47,11 @@ class ServerSelectionDemoApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          centerTitle: true,
-        ),
+        appBarTheme: const AppBarTheme(elevation: 0, centerTitle: true),
       ),
-      
+
       themeMode: ThemeMode.system,
-      
+
       home: const ServerSelectionDemoScreen(),
     );
   }
@@ -74,7 +61,8 @@ class ServerSelectionDemoScreen extends StatefulWidget {
   const ServerSelectionDemoScreen({super.key});
 
   @override
-  State<ServerSelectionDemoScreen> createState() => _ServerSelectionDemoScreenState();
+  State<ServerSelectionDemoScreen> createState() =>
+      _ServerSelectionDemoScreenState();
 }
 
 class _ServerSelectionDemoScreenState extends State<ServerSelectionDemoScreen> {
@@ -125,9 +113,9 @@ class _ServerSelectionDemoScreenState extends State<ServerSelectionDemoScreen> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Server selection widget
             ServerSelectionWidget(
               initialServer: _selectedServer,
@@ -135,7 +123,7 @@ class _ServerSelectionDemoScreenState extends State<ServerSelectionDemoScreen> {
                 setState(() {
                   _selectedServer = server;
                 });
-                
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('サーバーが選択されました: ${server.displayName}'),
@@ -144,16 +132,16 @@ class _ServerSelectionDemoScreenState extends State<ServerSelectionDemoScreen> {
                 );
               },
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Selected server info
             ...[
               Text(
                 '選択されたサーバー情報',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Container(
@@ -162,7 +150,9 @@ class _ServerSelectionDemoScreenState extends State<ServerSelectionDemoScreen> {
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Column(
@@ -170,8 +160,12 @@ class _ServerSelectionDemoScreenState extends State<ServerSelectionDemoScreen> {
                   children: [
                     Text('名前: ${_selectedServer.displayName}'),
                     Text('URL: ${_selectedServer.serviceUrl}'),
-                    Text('OAuth: ${_selectedServer.supportsOAuth ? "対応" : "非対応"}'),
-                    Text('App Password: ${_selectedServer.supportsAppPasswords ? "対応" : "非対応"}'),
+                    Text(
+                      'OAuth: ${_selectedServer.supportsOAuth ? "対応" : "非対応"}',
+                    ),
+                    Text(
+                      'App Password: ${_selectedServer.supportsAppPasswords ? "対応" : "非対応"}',
+                    ),
                     const SizedBox(height: 8),
                     Text('App Password URL: ${_selectedServer.appPasswordUrl}'),
                   ],

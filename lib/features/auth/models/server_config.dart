@@ -12,35 +12,36 @@ class ServerConfig with _$ServerConfig {
     String? pdsUrl,
     String? oauthUrl,
     String? xrpcUrl,
-    
+
     // Server metadata
     required String displayName,
     String? description,
     String? icon,
     String? contactEmail,
-    
+
     // Protocol support
-    @Default(['com.atproto.server.createSession']) List<String> supportedMethods,
+    @Default(['com.atproto.server.createSession'])
+    List<String> supportedMethods,
     @Default('0.4.0') String protocolVersion,
     @Default(true) bool supportsOAuth,
     @Default(true) bool supportsAppPasswords,
-    
+
     // Network configuration
     @Default({}) Map<String, String> headers,
     @Default(30) int timeoutSeconds,
     @Default(false) bool allowSelfSigned,
-    
+
     // Feature flags
     @Default(false) bool supportsChat,
     @Default(false) bool supportsNotifications,
     @Default(false) bool supportsModeration,
     @Default(false) bool supportsCustomFeeds,
-    
+
     // Server status
     @Default(ServerStatus.unknown) ServerStatus status,
     DateTime? lastChecked,
     int? latencyMs,
-    
+
     // UI properties
     @Default(false) bool isOfficial,
     @Default(false) bool isCustom,
@@ -50,13 +51,7 @@ class ServerConfig with _$ServerConfig {
       _$ServerConfigFromJson(json);
 }
 
-enum ServerStatus {
-  unknown,
-  online,
-  offline,
-  error,
-  checking,
-}
+enum ServerStatus { unknown, online, offline, error, checking }
 
 class ServerPresets {
   static final ServerConfig blueskyOfficial = ServerConfig(
@@ -73,7 +68,7 @@ class ServerPresets {
     supportsCustomFeeds: true,
     isOfficial: true,
   );
-  
+
   static final ServerConfig blueskyStaging = ServerConfig(
     serviceUrl: 'https://staging.bsky.dev',
     displayName: 'Bluesky Staging',
@@ -83,12 +78,12 @@ class ServerPresets {
     supportsAppPasswords: true,
     isOfficial: true,
   );
-  
+
   static final List<ServerConfig> predefinedServers = [
     blueskyOfficial,
     blueskyStaging,
   ];
-  
+
   static ServerConfig customServer({
     required String serviceUrl,
     required String displayName,
@@ -111,7 +106,7 @@ extension ServerConfigExtensions on ServerConfig {
     if (serviceUrl.contains('bsky.social')) {
       return 'https://bsky.app/settings/app-passwords';
     }
-    
+
     try {
       final uri = Uri.parse(serviceUrl);
       return '${uri.scheme}://${uri.host}/settings/app-passwords';
@@ -119,10 +114,10 @@ extension ServerConfigExtensions on ServerConfig {
       return '$serviceUrl/settings/app-passwords';
     }
   }
-  
+
   String get oauthAuthUrl {
     if (oauthUrl != null) return oauthUrl!;
-    
+
     try {
       final uri = Uri.parse(serviceUrl);
       return '${uri.scheme}://${uri.host}/oauth/authorize';
@@ -130,9 +125,9 @@ extension ServerConfigExtensions on ServerConfig {
       return '$serviceUrl/oauth/authorize';
     }
   }
-  
+
   bool get isHealthy => status == ServerStatus.online;
-  
+
   String get statusText {
     switch (status) {
       case ServerStatus.online:
@@ -147,6 +142,6 @@ extension ServerConfigExtensions on ServerConfig {
         return 'Unknown';
     }
   }
-  
+
   Duration get timeout => Duration(seconds: timeoutSeconds);
 }

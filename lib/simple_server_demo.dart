@@ -9,11 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moodesky/features/auth/models/server_config.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: SimpleServerDemoApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: SimpleServerDemoApp()));
 }
 
 class SimpleServerDemoApp extends StatelessWidget {
@@ -24,18 +20,15 @@ class SimpleServerDemoApp extends StatelessWidget {
     return MaterialApp(
       title: 'Simple Server Selection Demo',
       debugShowCheckedModeBanner: false,
-      
+
       // Localization
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('ja', 'JP'),
-        Locale('en', 'US'),
-      ],
-      
+      supportedLocales: const [Locale('ja', 'JP'), Locale('en', 'US')],
+
       // Theme
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -43,12 +36,9 @@ class SimpleServerDemoApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
         useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          centerTitle: true,
-        ),
+        appBarTheme: const AppBarTheme(elevation: 0, centerTitle: true),
       ),
-      
+
       home: const SimpleServerDemoScreen(),
     );
   }
@@ -79,44 +69,55 @@ class _SimpleServerDemoScreenState extends State<SimpleServerDemoScreen> {
           children: [
             Text(
               'サーバーを選択:',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Server list
             Expanded(
               child: ListView.builder(
                 itemCount: _servers.length,
                 itemBuilder: (context, index) {
                   final server = _servers[index];
-                  final isSelected = server.serviceUrl == _selectedServer.serviceUrl;
-                  
+                  final isSelected =
+                      server.serviceUrl == _selectedServer.serviceUrl;
+
                   return Card(
-                    color: isSelected ? Colors.blue.withValues(alpha: 0.1) : null,
+                    color: isSelected
+                        ? Colors.blue.withValues(alpha: 0.1)
+                        : null,
                     child: ListTile(
                       leading: Icon(
                         server.isOfficial ? Icons.verified : Icons.dns,
-                        color: server.isOfficial ? Colors.blue : Colors.grey[600],
+                        color: server.isOfficial
+                            ? Colors.blue
+                            : Colors.grey[600],
                       ),
                       title: Text(
                         server.displayName,
                         style: TextStyle(
-                          fontWeight: server.isOfficial ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: server.isOfficial
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                       subtitle: Text(Uri.parse(server.serviceUrl).host),
-                      trailing: isSelected ? const Icon(Icons.check, color: Colors.blue) : null,
+                      trailing: isSelected
+                          ? const Icon(Icons.check, color: Colors.blue)
+                          : null,
                       onTap: () {
                         setState(() {
                           _selectedServer = server;
                         });
-                        
+
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('サーバーが選択されました: ${server.displayName}'),
+                            content: Text(
+                              'サーバーが選択されました: ${server.displayName}',
+                            ),
                             backgroundColor: Colors.green,
                           ),
                         );
@@ -126,9 +127,9 @@ class _SimpleServerDemoScreenState extends State<SimpleServerDemoScreen> {
                 },
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Selected server info
             Container(
               padding: const EdgeInsets.all(16),
@@ -136,7 +137,9 @@ class _SimpleServerDemoScreenState extends State<SimpleServerDemoScreen> {
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.2),
                 ),
               ),
               child: Column(
@@ -151,8 +154,12 @@ class _SimpleServerDemoScreenState extends State<SimpleServerDemoScreen> {
                   const SizedBox(height: 8),
                   Text('名前: ${_selectedServer.displayName}'),
                   Text('URL: ${_selectedServer.serviceUrl}'),
-                  Text('OAuth: ${_selectedServer.supportsOAuth ? "対応" : "非対応"}'),
-                  Text('App Password: ${_selectedServer.supportsAppPasswords ? "対応" : "非対応"}'),
+                  Text(
+                    'OAuth: ${_selectedServer.supportsOAuth ? "対応" : "非対応"}',
+                  ),
+                  Text(
+                    'App Password: ${_selectedServer.supportsAppPasswords ? "対応" : "非対応"}',
+                  ),
                   const SizedBox(height: 8),
                   Text('App Password URL: ${_selectedServer.appPasswordUrl}'),
                 ],
