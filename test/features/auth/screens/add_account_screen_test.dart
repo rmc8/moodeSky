@@ -45,7 +45,7 @@ void main() {
       expect(find.text('新しいアカウントを追加'), findsOneWidget);
       expect(
         find.text(
-          'MoodeSkyでは複数のBlueskyアカウントを同時に管理できます。新しいアカウントの認証情報を入力してください。',
+          'moodeSkyでは複数のBlueskyアカウントを同時に管理できます。新しいアカウントの認証情報を入力してください。',
         ),
         findsOneWidget,
       );

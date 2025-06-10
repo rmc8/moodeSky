@@ -79,8 +79,9 @@ class SettingsScreen extends ConsumerWidget {
                       AppLocalizations.of(context)!.manageAccountsDescription,
                       style: TextStyle(
                         color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF333333) 
-                            : const Color(0xFFCCCCCC),
+                            ? const Color(0xFF222222) 
+                            : const Color(0xFFE0E0E0),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     trailing: const Icon(Icons.chevron_right),
@@ -114,8 +115,9 @@ class SettingsScreen extends ConsumerWidget {
                       AppLocalizations.of(context)!.signOutAllDescription,
                       style: TextStyle(
                         color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF333333) 
-                            : const Color(0xFFCCCCCC),
+                            ? const Color(0xFF222222) 
+                            : const Color(0xFFE0E0E0),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     onTap: () => _showSignOutConfirmation(context, ref),
@@ -154,11 +156,12 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                     subtitle: Text(
-                      AppLocalizations.of(context)!.appVersion('1.0.0'),
+                      AppLocalizations.of(context)!.appVersion('0.0.1'),
                       style: TextStyle(
                         color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF333333) 
-                            : const Color(0xFFCCCCCC),
+                            ? const Color(0xFF222222) 
+                            : const Color(0xFFE0E0E0),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     trailing: const Icon(Icons.chevron_right),
@@ -251,8 +254,8 @@ class SettingsScreen extends ConsumerWidget {
   void _showAboutDialog(BuildContext context) {
     showAboutDialog(
       context: context,
-      applicationName: 'MoodeSky',
-      applicationVersion: '1.0.0',
+      applicationName: 'moodeSky',
+      applicationVersion: '0.0.1',
       applicationIcon: Container(
         width: 64,
         height: 64,

@@ -12,11 +12,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:moodesky/main.dart';
 
 void main() {
-  testWidgets('MoodeSky app loads', (WidgetTester tester) async {
+  testWidgets('moodeSky app loads', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MoodeSkyApp());
+    await tester.pumpWidget(const moodeSkyApp());
 
-    // Verify that the app loads with MoodeSky branding
-    expect(find.text('MoodeSky'), findsWidgets);
+    // Verify that the app loads with moodeSky branding
+    expect(find.text('moodeSky'), findsWidgets);
   });
 }

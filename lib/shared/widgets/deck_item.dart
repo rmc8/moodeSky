@@ -93,9 +93,9 @@ class DeckItem extends StatelessWidget {
             content, 
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Theme.of(context).brightness == Brightness.light 
-                  ? const Color(0xFF222222) 
+                  ? const Color(0xFF000000) // 純粋な黒
                   : const Color(0xFFF5F5F5),
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w400, // Regular
             ),
           ),
 
@@ -352,7 +352,11 @@ class ProfilePostItem extends StatelessWidget {
                   _formatCount(count),
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: color, fontSize: 12),
+                  ).textTheme.bodySmall?.copyWith(
+                    color: color, 
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

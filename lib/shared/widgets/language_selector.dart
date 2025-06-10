@@ -136,7 +136,7 @@ class LanguageSelector extends ConsumerWidget {
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).brightness == Brightness.light 
                 ? const Color(0xFF222222) 
-                : const Color(0xFFCCCCCC),
+                : const Color(0xFFE0E0E0),
             fontWeight: FontWeight.w500,
           ),
         ),

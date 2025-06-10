@@ -29,7 +29,7 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       // ロゴテキストが表示される
-      expect(find.text('MoodeSky'), findsOneWidget);
+      expect(find.text('moodeSky'), findsOneWidget);
 
       // 認証方法選択が表示される
       expect(find.text('ログイン方法'), findsOneWidget);
@@ -184,14 +184,14 @@ void main() {
 
       // エラー状態のテストは、AuthProviderのモック化が必要
       // 今は基本的なUIテストのみ実行
-      expect(find.text('MoodeSky'), findsOneWidget);
+      expect(find.text('moodeSky'), findsOneWidget);
     });
 
     testWidgets('shows loading indicator when auth is loading', (tester) async {
       // ローディング状態のテストも、AuthProviderのモック化が必要
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('MoodeSky'), findsOneWidget);
+      expect(find.text('moodeSky'), findsOneWidget);
     });
 
     testWidgets('help text changes based on auth method', (tester) async {

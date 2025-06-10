@@ -121,7 +121,7 @@ class TestCredentials {
 class TestAssertions {
   /// 基本的なログインフォーム要素が存在することを確認
   static void expectLoginFormElements(WidgetTester tester) {
-    expect(find.text('MoodeSky'), findsOneWidget);
+    expect(find.text('moodeSky'), findsOneWidget);
     expect(find.text('Sign in method'), findsOneWidget);
     expect(find.byType(TextFormField), findsAtLeastNWidgets(1));
   }

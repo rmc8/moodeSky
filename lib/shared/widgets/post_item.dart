@@ -115,9 +115,9 @@ class PostItem extends StatelessWidget {
               content,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).brightness == Brightness.light 
-                    ? const Color(0xFF222222) // 濃いグレー
+                    ? const Color(0xFF111111) // より濃い黒
                     : const Color(0xFFF5F5F5), // 明るい白
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400, // Regular
               ),
             ),
             
@@ -215,6 +215,7 @@ class PostItem extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: color,
                     fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -275,9 +276,9 @@ class PostListDemo extends ConsumerWidget {
     
     final demoPosts = [
       PostItem(
-        authorName: 'MoodeSky Dev',
+        authorName: 'moodeSky Dev',
         authorHandle: 'moodesky.bsky.social',
-        content: 'MoodeSkyのテーマシステムが完成しました！空の青をアクセントにしたライトテーマと、夕焼けのオレンジをアクセントにしたダークテーマをお楽しみください。🌅',
+        content: 'moodeSkyのテーマシステムが完成しました！空の青をアクセントにしたライトテーマと、夕焼けのオレンジをアクセントにしたダークテーマをお楽しみください。🌅',
         timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
         likeCount: 42,
         repostCount: 8,
@@ -286,7 +287,7 @@ class PostListDemo extends ConsumerWidget {
       PostItem(
         authorName: 'Alice Johnson',
         authorHandle: 'alice.bsky.social',
-        content: 'Just discovered this new Bluesky client called MoodeSky! The deck interface is really nice and the themes are beautiful ✨',
+        content: 'Just discovered this new Bluesky client called moodeSky! The deck interface is really nice and the themes are beautiful ✨',
         timestamp: DateTime.now().subtract(const Duration(hours: 2)),
         likeCount: 23,
         repostCount: 3,
@@ -296,7 +297,7 @@ class PostListDemo extends ConsumerWidget {
       PostItem(
         authorName: 'Bob Wilson',
         authorHandle: 'bob.dev',
-        content: 'The post design in MoodeSky is clean and minimal. Love how they use subtle borders instead of heavy cards! 🎨',
+        content: 'The post design in moodeSky is clean and minimal. Love how they use subtle borders instead of heavy cards! 🎨',
         timestamp: DateTime.now().subtract(const Duration(hours: 4)),
         likeCount: 156,
         repostCount: 24,
@@ -306,7 +307,7 @@ class PostListDemo extends ConsumerWidget {
       PostItem(
         authorName: 'Charlie Brown',
         authorHandle: 'charlie.bsky.social',
-        content: 'Multi-account support in MoodeSky is seamless. Finally can manage my personal and work accounts in one place! 👏',
+        content: 'Multi-account support in moodeSky is seamless. Finally can manage my personal and work accounts in one place! 👏',
         timestamp: DateTime.now().subtract(const Duration(days: 1)),
         likeCount: 89,
         repostCount: 15,
@@ -396,9 +397,9 @@ class PostListDemo extends ConsumerWidget {
                   post.content,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Theme.of(context).brightness == Brightness.light 
-                        ? const Color(0xFF222222) // 濃いグレー
+                        ? const Color(0xFF111111) // より濃い黒
                         : const Color(0xFFF5F5F5), // 明るい白
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400, // Regular
                   ),
                 ),
                 
@@ -501,6 +502,7 @@ class PostListDemo extends ConsumerWidget {
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: color,
                     fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),

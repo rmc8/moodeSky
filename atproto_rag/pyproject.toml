@@ -1,15 +1,26 @@
 [project]
 name = "atproto-rag"
-version = "0.1.0"
-description = "AT Protocol repository vectorization for RAG with Qdrant MCP"
+version = "0.2.0"
+description = "High-performance AT Protocol repository vectorization for RAG with ChromaDB + OpenAI"
 requires-python = ">=3.12"
 dependencies = [
-    "qdrant-client>=1.7.0",
-    "fastembed>=0.2.0",
+    # High-performance vector database and embeddings
+    "chromadb>=0.4.0",
+    "openai>=1.0.0",
+    
+    # Core functionality
     "gitpython>=3.1.0",
     "rich>=13.0.0",
     "typer>=0.9.0",
-    "pydantic>=2.0.0"
+    "pydantic>=2.0.0",
+    
+    # Performance optimization
+    "tenacity>=8.0.0",  # Retry logic for API calls
+    "psutil>=5.9.0",    # Memory monitoring
+    
+    # Legacy compatibility (optional)
+    "qdrant-client>=1.7.0; extra == 'qdrant'",
+    "fastembed>=0.2.0; extra == 'fastembed'"
 ]
 
 [project.optional-dependencies]
