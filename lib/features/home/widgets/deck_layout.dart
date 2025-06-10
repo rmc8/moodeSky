@@ -87,7 +87,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
           ),
           const SizedBox(height: 16),
           Text(
-            AppLocalizations.of(context)!.decksEmptyTitle,
+            AppLocalizations.of(context).decksEmptyTitle,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: Theme.of(
                 context,
@@ -96,7 +96,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
           ),
           const SizedBox(height: 8),
           Text(
-            AppLocalizations.of(context)!.decksEmptyDescription,
+            AppLocalizations.of(context).decksEmptyDescription,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(
@@ -279,14 +279,27 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _getAccountColor(account.did),
+                          // アバターアイコン（タブ用適切サイズ）
+                          if (account.avatar != null) ...[
+                            CircleAvatar(
+                              radius: 8,
+                              backgroundImage: NetworkImage(account.avatar!),
                             ),
-                          ),
+                          ] else ...[
+                            CircleAvatar(
+                              radius: 8,
+                              backgroundColor: _getAccountColor(account.did),
+                              child: Text(
+                                account.displayName?.substring(0, 1).toUpperCase() ?? 
+                                account.handle.substring(0, 1).toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -380,9 +393,9 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       ),
       child: Column(
         children: [
-          // Compact deck header with account info
+          // Compact deck header - single line with proper touch targets
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainer,
               borderRadius: const BorderRadius.only(
@@ -390,36 +403,42 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                 topRight: Radius.circular(8),
               ),
             ),
-            child: Column(
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Icon(_getDeckIcon(selectedDeck.deckType), size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        selectedDeck.title,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                // アカウントアバター（適切なサイズ）
+                _buildCompactAccountAvatar(selectedDeck),
+                if (_hasAccountInfo(selectedDeck)) const SizedBox(width: 8),
+                
+                // デッキタイプアイコン
+                Icon(_getDeckIcon(selectedDeck.deckType), size: 16),
+                const SizedBox(width: 8),
+                
+                // ワンライナーのラベル
+                Expanded(
+                  child: Text(
+                    _buildCompactDeckLabel(selectedDeck),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.more_vert, size: 18),
-                      onPressed: () {
-                        // TODO: Show deck options
-                      },
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
-                      ),
-                      padding: const EdgeInsets.all(4),
-                    ),
-                  ],
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
                 ),
-                // Account information row
-                _buildDeckAccountInfo(selectedDeck),
+                
+                // メニューボタン（タップしやすいサイズ）
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: IconButton(
+                    icon: const Icon(Icons.more_vert, size: 18),
+                    onPressed: () {
+                      // TODO: Show deck options
+                    },
+                    padding: const EdgeInsets.all(8),
+                    tooltip: 'デッキオプション',
+                  ),
+                ),
               ],
             ),
           ),
@@ -620,9 +639,9 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       ),
       child: Column(
         children: [
-          // Compact deck header with page indicator and account info
+          // Mobile deck header - single line with touch-friendly controls
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainer,
               borderRadius: const BorderRadius.only(
@@ -630,57 +649,56 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                 topRight: Radius.circular(8),
               ),
             ),
-            child: Column(
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Icon(_getDeckIcon(deck.deckType), size: 16),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        deck.title,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
+                // アカウントアバター（モバイル適切サイズ）
+                _buildCompactAccountAvatar(deck, isUltraCompact: true),
+                if (_hasAccountInfo(deck)) const SizedBox(width: 6),
+                
+                // デッキタイプアイコン
+                Icon(_getDeckIcon(deck.deckType), size: 14),
+                const SizedBox(width: 6),
+                
+                // ワンライナーのラベル
+                Expanded(
+                  child: Text(
+                    _buildCompactDeckLabel(deck),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
                     ),
-                    // Compact page indicator
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outline.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        '${index + 1}/$totalDecks',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(fontSize: 10),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      icon: const Icon(Icons.more_vert, size: 16),
-                      onPressed: () {
-                        // TODO: Show deck options
-                      },
-                      constraints: const BoxConstraints(
-                        minWidth: 28,
-                        minHeight: 28,
-                      ),
-                      padding: const EdgeInsets.all(2),
-                    ),
-                  ],
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
                 ),
-                // Account information row for mobile
-                _buildDeckAccountInfo(deck, isMobile: true),
+                
+                // ページインジケーター（コンパクト）
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '${index + 1}/$totalDecks',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 9),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                
+                // メニューボタン（モバイルタップ対応）
+                SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: IconButton(
+                    icon: const Icon(Icons.more_vert, size: 16),
+                    onPressed: () {
+                      // TODO: Show deck options
+                    },
+                    padding: const EdgeInsets.all(6),
+                    tooltip: 'デッキオプション',
+                  ),
+                ),
               ],
             ),
           ),
@@ -804,7 +822,6 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       itemBuilder: (context, index) {
         final notification = notifications[index];
         return postStyle.buildPostContainer(
-          showTopBorder: index > 0,
           child: notification,
         );
       },
@@ -851,7 +868,6 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       itemBuilder: (context, index) {
         final post = profilePosts[index];
         return postStyle.buildPostContainer(
-          showTopBorder: index > 0,
           child: post,
         );
       },
@@ -897,7 +913,6 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       itemBuilder: (context, index) {
         final result = searchResults[index];
         return postStyle.buildPostContainer(
-          showTopBorder: index > 0,
           child: result,
         );
       },
@@ -939,7 +954,6 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       itemBuilder: (context, index) {
         final member = listMembers[index];
         return postStyle.buildPostContainer(
-          showTopBorder: index > 0,
           child: member,
         );
       },
@@ -979,7 +993,6 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       itemCount: 5,
       itemBuilder: (context, index) {
         return postStyle.buildPostContainer(
-          showTopBorder: index > 0,
           child: DeckItem(
             avatar: CircleAvatar(
               radius: 20,
@@ -995,68 +1008,33 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
     );
   }
 
-  /// デッキのアカウント情報表示ウィジェットを構築
-  Widget _buildDeckAccountInfo(Deck deck, {bool isMobile = false}) {
-    final allAccounts = ref.watch(availableAccountsProvider);
-    final account = deck.accountDid != null
-        ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
-        : null;
 
-    // アカウント情報がない場合は空のウィジェットを返す
-    if (account == null && !deck.isCrossAccount) {
-      return const SizedBox.shrink();
+  /// デッキタイプの日本語名を取得
+  String _getDeckTypeName(String deckType) {
+    switch (deckType) {
+      case 'home':
+        return 'ホーム';
+      case 'notifications':
+        return '通知';
+      case 'search':
+        return '検索';
+      case 'list':
+        return 'リスト';
+      case 'profile':
+        return 'プロフィール';
+      case 'thread':
+        return 'スレッド';
+      case 'custom_feed':
+        return 'カスタムフィード';
+      case 'local':
+        return 'ローカル';
+      case 'hashtag':
+        return 'ハッシュタグ';
+      case 'mentions':
+        return 'メンション';
+      default:
+        return 'カスタム';
     }
-
-    return Container(
-      margin: const EdgeInsets.only(top: 4),
-      child: Row(
-        children: [
-          // アカウントインジケーター
-          if (account != null) ...[
-            Container(
-              width: isMobile ? 8 : 10,
-              height: isMobile ? 8 : 10,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _getAccountColor(account.did),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                '@${account.handle}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontSize: isMobile ? 10 : 11,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                  fontWeight: FontWeight.w500,
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
-          ] else if (deck.isCrossAccount) ...[
-            Icon(
-              Icons.group,
-              size: isMobile ? 10 : 12,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                'マルチアカウント', // TODO: 多言語化が必要な場合はAppLocalizations.of(context)を使用
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontSize: isMobile ? 10 : 11,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                  fontStyle: FontStyle.italic,
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
   }
 
   /// アカウントごとの識別カラーを取得
@@ -1075,6 +1053,84 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
     // accountDidのハッシュコードを使用してカラーを決定
     final index = accountDid.hashCode.abs() % colors.length;
     return colors[index];
+  }
+
+  /// コンパクトなアカウントアバターを構築（アイキャッチとして適切なサイズ）
+  Widget _buildCompactAccountAvatar(Deck deck, {bool isUltraCompact = false}) {
+    final allAccounts = ref.watch(availableAccountsProvider);
+    final account = deck.accountDid != null
+        ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
+        : null;
+
+    // アイキャッチとして少し大きめに調整
+    final radius = isUltraCompact ? 10.0 : 12.0;
+    final fontSize = isUltraCompact ? 10.0 : 12.0;
+    final iconSize = isUltraCompact ? 12.0 : 14.0;
+
+    if (account != null) {
+      if (account.avatar != null) {
+        return CircleAvatar(
+          radius: radius,
+          backgroundImage: NetworkImage(account.avatar!),
+        );
+      } else {
+        return CircleAvatar(
+          radius: radius,
+          backgroundColor: _getAccountColor(account.did),
+          child: Text(
+            account.displayName?.substring(0, 1).toUpperCase() ?? 
+            account.handle.substring(0, 1).toUpperCase(),
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        );
+      }
+    } else if (deck.isCrossAccount) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        child: Icon(
+          Icons.group,
+          size: iconSize,
+          color: Colors.white,
+        ),
+      );
+    }
+    
+    return const SizedBox.shrink();
+  }
+
+  /// アカウント情報があるかチェック
+  bool _hasAccountInfo(Deck deck) {
+    if (deck.isCrossAccount) return true;
+    
+    final allAccounts = ref.watch(availableAccountsProvider);
+    final account = deck.accountDid != null
+        ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
+        : null;
+    
+    return account != null;
+  }
+
+  /// コンパクトなデッキラベルを構築
+  String _buildCompactDeckLabel(Deck deck) {
+    final allAccounts = ref.watch(availableAccountsProvider);
+    final account = deck.accountDid != null
+        ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
+        : null;
+
+    final deckTypeName = _getDeckTypeName(deck.deckType);
+    
+    if (account != null) {
+      return '$deckTypeName • @${account.handle}';
+    } else if (deck.isCrossAccount) {
+      return '$deckTypeName • マルチアカウント';
+    } else {
+      return deckTypeName;
+    }
   }
 
 }

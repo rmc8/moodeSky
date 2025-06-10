@@ -14,6 +14,10 @@ class AppThemes {
   static const Color sunsetOrangeLight = Color(0xFFFF8A65); // Material Deep Orange 300
   static const Color sunsetOrangeDark = Color(0xFFFF5722); // Material Deep Orange 500
 
+  /// アクション用カラー
+  static const Color repostGreen = Color(0xFF4CAF50); // Material Green 500
+  static const Color likeRed = Color(0xFFF44336); // Material Red 500
+
   /// ライトテーマ - 空の青をアクセントに
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
@@ -276,11 +280,11 @@ class PostItemStyle {
     );
   }
   
-  /// ポストアイテムのContainer
+  /// ポストアイテムのContainer（下ボーダーのみ統一）
   Widget buildPostContainer({
     required Widget child,
-    bool showTopBorder = true,
-    bool showBottomBorder = true,
+    bool showTopBorder = false, // 非推奨：後方互換のため残す
+    bool showBottomBorder = true, // 常に下ボーダーを表示
   }) {
     return Container(
       width: double.infinity,
@@ -289,9 +293,7 @@ class PostItemStyle {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
-          top: showTopBorder 
-              ? BorderSide(color: Theme.of(context).colorScheme.outline, width: 0.5)
-              : BorderSide.none,
+          // 上ボーダーは廃止（重複による太線を防ぐ）
           bottom: showBottomBorder 
               ? BorderSide(color: Theme.of(context).colorScheme.outline, width: 0.5)
               : BorderSide.none,
@@ -305,8 +307,8 @@ class PostItemStyle {
   static Widget buildPostContainerStatic({
     required BuildContext context,
     required Widget child,
-    bool showTopBorder = true,
-    bool showBottomBorder = true,
+    bool showTopBorder = false, // 非推奨：後方互換のため残す
+    bool showBottomBorder = true, // 常に下ボーダーを表示
   }) {
     return PostItemStyle(context).buildPostContainer(
       child: child,
@@ -314,4 +316,13 @@ class PostItemStyle {
       showBottomBorder: showBottomBorder,
     );
   }
+}
+
+/// アクション用カラーのエクステンション
+extension AppActionColors on ColorScheme {
+  /// リポスト用の緑色
+  Color get repostColor => AppThemes.repostGreen;
+  
+  /// いいね用の赤色
+  Color get likeColor => AppThemes.likeRed;
 }

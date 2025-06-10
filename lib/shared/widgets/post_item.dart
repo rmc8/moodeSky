@@ -133,7 +133,7 @@ class PostItem extends StatelessWidget {
                   icon: Icons.repeat,
                   count: repostCount,
                   isActive: isReposted,
-                  activeColor: Theme.of(context).colorScheme.primary,
+                  activeColor: Theme.of(context).colorScheme.repostColor,
                   onTap: onRepost,
                 ),
                 
@@ -145,7 +145,7 @@ class PostItem extends StatelessWidget {
                   icon: isLiked ? Icons.favorite : Icons.favorite_border,
                   count: likeCount,
                   isActive: isLiked,
-                  activeColor: Colors.red,
+                  activeColor: Theme.of(context).colorScheme.likeColor,
                   onTap: onLike,
                 ),
                 
@@ -260,9 +260,6 @@ class PostListDemo extends ConsumerWidget {
     // テーマ変更を監視して再描画をトリガー
     ref.watch(currentThemeModeProvider);
     
-    // PostItemStyleのインスタンスを作成（最新のコンテキストで）
-    final postStyle = PostItemStyle(context);
-    
     final demoPosts = [
       PostItem(
         authorName: 'MoodeSky Dev',
@@ -312,12 +309,10 @@ class PostListDemo extends ConsumerWidget {
         return Consumer(
           builder: (context, ref, child) {
             // テーマ変更を確実に検知
-            final currentTheme = ref.watch(currentThemeModeProvider);
-            final brightness = Theme.of(context).brightness;
+            ref.watch(currentThemeModeProvider);
             final itemPostStyle = PostItemStyle(context);
             
             return itemPostStyle.buildPostContainer(
-              showTopBorder: index > 0, // 最初のアイテムは上ボーダーなし
               child: InkWell(
                 onTap: post.onTap,
                 child: Column(
@@ -406,7 +401,7 @@ class PostListDemo extends ConsumerWidget {
                       icon: Icons.repeat,
                       count: post.repostCount,
                       isActive: post.isReposted,
-                      activeColor: Theme.of(context).colorScheme.primary,
+                      activeColor: Theme.of(context).colorScheme.repostColor,
                       onTap: post.onRepost,
                     ),
                     
@@ -418,7 +413,7 @@ class PostListDemo extends ConsumerWidget {
                       icon: post.isLiked ? Icons.favorite : Icons.favorite_border,
                       count: post.likeCount,
                       isActive: post.isLiked,
-                      activeColor: Colors.red,
+                      activeColor: Theme.of(context).colorScheme.likeColor,
                       onTap: post.onLike,
                     ),
                     

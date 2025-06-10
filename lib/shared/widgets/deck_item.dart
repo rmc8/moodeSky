@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
+import 'package:moodesky/core/theme/app_themes.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 
 /// デッキアイテムの基本レイアウト - PostItemと統一されたデザイン
@@ -170,13 +171,13 @@ class NotificationItem extends StatelessWidget {
       case 'like':
         return (
           Icons.favorite,
-          Colors.red,
+          Theme.of(context).colorScheme.likeColor,
           '${AppLocalizations.of(context).notificationLike}${postContent != null ? '\n"$postContent"' : ''}',
         );
       case 'repost':
         return (
           Icons.repeat,
-          Theme.of(context).colorScheme.primary,
+          Theme.of(context).colorScheme.repostColor,
           '${AppLocalizations.of(context).notificationRepost}${postContent != null ? '\n"$postContent"' : ''}',
         );
       case 'follow':
@@ -290,7 +291,7 @@ class ProfilePostItem extends StatelessWidget {
           icon: Icons.repeat,
           count: repostCount,
           isActive: isReposted,
-          activeColor: Theme.of(context).colorScheme.primary,
+          activeColor: Theme.of(context).colorScheme.repostColor,
           onTap: onRepost,
         ),
         _buildActionButton(
@@ -298,7 +299,7 @@ class ProfilePostItem extends StatelessWidget {
           icon: isLiked ? Icons.favorite : Icons.favorite_border,
           count: likeCount,
           isActive: isLiked,
-          activeColor: Colors.red,
+          activeColor: Theme.of(context).colorScheme.likeColor,
           onTap: onLike,
         ),
       ],
