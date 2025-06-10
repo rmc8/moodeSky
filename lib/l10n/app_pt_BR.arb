@@ -130,5 +130,8 @@
   "timeHours": "{hours}h",
   "timeDays": "{days}d",
   "numberThousandSuffix": "mil",
-  "numberMillionSuffix": "M"
+  "numberMillionSuffix": "M",
+  "multiAccount": "Multi Conta",
+  "deckOptions": "Opções do Deck",
+  "deckTypeCustom": "Personalizado"
 }

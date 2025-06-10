@@ -436,4 +436,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get numberMillionSuffix => 'M';
+
+  @override
+  String get multiAccount => 'Multi Account';
+
+  @override
+  String get deckOptions => 'Deck Options';
+
+  @override
+  String get deckTypeCustom => 'Custom';
 }

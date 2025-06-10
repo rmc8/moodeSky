@@ -331,7 +331,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              'マルチアカウント', // TODO: 多言語化が必要な場合はAppLocalizations.of(context)を使用
+                              AppLocalizations.of(context).multiAccount,
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 fontSize: 10,
                                 color: Theme.of(
@@ -436,7 +436,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                       // TODO: Show deck options
                     },
                     padding: const EdgeInsets.all(8),
-                    tooltip: 'デッキオプション',
+                    tooltip: AppLocalizations.of(context).deckOptions,
                   ),
                 ),
               ],
@@ -696,7 +696,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                       // TODO: Show deck options
                     },
                     padding: const EdgeInsets.all(6),
-                    tooltip: 'デッキオプション',
+                    tooltip: AppLocalizations.of(context).deckOptions,
                   ),
                 ),
               ],
@@ -1013,27 +1013,27 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   String _getDeckTypeName(String deckType) {
     switch (deckType) {
       case 'home':
-        return 'ホーム';
+        return AppLocalizations.of(context).deckTypeHome;
       case 'notifications':
-        return '通知';
+        return AppLocalizations.of(context).deckTypeNotifications;
       case 'search':
-        return '検索';
+        return AppLocalizations.of(context).deckTypeSearch;
       case 'list':
-        return 'リスト';
+        return AppLocalizations.of(context).deckTypeList;
       case 'profile':
-        return 'プロフィール';
+        return AppLocalizations.of(context).deckTypeProfile;
       case 'thread':
-        return 'スレッド';
+        return AppLocalizations.of(context).deckTypeThread;
       case 'custom_feed':
-        return 'カスタムフィード';
+        return AppLocalizations.of(context).deckTypeCustomFeed;
       case 'local':
-        return 'ローカル';
+        return AppLocalizations.of(context).deckTypeLocal;
       case 'hashtag':
-        return 'ハッシュタグ';
+        return AppLocalizations.of(context).deckTypeHashtag;
       case 'mentions':
-        return 'メンション';
+        return AppLocalizations.of(context).deckTypeMentions;
       default:
-        return 'カスタム';
+        return AppLocalizations.of(context).deckTypeCustom;
     }
   }
 
@@ -1127,7 +1127,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
     if (account != null) {
       return '$deckTypeName • @${account.handle}';
     } else if (deck.isCrossAccount) {
-      return '$deckTypeName • マルチアカウント';
+      return '$deckTypeName • ${AppLocalizations.of(context).multiAccount}';
     } else {
       return deckTypeName;
     }

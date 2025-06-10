@@ -130,5 +130,8 @@
   "timeHours": "{hours}時間",
   "timeDays": "{days}日",
   "numberThousandSuffix": "K",
-  "numberMillionSuffix": "M"
+  "numberMillionSuffix": "M",
+  "multiAccount": "マルチアカウント",
+  "deckOptions": "デッキオプション",
+  "deckTypeCustom": "カスタム"
 }

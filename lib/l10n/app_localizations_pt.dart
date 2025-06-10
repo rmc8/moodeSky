@@ -436,6 +436,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get numberMillionSuffix => 'M';
+
+  @override
+  String get multiAccount => 'Multi Conta';
+
+  @override
+  String get deckOptions => 'Opções do Deck';
+
+  @override
+  String get deckTypeCustom => 'Personalizado';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -870,4 +879,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get numberMillionSuffix => 'M';
+
+  @override
+  String get multiAccount => 'Multi Conta';
+
+  @override
+  String get deckOptions => 'Opções do Deck';
+
+  @override
+  String get deckTypeCustom => 'Personalizado';
 }

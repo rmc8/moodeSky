@@ -706,5 +706,20 @@
   "numberMillionSuffix": "M",
   "@numberMillionSuffix": {
     "description": "Suffix for numbers in millions (e.g., 1.5M)"
+  },
+  
+  "multiAccount": "Multi Account",
+  "@multiAccount": {
+    "description": "Multi account indicator"
+  },
+  
+  "deckOptions": "Deck Options",
+  "@deckOptions": {
+    "description": "Tooltip for deck options menu"
+  },
+  
+  "deckTypeCustom": "Custom",
+  "@deckTypeCustom": {
+    "description": "Custom deck type"
   }
 }

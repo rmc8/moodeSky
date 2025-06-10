@@ -131,5 +131,8 @@
   "timeHours": "{hours}시간",
   "timeDays": "{days}일",
   "numberThousandSuffix": "천",
-  "numberMillionSuffix": "백만"
+  "numberMillionSuffix": "백만",
+  "multiAccount": "멀티 계정",
+  "deckOptions": "덱 옵션",
+  "deckTypeCustom": "커스텀"
 }

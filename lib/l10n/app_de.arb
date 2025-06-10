@@ -130,5 +130,8 @@
   "timeHours": "{hours}h",
   "timeDays": "{days}T",
   "numberThousandSuffix": "T",
-  "numberMillionSuffix": "M"
+  "numberMillionSuffix": "M",
+  "multiAccount": "Multi-Konto",
+  "deckOptions": "Deck-Optionen",
+  "deckTypeCustom": "Benutzerdefiniert"
 }

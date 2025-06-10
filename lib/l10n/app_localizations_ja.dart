@@ -423,4 +423,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get numberMillionSuffix => 'M';
+
+  @override
+  String get multiAccount => 'マルチアカウント';
+
+  @override
+  String get deckOptions => 'デッキオプション';
+
+  @override
+  String get deckTypeCustom => 'カスタム';
 }

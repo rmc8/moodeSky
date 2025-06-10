@@ -884,6 +884,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'M'**
   String get numberMillionSuffix;
+
+  /// Multi account indicator
+  ///
+  /// In en, this message translates to:
+  /// **'Multi Account'**
+  String get multiAccount;
+
+  /// Tooltip for deck options menu
+  ///
+  /// In en, this message translates to:
+  /// **'Deck Options'**
+  String get deckOptions;
+
+  /// Custom deck type
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get deckTypeCustom;
 }
 
 class _AppLocalizationsDelegate

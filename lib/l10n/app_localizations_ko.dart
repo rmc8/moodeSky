@@ -422,4 +422,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get numberMillionSuffix => '백만';
+
+  @override
+  String get multiAccount => '멀티 계정';
+
+  @override
+  String get deckOptions => '덱 옵션';
+
+  @override
+  String get deckTypeCustom => '커스텀';
 }

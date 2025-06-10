@@ -438,4 +438,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get numberMillionSuffix => 'M';
+
+  @override
+  String get multiAccount => 'Multi-Konto';
+
+  @override
+  String get deckOptions => 'Deck-Optionen';
+
+  @override
+  String get deckTypeCustom => 'Benutzerdefiniert';
 }
