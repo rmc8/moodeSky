@@ -77,7 +77,7 @@ class PostItem extends StatelessWidget {
                       Text(
                         authorName,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -85,7 +85,9 @@ class PostItem extends StatelessWidget {
                       Text(
                         '@$authorHandle',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: Theme.of(context).brightness == Brightness.light 
+                              ? const Color(0xFF424242) 
+                              : const Color(0xFFCCCCCC),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -98,7 +100,9 @@ class PostItem extends StatelessWidget {
                 Text(
                   _formatTimestamp(timestamp),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).brightness == Brightness.light 
+                        ? const Color(0xFF424242) 
+                        : const Color(0xFFCCCCCC),
                   ),
                 ),
               ],
@@ -109,7 +113,12 @@ class PostItem extends StatelessWidget {
             // ポスト内容
             Text(
               content,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context).brightness == Brightness.light 
+                    ? const Color(0xFF222222) // 濃いグレー
+                    : const Color(0xFFF5F5F5), // 明るい白
+                fontWeight: FontWeight.w500,
+              ),
             ),
             
             const SizedBox(height: 16),
@@ -155,7 +164,9 @@ class PostItem extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.more_horiz_rounded,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).brightness == Brightness.light 
+                        ? const Color(0xFF424242) 
+                        : const Color(0xFFCCCCCC),
                   ),
                   onPressed: () {
                     // TODO: メニューを表示
@@ -178,7 +189,9 @@ class PostItem extends StatelessWidget {
   }) {
     final color = isActive && activeColor != null
         ? activeColor
-        : Theme.of(context).colorScheme.onSurfaceVariant;
+        : (Theme.of(context).brightness == Brightness.light 
+            ? const Color(0xFF424242) 
+            : const Color(0xFFCCCCCC));
     
     return InkWell(
       onTap: onTap,
@@ -345,7 +358,7 @@ class PostListDemo extends ConsumerWidget {
                           Text(
                             post.authorName,
                             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -353,7 +366,9 @@ class PostListDemo extends ConsumerWidget {
                           Text(
                             '@${post.authorHandle}',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context).brightness == Brightness.light 
+                                  ? const Color(0xFF424242) 
+                                  : const Color(0xFFCCCCCC),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -366,7 +381,9 @@ class PostListDemo extends ConsumerWidget {
                     Text(
                       _formatTimestampDemo(post.timestamp),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).brightness == Brightness.light 
+                            ? const Color(0xFF424242) 
+                            : const Color(0xFFCCCCCC),
                       ),
                     ),
                   ],
@@ -377,7 +394,12 @@ class PostListDemo extends ConsumerWidget {
                 // ポスト内容
                 Text(
                   post.content,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).brightness == Brightness.light 
+                        ? const Color(0xFF222222) // 濃いグレー
+                        : const Color(0xFFF5F5F5), // 明るい白
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 
                 const SizedBox(height: 16),
@@ -423,7 +445,9 @@ class PostListDemo extends ConsumerWidget {
                     IconButton(
                       icon: Icon(
                         Icons.more_horiz_rounded,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).brightness == Brightness.light 
+                            ? const Color(0xFF424242) 
+                            : const Color(0xFFCCCCCC),
                       ),
                       onPressed: () {
                         // TODO: メニューを表示
@@ -451,7 +475,9 @@ class PostListDemo extends ConsumerWidget {
   }) {
     final color = isActive && activeColor != null
         ? activeColor
-        : Theme.of(context).colorScheme.onSurfaceVariant;
+        : (Theme.of(context).brightness == Brightness.light 
+            ? const Color(0xFF424242) 
+            : const Color(0xFFCCCCCC));
     
     return InkWell(
       onTap: onTap,

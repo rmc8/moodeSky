@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/locale_provider.dart';
+import 'package:moodesky/core/theme/app_fonts.dart';
 import 'package:moodesky/core/theme/app_themes.dart';
 
 part 'theme_provider.g.dart';
@@ -104,7 +105,7 @@ class ThemeNotifier extends _$ThemeNotifier {
 
 /// 現在のテーマモードを簡単に取得するためのプロバイダー
 @riverpod
-AppThemeMode? currentThemeMode(CurrentThemeModeRef ref) {
+AppThemeMode? currentThemeMode(AutoDisposeProviderRef<AppThemeMode?> ref) {
   final asyncThemeMode = ref.watch(themeNotifierProvider);
   return asyncThemeMode.maybeWhen(
     data: (themeMode) => themeMode,
@@ -114,19 +115,51 @@ AppThemeMode? currentThemeMode(CurrentThemeModeRef ref) {
 
 /// Flutter ThemeModeを取得するプロバイダー
 @riverpod
-ThemeMode flutterThemeMode(FlutterThemeModeRef ref) {
+ThemeMode flutterThemeMode(AutoDisposeProviderRef<ThemeMode> ref) {
   final themeMode = ref.watch(currentThemeModeProvider);
   return themeMode?.flutterThemeMode ?? ThemeMode.system;
 }
 
-/// ライトテーマを提供するプロバイダー
+/// ライトテーマを提供するプロバイダー（ロケールに応じたフォントを適用）
 @riverpod
-ThemeData lightTheme(LightThemeRef ref) {
-  return AppThemes.lightTheme;
+ThemeData lightTheme(AutoDisposeProviderRef<ThemeData> ref) {
+  final locale = ref.watch(currentLocaleProvider);
+  return AppThemes.lightTheme.withLocaleFonts(locale);
 }
 
-/// ダークテーマを提供するプロバイダー
+/// ダークテーマを提供するプロバイダー（ロケールに応じたフォントを適用）
 @riverpod
-ThemeData darkTheme(DarkThemeRef ref) {
-  return AppThemes.darkTheme;
+ThemeData darkTheme(AutoDisposeProviderRef<ThemeData> ref) {
+  final locale = ref.watch(currentLocaleProvider);
+  return AppThemes.darkTheme.withLocaleFonts(locale);
+}
+
+/// 現在のフォントファミリーを取得するプロバイダー
+@riverpod
+String currentFontFamily(AutoDisposeProviderRef<String> ref) {
+  final locale = ref.watch(currentLocaleProvider);
+  return AppFonts.getFontFamilyForLocale(locale);
+}
+
+/// モノスペースフォント用のTextStyleを提供するプロバイダー
+@riverpod
+TextStyle monospaceTextStyle(
+  AutoDisposeProviderRef<TextStyle> ref, {
+  double fontSize = 14,
+  FontWeight fontWeight = FontWeight.w400,
+  Color? color,
+}) {
+  return AppFonts.getMonospaceStyle(
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: color,
+  );
+}
+
+/// 言語に応じて調整されたフォントウェイトを取得するプロバイダー
+@riverpod
+FontWeight adjustedFontWeight(AutoDisposeProviderRef<FontWeight> ref, FontWeight baseWeight) {
+  final locale = ref.watch(currentLocaleProvider);
+  final languageCode = locale?.languageCode ?? 'en';
+  return AppFonts.adjustFontWeightForCJK(baseWeight, languageCode);
 }

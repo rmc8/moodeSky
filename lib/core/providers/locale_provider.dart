@@ -91,7 +91,7 @@ class SupportedLocales {
 
 /// SharedPreferencesから言語設定を読み込むProvider
 @riverpod
-Future<SharedPreferences> sharedPreferences(SharedPreferencesRef ref) async {
+Future<SharedPreferences> sharedPreferences(AutoDisposeFutureProviderRef<SharedPreferences> ref) async {
   return await SharedPreferences.getInstance();
 }
 
@@ -151,7 +151,7 @@ class LocaleNotifier extends _$LocaleNotifier {
 
 /// 現在のロケールを簡単に取得するためのProvider
 @riverpod
-Locale? currentLocale(CurrentLocaleRef ref) {
+Locale? currentLocale(AutoDisposeProviderRef<Locale?> ref) {
   final asyncLocale = ref.watch(localeNotifierProvider);
   return asyncLocale.maybeWhen(data: (locale) => locale, orElse: () => null);
 }

@@ -53,7 +53,7 @@ class DeckItem extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -61,7 +61,9 @@ class DeckItem extends StatelessWidget {
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).brightness == Brightness.light 
+                            ? const Color(0xFF424242) 
+                            : const Color(0xFFCCCCCC),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -75,7 +77,9 @@ class DeckItem extends StatelessWidget {
                 Text(
                   timestamp!,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).brightness == Brightness.light 
+                        ? const Color(0xFF424242) 
+                        : const Color(0xFFCCCCCC),
                   ),
                 ),
               if (trailing != null) trailing!,
@@ -85,7 +89,15 @@ class DeckItem extends StatelessWidget {
           const SizedBox(height: 12),
 
           // コンテンツ
-          Text(content, style: Theme.of(context).textTheme.bodyMedium),
+          Text(
+            content, 
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).brightness == Brightness.light 
+                  ? const Color(0xFF222222) 
+                  : const Color(0xFFF5F5F5),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
 
           if (actionButtons != null && actionButtons!.isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -103,7 +115,9 @@ class DeckItem extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.more_horiz,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).brightness == Brightness.light 
+                        ? const Color(0xFF424242) 
+                        : const Color(0xFFCCCCCC),
                   ),
                   onPressed: () {
                     // TODO: メニューを表示
@@ -317,7 +331,9 @@ class ProfilePostItem extends StatelessWidget {
   }) {
     final color = isActive && activeColor != null
         ? activeColor
-        : Theme.of(context).colorScheme.onSurfaceVariant;
+        : (Theme.of(context).brightness == Brightness.light 
+            ? const Color(0xFF424242) 
+            : const Color(0xFFCCCCCC));
 
     return InkWell(
       onTap: onTap,

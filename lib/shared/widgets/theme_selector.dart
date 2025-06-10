@@ -124,7 +124,10 @@ class ThemeSelector extends ConsumerWidget {
         Text(
           AppLocalizations.of(context)!.themeDescription,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            color: Theme.of(context).brightness == Brightness.light 
+                ? const Color(0xFF222222) 
+                : const Color(0xFFCCCCCC),
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],

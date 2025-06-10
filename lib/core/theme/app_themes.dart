@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+// Project imports:
+import 'package:moodesky/core/theme/app_fonts.dart';
+
 /// MoodeSkyアプリのテーマ定義
 class AppThemes {
   /// 空をイメージした爽やかな青（ライトテーマ用）
@@ -23,6 +26,34 @@ class AppThemes {
     useMaterial3: true,
     brightness: Brightness.light,
     
+    // テキストテーマ - 視認性向上のためフォントウェイトを1段階上げて調整
+    textTheme: const TextTheme(
+      // Display styles (w400 → w500)
+      displayLarge: TextStyle(fontSize: 57, fontWeight: FontWeight.w500, letterSpacing: -0.25, color: Color(0xFF1A1A1A)),
+      displayMedium: TextStyle(fontSize: 45, fontWeight: FontWeight.w500, color: Color(0xFF1A1A1A)),
+      displaySmall: TextStyle(fontSize: 36, fontWeight: FontWeight.w500, color: Color(0xFF1A1A1A)),
+      
+      // Headline styles (w500 → w600)
+      headlineLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A)),
+      headlineMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A)),
+      headlineSmall: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A)),
+      
+      // Title styles (w600 → w700)
+      titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A)),
+      titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.15, color: Color(0xFF1A1A1A)),
+      titleSmall: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0.1, color: Color(0xFF1A1A1A)),
+      
+      // Body styles - 視認性向上のためフォントウェイトを1段階上げて調整 (w400 → w500)
+      bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0.5, height: 1.6, color: Color(0xFF1A1A1A)),
+      bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: 0.25, height: 1.5, color: Color(0xFF2A2A2A)),
+      bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 0.4, height: 1.4, color: Color(0xFF424242)),
+      
+      // Label styles (w500 → w600)
+      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.1, color: Color(0xFF1A1A1A)),
+      labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5, color: Color(0xFF2A2A2A)),
+      labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5, color: Color(0xFF424242)),
+    ),
+    
     // カラースキーム
     colorScheme: ColorScheme.fromSeed(
       seedColor: skyBlue,
@@ -37,7 +68,7 @@ class AppThemes {
       surfaceContainer: const Color(0xFFF8F9FA),
       surfaceContainerHighest: const Color(0xFFE3F2FD),
       onSurface: const Color(0xFF1A1A1A),
-      onSurfaceVariant: const Color(0xFF616161),
+      onSurfaceVariant: const Color(0xFF424242), // より濃いグレーに変更（コントラスト向上）
       outline: const Color(0xFFE0E0E0),
       outlineVariant: const Color(0xFFF5F5F5),
     ),
@@ -68,10 +99,20 @@ class AppThemes {
       ),
     ),
     
-    // リストタイル
+    // リストタイル - 視認性向上のためテキストスタイルを調整
     listTileTheme: const ListTileThemeData(
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       horizontalTitleGap: 16,
+      titleTextStyle: TextStyle(
+        color: Color(0xFF1A1A1A),
+        fontWeight: FontWeight.w500,
+        fontSize: 16,
+      ),
+      subtitleTextStyle: TextStyle(
+        color: Color(0xFF333333),
+        fontWeight: FontWeight.w400,
+        fontSize: 14,
+      ),
     ),
     
     // 区切り線
@@ -114,6 +155,34 @@ class AppThemes {
     useMaterial3: true,
     brightness: Brightness.dark,
     
+    // テキストテーマ - 視認性向上のためフォントウェイトを1段階上げて調整
+    textTheme: const TextTheme(
+      // Display styles (w400 → w500)
+      displayLarge: TextStyle(fontSize: 57, fontWeight: FontWeight.w500, letterSpacing: -0.25, color: Color(0xFFF5F5F5)),
+      displayMedium: TextStyle(fontSize: 45, fontWeight: FontWeight.w500, color: Color(0xFFF5F5F5)),
+      displaySmall: TextStyle(fontSize: 36, fontWeight: FontWeight.w500, color: Color(0xFFF5F5F5)),
+      
+      // Headline styles (w500 → w600)
+      headlineLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w600, color: Color(0xFFF5F5F5)),
+      headlineMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: Color(0xFFF5F5F5)),
+      headlineSmall: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: Color(0xFFF5F5F5)),
+      
+      // Title styles (w600 → w700)
+      titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Color(0xFFF5F5F5)),
+      titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.15, color: Color(0xFFF5F5F5)),
+      titleSmall: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0.1, color: Color(0xFFF5F5F5)),
+      
+      // Body styles - 視認性向上のためフォントウェイトを1段階上げて調整 (w400 → w500)
+      bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0.5, height: 1.6, color: Color(0xFFF5F5F5)),
+      bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: 0.25, height: 1.5, color: Color(0xFFE0E0E0)),
+      bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 0.4, height: 1.4, color: Color(0xFFBDBDBD)),
+      
+      // Label styles (w500 → w600)
+      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.1, color: Color(0xFFF5F5F5)),
+      labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5, color: Color(0xFFE0E0E0)),
+      labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5, color: Color(0xFFBDBDBD)),
+    ),
+    
     // カラースキーム
     colorScheme: ColorScheme.fromSeed(
       seedColor: sunsetOrange,
@@ -127,8 +196,8 @@ class AppThemes {
       surface: const Color(0xFF121212),
       surfaceContainer: const Color(0xFF1E1E1E),
       surfaceContainerHighest: const Color(0xFF2D2D2D),
-      onSurface: const Color(0xFFE0E0E0),
-      onSurfaceVariant: const Color(0xFFBDBDBD),
+      onSurface: const Color(0xFFF5F5F5), // より明るい白に変更
+      onSurfaceVariant: const Color(0xFFCCCCCC), // より明るく高コントラストなグレーに変更
       outline: const Color(0xFF3D3D3D),
       outlineVariant: const Color(0xFF2D2D2D),
     ),
@@ -159,10 +228,20 @@ class AppThemes {
       ),
     ),
     
-    // リストタイル
+    // リストタイル - 視認性向上のためテキストスタイルを調整
     listTileTheme: const ListTileThemeData(
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       horizontalTitleGap: 16,
+      titleTextStyle: TextStyle(
+        color: Color(0xFFF5F5F5),
+        fontWeight: FontWeight.w500,
+        fontSize: 16,
+      ),
+      subtitleTextStyle: TextStyle(
+        color: Color(0xFFCCCCCC),
+        fontWeight: FontWeight.w400,
+        fontSize: 14,
+      ),
     ),
     
     // 区切り線

@@ -66,9 +66,22 @@ class SettingsScreen extends ConsumerWidget {
 
                   ListTile(
                     leading: const Icon(Icons.manage_accounts),
-                    title: Text(AppLocalizations.of(context)!.manageAccounts),
+                    title: Text(
+                      AppLocalizations.of(context)!.manageAccounts,
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.light 
+                            ? const Color(0xFF1A1A1A) 
+                            : const Color(0xFFF5F5F5),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     subtitle: Text(
                       AppLocalizations.of(context)!.manageAccountsDescription,
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.light 
+                            ? const Color(0xFF333333) 
+                            : const Color(0xFFCCCCCC),
+                      ),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
@@ -94,10 +107,16 @@ class SettingsScreen extends ConsumerWidget {
                       AppLocalizations.of(context)!.signOutAll,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.error,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     subtitle: Text(
                       AppLocalizations.of(context)!.signOutAllDescription,
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.light 
+                            ? const Color(0xFF333333) 
+                            : const Color(0xFFCCCCCC),
+                      ),
                     ),
                     onTap: () => _showSignOutConfirmation(context, ref),
                   ),
@@ -125,9 +144,22 @@ class SettingsScreen extends ConsumerWidget {
 
                   ListTile(
                     leading: const Icon(Icons.info),
-                    title: Text(AppLocalizations.of(context)!.aboutApp),
+                    title: Text(
+                      AppLocalizations.of(context)!.aboutApp,
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.light 
+                            ? const Color(0xFF1A1A1A) 
+                            : const Color(0xFFF5F5F5),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     subtitle: Text(
                       AppLocalizations.of(context)!.appVersion('1.0.0'),
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.light 
+                            ? const Color(0xFF333333) 
+                            : const Color(0xFFCCCCCC),
+                      ),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
@@ -139,7 +171,15 @@ class SettingsScreen extends ConsumerWidget {
 
                   ListTile(
                     leading: const Icon(Icons.privacy_tip),
-                    title: Text(AppLocalizations.of(context)!.privacyPolicy),
+                    title: Text(
+                      AppLocalizations.of(context)!.privacyPolicy,
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.light 
+                            ? const Color(0xFF1A1A1A) 
+                            : const Color(0xFFF5F5F5),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     trailing: const Icon(Icons.open_in_new),
                     onTap: () {
                       // TODO: Open privacy policy
@@ -155,7 +195,15 @@ class SettingsScreen extends ConsumerWidget {
 
                   ListTile(
                     leading: const Icon(Icons.description),
-                    title: Text(AppLocalizations.of(context)!.termsOfService),
+                    title: Text(
+                      AppLocalizations.of(context)!.termsOfService,
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.light 
+                            ? const Color(0xFF1A1A1A) 
+                            : const Color(0xFFF5F5F5),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     trailing: const Icon(Icons.open_in_new),
                     onTap: () {
                       // TODO: Open terms of service
