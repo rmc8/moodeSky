@@ -186,6 +186,22 @@ class AppLocalizationsPt extends AppLocalizations {
       'Adicionar, remover ou alternar entre contas';
 
   @override
+  String get refreshProfiles => 'Atualizar Perfis';
+
+  @override
+  String get refreshProfilesDescription =>
+      'Atualizar informações de perfil e avatares para todas as contas';
+
+  @override
+  String get refreshingProfiles => 'Atualizando informações de perfil...';
+
+  @override
+  String get profilesRefreshed => 'Informações de perfil foram atualizadas';
+
+  @override
+  String get refreshProfilesError => 'Falha ao atualizar perfis';
+
+  @override
   String get signOutAllDescription =>
       'Sair de todas as contas e retornar à tela de login';
 
@@ -627,6 +643,22 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get manageAccountsDescription =>
       'Adicionar, remover ou alternar entre contas';
+
+  @override
+  String get refreshProfiles => 'Atualizar Perfis';
+
+  @override
+  String get refreshProfilesDescription =>
+      'Atualizar informações de perfil e avatares para todas as contas';
+
+  @override
+  String get refreshingProfiles => 'Atualizando informações de perfil...';
+
+  @override
+  String get profilesRefreshed => 'Informações de perfil foram atualizadas';
+
+  @override
+  String get refreshProfilesError => 'Falha ao atualizar perfis';
 
   @override
   String get signOutAllDescription =>

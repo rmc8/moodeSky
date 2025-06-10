@@ -178,6 +178,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get manageAccountsDescription => '계정 추가, 삭제, 전환';
 
   @override
+  String get refreshProfiles => '프로필 새로고침';
+
+  @override
+  String get refreshProfilesDescription => '모든 계정의 프로필 정보와 아바타 업데이트';
+
+  @override
+  String get refreshingProfiles => '프로필 정보를 업데이트하는 중...';
+
+  @override
+  String get profilesRefreshed => '프로필 정보가 업데이트되었습니다';
+
+  @override
+  String get refreshProfilesError => '프로필 업데이트에 실패했습니다';
+
+  @override
   String get signOutAllDescription => '모든 계정에서 로그아웃하고 로그인 화면으로 돌아갑니다';
 
   @override

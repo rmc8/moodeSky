@@ -283,6 +283,31 @@
     "description": "Description for manage accounts option"
   },
   
+  "refreshProfiles": "Refresh Profiles",
+  "@refreshProfiles": {
+    "description": "Label for refresh profiles option"
+  },
+  
+  "refreshProfilesDescription": "Update profile information and avatars for all accounts",
+  "@refreshProfilesDescription": {
+    "description": "Description for refresh profiles option"
+  },
+  
+  "refreshingProfiles": "Updating profile information...",
+  "@refreshingProfiles": {
+    "description": "Message shown while refreshing profiles"
+  },
+  
+  "profilesRefreshed": "Profile information has been updated",
+  "@profilesRefreshed": {
+    "description": "Success message after profiles are refreshed"
+  },
+  
+  "refreshProfilesError": "Failed to update profiles",
+  "@refreshProfilesError": {
+    "description": "Error message when profile refresh fails"
+  },
+  
   "signOutAllDescription": "Sign out of all accounts and return to login screen",
   "@signOutAllDescription": {
     "description": "Description for sign out all option"

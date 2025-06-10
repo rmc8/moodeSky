@@ -187,6 +187,22 @@ class AppLocalizationsDe extends AppLocalizations {
       'Konten hinzufügen, entfernen oder wechseln';
 
   @override
+  String get refreshProfiles => 'Profile aktualisieren';
+
+  @override
+  String get refreshProfilesDescription =>
+      'Profilinformationen und Avatare für alle Konten aktualisieren';
+
+  @override
+  String get refreshingProfiles => 'Profilinformationen werden aktualisiert...';
+
+  @override
+  String get profilesRefreshed => 'Profilinformationen wurden aktualisiert';
+
+  @override
+  String get refreshProfilesError => 'Fehler beim Aktualisieren der Profile';
+
+  @override
   String get signOutAllDescription =>
       'Von allen Konten abmelden und zum Anmeldebildschirm zurückkehren';
 

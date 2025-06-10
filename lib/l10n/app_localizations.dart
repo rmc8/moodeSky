@@ -429,6 +429,36 @@ abstract class AppLocalizations {
   /// **'Add, remove, or switch between accounts'**
   String get manageAccountsDescription;
 
+  /// Label for refresh profiles option
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Profiles'**
+  String get refreshProfiles;
+
+  /// Description for refresh profiles option
+  ///
+  /// In en, this message translates to:
+  /// **'Update profile information and avatars for all accounts'**
+  String get refreshProfilesDescription;
+
+  /// Message shown while refreshing profiles
+  ///
+  /// In en, this message translates to:
+  /// **'Updating profile information...'**
+  String get refreshingProfiles;
+
+  /// Success message after profiles are refreshed
+  ///
+  /// In en, this message translates to:
+  /// **'Profile information has been updated'**
+  String get profilesRefreshed;
+
+  /// Error message when profile refresh fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update profiles'**
+  String get refreshProfilesError;
+
   /// Description for sign out all option
   ///
   /// In en, this message translates to:

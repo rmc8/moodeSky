@@ -86,6 +86,18 @@ class AuthNotifier extends _$AuthNotifier {
       }
 
       final accounts = await _blueskyService.getAllAccounts();
+      
+      // バックグラウンドでプロフィール情報を更新（アプリ起動を妨げない）
+      Future.microtask(() async {
+        try {
+          await _blueskyService.refreshAllAccountProfiles();
+          // 更新後に状態を再更新
+          await _updateAuthenticatedState();
+        } catch (e) {
+          print('Background profile refresh failed: $e');
+        }
+      });
+      
       final profiles = accounts
           .map(
             (account) => UserProfile(
@@ -128,6 +140,9 @@ class AuthNotifier extends _$AuthNotifier {
 
       result.when(
         success: (session, accountDid) async {
+          // プロフィール情報を取得・更新
+          await _fetchAndUpdateProfileInfo(accountDid);
+          // 認証状態を更新
           await _updateAuthenticatedState();
         },
         failure: (error, errorDescription, errorType) {
@@ -187,6 +202,9 @@ class AuthNotifier extends _$AuthNotifier {
 
       result.when(
         success: (session, accountDid) async {
+          // プロフィール情報を取得・更新
+          await _fetchAndUpdateProfileInfo(accountDid);
+          // 認証状態を更新
           await _updateAuthenticatedState();
         },
         failure: (error, errorDescription, errorType) {
@@ -352,8 +370,12 @@ class AuthNotifier extends _$AuthNotifier {
   // Fetch and update profile information for a specific account
   Future<void> _fetchAndUpdateProfileInfo(String accountDid) async {
     try {
-      final profileInfo = await _blueskyService.getProfileInfo(accountDid);
+      // 最新のプロフィール情報をAPIから取得（現在はモック実装）
+      final profileInfo = await _blueskyService.fetchProfileFromAPI(accountDid);
       if (profileInfo != null) {
+        print('Fetched profile for ${profileInfo.handle}: avatar=${profileInfo.avatar}');
+        
+        // データベースに最新の情報を保存
         await _blueskyService.updateAccountProfile(
           accountDid: accountDid,
           displayName: profileInfo.displayName,
@@ -361,11 +383,23 @@ class AuthNotifier extends _$AuthNotifier {
           avatar: profileInfo.avatar,
           banner: profileInfo.banner,
         );
+        
+        print('Profile updated in database for ${profileInfo.handle}');
       }
     } catch (e) {
-      // Profile fetch failed, but account creation succeeded
-      // Continue without profile information
+      // プロフィール取得に失敗した場合でも、アカウント作成は成功とみなす
       print('Failed to fetch profile info for $accountDid: $e');
+    }
+  }
+
+  // 全アカウントのプロフィール情報を更新する
+  Future<void> refreshAllProfiles() async {
+    try {
+      await _blueskyService.refreshAllAccountProfiles();
+      // 状態を更新してUIに反映
+      await _updateAuthenticatedState();
+    } catch (e) {
+      print('Failed to refresh all profiles: $e');
     }
   }
 

@@ -186,6 +186,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add, remove, or switch between accounts';
 
   @override
+  String get refreshProfiles => 'Refresh Profiles';
+
+  @override
+  String get refreshProfilesDescription =>
+      'Update profile information and avatars for all accounts';
+
+  @override
+  String get refreshingProfiles => 'Updating profile information...';
+
+  @override
+  String get profilesRefreshed => 'Profile information has been updated';
+
+  @override
+  String get refreshProfilesError => 'Failed to update profiles';
+
+  @override
   String get signOutAllDescription =>
       'Sign out of all accounts and return to login screen';
 

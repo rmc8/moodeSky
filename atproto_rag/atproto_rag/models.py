@@ -45,17 +45,17 @@ class DocumentChunk(BaseModel):
 
 
 class VectorizationConfig(BaseModel):
-    """Configuration for vectorization process with ChromaDB + OpenAI optimizations"""
-    # ChromaDB configuration (replaces Qdrant)
-    chromadb_path: str = Field(default="./atproto_vector_db", description="Path to ChromaDB storage")
+    """Configuration for vectorization process with Qdrant"""
+    # Qdrant configuration
+    qdrant_url: str = Field(default="http://localhost:6333", description="Qdrant server URL")
     collection_name: str = Field(default="atproto-dart")
     
-    # OpenAI embeddings configuration (replaces FastEmbed)
-    embedding_model: str = Field(default="text-embedding-3-small", description="OpenAI embedding model")
-    embedding_dimensions: int = Field(default=1536, description="OpenAI text-embedding-3-small dimensions")
+    # FastEmbed configuration
+    embedding_model: str = Field(default="BAAI/bge-small-en-v1.5", description="FastEmbed model")
+    embedding_dimensions: int = Field(default=384, description="BAAI/bge-small-en-v1.5 dimensions")
     
     # Performance optimization settings
-    batch_size: int = Field(default=1000, description="Batch size for embedding requests")
+    batch_size: int = Field(default=100, description="Batch size for embedding requests")
     max_doc_length: int = Field(default=1000)
     max_code_length: int = Field(default=1500)
     
@@ -63,12 +63,9 @@ class VectorizationConfig(BaseModel):
     include_tests: bool = Field(default=False)
     include_generated: bool = Field(default=False)
     
-    # Memory management (for M2 MacBook Air)
+    # Memory management
     max_memory_percent: int = Field(default=75, description="Maximum memory usage percentage")
-    store_batch_size: int = Field(default=500, description="Batch size for ChromaDB storage")
-    
-    # Legacy Qdrant compatibility (deprecated)
-    qdrant_url: Optional[str] = Field(default=None, description="Deprecated: Use chromadb_path instead")
+    store_batch_size: int = Field(default=100, description="Batch size for Qdrant storage")
 
 
 class RepositoryInfo(BaseModel):

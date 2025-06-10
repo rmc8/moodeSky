@@ -179,6 +179,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get manageAccountsDescription => 'アカウントの追加、削除、切り替え';
 
   @override
+  String get refreshProfiles => 'プロフィール更新';
+
+  @override
+  String get refreshProfilesDescription => 'すべてのアカウントのプロフィール情報とアバターを更新';
+
+  @override
+  String get refreshingProfiles => 'プロフィール情報を更新中...';
+
+  @override
+  String get profilesRefreshed => 'プロフィール情報が更新されました';
+
+  @override
+  String get refreshProfilesError => 'プロフィール更新に失敗しました';
+
+  @override
   String get signOutAllDescription => 'すべてのアカウントからサインアウトしてログイン画面に戻る';
 
   @override
