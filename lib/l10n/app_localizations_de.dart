@@ -9,7 +9,7 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
-  String get appTitle => 'MoodeSky';
+  String get appTitle => 'moodeSky';
 
   @override
   String get loginTitle => 'Anmelden';
@@ -107,7 +107,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get multiAccountInfo =>
-      'MoodeSky kann mehrere Bluesky-Konten gleichzeitig verwalten. Geben Sie Ihre neuen Kontoanmeldedaten ein.';
+      'moodeSky kann mehrere Bluesky-Konten gleichzeitig verwalten. Geben Sie Ihre neuen Kontoanmeldedaten ein.';
 
   @override
   String get newAccountInfo => 'Neues Konto hinzufügen';
@@ -194,7 +194,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get appInformation => 'App-Informationen';
 
   @override
-  String get aboutApp => 'Über MoodeSky';
+  String get aboutApp => 'Über moodeSky';
 
   @override
   String appVersion(String version) {
@@ -203,7 +203,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get aboutAppDescription =>
-      'MoodeSky ist ein moderner Bluesky-Client mit deck-basierter Benutzeroberfläche und Multi-Account-Unterstützung.';
+      'moodeSky ist ein moderner Bluesky-Client mit deck-basierter Benutzeroberfläche und Multi-Account-Unterstützung.';
 
   @override
   String get privacyPolicy => 'Datenschutzrichtlinie';
@@ -247,4 +247,195 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get themeSystemDescription =>
       'Automatisch den Systemdesign-Einstellungen folgen';
+
+  @override
+  String get homeTitle => 'Startseite';
+
+  @override
+  String get decksEmptyTitle => 'Keine Decks';
+
+  @override
+  String get decksEmptyDescription =>
+      'Fügen Sie Decks über die Schaltfläche \"Deck\" in der Navigationsleiste hinzu,\num Ihre Timeline anzuzeigen';
+
+  @override
+  String get addDeckButton => 'Deck hinzufügen';
+
+  @override
+  String get addDeckTooltip => 'Deck hinzufügen';
+
+  @override
+  String get composeTooltip => 'Neuen Beitrag erstellen';
+
+  @override
+  String get settingsTooltip => 'Einstellungen öffnen';
+
+  @override
+  String get homeNavigation => 'Startseite';
+
+  @override
+  String get notificationsNavigation => 'Benachrichtigungen';
+
+  @override
+  String get searchNavigation => 'Suche';
+
+  @override
+  String get profileNavigation => 'Profil';
+
+  @override
+  String get composeNavigation => 'Verfassen';
+
+  @override
+  String get deckNavigation => 'Decks';
+
+  @override
+  String get noLoggedInAccounts => 'Keine angemeldeten Konten';
+
+  @override
+  String get notificationLike => 'hat Ihren Beitrag geliked';
+
+  @override
+  String get notificationRepost => 'hat Ihren Beitrag repostet';
+
+  @override
+  String get notificationFollow => 'folgt Ihnen jetzt';
+
+  @override
+  String get notificationMention => 'hat Sie erwähnt';
+
+  @override
+  String get notificationReply => 'hat auf Ihren Beitrag geantwortet';
+
+  @override
+  String get notification => 'Benachrichtigung';
+
+  @override
+  String get followers => 'Follower';
+
+  @override
+  String get posts => ' Beiträge';
+
+  @override
+  String get trending => 'Trending';
+
+  @override
+  String get following => 'Folge ich';
+
+  @override
+  String get follow => 'Folgen';
+
+  @override
+  String get noProfileInfo => 'Keine Profilinformationen';
+
+  @override
+  String get sampleContent => 'Beispielinhalt';
+
+  @override
+  String hoursAgo(int hours) {
+    return 'vor $hours Stunden';
+  }
+
+  @override
+  String get closeDeckFeature => 'Deck-Schließfunktion ist in Vorbereitung';
+
+  @override
+  String get composeFunctionUnderDev =>
+      'Beitragserstellungsfunktion ist in Vorbereitung';
+
+  @override
+  String get notificationsFunctionUnderDev =>
+      'Benachrichtigungsfunktion ist in Vorbereitung';
+
+  @override
+  String get searchFunctionUnderDev => 'Suchfunktion ist in Vorbereitung';
+
+  @override
+  String errorOccurred(String error) {
+    return 'Ein Fehler ist aufgetreten: $error';
+  }
+
+  @override
+  String get deckTypeHome => 'Startseite';
+
+  @override
+  String get deckTypeNotifications => 'Benachrichtigungen';
+
+  @override
+  String get deckTypeSearch => 'Suche';
+
+  @override
+  String get deckTypeList => 'Liste';
+
+  @override
+  String get deckTypeProfile => 'Profil';
+
+  @override
+  String get deckTypeThread => 'Thread';
+
+  @override
+  String get deckTypeCustomFeed => 'Benutzerdefinierter Feed';
+
+  @override
+  String get deckTypeLocal => 'Lokal';
+
+  @override
+  String get deckTypeHashtag => 'Hashtag';
+
+  @override
+  String get deckTypeMentions => 'Erwähnungen';
+
+  @override
+  String get addDeckDialogTitle => 'Deck hinzufügen';
+
+  @override
+  String get deckNameLabel => 'Deck-Name';
+
+  @override
+  String get deckNameHint => 'z.B. Startseiten-Timeline';
+
+  @override
+  String get deckTypeLabel => 'Deck-Typ';
+
+  @override
+  String get accountLabel => 'Konto';
+
+  @override
+  String get useAllAccounts => 'Für alle Konten verwenden';
+
+  @override
+  String get addButton => 'Hinzufügen';
+
+  @override
+  String deckAddedSuccess(String deckName) {
+    return 'Deck \"$deckName\" hinzugefügt';
+  }
+
+  @override
+  String deckAddFailed(String error) {
+    return 'Fehler beim Hinzufügen des Decks: $error';
+  }
+
+  @override
+  String get timeNow => 'jetzt';
+
+  @override
+  String timeMinutes(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String timeHours(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String timeDays(int days) {
+    return '${days}T';
+  }
+
+  @override
+  String get numberThousandSuffix => 'T';
+
+  @override
+  String get numberMillionSuffix => 'M';
 }

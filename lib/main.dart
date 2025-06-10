@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moodesky/core/providers/auth_provider.dart';
 import 'package:moodesky/core/providers/locale_provider.dart';
 import 'package:moodesky/core/providers/theme_provider.dart';
+import 'package:moodesky/core/theme/app_themes.dart';
 import 'package:moodesky/features/auth/screens/login_screen.dart';
 import 'package:moodesky/features/home/screens/home_screen.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
@@ -29,7 +30,7 @@ class MoodeSkyApp extends ConsumerWidget {
 
     return asyncLocale.when(
       data: (locale) => MaterialApp(
-        title: 'MoodeSky',
+        title: 'moodeSky',
         debugShowCheckedModeBanner: false,
 
         // Localization
@@ -47,11 +48,17 @@ class MoodeSkyApp extends ConsumerWidget {
         darkTheme: darkTheme,
         themeMode: themeMode,
 
+        // System UI Overlay Style
+        builder: (context, child) {
+          AppThemes.setSystemUiOverlayStyle(context);
+          return child ?? const SizedBox.shrink();
+        },
+
         // App routing
         home: const AppRouter(),
       ),
       loading: () => MaterialApp(
-        title: 'MoodeSky',
+        title: 'moodeSky',
         debugShowCheckedModeBanner: false,
         localizationsDelegates: const [
           AppLocalizations.delegate,
@@ -60,10 +67,14 @@ class MoodeSkyApp extends ConsumerWidget {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: SupportedLocales.locales,
+        builder: (context, child) {
+          AppThemes.setSystemUiOverlayStyle(context);
+          return child ?? const SizedBox.shrink();
+        },
         home: const Scaffold(body: Center(child: CircularProgressIndicator())),
       ),
       error: (error, stack) => MaterialApp(
-        title: 'MoodeSky',
+        title: 'moodeSky',
         debugShowCheckedModeBanner: false,
         localizationsDelegates: const [
           AppLocalizations.delegate,
@@ -72,6 +83,10 @@ class MoodeSkyApp extends ConsumerWidget {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: SupportedLocales.locales,
+        builder: (context, child) {
+          AppThemes.setSystemUiOverlayStyle(context);
+          return child ?? const SizedBox.shrink();
+        },
         home: Scaffold(
           body: Center(
             child: Column(
@@ -135,7 +150,7 @@ class LoadingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'MoodeSky',
+              'moodeSky',
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),

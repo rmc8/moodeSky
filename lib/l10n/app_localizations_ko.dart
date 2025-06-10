@@ -9,7 +9,7 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
-  String get appTitle => 'MoodeSky';
+  String get appTitle => 'moodeSky';
 
   @override
   String get loginTitle => '로그인';
@@ -102,7 +102,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get multiAccountInfo =>
-      'MoodeSky는 여러 Bluesky 계정을 동시에 관리할 수 있습니다. 새 계정 자격 증명을 입력하세요.';
+      'moodeSky는 여러 Bluesky 계정을 동시에 관리할 수 있습니다. 새 계정 자격 증명을 입력하세요.';
 
   @override
   String get newAccountInfo => '새 계정 추가';
@@ -184,7 +184,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appInformation => '앱 정보';
 
   @override
-  String get aboutApp => 'MoodeSky 정보';
+  String get aboutApp => 'moodeSky 정보';
 
   @override
   String appVersion(String version) {
@@ -193,7 +193,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get aboutAppDescription =>
-      'MoodeSky는 덱 기반 인터페이스와 멀티 계정 지원을 갖춤 모던 Bluesky 클라이언트입니다.';
+      'moodeSky는 덱 기반 인터페이스와 멀티 계정 지원을 갖춤 모던 Bluesky 클라이언트입니다.';
 
   @override
   String get privacyPolicy => '개인정보 보호정책';
@@ -233,4 +233,193 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get themeSystemDescription => '시스템 테마 설정을 자동으로 따릅니다';
+
+  @override
+  String get homeTitle => '홈';
+
+  @override
+  String get decksEmptyTitle => '덱이 없습니다';
+
+  @override
+  String get decksEmptyDescription =>
+      '내비게이션 바의 \"덱\" 버튼으로\n덱을 추가해서 타임라인을 표시하세요';
+
+  @override
+  String get addDeckButton => '덱 추가';
+
+  @override
+  String get addDeckTooltip => '덱 추가';
+
+  @override
+  String get composeTooltip => '새 게시물 작성';
+
+  @override
+  String get settingsTooltip => '설정 화면 열기';
+
+  @override
+  String get homeNavigation => '홈';
+
+  @override
+  String get notificationsNavigation => '알림';
+
+  @override
+  String get searchNavigation => '검색';
+
+  @override
+  String get profileNavigation => '프로필';
+
+  @override
+  String get composeNavigation => '게시';
+
+  @override
+  String get deckNavigation => '덱';
+
+  @override
+  String get noLoggedInAccounts => '로그인된 계정이 없습니다';
+
+  @override
+  String get notificationLike => '당신의 게시물을 좋아합니다';
+
+  @override
+  String get notificationRepost => '당신의 게시물을 리포스트했습니다';
+
+  @override
+  String get notificationFollow => '당신을 팔로우했습니다';
+
+  @override
+  String get notificationMention => '당신을 멘션했습니다';
+
+  @override
+  String get notificationReply => '당신의 게시물에 답글을 남겼습니다';
+
+  @override
+  String get notification => '알림';
+
+  @override
+  String get followers => '팔로워';
+
+  @override
+  String get posts => '게시물';
+
+  @override
+  String get trending => '트렌딩';
+
+  @override
+  String get following => '팔로잉';
+
+  @override
+  String get follow => '팔로우';
+
+  @override
+  String get noProfileInfo => '프로필 정보가 없습니다';
+
+  @override
+  String get sampleContent => '샘플 콘텐츠';
+
+  @override
+  String hoursAgo(int hours) {
+    return '$hours시간 전';
+  }
+
+  @override
+  String get closeDeckFeature => '덱 닫기 기능은 개발 중입니다';
+
+  @override
+  String get composeFunctionUnderDev => '게시물 작성 기능은 개발 중입니다';
+
+  @override
+  String get notificationsFunctionUnderDev => '알림 기능은 개발 중입니다';
+
+  @override
+  String get searchFunctionUnderDev => '검색 기능은 개발 중입니다';
+
+  @override
+  String errorOccurred(String error) {
+    return '오류가 발생했습니다: $error';
+  }
+
+  @override
+  String get deckTypeHome => '홈';
+
+  @override
+  String get deckTypeNotifications => '알림';
+
+  @override
+  String get deckTypeSearch => '검색';
+
+  @override
+  String get deckTypeList => '리스트';
+
+  @override
+  String get deckTypeProfile => '프로필';
+
+  @override
+  String get deckTypeThread => '스레드';
+
+  @override
+  String get deckTypeCustomFeed => '커스텀 피드';
+
+  @override
+  String get deckTypeLocal => '로컬';
+
+  @override
+  String get deckTypeHashtag => '해시태그';
+
+  @override
+  String get deckTypeMentions => '멘션';
+
+  @override
+  String get addDeckDialogTitle => '덱 추가';
+
+  @override
+  String get deckNameLabel => '덱 이름';
+
+  @override
+  String get deckNameHint => '예: 홈 타임라인';
+
+  @override
+  String get deckTypeLabel => '덱 타입';
+
+  @override
+  String get accountLabel => '계정';
+
+  @override
+  String get useAllAccounts => '모든 계정에서 사용';
+
+  @override
+  String get addButton => '추가';
+
+  @override
+  String deckAddedSuccess(String deckName) {
+    return '덱 \"$deckName\"이(가) 추가되었습니다';
+  }
+
+  @override
+  String deckAddFailed(String error) {
+    return '덱 추가에 실패했습니다: $error';
+  }
+
+  @override
+  String get timeNow => '지금';
+
+  @override
+  String timeMinutes(int minutes) {
+    return '$minutes분';
+  }
+
+  @override
+  String timeHours(int hours) {
+    return '$hours시간';
+  }
+
+  @override
+  String timeDays(int days) {
+    return '$days일';
+  }
+
+  @override
+  String get numberThousandSuffix => '천';
+
+  @override
+  String get numberMillionSuffix => '백만';
 }

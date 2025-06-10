@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// MoodeSkyアプリのテーマ定義
 class AppThemes {
@@ -194,6 +195,51 @@ class AppThemes {
       behavior: SnackBarBehavior.floating,
     ),
   );
+
+  /// ライトテーマ用のシステムUIオーバーレイスタイル
+  static const SystemUiOverlayStyle lightSystemUiOverlayStyle = SystemUiOverlayStyle(
+    statusBarColor: Colors.white,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+    systemNavigationBarColor: Colors.white,
+    systemNavigationBarIconBrightness: Brightness.dark,
+    systemNavigationBarDividerColor: Color(0xFFE0E0E0),
+  );
+
+  /// ダークテーマ用のシステムUIオーバーレイスタイル  
+  static const SystemUiOverlayStyle darkSystemUiOverlayStyle = SystemUiOverlayStyle(
+    statusBarColor: Color(0xFF121212),
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+    systemNavigationBarColor: Color(0xFF121212),
+    systemNavigationBarIconBrightness: Brightness.light,
+    systemNavigationBarDividerColor: Color(0xFF3D3D3D),
+  );
+
+  /// 現在のテーマに基づいてシステムUIオーバーレイスタイルを取得
+  static SystemUiOverlayStyle getSystemUiOverlayStyle(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final baseStyle = brightness == Brightness.light
+        ? lightSystemUiOverlayStyle
+        : darkSystemUiOverlayStyle;
+    
+    // プラットフォーム固有の調整
+    return baseStyle.copyWith(
+      // iOS用の追加設定
+      statusBarBrightness: brightness == Brightness.light 
+          ? Brightness.light 
+          : Brightness.dark,
+      // 確実にアイコンの色を設定
+      statusBarIconBrightness: brightness == Brightness.light 
+          ? Brightness.dark 
+          : Brightness.light,
+    );
+  }
+
+  /// システムUIオーバーレイスタイルを適用
+  static void setSystemUiOverlayStyle(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(getSystemUiOverlayStyle(context));
+  }
 }
 
 /// ポストアイテム用のスタイル

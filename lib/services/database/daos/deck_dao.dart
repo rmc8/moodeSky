@@ -56,50 +56,55 @@ class DeckDao extends DatabaseAccessor<AppDatabase> with _$DeckDaoMixin {
   }
 
   // Update deck order
-  Future<bool> updateDeckOrder(String deckId, int order) {
-    return (update(decks)..where((t) => t.deckId.equals(deckId))).write(
+  Future<bool> updateDeckOrder(String deckId, int order) async {
+    final count = await (update(decks)..where((t) => t.deckId.equals(deckId))).write(
       DecksCompanion(deckOrder: Value(order), updatedAt: Value(DateTime.now())),
     );
+    return count > 0;
   }
 
   // Update deck visibility
-  Future<bool> updateDeckVisibility(String deckId, bool isVisible) {
-    return (update(decks)..where((t) => t.deckId.equals(deckId))).write(
+  Future<bool> updateDeckVisibility(String deckId, bool isVisible) async {
+    final count = await (update(decks)..where((t) => t.deckId.equals(deckId))).write(
       DecksCompanion(
         isVisible: Value(isVisible),
         updatedAt: Value(DateTime.now()),
       ),
     );
+    return count > 0;
   }
 
   // Mark deck as favorite
-  Future<bool> updateDeckFavorite(String deckId, bool isFavorite) {
-    return (update(decks)..where((t) => t.deckId.equals(deckId))).write(
+  Future<bool> updateDeckFavorite(String deckId, bool isFavorite) async {
+    final count = await (update(decks)..where((t) => t.deckId.equals(deckId))).write(
       DecksCompanion(
         isFavorite: Value(isFavorite),
         updatedAt: Value(DateTime.now()),
       ),
     );
+    return count > 0;
   }
 
   // Update last refresh time
-  Future<bool> updateLastRefresh(String deckId) {
-    return (update(decks)..where((t) => t.deckId.equals(deckId))).write(
+  Future<bool> updateLastRefresh(String deckId) async {
+    final count = await (update(decks)..where((t) => t.deckId.equals(deckId))).write(
       DecksCompanion(
         lastRefresh: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
       ),
     );
+    return count > 0;
   }
 
   // Update last read time
-  Future<bool> updateLastRead(String deckId) {
-    return (update(decks)..where((t) => t.deckId.equals(deckId))).write(
+  Future<bool> updateLastRead(String deckId) async {
+    final count = await (update(decks)..where((t) => t.deckId.equals(deckId))).write(
       DecksCompanion(
         lastRead: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
       ),
     );
+    return count > 0;
   }
 
   // Get favorite decks

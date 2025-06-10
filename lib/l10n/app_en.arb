@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
   
-  "appTitle": "MoodeSky",
+  "appTitle": "moodeSky",
   "@appTitle": {
     "description": "The title of the application"
   },
@@ -151,7 +151,7 @@
     "description": "Help text when App Password is selected"
   },
   
-  "multiAccountInfo": "MoodeSky can manage multiple Bluesky accounts simultaneously. Enter your new account credentials.",
+  "multiAccountInfo": "moodeSky can manage multiple Bluesky accounts simultaneously. Enter your new account credentials.",
   "@multiAccountInfo": {
     "description": "Information about multi-account support"
   },
@@ -293,7 +293,7 @@
     "description": "Title for app information section"
   },
   
-  "aboutApp": "About MoodeSky",
+  "aboutApp": "About moodeSky",
   "@aboutApp": {
     "description": "Label for about app option"
   },
@@ -309,7 +309,7 @@
     }
   },
   
-  "aboutAppDescription": "MoodeSky is a modern Bluesky client with deck-based interface and multi-account support.",
+  "aboutAppDescription": "moodeSky is a modern Bluesky client with deck-based interface and multi-account support.",
   "@aboutAppDescription": {
     "description": "Description shown in about dialog"
   },
@@ -377,5 +377,334 @@
   "themeSystemDescription": "Automatically follow system theme settings",
   "@themeSystemDescription": {
     "description": "Description for system theme"
+  },
+
+  "homeTitle": "Home",
+  "@homeTitle": {
+    "description": "Title for home screen"
+  },
+
+  "decksEmptyTitle": "No decks",
+  "@decksEmptyTitle": {
+    "description": "Title when no decks are available"
+  },
+
+  "decksEmptyDescription": "Add decks from the navigation bar\nto display timelines",
+  "@decksEmptyDescription": {
+    "description": "Description when no decks are available"
+  },
+
+  "addDeckButton": "Add Deck",
+  "@addDeckButton": {
+    "description": "Button text to add a deck"
+  },
+
+  "addDeckTooltip": "Add deck",
+  "@addDeckTooltip": {
+    "description": "Tooltip for add deck button"
+  },
+
+  "composeTooltip": "Create new post",
+  "@composeTooltip": {
+    "description": "Tooltip for compose button"
+  },
+
+  "settingsTooltip": "Open settings",
+  "@settingsTooltip": {
+    "description": "Tooltip for settings button"
+  },
+
+  "homeNavigation": "Home",
+  "@homeNavigation": {
+    "description": "Navigation label for home"
+  },
+
+  "notificationsNavigation": "Notifications",
+  "@notificationsNavigation": {
+    "description": "Navigation label for notifications"
+  },
+
+  "searchNavigation": "Search",
+  "@searchNavigation": {
+    "description": "Navigation label for search"
+  },
+
+  "profileNavigation": "Profile",
+  "@profileNavigation": {
+    "description": "Navigation label for profile"
+  },
+
+  "composeNavigation": "Post",
+  "@composeNavigation": {
+    "description": "Navigation label for compose"
+  },
+
+  "deckNavigation": "Deck",
+  "@deckNavigation": {
+    "description": "Navigation label for deck"
+  },
+
+  "noLoggedInAccounts": "No logged in accounts",
+  "@noLoggedInAccounts": {
+    "description": "Message when no accounts are logged in"
+  },
+
+  "notificationLike": "liked your post",
+  "@notificationLike": {
+    "description": "Notification text for like action"
+  },
+
+  "notificationRepost": "reposted your post",
+  "@notificationRepost": {
+    "description": "Notification text for repost action"
+  },
+
+  "notificationFollow": "followed you",
+  "@notificationFollow": {
+    "description": "Notification text for follow action"
+  },
+
+  "notificationMention": "mentioned you",
+  "@notificationMention": {
+    "description": "Notification text for mention action"
+  },
+
+  "notificationReply": "replied to your post",
+  "@notificationReply": {
+    "description": "Notification text for reply action"
+  },
+
+  "notification": "Notification",
+  "@notification": {
+    "description": "Generic notification text"
+  },
+
+  "followers": "followers",
+  "@followers": {
+    "description": "Text for followers count"
+  },
+
+  "posts": "posts",
+  "@posts": {
+    "description": "Text for posts count"
+  },
+
+  "trending": "Trending",
+  "@trending": {
+    "description": "Text for trending content"
+  },
+
+  "following": "Following",
+  "@following": {
+    "description": "Text for following status"
+  },
+
+  "follow": "Follow",
+  "@follow": {
+    "description": "Text for follow button"
+  },
+
+  "noProfileInfo": "No profile information available",
+  "@noProfileInfo": {
+    "description": "Text when profile info is not available"
+  },
+
+  "sampleContent": "Sample content",
+  "@sampleContent": {
+    "description": "Text for sample content"
+  },
+
+  "hoursAgo": "{hours}h ago",
+  "@hoursAgo": {
+    "description": "Text for hours ago timestamp",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "description": "Number of hours"
+      }
+    }
+  },
+
+  "closeDeckFeature": "Deck closing feature is under development",
+  "@closeDeckFeature": {
+    "description": "Message when close deck is clicked"
+  },
+
+  "composeFunctionUnderDev": "Post creation function is under development",
+  "@composeFunctionUnderDev": {
+    "description": "Message when compose is clicked"
+  },
+
+  "notificationsFunctionUnderDev": "Notification function is under development",
+  "@notificationsFunctionUnderDev": {
+    "description": "Message when notifications is clicked"
+  },
+
+  "searchFunctionUnderDev": "Search function is under development",
+  "@searchFunctionUnderDev": {
+    "description": "Message when search is clicked"
+  },
+
+  "errorOccurred": "An error occurred: {error}",
+  "@errorOccurred": {
+    "description": "Error message with error details",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+
+  "deckTypeHome": "Home",
+  "@deckTypeHome": {
+    "description": "Home deck type"
+  },
+
+  "deckTypeNotifications": "Notifications",
+  "@deckTypeNotifications": {
+    "description": "Notifications deck type"
+  },
+
+  "deckTypeSearch": "Search",
+  "@deckTypeSearch": {
+    "description": "Search deck type"
+  },
+
+  "deckTypeList": "List",
+  "@deckTypeList": {
+    "description": "List deck type"
+  },
+
+  "deckTypeProfile": "Profile",
+  "@deckTypeProfile": {
+    "description": "Profile deck type"
+  },
+
+  "deckTypeThread": "Thread",
+  "@deckTypeThread": {
+    "description": "Thread deck type"
+  },
+
+  "deckTypeCustomFeed": "Custom Feed",
+  "@deckTypeCustomFeed": {
+    "description": "Custom feed deck type"
+  },
+
+  "deckTypeLocal": "Local",
+  "@deckTypeLocal": {
+    "description": "Local deck type"
+  },
+
+  "deckTypeHashtag": "Hashtag",
+  "@deckTypeHashtag": {
+    "description": "Hashtag deck type"
+  },
+
+  "deckTypeMentions": "Mentions",
+  "@deckTypeMentions": {
+    "description": "Mentions deck type"
+  },
+
+  "addDeckDialogTitle": "Add Deck",
+  "@addDeckDialogTitle": {
+    "description": "Title for add deck dialog"
+  },
+
+  "deckNameLabel": "Deck name",
+  "@deckNameLabel": {
+    "description": "Label for deck name field"
+  },
+
+  "deckNameHint": "e.g. Home Timeline",
+  "@deckNameHint": {
+    "description": "Hint for deck name field"
+  },
+
+  "deckTypeLabel": "Deck type",
+  "@deckTypeLabel": {
+    "description": "Label for deck type selection"
+  },
+
+  "accountLabel": "Account",
+  "@accountLabel": {
+    "description": "Label for account selection"
+  },
+
+  "useAllAccounts": "Use for all accounts",
+  "@useAllAccounts": {
+    "description": "Option to use deck for all accounts"
+  },
+
+  "addButton": "Add",
+  "@addButton": {
+    "description": "Add button text"
+  },
+
+  "deckAddedSuccess": "Deck \"{deckName}\" added",
+  "@deckAddedSuccess": {
+    "description": "Success message when deck is added",
+    "placeholders": {
+      "deckName": {
+        "type": "String",
+        "description": "Name of the deck"
+      }
+    }
+  },
+
+  "deckAddFailed": "Failed to add deck: {error}",
+  "@deckAddFailed": {
+    "description": "Error message when deck add fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  
+  "timeNow": "now",
+  "@timeNow": {
+    "description": "Time format for 'now'"
+  },
+  
+  "timeMinutes": "{minutes}m",
+  "@timeMinutes": {
+    "description": "Time format for minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "timeHours": "{hours}h",
+  "@timeHours": {
+    "description": "Time format for hours",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "timeDays": "{days}d",
+  "@timeDays": {
+    "description": "Time format for days",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "numberThousandSuffix": "K",
+  "@numberThousandSuffix": {
+    "description": "Suffix for numbers in thousands (e.g., 1.5K)"
+  },
+  
+  "numberMillionSuffix": "M",
+  "@numberMillionSuffix": {
+    "description": "Suffix for numbers in millions (e.g., 1.5M)"
   }
 }

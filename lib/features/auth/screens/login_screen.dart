@@ -1,11 +1,13 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/core/theme/app_themes.dart';
 import 'package:moodesky/features/auth/models/server_config.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
@@ -71,18 +73,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: LanguageSelector(isCompact: true, showLabel: false),
-          ),
-        ],
-      ),
-      body: SafeArea(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: AppThemes.getSystemUiOverlayStyle(context),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          systemOverlayStyle: AppThemes.getSystemUiOverlayStyle(context),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: LanguageSelector(isCompact: true, showLabel: false),
+            ),
+          ],
+        ),
+        body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -100,7 +105,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       margin: const EdgeInsets.only(bottom: 32),
                       child: Center(
                         child: Text(
-                          'MoodeSky',
+                          'moodeSky',
                           style: Theme.of(context).textTheme.headlineLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -535,6 +540,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 }
