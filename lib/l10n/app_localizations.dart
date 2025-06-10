@@ -536,6 +536,354 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Automatically follow system theme settings'**
   String get themeSystemDescription;
+
+  /// Title for home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeTitle;
+
+  /// Title when no decks are available
+  ///
+  /// In en, this message translates to:
+  /// **'No decks'**
+  String get decksEmptyTitle;
+
+  /// Description when no decks are available
+  ///
+  /// In en, this message translates to:
+  /// **'Add decks from the navigation bar\nto display timelines'**
+  String get decksEmptyDescription;
+
+  /// Button text to add a deck
+  ///
+  /// In en, this message translates to:
+  /// **'Add Deck'**
+  String get addDeckButton;
+
+  /// Tooltip for add deck button
+  ///
+  /// In en, this message translates to:
+  /// **'Add deck'**
+  String get addDeckTooltip;
+
+  /// Tooltip for compose button
+  ///
+  /// In en, this message translates to:
+  /// **'Create new post'**
+  String get composeTooltip;
+
+  /// Tooltip for settings button
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get settingsTooltip;
+
+  /// Navigation label for home
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeNavigation;
+
+  /// Navigation label for notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsNavigation;
+
+  /// Navigation label for search
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchNavigation;
+
+  /// Navigation label for profile
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileNavigation;
+
+  /// Navigation label for compose
+  ///
+  /// In en, this message translates to:
+  /// **'Post'**
+  String get composeNavigation;
+
+  /// Navigation label for deck
+  ///
+  /// In en, this message translates to:
+  /// **'Deck'**
+  String get deckNavigation;
+
+  /// Message when no accounts are logged in
+  ///
+  /// In en, this message translates to:
+  /// **'No logged in accounts'**
+  String get noLoggedInAccounts;
+
+  /// Notification text for like action
+  ///
+  /// In en, this message translates to:
+  /// **'liked your post'**
+  String get notificationLike;
+
+  /// Notification text for repost action
+  ///
+  /// In en, this message translates to:
+  /// **'reposted your post'**
+  String get notificationRepost;
+
+  /// Notification text for follow action
+  ///
+  /// In en, this message translates to:
+  /// **'followed you'**
+  String get notificationFollow;
+
+  /// Notification text for mention action
+  ///
+  /// In en, this message translates to:
+  /// **'mentioned you'**
+  String get notificationMention;
+
+  /// Notification text for reply action
+  ///
+  /// In en, this message translates to:
+  /// **'replied to your post'**
+  String get notificationReply;
+
+  /// Generic notification text
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get notification;
+
+  /// Text for followers count
+  ///
+  /// In en, this message translates to:
+  /// **'followers'**
+  String get followers;
+
+  /// Text for posts count
+  ///
+  /// In en, this message translates to:
+  /// **'posts'**
+  String get posts;
+
+  /// Text for trending content
+  ///
+  /// In en, this message translates to:
+  /// **'Trending'**
+  String get trending;
+
+  /// Text for following status
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get following;
+
+  /// Text for follow button
+  ///
+  /// In en, this message translates to:
+  /// **'Follow'**
+  String get follow;
+
+  /// Text when profile info is not available
+  ///
+  /// In en, this message translates to:
+  /// **'No profile information available'**
+  String get noProfileInfo;
+
+  /// Text for sample content
+  ///
+  /// In en, this message translates to:
+  /// **'Sample content'**
+  String get sampleContent;
+
+  /// Text for hours ago timestamp
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h ago'**
+  String hoursAgo(int hours);
+
+  /// Message when close deck is clicked
+  ///
+  /// In en, this message translates to:
+  /// **'Deck closing feature is under development'**
+  String get closeDeckFeature;
+
+  /// Message when compose is clicked
+  ///
+  /// In en, this message translates to:
+  /// **'Post creation function is under development'**
+  String get composeFunctionUnderDev;
+
+  /// Message when notifications is clicked
+  ///
+  /// In en, this message translates to:
+  /// **'Notification function is under development'**
+  String get notificationsFunctionUnderDev;
+
+  /// Message when search is clicked
+  ///
+  /// In en, this message translates to:
+  /// **'Search function is under development'**
+  String get searchFunctionUnderDev;
+
+  /// Error message with error details
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred: {error}'**
+  String errorOccurred(String error);
+
+  /// Home deck type
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get deckTypeHome;
+
+  /// Notifications deck type
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get deckTypeNotifications;
+
+  /// Search deck type
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get deckTypeSearch;
+
+  /// List deck type
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get deckTypeList;
+
+  /// Profile deck type
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get deckTypeProfile;
+
+  /// Thread deck type
+  ///
+  /// In en, this message translates to:
+  /// **'Thread'**
+  String get deckTypeThread;
+
+  /// Custom feed deck type
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Feed'**
+  String get deckTypeCustomFeed;
+
+  /// Local deck type
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get deckTypeLocal;
+
+  /// Hashtag deck type
+  ///
+  /// In en, this message translates to:
+  /// **'Hashtag'**
+  String get deckTypeHashtag;
+
+  /// Mentions deck type
+  ///
+  /// In en, this message translates to:
+  /// **'Mentions'**
+  String get deckTypeMentions;
+
+  /// Title for add deck dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Add Deck'**
+  String get addDeckDialogTitle;
+
+  /// Label for deck name field
+  ///
+  /// In en, this message translates to:
+  /// **'Deck name'**
+  String get deckNameLabel;
+
+  /// Hint for deck name field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Home Timeline'**
+  String get deckNameHint;
+
+  /// Label for deck type selection
+  ///
+  /// In en, this message translates to:
+  /// **'Deck type'**
+  String get deckTypeLabel;
+
+  /// Label for account selection
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountLabel;
+
+  /// Option to use deck for all accounts
+  ///
+  /// In en, this message translates to:
+  /// **'Use for all accounts'**
+  String get useAllAccounts;
+
+  /// Add button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addButton;
+
+  /// Success message when deck is added
+  ///
+  /// In en, this message translates to:
+  /// **'Deck \"{deckName}\" added'**
+  String deckAddedSuccess(String deckName);
+
+  /// Error message when deck add fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add deck: {error}'**
+  String deckAddFailed(String error);
+
+  /// Time format for 'now'
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get timeNow;
+
+  /// Time format for minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String timeMinutes(int minutes);
+
+  /// Time format for hours
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String timeHours(int hours);
+
+  /// Time format for days
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d'**
+  String timeDays(int days);
+
+  /// Suffix for numbers in thousands (e.g., 1.5K)
+  ///
+  /// In en, this message translates to:
+  /// **'K'**
+  String get numberThousandSuffix;
+
+  /// Suffix for numbers in millions (e.g., 1.5M)
+  ///
+  /// In en, this message translates to:
+  /// **'M'**
+  String get numberMillionSuffix;
 }
 
 class _AppLocalizationsDelegate

@@ -245,6 +245,197 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get themeSystemDescription =>
       'Seguir automaticamente as configurações de tema do sistema';
+
+  @override
+  String get homeTitle => 'Início';
+
+  @override
+  String get decksEmptyTitle => 'Sem decks';
+
+  @override
+  String get decksEmptyDescription =>
+      'Adicione decks usando o botão \"Deck\" na barra de navegação\npara exibir sua linha do tempo';
+
+  @override
+  String get addDeckButton => 'Adicionar deck';
+
+  @override
+  String get addDeckTooltip => 'Adicionar deck';
+
+  @override
+  String get composeTooltip => 'Criar nova postagem';
+
+  @override
+  String get settingsTooltip => 'Abrir configurações';
+
+  @override
+  String get homeNavigation => 'Início';
+
+  @override
+  String get notificationsNavigation => 'Notificações';
+
+  @override
+  String get searchNavigation => 'Buscar';
+
+  @override
+  String get profileNavigation => 'Perfil';
+
+  @override
+  String get composeNavigation => 'Compor';
+
+  @override
+  String get deckNavigation => 'Decks';
+
+  @override
+  String get noLoggedInAccounts => 'Nenhuma conta conectada';
+
+  @override
+  String get notificationLike => 'curtiu sua postagem';
+
+  @override
+  String get notificationRepost => 'repostou sua postagem';
+
+  @override
+  String get notificationFollow => 'começou a seguir você';
+
+  @override
+  String get notificationMention => 'mencionou você';
+
+  @override
+  String get notificationReply => 'respondeu à sua postagem';
+
+  @override
+  String get notification => 'Notificação';
+
+  @override
+  String get followers => 'Seguidores';
+
+  @override
+  String get posts => ' postagens';
+
+  @override
+  String get trending => 'Em alta';
+
+  @override
+  String get following => 'Seguindo';
+
+  @override
+  String get follow => 'Seguir';
+
+  @override
+  String get noProfileInfo => 'Sem informações do perfil';
+
+  @override
+  String get sampleContent => 'Conteúdo de exemplo';
+
+  @override
+  String hoursAgo(int hours) {
+    return '$hours horas atrás';
+  }
+
+  @override
+  String get closeDeckFeature => 'Função de fechar deck está em preparação';
+
+  @override
+  String get composeFunctionUnderDev =>
+      'Função de criar postagem está em preparação';
+
+  @override
+  String get notificationsFunctionUnderDev =>
+      'Função de notificações está em preparação';
+
+  @override
+  String get searchFunctionUnderDev => 'Função de busca está em preparação';
+
+  @override
+  String errorOccurred(String error) {
+    return 'Ocorreu um erro: $error';
+  }
+
+  @override
+  String get deckTypeHome => 'Início';
+
+  @override
+  String get deckTypeNotifications => 'Notificações';
+
+  @override
+  String get deckTypeSearch => 'Buscar';
+
+  @override
+  String get deckTypeList => 'Lista';
+
+  @override
+  String get deckTypeProfile => 'Perfil';
+
+  @override
+  String get deckTypeThread => 'Thread';
+
+  @override
+  String get deckTypeCustomFeed => 'Feed personalizado';
+
+  @override
+  String get deckTypeLocal => 'Local';
+
+  @override
+  String get deckTypeHashtag => 'Hashtag';
+
+  @override
+  String get deckTypeMentions => 'Menções';
+
+  @override
+  String get addDeckDialogTitle => 'Adicionar deck';
+
+  @override
+  String get deckNameLabel => 'Nome do deck';
+
+  @override
+  String get deckNameHint => 'Ex: Linha do tempo inicial';
+
+  @override
+  String get deckTypeLabel => 'Tipo do deck';
+
+  @override
+  String get accountLabel => 'Conta';
+
+  @override
+  String get useAllAccounts => 'Usar em todas as contas';
+
+  @override
+  String get addButton => 'Adicionar';
+
+  @override
+  String deckAddedSuccess(String deckName) {
+    return 'Deck \"$deckName\" adicionado';
+  }
+
+  @override
+  String deckAddFailed(String error) {
+    return 'Falha ao adicionar deck: $error';
+  }
+
+  @override
+  String get timeNow => 'agora';
+
+  @override
+  String timeMinutes(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String timeHours(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String timeDays(int days) {
+    return '${days}d';
+  }
+
+  @override
+  String get numberThousandSuffix => 'mil';
+
+  @override
+  String get numberMillionSuffix => 'M';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -488,4 +679,195 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get themeSystemDescription =>
       'Seguir automaticamente as configurações de tema do sistema';
+
+  @override
+  String get homeTitle => 'Início';
+
+  @override
+  String get decksEmptyTitle => 'Sem decks';
+
+  @override
+  String get decksEmptyDescription =>
+      'Adicione decks usando o botão \"Deck\" na barra de navegação\npara exibir sua linha do tempo';
+
+  @override
+  String get addDeckButton => 'Adicionar deck';
+
+  @override
+  String get addDeckTooltip => 'Adicionar deck';
+
+  @override
+  String get composeTooltip => 'Criar nova postagem';
+
+  @override
+  String get settingsTooltip => 'Abrir configurações';
+
+  @override
+  String get homeNavigation => 'Início';
+
+  @override
+  String get notificationsNavigation => 'Notificações';
+
+  @override
+  String get searchNavigation => 'Buscar';
+
+  @override
+  String get profileNavigation => 'Perfil';
+
+  @override
+  String get composeNavigation => 'Compor';
+
+  @override
+  String get deckNavigation => 'Decks';
+
+  @override
+  String get noLoggedInAccounts => 'Nenhuma conta conectada';
+
+  @override
+  String get notificationLike => 'curtiu sua postagem';
+
+  @override
+  String get notificationRepost => 'repostou sua postagem';
+
+  @override
+  String get notificationFollow => 'começou a seguir você';
+
+  @override
+  String get notificationMention => 'mencionou você';
+
+  @override
+  String get notificationReply => 'respondeu à sua postagem';
+
+  @override
+  String get notification => 'Notificação';
+
+  @override
+  String get followers => 'Seguidores';
+
+  @override
+  String get posts => ' postagens';
+
+  @override
+  String get trending => 'Em alta';
+
+  @override
+  String get following => 'Seguindo';
+
+  @override
+  String get follow => 'Seguir';
+
+  @override
+  String get noProfileInfo => 'Sem informações do perfil';
+
+  @override
+  String get sampleContent => 'Conteúdo de exemplo';
+
+  @override
+  String hoursAgo(int hours) {
+    return '$hours horas atrás';
+  }
+
+  @override
+  String get closeDeckFeature => 'Função de fechar deck está em preparação';
+
+  @override
+  String get composeFunctionUnderDev =>
+      'Função de criar postagem está em preparação';
+
+  @override
+  String get notificationsFunctionUnderDev =>
+      'Função de notificações está em preparação';
+
+  @override
+  String get searchFunctionUnderDev => 'Função de busca está em preparação';
+
+  @override
+  String errorOccurred(String error) {
+    return 'Ocorreu um erro: $error';
+  }
+
+  @override
+  String get deckTypeHome => 'Início';
+
+  @override
+  String get deckTypeNotifications => 'Notificações';
+
+  @override
+  String get deckTypeSearch => 'Buscar';
+
+  @override
+  String get deckTypeList => 'Lista';
+
+  @override
+  String get deckTypeProfile => 'Perfil';
+
+  @override
+  String get deckTypeThread => 'Thread';
+
+  @override
+  String get deckTypeCustomFeed => 'Feed personalizado';
+
+  @override
+  String get deckTypeLocal => 'Local';
+
+  @override
+  String get deckTypeHashtag => 'Hashtag';
+
+  @override
+  String get deckTypeMentions => 'Menções';
+
+  @override
+  String get addDeckDialogTitle => 'Adicionar deck';
+
+  @override
+  String get deckNameLabel => 'Nome do deck';
+
+  @override
+  String get deckNameHint => 'Ex: Linha do tempo inicial';
+
+  @override
+  String get deckTypeLabel => 'Tipo do deck';
+
+  @override
+  String get accountLabel => 'Conta';
+
+  @override
+  String get useAllAccounts => 'Usar em todas as contas';
+
+  @override
+  String get addButton => 'Adicionar';
+
+  @override
+  String deckAddedSuccess(String deckName) {
+    return 'Deck \"$deckName\" adicionado';
+  }
+
+  @override
+  String deckAddFailed(String error) {
+    return 'Falha ao adicionar deck: $error';
+  }
+
+  @override
+  String get timeNow => 'agora';
+
+  @override
+  String timeMinutes(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String timeHours(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String timeDays(int days) {
+    return '${days}d';
+  }
+
+  @override
+  String get numberThousandSuffix => 'mil';
+
+  @override
+  String get numberMillionSuffix => 'M';
 }

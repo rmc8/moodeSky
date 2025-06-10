@@ -12,26 +12,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get appTitle => 'MoodeSky';
 
   @override
-  String get loginTitle => 'ログイン';
+  String get loginTitle => 'サインイン';
 
   @override
   String get addAccountTitle => 'アカウントを追加';
 
   @override
-  String get loginMethod => 'ログイン方法';
+  String get loginMethod => 'サインイン方法';
 
   @override
   String get authMethodOAuth => 'OAuth';
 
   @override
-  String get authMethodAppPassword => 'App Password';
+  String get authMethodAppPassword => 'アプリパスワード';
 
   @override
-  String get oAuthInfo => 'OAuth機能は開発中です。現在はApp Passwordをご利用ください。';
+  String get oAuthInfo => 'OAuth機能は開発中です。現在はアプリパスワードをご利用ください。';
 
   @override
-  String get appPasswordRecommended =>
-      'App Passwordは推奨されるログイン方法です。安全で取り消しも簡単です。';
+  String get appPasswordRecommended => 'アプリパスワードが推奨されるサインイン方法です。安全で簡単に無効化できます。';
 
   @override
   String get serverSelectionTitle => 'サーバーを選択';
@@ -46,25 +45,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get customServerComingSoon => 'カスタムサーバー機能は開発中です';
 
   @override
-  String get identifierLabel => 'ハンドルまたはメールアドレス';
+  String get identifierLabel => 'ハンドルまたはメール';
 
   @override
   String get identifierHint => 'user.bsky.social';
 
   @override
-  String get passwordLabel => 'App Password';
+  String get passwordLabel => 'アプリパスワード';
 
   @override
-  String get passwordHint => 'App Passwordを入力';
+  String get passwordHint => 'アプリパスワードを入力してください';
 
   @override
-  String get identifierRequired => 'ハンドルまたはメールアドレスを入力してください';
+  String get identifierRequired => 'ハンドルまたはメールを入力してください';
 
   @override
-  String get passwordRequired => 'App Passwordを入力してください';
+  String get passwordRequired => 'アプリパスワードを入力してください';
 
   @override
-  String get signInButton => 'ログイン';
+  String get signInButton => 'サインイン';
 
   @override
   String get oAuthInDevelopment => 'OAuth開発中';
@@ -73,20 +72,20 @@ class AppLocalizationsJa extends AppLocalizations {
   String get addAccountButton => 'アカウントを追加';
 
   @override
-  String get aboutAppPassword => 'App Passwordについて';
+  String get aboutAppPassword => 'アプリパスワードについて';
 
   @override
   String get appPasswordDescription =>
-      'App Passwordはアプリ専用の安全なパスワードです。通常のパスワードより安全です。';
+      'アプリパスワードはアプリ専用の安全なパスワードです。通常のパスワードより安全です。';
 
   @override
-  String get generateAppPassword => 'App Passwordを生成 →';
+  String get generateAppPassword => 'アプリパスワードを生成 →';
 
   @override
   String get copyButton => 'コピー';
 
   @override
-  String get loginError => 'ログインエラー';
+  String get loginError => 'サインインエラー';
 
   @override
   String get accountAddError => 'アカウント追加エラー';
@@ -95,40 +94,40 @@ class AppLocalizationsJa extends AppLocalizations {
   String get retryButton => '再試行';
 
   @override
-  String get helpTextOAuth => 'OAuth機能は近日公開予定です。現在はApp Passwordでログインしてください。';
+  String get helpTextOAuth => 'OAuthは近日公開予定です。現在はアプリパスワードでサインインしてください。';
 
   @override
   String get helpTextAppPassword =>
-      'App PasswordはBlueskyの設定画面で生成できます。通常のパスワードではなく、App Passwordを使用してください。';
+      'アプリパスワードはBlueskyの設定で生成できます。通常のパスワードではなくアプリパスワードをご利用ください。';
 
   @override
   String get multiAccountInfo =>
-      'MoodeSkyでは複数のBlueskyアカウントを同時に管理できます。新しいアカウントの認証情報を入力してください。';
+      'MoodeSkyは複数のBlueskyアカウントを同時に管理できます。新しいアカウントの認証情報を入力してください。';
 
   @override
   String get newAccountInfo => '新しいアカウントを追加';
 
   @override
-  String get multiAccountHelpText => '複数のアカウントを同時にログインして、簡単に切り替えることができます。';
+  String get multiAccountHelpText => '複数のアカウントに同時にログインして、簡単に切り替えることができます。';
 
   @override
-  String get accountAddedSuccess => 'アカウントを追加しました';
+  String get accountAddedSuccess => 'アカウントが正常に追加されました';
 
   @override
   String accountAddedSuccessWithName(String name) {
-    return 'アカウント「$name」を追加しました';
+    return 'アカウント「$name」が追加されました';
   }
 
   @override
   String accountAddFailed(String error) {
-    return 'アカウント追加に失敗しました: $error';
+    return 'アカウントの追加に失敗しました: $error';
   }
 
   @override
-  String get accountAddCancelled => 'アカウント追加がキャンセルされました';
+  String get accountAddCancelled => 'アカウントの追加がキャンセルされました';
 
   @override
-  String get switchAccount => 'アカウントを切り替え';
+  String get switchAccount => 'アカウント切り替え';
 
   @override
   String get signOutAll => 'すべてサインアウト';
@@ -138,7 +137,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get signOutAllConfirmMessage =>
-      'すべてのアカウントからサインアウトしてもよろしいですか？再度サインインする必要があります。';
+      'すべてのアカウントからサインアウトしますか？再度サインインが必要になります。';
 
   @override
   String get cancelButton => 'キャンセル';
@@ -156,7 +155,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languageLabel => '言語';
 
   @override
-  String get languageDescription => 'アプリで使用する言語を選択してください';
+  String get languageDescription => 'アプリの言語を選択してください';
 
   @override
   String get selectLanguage => '言語を選択';
@@ -180,7 +179,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get manageAccountsDescription => 'アカウントの追加、削除、切り替え';
 
   @override
-  String get signOutAllDescription => 'すべてのアカウントからサインアウトしてログイン画面に戻ります';
+  String get signOutAllDescription => 'すべてのアカウントからサインアウトしてログイン画面に戻る';
 
   @override
   String get appInformation => 'アプリ情報';
@@ -195,7 +194,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get aboutAppDescription =>
-      'MoodeSkyは、デッキベースのインターフェースとマルチアカウントサポートを備えたモダンなBlueskyクライアントです。';
+      'MoodeSkyはデッキベースのインターフェースとマルチアカウント対応を備えたモダンなBlueskyクライアントです。';
 
   @override
   String get privacyPolicy => 'プライバシーポリシー';
@@ -204,13 +203,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get termsOfService => '利用規約';
 
   @override
-  String get comingSoon => '近日公開予定';
+  String get comingSoon => '近日公開';
 
   @override
   String get themeLabel => 'テーマ';
 
   @override
-  String get themeDescription => 'アプリで使用するテーマを選択してください';
+  String get themeDescription => 'アプリのテーマを選択してください';
 
   @override
   String get selectTheme => 'テーマを選択';
@@ -234,5 +233,194 @@ class AppLocalizationsJa extends AppLocalizations {
   String get themeDarkDescription => '夕焼けのオレンジをアクセントにした快適なダークインターフェース';
 
   @override
-  String get themeSystemDescription => 'システムのテーマ設定に自動で従います';
+  String get themeSystemDescription => 'システムのテーマ設定に自動的に従う';
+
+  @override
+  String get homeTitle => 'ホーム';
+
+  @override
+  String get decksEmptyTitle => 'デッキがありません';
+
+  @override
+  String get decksEmptyDescription =>
+      'ナビゲーションバーの「デッキ」ボタンから\nデッキを追加してタイムラインを表示しましょう';
+
+  @override
+  String get addDeckButton => 'デッキを追加';
+
+  @override
+  String get addDeckTooltip => 'デッキを追加';
+
+  @override
+  String get composeTooltip => '新しい投稿を作成';
+
+  @override
+  String get settingsTooltip => '設定画面を開く';
+
+  @override
+  String get homeNavigation => 'ホーム';
+
+  @override
+  String get notificationsNavigation => '通知';
+
+  @override
+  String get searchNavigation => '検索';
+
+  @override
+  String get profileNavigation => 'プロフィール';
+
+  @override
+  String get composeNavigation => '投稿';
+
+  @override
+  String get deckNavigation => 'デッキ';
+
+  @override
+  String get noLoggedInAccounts => 'ログイン中のアカウントがありません';
+
+  @override
+  String get notificationLike => 'あなたの投稿にいいねしました';
+
+  @override
+  String get notificationRepost => 'あなたの投稿をリポストしました';
+
+  @override
+  String get notificationFollow => 'あなたをフォローしました';
+
+  @override
+  String get notificationMention => 'あなたにメンションしました';
+
+  @override
+  String get notificationReply => 'あなたの投稿に返信しました';
+
+  @override
+  String get notification => '通知';
+
+  @override
+  String get followers => 'フォロワー';
+
+  @override
+  String get posts => '件の投稿';
+
+  @override
+  String get trending => 'トレンド';
+
+  @override
+  String get following => 'フォロー中';
+
+  @override
+  String get follow => 'フォロー';
+
+  @override
+  String get noProfileInfo => 'プロフィール情報はありません';
+
+  @override
+  String get sampleContent => 'サンプルコンテンツ';
+
+  @override
+  String hoursAgo(int hours) {
+    return '$hours時間前';
+  }
+
+  @override
+  String get closeDeckFeature => 'デッキを閉じる機能は準備中です';
+
+  @override
+  String get composeFunctionUnderDev => '投稿作成機能は準備中です';
+
+  @override
+  String get notificationsFunctionUnderDev => '通知機能は準備中です';
+
+  @override
+  String get searchFunctionUnderDev => '検索機能は準備中です';
+
+  @override
+  String errorOccurred(String error) {
+    return 'エラーが発生しました: $error';
+  }
+
+  @override
+  String get deckTypeHome => 'ホーム';
+
+  @override
+  String get deckTypeNotifications => '通知';
+
+  @override
+  String get deckTypeSearch => '検索';
+
+  @override
+  String get deckTypeList => 'リスト';
+
+  @override
+  String get deckTypeProfile => 'プロフィール';
+
+  @override
+  String get deckTypeThread => 'スレッド';
+
+  @override
+  String get deckTypeCustomFeed => 'カスタムフィード';
+
+  @override
+  String get deckTypeLocal => 'ローカル';
+
+  @override
+  String get deckTypeHashtag => 'ハッシュタグ';
+
+  @override
+  String get deckTypeMentions => 'メンション';
+
+  @override
+  String get addDeckDialogTitle => 'デッキを追加';
+
+  @override
+  String get deckNameLabel => 'デッキ名';
+
+  @override
+  String get deckNameHint => '例: ホームタイムライン';
+
+  @override
+  String get deckTypeLabel => 'デッキタイプ';
+
+  @override
+  String get accountLabel => 'アカウント';
+
+  @override
+  String get useAllAccounts => 'すべてのアカウントで使用';
+
+  @override
+  String get addButton => '追加';
+
+  @override
+  String deckAddedSuccess(String deckName) {
+    return 'デッキ「$deckName」を追加しました';
+  }
+
+  @override
+  String deckAddFailed(String error) {
+    return 'デッキの追加に失敗しました: $error';
+  }
+
+  @override
+  String get timeNow => '今';
+
+  @override
+  String timeMinutes(int minutes) {
+    return '$minutes分';
+  }
+
+  @override
+  String timeHours(int hours) {
+    return '$hours時間';
+  }
+
+  @override
+  String timeDays(int days) {
+    return '$days日';
+  }
+
+  @override
+  String get numberThousandSuffix => 'K';
+
+  @override
+  String get numberMillionSuffix => 'M';
 }

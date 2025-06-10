@@ -40,6 +40,9 @@ dependencies:
   flutter_riverpod: ^2.4.9
   riverpod_annotation: ^2.3.3
 
+  # Utilities
+  collection: ^1.18.0
+
   # Database
   drift: ^2.14.1
   sqlite3_flutter_libs: ^0.5.18

@@ -245,4 +245,195 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get themeSystemDescription =>
       'Automatically follow system theme settings';
+
+  @override
+  String get homeTitle => 'Home';
+
+  @override
+  String get decksEmptyTitle => 'No decks';
+
+  @override
+  String get decksEmptyDescription =>
+      'Add decks from the navigation bar\nto display timelines';
+
+  @override
+  String get addDeckButton => 'Add Deck';
+
+  @override
+  String get addDeckTooltip => 'Add deck';
+
+  @override
+  String get composeTooltip => 'Create new post';
+
+  @override
+  String get settingsTooltip => 'Open settings';
+
+  @override
+  String get homeNavigation => 'Home';
+
+  @override
+  String get notificationsNavigation => 'Notifications';
+
+  @override
+  String get searchNavigation => 'Search';
+
+  @override
+  String get profileNavigation => 'Profile';
+
+  @override
+  String get composeNavigation => 'Post';
+
+  @override
+  String get deckNavigation => 'Deck';
+
+  @override
+  String get noLoggedInAccounts => 'No logged in accounts';
+
+  @override
+  String get notificationLike => 'liked your post';
+
+  @override
+  String get notificationRepost => 'reposted your post';
+
+  @override
+  String get notificationFollow => 'followed you';
+
+  @override
+  String get notificationMention => 'mentioned you';
+
+  @override
+  String get notificationReply => 'replied to your post';
+
+  @override
+  String get notification => 'Notification';
+
+  @override
+  String get followers => 'followers';
+
+  @override
+  String get posts => 'posts';
+
+  @override
+  String get trending => 'Trending';
+
+  @override
+  String get following => 'Following';
+
+  @override
+  String get follow => 'Follow';
+
+  @override
+  String get noProfileInfo => 'No profile information available';
+
+  @override
+  String get sampleContent => 'Sample content';
+
+  @override
+  String hoursAgo(int hours) {
+    return '${hours}h ago';
+  }
+
+  @override
+  String get closeDeckFeature => 'Deck closing feature is under development';
+
+  @override
+  String get composeFunctionUnderDev =>
+      'Post creation function is under development';
+
+  @override
+  String get notificationsFunctionUnderDev =>
+      'Notification function is under development';
+
+  @override
+  String get searchFunctionUnderDev => 'Search function is under development';
+
+  @override
+  String errorOccurred(String error) {
+    return 'An error occurred: $error';
+  }
+
+  @override
+  String get deckTypeHome => 'Home';
+
+  @override
+  String get deckTypeNotifications => 'Notifications';
+
+  @override
+  String get deckTypeSearch => 'Search';
+
+  @override
+  String get deckTypeList => 'List';
+
+  @override
+  String get deckTypeProfile => 'Profile';
+
+  @override
+  String get deckTypeThread => 'Thread';
+
+  @override
+  String get deckTypeCustomFeed => 'Custom Feed';
+
+  @override
+  String get deckTypeLocal => 'Local';
+
+  @override
+  String get deckTypeHashtag => 'Hashtag';
+
+  @override
+  String get deckTypeMentions => 'Mentions';
+
+  @override
+  String get addDeckDialogTitle => 'Add Deck';
+
+  @override
+  String get deckNameLabel => 'Deck name';
+
+  @override
+  String get deckNameHint => 'e.g. Home Timeline';
+
+  @override
+  String get deckTypeLabel => 'Deck type';
+
+  @override
+  String get accountLabel => 'Account';
+
+  @override
+  String get useAllAccounts => 'Use for all accounts';
+
+  @override
+  String get addButton => 'Add';
+
+  @override
+  String deckAddedSuccess(String deckName) {
+    return 'Deck \"$deckName\" added';
+  }
+
+  @override
+  String deckAddFailed(String error) {
+    return 'Failed to add deck: $error';
+  }
+
+  @override
+  String get timeNow => 'now';
+
+  @override
+  String timeMinutes(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String timeHours(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String timeDays(int days) {
+    return '${days}d';
+  }
+
+  @override
+  String get numberThousandSuffix => 'K';
+
+  @override
+  String get numberMillionSuffix => 'M';
 }
