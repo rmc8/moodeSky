@@ -12,6 +12,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // Project imports:
 import 'package:moodesky/services/database/database.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
+import 'package:moodesky/shared/models/preferences_models.dart';
 
 class BlueskyService {
   final AppDatabase database;
@@ -1160,5 +1161,179 @@ class BlueskyService {
     if (text.trim().length < 1) return false;
     
     return true;
+  }
+
+  // ========================================
+  // User Preferences 関連機能
+  // ========================================
+
+  /// ユーザーの設定を取得（6時間TTLキャッシュ付き）
+  Future<UserPreferences?> getUserPreferences({
+    required String accountDid,
+    bool forceRefresh = false,
+  }) async {
+    try {
+      // キャッシュチェック（6時間TTL）
+      if (!forceRefresh) {
+        final cached = await database.preferencesDao.getCachedPreferences(accountDid);
+        if (cached != null && cached.lastUpdated != null) {
+          final age = DateTime.now().difference(cached.lastUpdated!).inHours;
+          if (age < 6) {
+            print('設定をキャッシュから取得: アカウント $accountDid (${cached.preferences.length}項目)');
+            return cached;
+          }
+        }
+      }
+
+      print('Bluesky APIから設定を取得中: $accountDid');
+      
+      // API呼び出し（既存の_callAPIWithRetryパターン使用）
+      final response = await _callAPIWithRetry(() async {
+        final latestAccount = await database.accountDao.getAccountByDid(accountDid);
+        if (latestAccount?.accessJwt == null) {
+          throw Exception('有効なアクセストークンがありません');
+        }
+
+        final client = bsky.Bluesky.fromSession(
+          atcore.Session(
+            did: latestAccount!.did,
+            handle: latestAccount.handle,
+            accessJwt: latestAccount.accessJwt!,
+            refreshJwt: latestAccount.refreshJwt ?? '',
+          ),
+        );
+
+        return await client.actor.getPreferences();
+      }, accountDid);
+
+      final userPrefs = UserPreferences(
+        preferences: response.data.preferences,
+        lastUpdated: DateTime.now(),
+        accountDid: accountDid,
+      );
+
+      // データベースキャッシュ保存
+      await database.preferencesDao.savePreferences(accountDid, userPrefs);
+
+      print('設定取得完了: ${response.data.preferences.length}項目');
+      return userPrefs;
+    } catch (e) {
+      print('設定取得失敗: $e');
+      
+      // エラー時はキャッシュデータを返す
+      final cached = await database.preferencesDao.getCachedPreferences(accountDid);
+      if (cached != null) {
+        print('エラー時のフォールバック: キャッシュデータを使用');
+        return cached;
+      }
+      
+      return null;
+    }
+  }
+
+  /// 統合的なコンテンツモデレーション
+  Future<ModerationResult> moderateContent({
+    required bsky.PostView post,
+    required String accountDid,
+    required String context, // 'contentList' or 'contentMedia'
+  }) async {
+    try {
+      final preferences = await getUserPreferences(accountDid: accountDid);
+      if (preferences == null) {
+        return const ModerationResult.allow();
+      }
+
+      final moderationPrefs = PreferencesParser.extractModerationPrefs(preferences.preferences);
+      
+      // ContentModeratorを使用して判定
+      return ContentModerator.moderatePost(post, moderationPrefs);
+    } catch (e) {
+      print('モデレーション処理エラー: $e');
+      return const ModerationResult.allow(); // エラー時は表示許可
+    }
+  }
+
+  /// 投稿がワードミュート対象かチェック
+  Future<bool> isPostMuted({
+    required bsky.PostView post,
+    required String accountDid,
+  }) async {
+    try {
+      final preferences = await getUserPreferences(accountDid: accountDid);
+      if (preferences == null) return false;
+
+      final mutedWords = PreferencesParser.extractModerationPrefs(preferences.preferences).mutedWords;
+      return ContentModerator.isPostMuted(post, mutedWords);
+    } catch (e) {
+      print('ワードミュートチェックエラー: $e');
+      return false;
+    }
+  }
+
+  /// フィード表示設定を取得
+  Future<List<FeedViewPrefs>> getFeedViewPrefs(String accountDid) async {
+    try {
+      final preferences = await getUserPreferences(accountDid: accountDid);
+      if (preferences == null) return [];
+
+      return PreferencesParser.extractFeedViewPrefs(preferences.preferences);
+    } catch (e) {
+      print('フィード表示設定取得エラー: $e');
+      return [];
+    }
+  }
+
+  /// スレッド表示設定を取得
+  Future<ThreadViewPrefs?> getThreadViewPrefs(String accountDid) async {
+    try {
+      final preferences = await getUserPreferences(accountDid: accountDid);
+      if (preferences == null) return null;
+
+      return PreferencesParser.extractThreadViewPrefs(preferences.preferences);
+    } catch (e) {
+      print('スレッド表示設定取得エラー: $e');
+      return null;
+    }
+  }
+
+  /// 保存されたフィード設定を取得
+  Future<SavedFeedsPrefs?> getSavedFeedsPrefs(String accountDid) async {
+    try {
+      final preferences = await getUserPreferences(accountDid: accountDid);
+      if (preferences == null) return null;
+
+      return PreferencesParser.extractSavedFeedsPrefs(preferences.preferences);
+    } catch (e) {
+      print('保存フィード設定取得エラー: $e');
+      return null;
+    }
+  }
+
+  /// キャッシュが有効かチェック
+  bool _isCacheValid(DateTime? lastUpdated) {
+    if (lastUpdated == null) return false;
+    const ttl = Duration(hours: 6);
+    final age = DateTime.now().difference(lastUpdated);
+    return age < ttl;
+  }
+
+  /// 設定キャッシュをクリア
+  Future<void> clearPreferencesCache(String accountDid) async {
+    try {
+      await database.preferencesDao.clearCacheForAccount(accountDid);
+      print('設定キャッシュクリア完了: $accountDid');
+    } catch (e) {
+      print('設定キャッシュクリアエラー: $e');
+    }
+  }
+
+  /// 全アカウントの設定キャッシュをクリア
+  Future<void> clearAllPreferencesCache() async {
+    try {
+      await database.preferencesDao.clearAllCache();
+      print('全設定キャッシュクリア完了');
+    } catch (e) {
+      print('全設定キャッシュクリアエラー: $e');
+    }
   }
 }
