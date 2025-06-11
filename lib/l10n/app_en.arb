@@ -278,7 +278,7 @@
     "description": "Label for manage accounts option"
   },
   
-  "manageAccountsDescription": "Add, remove, or switch between accounts",
+  "manageAccountsDescription": "Add and remove accounts",
   "@manageAccountsDescription": {
     "description": "Description for manage accounts option"
   },
@@ -746,5 +746,82 @@
   "deckTypeCustom": "Custom",
   "@deckTypeCustom": {
     "description": "Custom deck type"
+  },
+  
+  "moveDeckLeft": "Move Left",
+  "@moveDeckLeft": {
+    "description": "Menu item to move deck left"
+  },
+  
+  "moveDeckRight": "Move Right",
+  "@moveDeckRight": {
+    "description": "Menu item to move deck right"
+  },
+  
+  "deckSettings": "Deck Settings",
+  "@deckSettings": {
+    "description": "Menu item to open deck settings"
+  },
+  
+  "deleteDeck": "Delete Deck",
+  "@deleteDeck": {
+    "description": "Menu item to delete deck"
+  },
+  
+  "deckMovedLeft": "Deck moved left",
+  "@deckMovedLeft": {
+    "description": "Success message when deck is moved left"
+  },
+  
+  "deckMovedRight": "Deck moved right",
+  "@deckMovedRight": {
+    "description": "Success message when deck is moved right"
+  },
+  
+  "deckMoveError": "Failed to move deck",
+  "@deckMoveError": {
+    "description": "Error message when deck move fails"
+  },
+  
+  "deckSettingsComingSoon": "Deck settings feature is coming soon",
+  "@deckSettingsComingSoon": {
+    "description": "Message when deck settings is not yet implemented"
+  },
+  
+  "deleteDeckTitle": "Delete Deck",
+  "@deleteDeckTitle": {
+    "description": "Title for delete deck confirmation dialog"
+  },
+  
+  "deleteDeckConfirm": "Delete \"{deckTitle}\"? This action cannot be undone.",
+  "@deleteDeckConfirm": {
+    "description": "Confirmation message for deck deletion",
+    "placeholders": {
+      "deckTitle": {
+        "type": "String",
+        "description": "The title of the deck being deleted"
+      }
+    }
+  },
+  
+  "deleteButton": "Delete",
+  "@deleteButton": {
+    "description": "Delete button text"
+  },
+  
+  "deckDeletedSuccess": "\"{deckTitle}\" has been deleted",
+  "@deckDeletedSuccess": {
+    "description": "Success message when deck is deleted",
+    "placeholders": {
+      "deckTitle": {
+        "type": "String",
+        "description": "The title of the deleted deck"
+      }
+    }
+  },
+  
+  "deckDeleteError": "Failed to delete deck",
+  "@deckDeleteError": {
+    "description": "Error message when deck deletion fails"
   }
 }

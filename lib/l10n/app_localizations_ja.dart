@@ -176,7 +176,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get manageAccounts => 'アカウント管理';
 
   @override
-  String get manageAccountsDescription => 'アカウントの追加、削除、切り替え';
+  String get manageAccountsDescription => 'アカウントの追加・削除';
 
   @override
   String get refreshProfiles => 'プロフィール更新';
@@ -447,4 +447,47 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get deckTypeCustom => 'カスタム';
+
+  @override
+  String get moveDeckLeft => '左に移動';
+
+  @override
+  String get moveDeckRight => '右に移動';
+
+  @override
+  String get deckSettings => 'デッキ設定';
+
+  @override
+  String get deleteDeck => 'デッキを削除';
+
+  @override
+  String get deckMovedLeft => 'デッキを左に移動しました';
+
+  @override
+  String get deckMovedRight => 'デッキを右に移動しました';
+
+  @override
+  String get deckMoveError => 'デッキの移動に失敗しました';
+
+  @override
+  String get deckSettingsComingSoon => 'デッキ設定機能は準備中です';
+
+  @override
+  String get deleteDeckTitle => 'デッキを削除';
+
+  @override
+  String deleteDeckConfirm(String deckTitle) {
+    return '「$deckTitle」を削除しますか？この操作は取り消せません。';
+  }
+
+  @override
+  String get deleteButton => '削除';
+
+  @override
+  String deckDeletedSuccess(String deckTitle) {
+    return '「$deckTitle」を削除しました';
+  }
+
+  @override
+  String get deckDeleteError => 'デッキの削除に失敗しました';
 }

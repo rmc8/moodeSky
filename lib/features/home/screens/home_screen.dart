@@ -31,7 +31,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _refreshProfilesIfNeeded();
     });
   }
-  
+
   // 必要に応じてプロフィール情報を更新
   Future<void> _refreshProfilesIfNeeded() async {
     try {
@@ -45,7 +45,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
-    
+
     // テーマ変更を監視して確実に更新されるようにする
     final currentTheme = ref.watch(currentThemeModeProvider);
 
@@ -57,95 +57,100 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       value: AppThemes.getSystemUiOverlayStyle(context),
       child: Scaffold(
         body: Row(
-        children: [
-          // Sidebar (for desktop/tablet)
-          if (MediaQuery.of(context).size.width >= 1200) ...[
-            Container(
-              width: 300,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                border: Border(
-                  right: BorderSide(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withValues(alpha: 0.2),
+          children: [
+            // Sidebar (for desktop/tablet)
+            if (MediaQuery.of(context).size.width >= 1200) ...[
+              Container(
+                width: 300,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  border: Border(
+                    right: BorderSide(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.2),
+                    ),
                   ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  // Logged-in accounts header
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context).appTitle,
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
+                child: Column(
+                  children: [
+                    // Logged-in accounts header
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context).appTitle,
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildLoggedInAccounts(),
-                      ],
+                          const SizedBox(height: 8),
+                          _buildLoggedInAccounts(),
+                        ],
+                      ),
                     ),
-                  ),
-                  const Divider(),
+                    const Divider(),
 
-                  // Navigation
-                  Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.all(8),
-                      children: [
-                        _buildNavItem(
-                          context,
-                          icon: Icons.home,
-                          label: AppLocalizations.of(context).homeNavigation,
-                          isSelected: true,
-                        ),
-                        _buildNavItem(
-                          context,
-                          icon: Icons.notifications,
-                          label: AppLocalizations.of(context).notificationsNavigation,
-                        ),
-                        _buildNavItem(
-                          context,
-                          icon: Icons.search,
-                          label: AppLocalizations.of(context).searchNavigation,
-                        ),
-                        _buildNavItem(
-                          context,
-                          icon: Icons.person,
-                          label: AppLocalizations.of(context).profileNavigation,
-                        ),
-                        const Divider(),
-                        _buildNavItem(
-                          context,
-                          icon: Icons.add_box,
-                          label: AppLocalizations.of(context).addDeckButton,
-                          onTap: () => _showAddDeckDialog(context),
-                        ),
-                      ],
+                    // Navigation
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.all(8),
+                        children: [
+                          _buildNavItem(
+                            context,
+                            icon: Icons.home,
+                            label: AppLocalizations.of(context).homeNavigation,
+                            isSelected: true,
+                          ),
+                          _buildNavItem(
+                            context,
+                            icon: Icons.notifications,
+                            label: AppLocalizations.of(
+                              context,
+                            ).notificationsNavigation,
+                          ),
+                          _buildNavItem(
+                            context,
+                            icon: Icons.search,
+                            label: AppLocalizations.of(
+                              context,
+                            ).searchNavigation,
+                          ),
+                          _buildNavItem(
+                            context,
+                            icon: Icons.person,
+                            label: AppLocalizations.of(
+                              context,
+                            ).profileNavigation,
+                          ),
+                          const Divider(),
+                          _buildNavItem(
+                            context,
+                            icon: Icons.add_box,
+                            label: AppLocalizations.of(context).addDeckButton,
+                            onTap: () => _showAddDeckDialog(context),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+            ],
+
+            // Main content area - Deck layout (no AppBar)
+            Expanded(
+              child: SafeArea(
+                child: DeckLayout(
+                  key: ValueKey('deck_layout_${currentTheme?.index ?? 0}'),
+                ),
               ),
             ),
           ],
+        ),
 
-          // Main content area - Deck layout (no AppBar)
-          Expanded(
-            child: SafeArea(
-              child: DeckLayout(
-                key: ValueKey('deck_layout_${currentTheme?.index ?? 0}'),
-              ),
-            ),
-          ),
-        ],
-      ),
-
-      // Bottom navigation (all devices except desktop)
+        // Bottom navigation (all devices except desktop)
         bottomNavigationBar: MediaQuery.of(context).size.width < 1200
             ? _buildBottomNavigationBar()
             : null,
@@ -179,22 +184,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showAddDeckDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const AddDeckDialog(),
-    );
+    showDialog(context: context, builder: (context) => const AddDeckDialog());
   }
 
   void _showComposeDialog(BuildContext context) {
     // TODO: Implement compose dialog
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context).composeFunctionUnderDev)),
+      SnackBar(
+        content: Text(AppLocalizations.of(context).composeFunctionUnderDev),
+      ),
     );
   }
 
   Widget _buildBottomNavigationBar() {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     if (screenWidth >= 600) {
       // Tablet: Extended navigation bar with more options
       return NavigationBar(
@@ -262,7 +266,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _handleNavigationTap(int index) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     if (screenWidth >= 600) {
       // Tablet navigation handling
       switch (index) {
@@ -277,13 +281,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         case 3: // Notifications
           // TODO: Navigate to notifications
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context).notificationsFunctionUnderDev)),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context).notificationsFunctionUnderDev,
+              ),
+            ),
           );
           break;
         case 4: // Search
           // TODO: Navigate to search
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context).searchFunctionUnderDev)),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context).searchFunctionUnderDev,
+              ),
+            ),
           );
           break;
         case 5: // Settings
@@ -310,7 +322,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildLoggedInAccounts() {
     final accounts = ref.watch(availableAccountsProvider);
-    
+
     if (accounts.isEmpty) {
       return Text(
         AppLocalizations.of(context).noLoggedInAccounts,
@@ -319,20 +331,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       );
     }
-    
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: accounts.map((account) {
         return Chip(
           avatar: account.avatar != null
-              ? CircleAvatar(
-                  backgroundImage: NetworkImage(account.avatar!),
-                )
+              ? CircleAvatar(backgroundImage: NetworkImage(account.avatar!))
               : CircleAvatar(
-                  child: Text(
-                    account.handle.substring(0, 1).toUpperCase(),
-                  ),
+                  child: Text(account.handle.substring(0, 1).toUpperCase()),
                 ),
           label: Text('@${account.handle}'),
           labelStyle: Theme.of(context).textTheme.bodySmall,

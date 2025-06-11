@@ -79,13 +79,15 @@ class AuthNotifier extends _$AuthNotifier {
 
       if (!isValid) {
         // セッションが無効でリフレッシュも失敗した場合、ログアウト状態にする
-        print('Session validation failed, signing out user: ${activeAccount.handle}');
+        print(
+          'Session validation failed, signing out user: ${activeAccount.handle}',
+        );
         state = const AuthState.unauthenticated();
         return;
       }
 
       final accounts = await _blueskyService.getAllAccounts();
-      
+
       // バックグラウンドで全アカウントのプロフィール情報を強制更新（アプリ起動を妨げない）
       Future.microtask(() async {
         try {
@@ -105,7 +107,7 @@ class AuthNotifier extends _$AuthNotifier {
           }
         }
       });
-      
+
       final profiles = accounts
           .map(
             (account) => UserProfile(
@@ -381,8 +383,10 @@ class AuthNotifier extends _$AuthNotifier {
       // 最新のプロフィール情報をAPIから取得（現在はモック実装）
       final profileInfo = await _blueskyService.fetchProfileFromAPI(accountDid);
       if (profileInfo != null) {
-        print('Fetched profile for ${profileInfo.handle}: avatar=${profileInfo.avatar}');
-        
+        print(
+          'Fetched profile for ${profileInfo.handle}: avatar=${profileInfo.avatar}',
+        );
+
         // データベースに最新の情報を保存
         await _blueskyService.updateAccountProfile(
           accountDid: accountDid,
@@ -391,7 +395,7 @@ class AuthNotifier extends _$AuthNotifier {
           avatar: profileInfo.avatar,
           banner: profileInfo.banner,
         );
-        
+
         print('Profile updated in database for ${profileInfo.handle}');
       }
     } catch (e) {
@@ -410,7 +414,7 @@ class AuthNotifier extends _$AuthNotifier {
       print('Failed to refresh all profiles: $e');
     }
   }
-  
+
   // 必要なアカウントのプロフィール情報のみを更新する
   Future<void> refreshProfilesIfNeeded() async {
     try {

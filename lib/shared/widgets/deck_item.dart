@@ -61,8 +61,8 @@ class DeckItem extends StatelessWidget {
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF424242) 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF424242)
                             : const Color(0xFFCCCCCC),
                       ),
                       maxLines: 1,
@@ -77,8 +77,8 @@ class DeckItem extends StatelessWidget {
                 Text(
                   timestamp!,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).brightness == Brightness.light 
-                        ? const Color(0xFF424242) 
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? const Color(0xFF424242)
                         : const Color(0xFFCCCCCC),
                   ),
                 ),
@@ -90,9 +90,9 @@ class DeckItem extends StatelessWidget {
 
           // コンテンツ
           Text(
-            content, 
+            content,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).brightness == Brightness.light 
+              color: Theme.of(context).brightness == Brightness.light
                   ? const Color(0xFF000000) // 純粋な黒
                   : const Color(0xFFF5F5F5),
               fontWeight: FontWeight.w400, // Regular
@@ -115,8 +115,8 @@ class DeckItem extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.more_horiz,
-                    color: Theme.of(context).brightness == Brightness.light 
-                        ? const Color(0xFF424242) 
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? const Color(0xFF424242)
                         : const Color(0xFFCCCCCC),
                   ),
                   onPressed: () {
@@ -310,7 +310,9 @@ class ProfilePostItem extends StatelessWidget {
         ),
         _buildActionButton(
           context: context,
-          icon: isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+          icon: isLiked
+              ? Icons.favorite_rounded
+              : Icons.favorite_border_rounded,
           count: likeCount,
           isActive: isLiked,
           activeColor: Theme.of(context).colorScheme.likeColor,
@@ -331,9 +333,9 @@ class ProfilePostItem extends StatelessWidget {
   }) {
     final color = isActive && activeColor != null
         ? activeColor
-        : (Theme.of(context).brightness == Brightness.light 
-            ? const Color(0xFF424242) 
-            : const Color(0xFFCCCCCC));
+        : (Theme.of(context).brightness == Brightness.light
+              ? const Color(0xFF424242)
+              : const Color(0xFFCCCCCC));
 
     return InkWell(
       onTap: onTap,
@@ -350,10 +352,8 @@ class ProfilePostItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   _formatCount(count),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(
-                    color: color, 
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: color,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
@@ -496,7 +496,11 @@ class ListMemberItem extends StatelessWidget {
       content: bio ?? AppLocalizations.of(context).noProfileInfo,
       trailing: OutlinedButton(
         onPressed: onFollow,
-        child: Text(isFollowing ? AppLocalizations.of(context).following : AppLocalizations.of(context).follow),
+        child: Text(
+          isFollowing
+              ? AppLocalizations.of(context).following
+              : AppLocalizations.of(context).follow,
+        ),
       ),
       onTap: onTap,
     );

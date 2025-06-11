@@ -14,7 +14,16 @@ import 'package:moodesky/shared/models/auth_models.dart';
 import 'package:moodesky/shared/widgets/language_selector.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  final String? initialIdentifier;
+  final ServerConfig? initialServer;
+  final bool isReauth;
+
+  const LoginScreen({
+    super.key,
+    this.initialIdentifier,
+    this.initialServer,
+    this.isReauth = false,
+  });
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -29,6 +38,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscurePassword = true;
   bool _useOAuth = false; // Toggle between OAuth and App Password
   ServerConfig _selectedServer = ServerPresets.blueskyOfficial;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 初期値を設定
+    if (widget.initialIdentifier != null) {
+      _identifierController.text = widget.initialIdentifier!;
+    }
+
+    if (widget.initialServer != null) {
+      _selectedServer = widget.initialServer!;
+    }
+  }
 
   @override
   void dispose() {
@@ -88,459 +111,490 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ],
         ),
         body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Logo
-                    Container(
-                      height: 80,
-                      margin: const EdgeInsets.only(bottom: 32),
-                      child: Center(
-                        child: Text(
-                          'moodeSky',
-                          style: Theme.of(context).textTheme.headlineLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                        ),
-                      ),
-                    ),
-
-                    // Auth method toggle
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Logo
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 32),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              AppLocalizations.of(context)!.loginMethod,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 8),
-                            SegmentedButton<bool>(
-                              segments: [
-                                ButtonSegment(
-                                  value: false,
-                                  label: Text(
-                                    AppLocalizations.of(
+                              'moodeSky',
+                              style: Theme.of(context).textTheme.headlineLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(
                                       context,
-                                    )!.authMethodAppPassword,
+                                    ).colorScheme.primary,
                                   ),
-                                  icon: const Icon(Icons.key),
-                                ),
-                                ButtonSegment(
-                                  value: true,
-                                  label: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.authMethodOAuth,
-                                  ),
-                                  icon: const Icon(Icons.security),
-                                ),
-                              ],
-                              selected: {_useOAuth},
-                              onSelectionChanged: (selection) {
-                                setState(() {
-                                  _useOAuth = selection.first;
-                                  _passwordController.clear();
-                                });
-                              },
                             ),
-                            const SizedBox(height: 8),
-                            // Method explanation
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: _useOAuth
-                                    ? Colors.orange.withValues(alpha: 0.1)
-                                    : Colors.blue.withValues(alpha: 0.1),
-                                border: Border.all(
-                                  color: _useOAuth
-                                      ? Colors.orange.withValues(alpha: 0.3)
-                                      : Colors.blue.withValues(alpha: 0.3),
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    _useOAuth ? Icons.info : Icons.check_circle,
-                                    color: _useOAuth
-                                        ? Colors.orange
-                                        : Colors.blue,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      _useOAuth
-                                          ? AppLocalizations.of(
-                                              context,
-                                            )!.oAuthInfo
-                                          : AppLocalizations.of(
-                                              context,
-                                            )!.appPasswordRecommended,
-                                      style: TextStyle(
-                                        color: _useOAuth
-                                            ? Colors.orange
-                                            : Colors.blue,
-                                        fontSize: 12,
-                                      ),
+                            if (widget.isReauth) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                '再認証',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.secondary,
+                                      fontWeight: FontWeight.w600,
                                     ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+
+                      // Auth method toggle
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context)!.loginMethod,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 8),
+                              SegmentedButton<bool>(
+                                segments: [
+                                  ButtonSegment(
+                                    value: false,
+                                    label: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.authMethodAppPassword,
+                                    ),
+                                    icon: const Icon(Icons.key),
+                                  ),
+                                  ButtonSegment(
+                                    value: true,
+                                    label: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.authMethodOAuth,
+                                    ),
+                                    icon: const Icon(Icons.security),
                                   ),
                                 ],
+                                selected: {_useOAuth},
+                                onSelectionChanged: (selection) {
+                                  setState(() {
+                                    _useOAuth = selection.first;
+                                    _passwordController.clear();
+                                  });
+                                },
                               ),
+                              const SizedBox(height: 8),
+                              // Method explanation
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: _useOAuth
+                                      ? Colors.orange.withValues(alpha: 0.1)
+                                      : Colors.blue.withValues(alpha: 0.1),
+                                  border: Border.all(
+                                    color: _useOAuth
+                                        ? Colors.orange.withValues(alpha: 0.3)
+                                        : Colors.blue.withValues(alpha: 0.3),
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      _useOAuth
+                                          ? Icons.info
+                                          : Icons.check_circle,
+                                      color: _useOAuth
+                                          ? Colors.orange
+                                          : Colors.blue,
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        _useOAuth
+                                            ? AppLocalizations.of(
+                                                context,
+                                              )!.oAuthInfo
+                                            : AppLocalizations.of(
+                                                context,
+                                              )!.appPasswordRecommended,
+                                        style: TextStyle(
+                                          color: _useOAuth
+                                              ? Colors.orange
+                                              : Colors.blue,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Server selection
+                      Card(
+                        child: ExpansionTile(
+                          leading: Icon(
+                            _selectedServer.isOfficial
+                                ? Icons.verified
+                                : Icons.dns,
+                            color: _selectedServer.isOfficial
+                                ? Colors.blue
+                                : Colors.grey[600],
+                          ),
+                          title: Text(_selectedServer.displayName),
+                          subtitle: Text(
+                            Uri.parse(_selectedServer.serviceUrl).host,
+                          ),
+                          children: [
+                            for (final server
+                                in ServerPresets.predefinedServers)
+                              Builder(
+                                builder: (context) {
+                                  final isSelected =
+                                      server.serviceUrl ==
+                                      _selectedServer.serviceUrl;
+                                  return ListTile(
+                                    leading: Icon(
+                                      server.isOfficial
+                                          ? Icons.verified
+                                          : Icons.dns,
+                                      color: server.isOfficial
+                                          ? Colors.blue
+                                          : Colors.grey[600],
+                                    ),
+                                    title: Text(
+                                      server.displayName,
+                                      style: TextStyle(
+                                        fontWeight: server.isOfficial
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      Uri.parse(server.serviceUrl).host,
+                                    ),
+                                    trailing: isSelected
+                                        ? const Icon(
+                                            Icons.check,
+                                            color: Colors.blue,
+                                          )
+                                        : null,
+                                    selected: isSelected,
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedServer = server;
+                                      });
+                                    },
+                                  );
+                                },
+                              ),
+                            ListTile(
+                              leading: const Icon(Icons.add),
+                              title: Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.customServerOption,
+                              ),
+                              subtitle: Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.customServerDescription,
+                              ),
+                              onTap: () {
+                                // TODO: カスタムサーバー追加ダイアログ
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.customServerComingSoon,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
                       ),
-                    ),
 
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 24),
 
-                    // Server selection
-                    Card(
-                      child: ExpansionTile(
-                        leading: Icon(
-                          _selectedServer.isOfficial
-                              ? Icons.verified
-                              : Icons.dns,
-                          color: _selectedServer.isOfficial
-                              ? Colors.blue
-                              : Colors.grey[600],
-                        ),
-                        title: Text(_selectedServer.displayName),
-                        subtitle: Text(
-                          Uri.parse(_selectedServer.serviceUrl).host,
-                        ),
-                        children: [
-                          for (final server in ServerPresets.predefinedServers)
-                            Builder(
-                              builder: (context) {
-                                final isSelected =
-                                    server.serviceUrl ==
-                                    _selectedServer.serviceUrl;
-                                return ListTile(
-                                  leading: Icon(
-                                    server.isOfficial
-                                        ? Icons.verified
-                                        : Icons.dns,
-                                    color: server.isOfficial
-                                        ? Colors.blue
-                                        : Colors.grey[600],
-                                  ),
-                                  title: Text(
-                                    server.displayName,
-                                    style: TextStyle(
-                                      fontWeight: server.isOfficial
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    Uri.parse(server.serviceUrl).host,
-                                  ),
-                                  trailing: isSelected
-                                      ? const Icon(
-                                          Icons.check,
-                                          color: Colors.blue,
-                                        )
-                                      : null,
-                                  selected: isSelected,
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedServer = server;
-                                    });
-                                  },
-                                );
-                              },
-                            ),
-                          ListTile(
-                            leading: const Icon(Icons.add),
-                            title: Text(
-                              AppLocalizations.of(context)!.customServerOption,
-                            ),
-                            subtitle: Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.customServerDescription,
-                            ),
-                            onTap: () {
-                              // TODO: カスタムサーバー追加ダイアログ
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.customServerComingSoon,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Identifier field
-                    TextFormField(
-                      controller: _identifierController,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(
-                          context,
-                        )!.identifierLabel,
-                        hintText: AppLocalizations.of(context)!.identifierHint,
-                        prefixIcon: const Icon(Icons.person),
-                        border: const OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: _useOAuth
-                          ? TextInputAction.done
-                          : TextInputAction.next,
-                      validator: (value) {
-                        if (value?.trim().isEmpty ?? true) {
-                          return AppLocalizations.of(
-                            context,
-                          )!.identifierRequired;
-                        }
-                        return null;
-                      },
-                    ),
-
-                    // Password field (only for app password)
-                    if (!_useOAuth) ...[
-                      const SizedBox(height: 16),
+                      // Identifier field
                       TextFormField(
-                        controller: _passwordController,
+                        controller: _identifierController,
                         decoration: InputDecoration(
                           labelText: AppLocalizations.of(
                             context,
-                          )!.passwordLabel,
-                          hintText: AppLocalizations.of(context)!.passwordHint,
-                          prefixIcon: const Icon(Icons.lock),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                            ),
-                            onPressed: () {
-                              setState(
-                                () => _obscurePassword = !_obscurePassword,
-                              );
-                            },
-                          ),
+                          )!.identifierLabel,
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.identifierHint,
+                          prefixIcon: const Icon(Icons.person),
                           border: const OutlineInputBorder(),
                         ),
-                        obscureText: _obscurePassword,
-                        textInputAction: TextInputAction.done,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: _useOAuth
+                            ? TextInputAction.done
+                            : TextInputAction.next,
                         validator: (value) {
                           if (value?.trim().isEmpty ?? true) {
                             return AppLocalizations.of(
                               context,
-                            )!.passwordRequired;
+                            )!.identifierRequired;
                           }
                           return null;
                         },
                       ),
 
-                      const SizedBox(height: 8),
-
-                      // App Password help and warning
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.1),
-                          border: Border.all(
-                            color: Colors.blue.withValues(alpha: 0.3),
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.info, color: Colors.blue, size: 16),
-                                const SizedBox(width: 6),
-                                Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.aboutAppPassword,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.appPasswordDescription,
-                              style: const TextStyle(fontSize: 11),
-                            ),
-                            const SizedBox(height: 6),
-                            InkWell(
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      _selectedServer.appPasswordUrl,
-                                    ),
-                                    action: SnackBarAction(
-                                      label: AppLocalizations.of(
-                                        context,
-                                      )!.copyButton,
-                                      onPressed: () {
-                                        // TODO: URLをクリップボードにコピー
-                                      },
-                                    ),
-                                  ),
+                      // Password field (only for app password)
+                      if (!_useOAuth) ...[
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(
+                              context,
+                            )!.passwordLabel,
+                            hintText: AppLocalizations.of(
+                              context,
+                            )!.passwordHint,
+                            prefixIcon: const Icon(Icons.lock),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(
+                                  () => _obscurePassword = !_obscurePassword,
                                 );
                               },
-                              child: Text(
-                                AppLocalizations.of(
-                                  context,
-                                )!.generateAppPassword,
-                                style: const TextStyle(
-                                  color: Colors.blue,
-                                  fontSize: 11,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
                             ),
-                          ],
+                            border: const OutlineInputBorder(),
+                          ),
+                          obscureText: _obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          validator: (value) {
+                            if (value?.trim().isEmpty ?? true) {
+                              return AppLocalizations.of(
+                                context,
+                              )!.passwordRequired;
+                            }
+                            return null;
+                          },
                         ),
-                      ),
-                    ],
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 8),
 
-                    // Sign in button
-                    FilledButton(
-                      onPressed: (_isLoading || _useOAuth) ? null : _signIn,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                _useOAuth
-                                    ? AppLocalizations.of(
-                                        context,
-                                      )!.oAuthInDevelopment
-                                    : AppLocalizations.of(
-                                        context,
-                                      )!.signInButton,
-                              ),
-                      ),
-                    ),
-
-                    // Error display
-                    if (authState is AuthError) ...[
-                      const SizedBox(height: 16),
-                      Card(
-                        color: Theme.of(context).colorScheme.errorContainer,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
+                        // App Password help and warning
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withValues(alpha: 0.1),
+                            border: Border.all(
+                              color: Colors.blue.withValues(alpha: 0.3),
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
                                   Icon(
-                                    Icons.error_outline,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onErrorContainer,
+                                    Icons.info,
+                                    color: Colors.blue,
+                                    size: 16,
                                   ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      AppLocalizations.of(context)!.loginError,
-                                      style: TextStyle(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onErrorContainer,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.aboutAppPassword,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue,
+                                      fontSize: 12,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 4),
                               Text(
-                                authState.message,
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onErrorContainer,
-                                  fontSize: 14,
-                                ),
+                                AppLocalizations.of(
+                                  context,
+                                )!.appPasswordDescription,
+                                style: const TextStyle(fontSize: 11),
                               ),
-                              // Show retry button for network errors
-                              if (authState.errorType ==
-                                  AuthErrorType.networkError) ...[
-                                const SizedBox(height: 12),
-                                FilledButton.tonal(
-                                  onPressed: () {
-                                    ref
-                                        .read(authNotifierProvider.notifier)
-                                        .refresh();
-                                  },
-                                  child: Text(
-                                    AppLocalizations.of(context)!.retryButton,
+                              const SizedBox(height: 6),
+                              InkWell(
+                                onTap: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        _selectedServer.appPasswordUrl,
+                                      ),
+                                      action: SnackBarAction(
+                                        label: AppLocalizations.of(
+                                          context,
+                                        )!.copyButton,
+                                        onPressed: () {
+                                          // TODO: URLをクリップボードにコピー
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.generateAppPassword,
+                                  style: const TextStyle(
+                                    color: Colors.blue,
+                                    fontSize: 11,
+                                    decoration: TextDecoration.underline,
                                   ),
                                 ),
-                              ],
+                              ),
                             ],
                           ),
                         ),
+                      ],
+
+                      const SizedBox(height: 24),
+
+                      // Sign in button
+                      FilledButton(
+                        onPressed: (_isLoading || _useOAuth) ? null : _signIn,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  _useOAuth
+                                      ? AppLocalizations.of(
+                                          context,
+                                        )!.oAuthInDevelopment
+                                      : AppLocalizations.of(
+                                          context,
+                                        )!.signInButton,
+                                ),
+                        ),
+                      ),
+
+                      // Error display
+                      if (authState is AuthError) ...[
+                        const SizedBox(height: 16),
+                        Card(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.error_outline,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onErrorContainer,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.loginError,
+                                        style: TextStyle(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onErrorContainer,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  authState.message,
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onErrorContainer,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                // Show retry button for network errors
+                                if (authState.errorType ==
+                                    AuthErrorType.networkError) ...[
+                                  const SizedBox(height: 12),
+                                  FilledButton.tonal(
+                                    onPressed: () {
+                                      ref
+                                          .read(authNotifierProvider.notifier)
+                                          .refresh();
+                                    },
+                                    child: Text(
+                                      AppLocalizations.of(context)!.retryButton,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(height: 32),
+
+                      // Help text
+                      Text(
+                        _useOAuth
+                            ? AppLocalizations.of(context)!.helpTextOAuth
+                            : AppLocalizations.of(context)!.helpTextAppPassword,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
-
-                    const SizedBox(height: 32),
-
-                    // Help text
-                    Text(
-                      _useOAuth
-                          ? AppLocalizations.of(context)!.helpTextOAuth
-                          : AppLocalizations.of(context)!.helpTextAppPassword,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 }

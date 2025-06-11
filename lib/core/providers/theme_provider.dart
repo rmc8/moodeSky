@@ -12,11 +12,7 @@ import 'package:moodesky/core/theme/app_themes.dart';
 part 'theme_provider.g.dart';
 
 /// テーマモード設定
-enum AppThemeMode {
-  light,
-  dark,
-  system,
-}
+enum AppThemeMode { light, dark, system }
 
 extension AppThemeModeExtension on AppThemeMode {
   String get displayName {
@@ -29,7 +25,7 @@ extension AppThemeModeExtension on AppThemeMode {
         return 'System';
     }
   }
-  
+
   String get localizedKey {
     switch (this) {
       case AppThemeMode.light:
@@ -40,7 +36,7 @@ extension AppThemeModeExtension on AppThemeMode {
         return 'themeSystem';
     }
   }
-  
+
   IconData get icon {
     switch (this) {
       case AppThemeMode.light:
@@ -51,7 +47,7 @@ extension AppThemeModeExtension on AppThemeMode {
         return Icons.brightness_auto;
     }
   }
-  
+
   ThemeMode get flutterThemeMode {
     switch (this) {
       case AppThemeMode.light:
@@ -72,16 +68,16 @@ class ThemeNotifier extends _$ThemeNotifier {
   @override
   Future<AppThemeMode> build() async {
     final prefs = await ref.watch(sharedPreferencesProvider.future);
-    
+
     // 保存されたテーマ設定を読み込む
     final savedThemeIndex = prefs.getInt(_themeKey);
-    
-    if (savedThemeIndex != null && 
-        savedThemeIndex >= 0 && 
+
+    if (savedThemeIndex != null &&
+        savedThemeIndex >= 0 &&
         savedThemeIndex < AppThemeMode.values.length) {
       return AppThemeMode.values[savedThemeIndex];
     }
-    
+
     // デフォルトはシステム設定に従う
     return AppThemeMode.system;
   }
@@ -89,10 +85,10 @@ class ThemeNotifier extends _$ThemeNotifier {
   /// テーマモードを変更する
   Future<void> setThemeMode(AppThemeMode themeMode) async {
     final prefs = await ref.read(sharedPreferencesProvider.future);
-    
+
     // SharedPreferencesに保存
     await prefs.setInt(_themeKey, themeMode.index);
-    
+
     // 状態を更新
     state = AsyncData(themeMode);
   }
@@ -158,7 +154,10 @@ TextStyle monospaceTextStyle(
 
 /// 言語に応じて調整されたフォントウェイトを取得するプロバイダー
 @riverpod
-FontWeight adjustedFontWeight(AutoDisposeProviderRef<FontWeight> ref, FontWeight baseWeight) {
+FontWeight adjustedFontWeight(
+  AutoDisposeProviderRef<FontWeight> ref,
+  FontWeight baseWeight,
+) {
   final locale = ref.watch(currentLocaleProvider);
   final languageCode = locale?.languageCode ?? 'en';
   return AppFonts.adjustFontWeightForCJK(baseWeight, languageCode);

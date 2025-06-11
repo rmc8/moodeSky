@@ -182,8 +182,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manageAccounts => 'Manage Accounts';
 
   @override
-  String get manageAccountsDescription =>
-      'Add, remove, or switch between accounts';
+  String get manageAccountsDescription => 'Add and remove accounts';
 
   @override
   String get refreshProfiles => 'Refresh Profiles';
@@ -461,4 +460,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deckTypeCustom => 'Custom';
+
+  @override
+  String get moveDeckLeft => 'Move Left';
+
+  @override
+  String get moveDeckRight => 'Move Right';
+
+  @override
+  String get deckSettings => 'Deck Settings';
+
+  @override
+  String get deleteDeck => 'Delete Deck';
+
+  @override
+  String get deckMovedLeft => 'Deck moved left';
+
+  @override
+  String get deckMovedRight => 'Deck moved right';
+
+  @override
+  String get deckMoveError => 'Failed to move deck';
+
+  @override
+  String get deckSettingsComingSoon => 'Deck settings feature is coming soon';
+
+  @override
+  String get deleteDeckTitle => 'Delete Deck';
+
+  @override
+  String deleteDeckConfirm(String deckTitle) {
+    return 'Delete \"$deckTitle\"? This action cannot be undone.';
+  }
+
+  @override
+  String get deleteButton => 'Delete';
+
+  @override
+  String deckDeletedSuccess(String deckTitle) {
+    return '\"$deckTitle\" has been deleted';
+  }
+
+  @override
+  String get deckDeleteError => 'Failed to delete deck';
 }

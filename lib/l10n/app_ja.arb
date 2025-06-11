@@ -54,7 +54,7 @@
   "settingsTitle": "設定",
   "accountSettings": "アカウント設定",
   "manageAccounts": "アカウント管理",
-  "manageAccountsDescription": "アカウントの追加、削除、切り替え",
+  "manageAccountsDescription": "アカウントの追加・削除",
   "refreshProfiles": "プロフィール更新",
   "refreshProfilesDescription": "すべてのアカウントのプロフィール情報とアバターを更新",
   "refreshingProfiles": "プロフィール情報を更新中...",
@@ -138,5 +138,18 @@
   "numberMillionSuffix": "M",
   "multiAccount": "マルチアカウント",
   "deckOptions": "デッキオプション",
-  "deckTypeCustom": "カスタム"
+  "deckTypeCustom": "カスタム",
+  "moveDeckLeft": "左に移動",
+  "moveDeckRight": "右に移動",
+  "deckSettings": "デッキ設定",
+  "deleteDeck": "デッキを削除",
+  "deckMovedLeft": "デッキを左に移動しました",
+  "deckMovedRight": "デッキを右に移動しました",
+  "deckMoveError": "デッキの移動に失敗しました",
+  "deckSettingsComingSoon": "デッキ設定機能は準備中です",
+  "deleteDeckTitle": "デッキを削除",
+  "deleteDeckConfirm": "「{deckTitle}」を削除しますか？この操作は取り消せません。",
+  "deleteButton": "削除",
+  "deckDeletedSuccess": "「{deckTitle}」を削除しました",
+  "deckDeleteError": "デッキの削除に失敗しました"
 }

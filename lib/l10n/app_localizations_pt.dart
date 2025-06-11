@@ -461,6 +461,49 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get deckTypeCustom => 'Personalizado';
+
+  @override
+  String get moveDeckLeft => 'Move Left';
+
+  @override
+  String get moveDeckRight => 'Move Right';
+
+  @override
+  String get deckSettings => 'Deck Settings';
+
+  @override
+  String get deleteDeck => 'Delete Deck';
+
+  @override
+  String get deckMovedLeft => 'Deck moved left';
+
+  @override
+  String get deckMovedRight => 'Deck moved right';
+
+  @override
+  String get deckMoveError => 'Failed to move deck';
+
+  @override
+  String get deckSettingsComingSoon => 'Deck settings feature is coming soon';
+
+  @override
+  String get deleteDeckTitle => 'Delete Deck';
+
+  @override
+  String deleteDeckConfirm(String deckTitle) {
+    return 'Delete \"$deckTitle\"? This action cannot be undone.';
+  }
+
+  @override
+  String get deleteButton => 'Delete';
+
+  @override
+  String deckDeletedSuccess(String deckTitle) {
+    return '\"$deckTitle\" has been deleted';
+  }
+
+  @override
+  String get deckDeleteError => 'Failed to delete deck';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).

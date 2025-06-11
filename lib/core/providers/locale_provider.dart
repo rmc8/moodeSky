@@ -91,7 +91,9 @@ class SupportedLocales {
 
 /// SharedPreferencesから言語設定を読み込むProvider
 @riverpod
-Future<SharedPreferences> sharedPreferences(AutoDisposeFutureProviderRef<SharedPreferences> ref) async {
+Future<SharedPreferences> sharedPreferences(
+  AutoDisposeFutureProviderRef<SharedPreferences> ref,
+) async {
   return await SharedPreferences.getInstance();
 }
 

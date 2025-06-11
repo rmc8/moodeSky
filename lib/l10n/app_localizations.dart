@@ -426,7 +426,7 @@ abstract class AppLocalizations {
   /// Description for manage accounts option
   ///
   /// In en, this message translates to:
-  /// **'Add, remove, or switch between accounts'**
+  /// **'Add and remove accounts'**
   String get manageAccountsDescription;
 
   /// Label for refresh profiles option
@@ -932,6 +932,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Custom'**
   String get deckTypeCustom;
+
+  /// Menu item to move deck left
+  ///
+  /// In en, this message translates to:
+  /// **'Move Left'**
+  String get moveDeckLeft;
+
+  /// Menu item to move deck right
+  ///
+  /// In en, this message translates to:
+  /// **'Move Right'**
+  String get moveDeckRight;
+
+  /// Menu item to open deck settings
+  ///
+  /// In en, this message translates to:
+  /// **'Deck Settings'**
+  String get deckSettings;
+
+  /// Menu item to delete deck
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Deck'**
+  String get deleteDeck;
+
+  /// Success message when deck is moved left
+  ///
+  /// In en, this message translates to:
+  /// **'Deck moved left'**
+  String get deckMovedLeft;
+
+  /// Success message when deck is moved right
+  ///
+  /// In en, this message translates to:
+  /// **'Deck moved right'**
+  String get deckMovedRight;
+
+  /// Error message when deck move fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to move deck'**
+  String get deckMoveError;
+
+  /// Message when deck settings is not yet implemented
+  ///
+  /// In en, this message translates to:
+  /// **'Deck settings feature is coming soon'**
+  String get deckSettingsComingSoon;
+
+  /// Title for delete deck confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Deck'**
+  String get deleteDeckTitle;
+
+  /// Confirmation message for deck deletion
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{deckTitle}\"? This action cannot be undone.'**
+  String deleteDeckConfirm(String deckTitle);
+
+  /// Delete button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteButton;
+
+  /// Success message when deck is deleted
+  ///
+  /// In en, this message translates to:
+  /// **'\"{deckTitle}\" has been deleted'**
+  String deckDeletedSuccess(String deckTitle);
+
+  /// Error message when deck deletion fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete deck'**
+  String get deckDeleteError;
 }
 
 class _AppLocalizationsDelegate

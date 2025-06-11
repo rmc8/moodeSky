@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/features/settings/screens/account_management_screen.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/shared/widgets/language_selector.dart';
 import 'package:moodesky/shared/widgets/theme_selector.dart';
@@ -34,12 +35,12 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Theme Selection
                   const ThemeSelector(),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Language Selection
                   const LanguageSelector(),
                 ],
@@ -69,8 +70,8 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(
                       AppLocalizations.of(context)!.manageAccounts,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF1A1A1A) 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF1A1A1A)
                             : const Color(0xFFF5F5F5),
                         fontWeight: FontWeight.w500,
                       ),
@@ -78,20 +79,17 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: Text(
                       AppLocalizations.of(context)!.manageAccountsDescription,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF222222) 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF222222)
                             : const Color(0xFFE0E0E0),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
-                      // TODO: Navigate to account management screen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            AppLocalizations.of(context)!.comingSoon,
-                          ),
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const AccountManagementScreen(),
                         ),
                       );
                     },
@@ -114,8 +112,8 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: Text(
                       AppLocalizations.of(context)!.signOutAllDescription,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF222222) 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF222222)
                             : const Color(0xFFE0E0E0),
                         fontWeight: FontWeight.w500,
                       ),
@@ -149,8 +147,8 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(
                       AppLocalizations.of(context)!.aboutApp,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF1A1A1A) 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF1A1A1A)
                             : const Color(0xFFF5F5F5),
                         fontWeight: FontWeight.w500,
                       ),
@@ -158,8 +156,8 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: Text(
                       AppLocalizations.of(context)!.appVersion('0.0.1'),
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF222222) 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF222222)
                             : const Color(0xFFE0E0E0),
                         fontWeight: FontWeight.w500,
                       ),
@@ -177,8 +175,8 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(
                       AppLocalizations.of(context)!.privacyPolicy,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF1A1A1A) 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF1A1A1A)
                             : const Color(0xFFF5F5F5),
                         fontWeight: FontWeight.w500,
                       ),
@@ -201,8 +199,8 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(
                       AppLocalizations.of(context)!.termsOfService,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF1A1A1A) 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF1A1A1A)
                             : const Color(0xFFF5F5F5),
                         fontWeight: FontWeight.w500,
                       ),

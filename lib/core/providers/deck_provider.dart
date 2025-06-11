@@ -26,9 +26,10 @@ final allDecksFutureProvider = FutureProvider<List<Deck>>((ref) async {
 });
 
 /// Provider to create a new deck
-final deckCreatorProvider = StateNotifierProvider<DeckCreator, AsyncValue<void>>((ref) {
-  return DeckCreator(ref);
-});
+final deckCreatorProvider =
+    StateNotifierProvider<DeckCreator, AsyncValue<void>>((ref) {
+      return DeckCreator(ref);
+    });
 
 class DeckCreator extends StateNotifier<AsyncValue<void>> {
   final Ref ref;
@@ -43,13 +44,14 @@ class DeckCreator extends StateNotifier<AsyncValue<void>> {
     String? targetIdentifier,
   }) async {
     state = const AsyncValue.loading();
-    
+
     try {
       final dao = ref.read(deckDaoProvider);
-      
+
       // Generate unique deck ID
-      final deckId = '${accountDid}_${deckType}_${DateTime.now().millisecondsSinceEpoch}';
-      
+      final deckId =
+          '${accountDid}_${deckType}_${DateTime.now().millisecondsSinceEpoch}';
+
       final deck = DecksCompanion.insert(
         deckId: deckId,
         title: title,
@@ -59,7 +61,7 @@ class DeckCreator extends StateNotifier<AsyncValue<void>> {
         targetIdentifier: Value(targetIdentifier),
         isCrossAccount: Value(accountDid.isEmpty),
       );
-      
+
       await dao.createDeck(deck);
       state = const AsyncValue.data(null);
     } catch (error, stackTrace) {
@@ -75,7 +77,7 @@ final deckOrderUpdaterProvider = Provider<DeckOrderUpdater>((ref) {
 
 class DeckOrderUpdater {
   final Ref ref;
-  
+
   DeckOrderUpdater(this.ref);
 
   Future<void> updateOrder(String deckId, int newOrder) async {
@@ -91,7 +93,7 @@ final deckDeleterProvider = Provider<DeckDeleter>((ref) {
 
 class DeckDeleter {
   final Ref ref;
-  
+
   DeckDeleter(this.ref);
 
   Future<void> deleteDeck(String deckId) async {
@@ -107,7 +109,7 @@ final deckFavoriteTogglerProvider = Provider<DeckFavoriteToggler>((ref) {
 
 class DeckFavoriteToggler {
   final Ref ref;
-  
+
   DeckFavoriteToggler(this.ref);
 
   Future<void> toggleFavorite(String deckId, bool isFavorite) async {

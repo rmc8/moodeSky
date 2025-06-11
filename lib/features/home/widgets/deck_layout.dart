@@ -70,7 +70,11 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
         }
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text(AppLocalizations.of(context).errorOccurred(error.toString()))),
+      error: (error, stack) => Center(
+        child: Text(
+          AppLocalizations.of(context).errorOccurred(error.toString()),
+        ),
+      ),
     );
   }
 
@@ -163,6 +167,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
             child: SingleChildScrollView(
               controller: _tabScrollController,
               scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(left: 12), // 左側に余白を追加
               child: Row(
                 children: decks.asMap().entries.map((entry) {
                   final index = entry.key;
@@ -197,12 +202,12 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   Widget _buildTab(Deck deck, int index, bool isSelected) {
     final allAccounts = ref.watch(availableAccountsProvider);
     final activeAccount = ref.watch(activeAccountProvider);
-    
+
     // デッキに関連付けられたアカウントを取得
     var account = deck.accountDid != null
         ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
         : null;
-    
+
     // 対応するアカウントが見つからない場合はアクティブアカウントを使用
     account ??= activeAccount;
 
@@ -297,8 +302,12 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                               radius: 8,
                               backgroundColor: _getAccountColor(account.did),
                               child: Text(
-                                account.displayName?.substring(0, 1).toUpperCase() ?? 
-                                account.handle.substring(0, 1).toUpperCase(),
+                                account.displayName
+                                        ?.substring(0, 1)
+                                        .toUpperCase() ??
+                                    account.handle
+                                        .substring(0, 1)
+                                        .toUpperCase(),
                                 style: const TextStyle(
                                   fontSize: 8,
                                   fontWeight: FontWeight.bold,
@@ -311,13 +320,15 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                           Expanded(
                             child: Text(
                               '@${account.handle}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontSize: 10,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.7),
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    fontSize: 10,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.7),
+                                    fontWeight: FontWeight.w500,
+                                  ),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -339,13 +350,15 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                           Expanded(
                             child: Text(
                               AppLocalizations.of(context).multiAccount,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontSize: 10,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.6),
-                                fontStyle: FontStyle.italic,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    fontSize: 10,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.6),
+                                    fontStyle: FontStyle.italic,
+                                  ),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -361,7 +374,11 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                 onTap: () {
                   // TODO: Close deck
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context).closeDeckFeature)),
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context).closeDeckFeature,
+                      ),
+                    ),
                   );
                 },
                 child: Padding(
@@ -415,11 +432,11 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                 // アカウントアバター（適切なサイズ）
                 _buildCompactAccountAvatar(selectedDeck),
                 if (_hasAccountInfo(selectedDeck)) const SizedBox(width: 8),
-                
+
                 // デッキタイプアイコン
                 Icon(_getDeckIcon(selectedDeck.deckType), size: 16),
                 const SizedBox(width: 8),
-                
+
                 // ワンライナーのラベル
                 Expanded(
                   child: Text(
@@ -432,18 +449,72 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                     maxLines: 1,
                   ),
                 ),
-                
+
                 // メニューボタン（タップしやすいサイズ）
                 SizedBox(
                   width: 40,
                   height: 40,
-                  child: IconButton(
+                  child: PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert_rounded, size: 18),
-                    onPressed: () {
-                      // TODO: Show deck options
-                    },
-                    padding: const EdgeInsets.all(8),
                     tooltip: AppLocalizations.of(context).deckOptions,
+                    padding: const EdgeInsets.all(8),
+                    onSelected: (value) =>
+                        _handleDeckMenuAction(value, selectedDeck),
+                    itemBuilder: (context) => [
+                      PopupMenuItem<String>(
+                        value: 'moveLeft',
+                        enabled: _selectedTabIndex > 0,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.arrow_back_rounded, size: 18),
+                            const SizedBox(width: 12),
+                            Text(AppLocalizations.of(context).moveDeckLeft),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem<String>(
+                        value: 'moveRight',
+                        enabled: _selectedTabIndex < decks.length - 1,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.arrow_forward_rounded, size: 18),
+                            const SizedBox(width: 12),
+                            Text(AppLocalizations.of(context).moveDeckRight),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem<String>(
+                        value: 'settings',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.settings_rounded, size: 18),
+                            const SizedBox(width: 12),
+                            Text(AppLocalizations.of(context).deckSettings),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem<String>(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_rounded,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              AppLocalizations.of(context).deleteDeck,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -505,6 +576,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
             child: SingleChildScrollView(
               controller: _tabScrollController,
               scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(left: 8), // モバイルは少し狭めの余白
               child: Row(
                 children: decks.asMap().entries.map((entry) {
                   final index = entry.key;
@@ -544,12 +616,12 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   ) {
     final allAccounts = ref.watch(availableAccountsProvider);
     final activeAccount = ref.watch(activeAccountProvider);
-    
+
     // デッキに関連付けられたアカウントを取得
     var account = deck.accountDid != null
         ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
         : null;
-    
+
     // 対応するアカウントが見つからない場合はアクティブアカウントを使用
     account ??= activeAccount;
 
@@ -667,11 +739,11 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                 // アカウントアバター（モバイル適切サイズ）
                 _buildCompactAccountAvatar(deck, isUltraCompact: true),
                 if (_hasAccountInfo(deck)) const SizedBox(width: 6),
-                
+
                 // デッキタイプアイコン
                 Icon(_getDeckIcon(deck.deckType), size: 14),
                 const SizedBox(width: 6),
-                
+
                 // ワンライナーのラベル
                 Expanded(
                   child: Text(
@@ -684,32 +756,92 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
                     maxLines: 1,
                   ),
                 ),
-                
+
                 // ページインジケーター（コンパクト）
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     '${index + 1}/$totalDecks',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 9),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(fontSize: 9),
                   ),
                 ),
                 const SizedBox(width: 6),
-                
+
                 // メニューボタン（モバイルタップ対応）
                 SizedBox(
                   width: 36,
                   height: 36,
-                  child: IconButton(
+                  child: PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert_rounded, size: 16),
-                    onPressed: () {
-                      // TODO: Show deck options
-                    },
-                    padding: const EdgeInsets.all(6),
                     tooltip: AppLocalizations.of(context).deckOptions,
+                    padding: const EdgeInsets.all(6),
+                    onSelected: (value) => _handleDeckMenuAction(value, deck),
+                    itemBuilder: (context) => [
+                      PopupMenuItem<String>(
+                        value: 'moveLeft',
+                        enabled: index > 0,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.arrow_back_rounded, size: 16),
+                            const SizedBox(width: 12),
+                            Text(AppLocalizations.of(context).moveDeckLeft),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem<String>(
+                        value: 'moveRight',
+                        enabled: index < totalDecks - 1,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.arrow_forward_rounded, size: 16),
+                            const SizedBox(width: 12),
+                            Text(AppLocalizations.of(context).moveDeckRight),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem<String>(
+                        value: 'settings',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.settings_rounded, size: 16),
+                            const SizedBox(width: 12),
+                            Text(AppLocalizations.of(context).deckSettings),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem<String>(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_rounded,
+                              size: 16,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              AppLocalizations.of(context).deleteDeck,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -751,7 +883,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       case 'thread':
         return Icons.forum_rounded;
       case 'custom_feed':
-        return Icons.rss_feed_rounded;
+        return Icons.tag_rounded;
       case 'local':
         return Icons.people_rounded;
       case 'hashtag':
@@ -834,9 +966,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       itemCount: notifications.length,
       itemBuilder: (context, index) {
         final notification = notifications[index];
-        return postStyle.buildPostContainer(
-          child: notification,
-        );
+        return postStyle.buildPostContainer(child: notification);
       },
     );
   }
@@ -880,9 +1010,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       itemCount: profilePosts.length,
       itemBuilder: (context, index) {
         final post = profilePosts[index];
-        return postStyle.buildPostContainer(
-          child: post,
-        );
+        return postStyle.buildPostContainer(child: post);
       },
     );
   }
@@ -925,9 +1053,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       itemCount: searchResults.length,
       itemBuilder: (context, index) {
         final result = searchResults[index];
-        return postStyle.buildPostContainer(
-          child: result,
-        );
+        return postStyle.buildPostContainer(child: result);
       },
     );
   }
@@ -966,9 +1092,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       itemCount: listMembers.length,
       itemBuilder: (context, index) {
         final member = listMembers[index];
-        return postStyle.buildPostContainer(
-          child: member,
-        );
+        return postStyle.buildPostContainer(child: member);
       },
     );
   }
@@ -1021,7 +1145,6 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
     );
   }
 
-
   /// デッキタイプの日本語名を取得
   String _getDeckTypeName(String deckType) {
     switch (deckType) {
@@ -1062,7 +1185,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       Colors.teal,
       Colors.pink,
     ];
-    
+
     // accountDidのハッシュコードを使用してカラーを決定
     final index = accountDid.hashCode.abs() % colors.length;
     return colors[index];
@@ -1072,14 +1195,14 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   Widget _buildCompactAccountAvatar(Deck deck, {bool isUltraCompact = false}) {
     final allAccounts = ref.watch(availableAccountsProvider);
     final activeAccount = ref.watch(activeAccountProvider);
-    
+
     // デッキに関連付けられたアカウントを取得
     // accountDidが指定されていて、有効なアカウントに対応する場合はそれを使用
     // そうでなければアクティブアカウントを使用
     var account = deck.accountDid != null
         ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
         : null;
-    
+
     // 対応するアカウントが見つからない場合はアクティブアカウントを使用
     account ??= activeAccount;
 
@@ -1099,8 +1222,8 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
           radius: radius,
           backgroundColor: _getAccountColor(account.did),
           child: Text(
-            account.displayName?.substring(0, 1).toUpperCase() ?? 
-            account.handle.substring(0, 1).toUpperCase(),
+            account.displayName?.substring(0, 1).toUpperCase() ??
+                account.handle.substring(0, 1).toUpperCase(),
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: FontWeight.bold,
@@ -1113,32 +1236,28 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       return CircleAvatar(
         radius: radius,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        child: Icon(
-          Icons.group_rounded,
-          size: iconSize,
-          color: Colors.white,
-        ),
+        child: Icon(Icons.group_rounded, size: iconSize, color: Colors.white),
       );
     }
-    
+
     return const SizedBox.shrink();
   }
 
   /// アカウント情報があるかチェック
   bool _hasAccountInfo(Deck deck) {
     if (deck.isCrossAccount) return true;
-    
+
     final allAccounts = ref.watch(availableAccountsProvider);
     final activeAccount = ref.watch(activeAccountProvider);
-    
+
     // デッキに関連付けられたアカウントを取得
     var account = deck.accountDid != null
         ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
         : null;
-    
+
     // 対応するアカウントが見つからない場合はアクティブアカウントを使用
     account ??= activeAccount;
-    
+
     return account != null;
   }
 
@@ -1146,17 +1265,17 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   String _buildCompactDeckLabel(Deck deck) {
     final allAccounts = ref.watch(availableAccountsProvider);
     final activeAccount = ref.watch(activeAccountProvider);
-    
+
     // デッキに関連付けられたアカウントを取得
     var account = deck.accountDid != null
         ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
         : null;
-    
+
     // 対応するアカウントが見つからない場合はアクティブアカウントを使用
     account ??= activeAccount;
 
     final deckTypeName = _getDeckTypeName(deck.deckType);
-    
+
     if (account != null) {
       return '$deckTypeName • @${account.handle}';
     } else if (deck.isCrossAccount) {
@@ -1166,4 +1285,135 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
     }
   }
 
+  /// デッキメニューアクションを処理
+  Future<void> _handleDeckMenuAction(String action, Deck deck) async {
+    switch (action) {
+      case 'moveLeft':
+        await _moveDeck(deck, -1);
+        break;
+      case 'moveRight':
+        await _moveDeck(deck, 1);
+        break;
+      case 'settings':
+        _showDeckSettings(deck);
+        break;
+      case 'delete':
+        await _confirmAndDeleteDeck(deck);
+        break;
+    }
+  }
+
+  /// デッキを移動
+  Future<void> _moveDeck(Deck deck, int direction) async {
+    try {
+      final decks = await ref.read(allDecksFutureProvider.future);
+      final currentIndex = decks.indexWhere((d) => d.deckId == deck.deckId);
+
+      if (currentIndex == -1) return;
+
+      final newIndex = currentIndex + direction;
+      if (newIndex < 0 || newIndex >= decks.length) return;
+
+      // 隣接するデッキと位置を入れ替え
+      final orderUpdater = ref.read(deckOrderUpdaterProvider);
+      final currentOrder = deck.deckOrder;
+      final adjacentDeck = decks[newIndex];
+      final adjacentOrder = adjacentDeck.deckOrder;
+
+      // 位置を交換
+      await orderUpdater.updateOrder(deck.deckId, adjacentOrder);
+      await orderUpdater.updateOrder(adjacentDeck.deckId, currentOrder);
+
+      // 新しい位置にタブを移動
+      setState(() {
+        _selectedTabIndex = newIndex;
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            direction < 0
+                ? AppLocalizations.of(context).deckMovedLeft
+                : AppLocalizations.of(context).deckMovedRight,
+          ),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).deckMoveError),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
+
+  /// デッキ設定を表示
+  void _showDeckSettings(Deck deck) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context).deckSettingsComingSoon),
+      ),
+    );
+  }
+
+  /// デッキの削除確認と実行
+  Future<void> _confirmAndDeleteDeck(Deck deck) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context).deleteDeckTitle),
+        content: Text(
+          AppLocalizations.of(context).deleteDeckConfirm(deck.title),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(AppLocalizations.of(context).cancelButton),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: Text(AppLocalizations.of(context).deleteButton),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      final deleter = ref.read(deckDeleterProvider);
+      await deleter.deleteDeck(deck.deckId);
+
+      // 削除後、選択インデックスを調整
+      if (_selectedTabIndex > 0) {
+        setState(() {
+          _selectedTabIndex--;
+        });
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).deckDeletedSuccess(deck.title),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).deckDeleteError),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
 }

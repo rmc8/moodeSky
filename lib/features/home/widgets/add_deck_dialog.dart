@@ -21,18 +21,27 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
   String _selectedDeckType = 'home';
   String? _selectedAccountDid;
   bool _isCrossAccount = false;
+  bool _hasManuallyEditedTitle = false;
 
   List<(String, String, IconData)> _getDeckTypes(BuildContext context) => [
     ('home', AppLocalizations.of(context).deckTypeHome, Icons.home),
-    ('notifications', AppLocalizations.of(context).deckTypeNotifications, Icons.notifications),
+    (
+      'notifications',
+      AppLocalizations.of(context).deckTypeNotifications,
+      Icons.notifications,
+    ),
     ('search', AppLocalizations.of(context).deckTypeSearch, Icons.search),
     ('list', AppLocalizations.of(context).deckTypeList, Icons.list),
     ('profile', AppLocalizations.of(context).deckTypeProfile, Icons.person),
     ('thread', AppLocalizations.of(context).deckTypeThread, Icons.forum),
-    ('custom_feed', AppLocalizations.of(context).deckTypeCustomFeed, Icons.rss_feed),
+    ('custom_feed', AppLocalizations.of(context).deckTypeCustomFeed, Icons.tag),
     ('local', AppLocalizations.of(context).deckTypeLocal, Icons.people),
     ('hashtag', AppLocalizations.of(context).deckTypeHashtag, Icons.tag),
-    ('mentions', AppLocalizations.of(context).deckTypeMentions, Icons.alternate_email),
+    (
+      'mentions',
+      AppLocalizations.of(context).deckTypeMentions,
+      Icons.alternate_email,
+    ),
   ];
 
   @override
@@ -41,6 +50,17 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
     // フォーム表示時に必要に応じてプロフィール情報を取得
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshProfilesIfNeeded();
+      // デフォルトのデッキ名を設定
+      _setDefaultDeckName();
+      // デフォルトのアカウントを設定
+      _setDefaultAccount();
+    });
+
+    // タイトル編集の監視
+    _titleController.addListener(() {
+      if (_titleController.text.isNotEmpty) {
+        _hasManuallyEditedTitle = true;
+      }
     });
   }
 
@@ -49,7 +69,7 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
     _titleController.dispose();
     super.dispose();
   }
-  
+
   // 必要に応じてプロフィール情報を更新
   Future<void> _refreshProfilesIfNeeded() async {
     try {
@@ -60,10 +80,32 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
     }
   }
 
+  // デフォルトのデッキ名を設定
+  void _setDefaultDeckName() {
+    if (!_hasManuallyEditedTitle && _titleController.text.isEmpty) {
+      final deckTypes = _getDeckTypes(context);
+      final defaultType = deckTypes.firstWhere(
+        (type) => type.$1 == _selectedDeckType,
+      );
+      _titleController.text = defaultType.$2;
+      _hasManuallyEditedTitle = false; // デフォルト設定なので手動編集フラグはfalseのまま
+    }
+  }
+
+  // デフォルトのアカウントを設定
+  void _setDefaultAccount() {
+    final accounts = ref.read(availableAccountsProvider);
+    if (accounts.isNotEmpty && _selectedAccountDid == null) {
+      setState(() {
+        _selectedAccountDid = accounts.first.did;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final accounts = ref.watch(availableAccountsProvider);
-    
+
     // フォーム表示時にプロフィール情報を確認・取得
     ref.listen(availableAccountsProvider, (previous, next) {
       // アカウントリストが変更された際に必要に応じてプロフィール情報を更新
@@ -114,8 +156,10 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
                       setState(() {
                         _selectedDeckType = type.$1;
                         // デッキタイプによってデフォルトのタイトルを設定
-                        if (_titleController.text.isEmpty) {
+                        if (!_hasManuallyEditedTitle) {
                           _titleController.text = type.$2;
+                          _hasManuallyEditedTitle =
+                              false; // デフォルト設定なので手動編集フラグはfalseのまま
                         }
                       });
                     }
@@ -131,7 +175,7 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            
+
             // クロスアカウントオプション
             CheckboxListTile(
               title: Text(AppLocalizations.of(context).useAllAccounts),
@@ -203,12 +247,12 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
 
     try {
       final deckCreator = ref.read(deckCreatorProvider.notifier);
-      
+
       // デッキ作成前に関連アカウントのプロフィール情報を確実に取得
       if (!_isCrossAccount && _selectedAccountDid != null) {
         await ref.read(authNotifierProvider.notifier).refreshProfilesIfNeeded();
       }
-      
+
       await deckCreator.createDeck(
         title: _titleController.text,
         deckType: _selectedDeckType,
@@ -219,7 +263,11 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).deckAddedSuccess(_titleController.text)),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              ).deckAddedSuccess(_titleController.text),
+            ),
           ),
         );
       }
@@ -227,7 +275,9 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).deckAddFailed(e.toString())),
+            content: Text(
+              AppLocalizations.of(context).deckAddFailed(e.toString()),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
