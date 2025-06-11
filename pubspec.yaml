@@ -65,6 +65,9 @@ dependencies:
   # URL Launcher
   url_launcher: ^6.2.2
 
+  # Text Processing
+  bluesky_text: ^0.7.2
+
   # Serialization
   freezed_annotation: ^2.4.1
   json_annotation: ^4.8.1

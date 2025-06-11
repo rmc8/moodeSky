@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:atproto/atproto.dart' as atp;
 import 'package:atproto_core/atproto_core.dart' as atcore;
+import 'package:bluesky_text/bluesky_text.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -505,6 +506,7 @@ class BlueskyService {
       }
 
       print('Refreshing session for: ${account.handle}');
+      print('Current refresh token: ${account.refreshJwt?.substring(0, 20)}...');
 
       // リフレッシュトークンを使用してセッションを更新
       // refreshSession は文字列のrefreshTokenを受け取り、新しいSessionを返す
@@ -518,6 +520,9 @@ class BlueskyService {
       // Sessionオブジェクトからアクセストークンとリフレッシュトークンの文字列を取得
       final newAccessJwtString = newSession.accessJwt;
       final newRefreshJwtString = newSession.refreshJwt;
+      
+      print('New access token: ${newAccessJwtString.substring(0, 20)}...');
+      print('New refresh token: ${newRefreshJwtString.substring(0, 20)}...');
 
       // データベースの認証情報を更新（JWT文字列として保存）
       await database.accountDao.updateAccountWithAppPasswordSession(
@@ -816,15 +821,27 @@ class BlueskyService {
           print('Fetching profile from Bluesky API for: ${account.handle}');
 
           try {
-            // リトライ機能付きでAPI呼び出し（一時クライアントの場合は直接呼び出し）
-            final response =
-                (_currentClient != null && _currentAccount?.did == accountDid)
-                ? await _callAPIWithRetry(() async {
-                    return await clientToUse!.actor.getProfile(
-                      actor: account.did, // didまたはhandleを指定
-                    );
-                  }, accountDid)
-                : await clientToUse.actor.getProfile(actor: account.did);
+            // すべてのAPI呼び出しでリトライ機能を使用
+            final response = await _callAPIWithRetry(() async {
+              // 最新のアカウント情報を取得してクライアントを再作成
+              final latestAccount = await database.accountDao.getAccountByDid(accountDid);
+              if (latestAccount?.accessJwt == null) {
+                throw Exception('No valid access token after refresh for profile fetch');
+              }
+
+              final freshClient = bsky.Bluesky.fromSession(
+                atcore.Session(
+                  did: latestAccount!.did,
+                  handle: latestAccount.handle,
+                  accessJwt: latestAccount.accessJwt!,
+                  refreshJwt: latestAccount.refreshJwt!,
+                ),
+              );
+
+              return await freshClient.actor.getProfile(
+                actor: latestAccount.did, // didまたはhandleを指定
+              );
+            }, accountDid);
 
             if (response.data != null) {
               final profile = response.data!;
@@ -1021,7 +1038,7 @@ class BlueskyService {
     int limit = 50,
   }) async {
     try {
-      // Get account and create client
+      // Get account and validate
       final account = await database.accountDao.getAccountByDid(accountDid);
       if (account == null) {
         throw Exception('Account not found: $accountDid');
@@ -1031,38 +1048,117 @@ class BlueskyService {
         throw Exception('No access token for account: ${account.handle}');
       }
 
-      // Create Bluesky client with account's session
-      final session = atcore.Session(
-        did: account.did,
-        handle: account.handle,
-        accessJwt: account.accessJwt!,
-        refreshJwt: account.refreshJwt ?? '',
-      );
-
-      final client = bsky.Bluesky.fromSession(session);
-
       print(
         'BlueskyService: Fetching timeline for ${account.handle} (limit: $limit, cursor: $cursor)',
       );
 
-      // Get timeline from API - return original structure
-      final response = await client.feed.getTimeline(
-        limit: limit,
-        cursor: cursor,
-      );
+      // Use retry mechanism with token refresh for API call
+      final response = await _callAPIWithRetry(() async {
+        // Get the latest account data (in case tokens were refreshed)
+        final latestAccount = await database.accountDao.getAccountByDid(accountDid);
+        if (latestAccount?.accessJwt == null) {
+          throw Exception('No valid access token after refresh');
+        }
+
+        // Create fresh client with latest tokens
+        final session = atcore.Session(
+          did: latestAccount!.did,
+          handle: latestAccount.handle,
+          accessJwt: latestAccount.accessJwt!,
+          refreshJwt: latestAccount.refreshJwt ?? '',
+        );
+
+        final client = bsky.Bluesky.fromSession(session);
+
+        // Make the API call
+        return await client.feed.getTimeline(
+          limit: limit,
+          cursor: cursor,
+        );
+      }, accountDid);
 
       print(
         'BlueskyService: Timeline API response received: ${response.data.feed.length} posts',
       );
 
       // Return both feed data and cursor for proper pagination
+      // Create a mutable copy of the feed list to avoid unmodifiable list issues
       return (
-        feed: response.data.feed,
+        feed: List<bsky.FeedView>.from(response.data.feed),
         cursor: response.data.cursor,
       );
     } catch (e) {
       print('Failed to get timeline for $accountDid: $e');
       rethrow;
     }
+  }
+
+  /// テキスト解析機能
+  
+  /// テキストを分析してファセットを生成
+  Future<List<Map<String, dynamic>>> analyzeTextAndGenerateFacets(String text) async {
+    try {
+      final blueskyText = BlueskyText(text);
+      return await blueskyText.entities.toFacets();
+    } catch (e) {
+      print('Failed to generate facets: $e');
+      return [];
+    }
+  }
+
+  /// テキストの文字数をカウント（Unicode Grapheme Clusters）
+  int countTextLength(String text) {
+    try {
+      final blueskyText = BlueskyText(text);
+      return blueskyText.length;
+    } catch (e) {
+      print('Failed to count text length: $e');
+      // フォールバック：通常の文字数カウント
+      return text.length;
+    }
+  }
+
+  /// 投稿用テキストの検証
+  bool validatePostText(String text) {
+    const maxLength = 300; // Blueskyの文字数制限
+    return countTextLength(text) <= maxLength;
+  }
+
+  /// テキストからメンションを抽出
+  List<String> extractMentions(String text) {
+    // 正規表現による抽出
+    final mentionRegex = RegExp(r'@[\w.-]+\.[\w.-]+');
+    return mentionRegex.allMatches(text)
+        .map((m) => m.group(0)!.replaceFirst('@', ''))
+        .toList();
+  }
+
+  /// テキストからハッシュタグを抽出
+  List<String> extractHashtags(String text) {
+    // 正規表現による抽出
+    final hashtagRegex = RegExp(r'#[\w]+');
+    return hashtagRegex.allMatches(text)
+        .map((m) => m.group(0)!.replaceFirst('#', ''))
+        .toList();
+  }
+
+  /// テキストからURLを抽出
+  List<String> extractUrls(String text) {
+    // 正規表現による抽出
+    final urlRegex = RegExp(r'https?://[\w\-./?=#&%]+');
+    return urlRegex.allMatches(text)
+        .map((m) => m.group(0)!)
+        .toList();
+  }
+
+  /// テキストが投稿可能かチェック（長さ + 内容検証）
+  bool canPostText(String text) {
+    if (text.trim().isEmpty) return false;
+    if (!validatePostText(text)) return false;
+    
+    // 基本的な内容チェック（必要に応じて拡張）
+    if (text.trim().length < 1) return false;
+    
+    return true;
   }
 }

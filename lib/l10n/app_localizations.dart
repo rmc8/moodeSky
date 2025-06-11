@@ -1010,6 +1010,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to delete deck'**
   String get deckDeleteError;
+
+  /// Label for mention text elements
+  ///
+  /// In en, this message translates to:
+  /// **'Mention'**
+  String get richTextMentionLabel;
+
+  /// Label for hashtag text elements
+  ///
+  /// In en, this message translates to:
+  /// **'Hashtag'**
+  String get richTextHashtagLabel;
+
+  /// Label for URL text elements
+  ///
+  /// In en, this message translates to:
+  /// **'URL'**
+  String get richTextUrlLabel;
+
+  /// Message when mention is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'Mention @{handle} tapped'**
+  String richTextMentionTapped(String handle);
+
+  /// Message when hashtag is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'Hashtag #{tag} tapped'**
+  String richTextHashtagTapped(String tag);
+
+  /// Message when URL is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'URL {url} tapped'**
+  String richTextUrlTapped(String url);
+
+  /// Action to view profile when mention is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'View Profile'**
+  String get richTextProfileView;
+
+  /// Action to search hashtag when hashtag is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'Search Hashtag'**
+  String get richTextHashtagSearch;
+
+  /// Action to open URL when URL is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'Open URL'**
+  String get richTextOpenUrl;
+
+  /// Action to copy URL to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copy URL'**
+  String get richTextCopyUrl;
+
+  /// Message when URL is copied
+  ///
+  /// In en, this message translates to:
+  /// **'URL copied to clipboard'**
+  String get richTextUrlCopied;
+
+  /// Error message when URL cannot be opened
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open URL'**
+  String get richTextUrlOpenFailed;
+
+  /// Error message when text processing fails
+  ///
+  /// In en, this message translates to:
+  /// **'Text processing error'**
+  String get richTextProcessingError;
+
+  /// Message when a feature is not yet implemented
+  ///
+  /// In en, this message translates to:
+  /// **'This feature is under development'**
+  String get richTextFeatureNotImplemented;
 }
 
 class _AppLocalizationsDelegate

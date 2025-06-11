@@ -823,5 +823,93 @@
   "deckDeleteError": "Failed to delete deck",
   "@deckDeleteError": {
     "description": "Error message when deck deletion fails"
+  },
+  
+  "richTextMentionLabel": "Mention",
+  "@richTextMentionLabel": {
+    "description": "Label for mention text elements"
+  },
+  
+  "richTextHashtagLabel": "Hashtag",
+  "@richTextHashtagLabel": {
+    "description": "Label for hashtag text elements"
+  },
+  
+  "richTextUrlLabel": "URL",
+  "@richTextUrlLabel": {
+    "description": "Label for URL text elements"
+  },
+  
+  "richTextMentionTapped": "Mention @{handle} tapped",
+  "@richTextMentionTapped": {
+    "description": "Message when mention is tapped",
+    "placeholders": {
+      "handle": {
+        "type": "String",
+        "description": "The handle that was mentioned"
+      }
+    }
+  },
+  
+  "richTextHashtagTapped": "Hashtag #{tag} tapped",
+  "@richTextHashtagTapped": {
+    "description": "Message when hashtag is tapped",
+    "placeholders": {
+      "tag": {
+        "type": "String",
+        "description": "The hashtag that was tapped"
+      }
+    }
+  },
+  
+  "richTextUrlTapped": "URL {url} tapped",
+  "@richTextUrlTapped": {
+    "description": "Message when URL is tapped",
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "description": "The URL that was tapped"
+      }
+    }
+  },
+  
+  "richTextProfileView": "View Profile",
+  "@richTextProfileView": {
+    "description": "Action to view profile when mention is tapped"
+  },
+  
+  "richTextHashtagSearch": "Search Hashtag",
+  "@richTextHashtagSearch": {
+    "description": "Action to search hashtag when hashtag is tapped"
+  },
+  
+  "richTextOpenUrl": "Open URL",
+  "@richTextOpenUrl": {
+    "description": "Action to open URL when URL is tapped"
+  },
+  
+  "richTextCopyUrl": "Copy URL",
+  "@richTextCopyUrl": {
+    "description": "Action to copy URL to clipboard"
+  },
+  
+  "richTextUrlCopied": "URL copied to clipboard",
+  "@richTextUrlCopied": {
+    "description": "Message when URL is copied"
+  },
+  
+  "richTextUrlOpenFailed": "Could not open URL",
+  "@richTextUrlOpenFailed": {
+    "description": "Error message when URL cannot be opened"
+  },
+  
+  "richTextProcessingError": "Text processing error",
+  "@richTextProcessingError": {
+    "description": "Error message when text processing fails"
+  },
+  
+  "richTextFeatureNotImplemented": "This feature is under development",
+  "@richTextFeatureNotImplemented": {
+    "description": "Message when a feature is not yet implemented"
   }
 }

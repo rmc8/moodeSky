@@ -10,6 +10,7 @@ import 'package:moodesky/core/providers/auth_provider.dart';
 import 'package:moodesky/core/providers/deck_provider.dart';
 import 'package:moodesky/core/theme/app_themes.dart';
 import 'package:moodesky/features/home/widgets/add_deck_dialog.dart';
+import 'package:moodesky/features/home/widgets/bluesky_timeline_widget.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/services/database/database.dart';
 import 'package:moodesky/shared/widgets/deck_item.dart';
@@ -898,7 +899,9 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   Widget _buildDeckContent(Deck deck) {
     switch (deck.deckType) {
       case 'home':
-        return TimelineWidget(accountDid: deck.accountDid);
+        return deck.accountDid != null 
+          ? BlueskyTimelineWidget(accountDid: deck.accountDid!)
+          : const Center(child: Text('No account selected'));
       case 'notifications':
         return _buildNotificationsList();
       case 'profile':

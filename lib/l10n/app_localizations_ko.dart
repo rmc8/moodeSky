@@ -448,45 +448,93 @@ class AppLocalizationsKo extends AppLocalizations {
   String get deckTypeCustom => '커스텀';
 
   @override
-  String get moveDeckLeft => 'Move Left';
+  String get moveDeckLeft => '왼쪽으로 이동';
 
   @override
-  String get moveDeckRight => 'Move Right';
+  String get moveDeckRight => '오른쪽으로 이동';
 
   @override
-  String get deckSettings => 'Deck Settings';
+  String get deckSettings => '덱 설정';
 
   @override
-  String get deleteDeck => 'Delete Deck';
+  String get deleteDeck => '덱 삭제';
 
   @override
-  String get deckMovedLeft => 'Deck moved left';
+  String get deckMovedLeft => '덱을 왼쪽으로 이동했습니다';
 
   @override
-  String get deckMovedRight => 'Deck moved right';
+  String get deckMovedRight => '덱을 오른쪽으로 이동했습니다';
 
   @override
-  String get deckMoveError => 'Failed to move deck';
+  String get deckMoveError => '덱 이동에 실패했습니다';
 
   @override
-  String get deckSettingsComingSoon => 'Deck settings feature is coming soon';
+  String get deckSettingsComingSoon => '덱 설정 기능이 곧 출시됩니다';
 
   @override
-  String get deleteDeckTitle => 'Delete Deck';
+  String get deleteDeckTitle => '덱 삭제';
 
   @override
   String deleteDeckConfirm(String deckTitle) {
-    return 'Delete \"$deckTitle\"? This action cannot be undone.';
+    return '\"$deckTitle\"을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
   }
 
   @override
-  String get deleteButton => 'Delete';
+  String get deleteButton => '삭제';
 
   @override
   String deckDeletedSuccess(String deckTitle) {
-    return '\"$deckTitle\" has been deleted';
+    return '\"$deckTitle\"이(가) 삭제되었습니다';
   }
 
   @override
-  String get deckDeleteError => 'Failed to delete deck';
+  String get deckDeleteError => '덱 삭제에 실패했습니다';
+
+  @override
+  String get richTextMentionLabel => '멘션';
+
+  @override
+  String get richTextHashtagLabel => '해시태그';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return '멘션 @$handle을(를) 탭했습니다';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return '해시태그 #$tag을(를) 탭했습니다';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url을(를) 탭했습니다';
+  }
+
+  @override
+  String get richTextProfileView => '프로필 보기';
+
+  @override
+  String get richTextHashtagSearch => '해시태그 검색';
+
+  @override
+  String get richTextOpenUrl => 'URL 열기';
+
+  @override
+  String get richTextCopyUrl => 'URL 복사';
+
+  @override
+  String get richTextUrlCopied => 'URL이 클립보드에 복사되었습니다';
+
+  @override
+  String get richTextUrlOpenFailed => 'URL을 열 수 없습니다';
+
+  @override
+  String get richTextProcessingError => '텍스트 처리 오류';
+
+  @override
+  String get richTextFeatureNotImplemented => '이 기능은 개발 중입니다';
 }

@@ -2,11 +2,15 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/theme_provider.dart';
 import 'package:moodesky/core/theme/app_themes.dart';
+import 'package:moodesky/shared/widgets/bluesky_facet_text.dart';
+import 'package:moodesky/shared/widgets/rich_text_widget.dart';
 
 /// ポストアイテムの表示ウィジェット
 class PostItem extends StatelessWidget {
@@ -14,6 +18,7 @@ class PostItem extends StatelessWidget {
   final String authorHandle;
   final String? authorAvatar;
   final String content;
+  final List<bsky.Facet>? facets;
   final DateTime timestamp;
   final int likeCount;
   final int repostCount;
@@ -31,6 +36,7 @@ class PostItem extends StatelessWidget {
     required this.authorHandle,
     this.authorAvatar,
     required this.content,
+    this.facets,
     required this.timestamp,
     this.likeCount = 0,
     this.repostCount = 0,
@@ -110,16 +116,49 @@ class PostItem extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // ポスト内容
-          Text(
-            content,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).brightness == Brightness.light
-                  ? const Color(0xFF111111) // より濃い黒
-                  : const Color(0xFFF5F5F5), // 明るい白
-              fontWeight: FontWeight.w400, // Regular
-            ),
-          ),
+          // ポスト内容 - facetsがある場合はBlueskyFacetText、ない場合はBlueskyRichText
+          facets != null && facets!.isNotEmpty
+            ? BlueskyFacetText(
+                text: content,
+                facets: facets,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? const Color(0xFF111111) // より濃い黒
+                      : const Color(0xFFF5F5F5), // 明るい白
+                  fontWeight: FontWeight.w400, // Regular
+                ),
+                onMentionTap: (did) {
+                  // TODO: プロフィール画面へ遷移
+                  print('Mention tapped: $did');
+                },
+                onLinkTap: (url) {
+                  PostItem._launchUrl(url);
+                },
+                onHashtagTap: (tag) {
+                  // TODO: ハッシュタグ検索画面へ遷移
+                  print('Hashtag tapped: #$tag');
+                },
+              )
+            : BlueskyRichText(
+                text: content,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? const Color(0xFF111111) // より濃い黒
+                      : const Color(0xFFF5F5F5), // 明るい白
+                  fontWeight: FontWeight.w400, // Regular
+                ),
+                onMentionTap: (handle) {
+                  // TODO: プロフィール画面へ遷移
+                  print('Mention tapped: @$handle');
+                },
+                onLinkTap: (url) {
+                  PostItem._launchUrl(url);
+                },
+                onHashtagTap: (tag) {
+                  // TODO: ハッシュタグ検索画面へ遷移
+                  print('Hashtag tapped: #$tag');
+                },
+              ),
 
           const SizedBox(height: 16),
 
@@ -242,6 +281,19 @@ class PostItem extends StatelessWidget {
     }
   }
 
+  static Future<void> _launchUrl(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        print('Could not launch URL: $url');
+      }
+    } catch (e) {
+      print('Failed to launch URL: $e');
+    }
+  }
+
   String _formatCount(int count) {
     if (count < 1000) {
       return count.toString();
@@ -277,7 +329,7 @@ class PostListDemo extends ConsumerWidget {
         authorName: 'moodeSky Dev',
         authorHandle: 'moodesky.bsky.social',
         content:
-            'moodeSkyのテーマシステムが完成しました！空の青をアクセントにしたライトテーマと、夕焼けのオレンジをアクセントにしたダークテーマをお楽しみください。🌅',
+            'moodeSkyのリッチテキスト機能が完成！@alice.bsky.social さんもお試しください ✨ #moodeSky #BlueskyClient 詳細は https://moodesky.app で確認できます 🚀',
         timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
         likeCount: 42,
         repostCount: 8,
@@ -287,7 +339,7 @@ class PostListDemo extends ConsumerWidget {
         authorName: 'Alice Johnson',
         authorHandle: 'alice.bsky.social',
         content:
-            'Just discovered this new Bluesky client called moodeSky! The deck interface is really nice and the themes are beautiful ✨',
+            'Hey @moodesky.bsky.social, loving the new #RichText features! Check out my blog at https://alice-dev.blog for more #Flutter tips 💙',
         timestamp: DateTime.now().subtract(const Duration(hours: 2)),
         likeCount: 23,
         repostCount: 3,
@@ -298,7 +350,7 @@ class PostListDemo extends ConsumerWidget {
         authorName: 'Bob Wilson',
         authorHandle: 'bob.dev',
         content:
-            'The post design in moodeSky is clean and minimal. Love how they use subtle borders instead of heavy cards! 🎨',
+            'The @moodeSky design is amazing! 🎨 Check out the color themes at https://moodeSky.demo #UIDesign #BlueskyThemes #FlutterUI',
         timestamp: DateTime.now().subtract(const Duration(hours: 4)),
         likeCount: 156,
         repostCount: 24,
@@ -309,7 +361,7 @@ class PostListDemo extends ConsumerWidget {
         authorName: 'Charlie Brown',
         authorHandle: 'charlie.bsky.social',
         content:
-            'Multi-account support in moodeSky is seamless. Finally can manage my personal and work accounts in one place! 👏',
+            'Multi-account support in @moodeSky.bsky.social is seamless! 👏 Thanks @alice.bsky.social for the recommendation. Download at https://github.com/moodeSky #MultiAccount #Productivity',
         timestamp: DateTime.now().subtract(const Duration(days: 1)),
         likeCount: 89,
         repostCount: 15,
@@ -558,6 +610,19 @@ class PostListDemo extends ConsumerWidget {
       } else {
         return '${m.toStringAsFixed(1)}M';
       }
+    }
+  }
+
+  static Future<void> _launchUrl(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        print('Could not launch URL: $url');
+      }
+    } catch (e) {
+      print('Failed to launch URL: $e');
     }
   }
 }

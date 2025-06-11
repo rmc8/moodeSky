@@ -465,45 +465,94 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deckTypeCustom => 'Benutzerdefiniert';
 
   @override
-  String get moveDeckLeft => 'Move Left';
+  String get moveDeckLeft => 'Nach Links';
 
   @override
-  String get moveDeckRight => 'Move Right';
+  String get moveDeckRight => 'Nach Rechts';
 
   @override
-  String get deckSettings => 'Deck Settings';
+  String get deckSettings => 'Deck-Einstellungen';
 
   @override
-  String get deleteDeck => 'Delete Deck';
+  String get deleteDeck => 'Deck Löschen';
 
   @override
-  String get deckMovedLeft => 'Deck moved left';
+  String get deckMovedLeft => 'Deck nach links verschoben';
 
   @override
-  String get deckMovedRight => 'Deck moved right';
+  String get deckMovedRight => 'Deck nach rechts verschoben';
 
   @override
-  String get deckMoveError => 'Failed to move deck';
+  String get deckMoveError => 'Fehler beim Verschieben des Decks';
 
   @override
-  String get deckSettingsComingSoon => 'Deck settings feature is coming soon';
+  String get deckSettingsComingSoon => 'Deck-Einstellungen kommen bald';
 
   @override
-  String get deleteDeckTitle => 'Delete Deck';
+  String get deleteDeckTitle => 'Deck Löschen';
 
   @override
   String deleteDeckConfirm(String deckTitle) {
-    return 'Delete \"$deckTitle\"? This action cannot be undone.';
+    return '\"$deckTitle\" löschen? Diese Aktion kann nicht rückgängig gemacht werden.';
   }
 
   @override
-  String get deleteButton => 'Delete';
+  String get deleteButton => 'Löschen';
 
   @override
   String deckDeletedSuccess(String deckTitle) {
-    return '\"$deckTitle\" has been deleted';
+    return '\"$deckTitle\" wurde gelöscht';
   }
 
   @override
-  String get deckDeleteError => 'Failed to delete deck';
+  String get deckDeleteError => 'Fehler beim Löschen des Decks';
+
+  @override
+  String get richTextMentionLabel => 'Erwähnung';
+
+  @override
+  String get richTextHashtagLabel => 'Hashtag';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return 'Erwähnung @$handle angeklickt';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return 'Hashtag #$tag angeklickt';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url angeklickt';
+  }
+
+  @override
+  String get richTextProfileView => 'Profil anzeigen';
+
+  @override
+  String get richTextHashtagSearch => 'Hashtag suchen';
+
+  @override
+  String get richTextOpenUrl => 'URL öffnen';
+
+  @override
+  String get richTextCopyUrl => 'URL kopieren';
+
+  @override
+  String get richTextUrlCopied => 'URL in Zwischenablage kopiert';
+
+  @override
+  String get richTextUrlOpenFailed => 'URL konnte nicht geöffnet werden';
+
+  @override
+  String get richTextProcessingError => 'Textverarbeitungsfehler';
+
+  @override
+  String get richTextFeatureNotImplemented =>
+      'Diese Funktion wird noch entwickelt';
 }

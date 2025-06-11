@@ -490,4 +490,52 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get deckDeleteError => 'デッキの削除に失敗しました';
+
+  @override
+  String get richTextMentionLabel => 'メンション';
+
+  @override
+  String get richTextHashtagLabel => 'ハッシュタグ';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return 'メンション @$handle をタップしました';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return 'ハッシュタグ #$tag をタップしました';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url をタップしました';
+  }
+
+  @override
+  String get richTextProfileView => 'プロフィールを表示';
+
+  @override
+  String get richTextHashtagSearch => 'ハッシュタグ検索';
+
+  @override
+  String get richTextOpenUrl => 'URLを開く';
+
+  @override
+  String get richTextCopyUrl => 'URLをコピー';
+
+  @override
+  String get richTextUrlCopied => 'URLをクリップボードにコピーしました';
+
+  @override
+  String get richTextUrlOpenFailed => 'URLを開けませんでした';
+
+  @override
+  String get richTextProcessingError => 'テキスト処理エラー';
+
+  @override
+  String get richTextFeatureNotImplemented => 'この機能は準備中です';
 }

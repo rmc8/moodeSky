@@ -463,47 +463,96 @@ class AppLocalizationsPt extends AppLocalizations {
   String get deckTypeCustom => 'Personalizado';
 
   @override
-  String get moveDeckLeft => 'Move Left';
+  String get moveDeckLeft => 'Mover à Esquerda';
 
   @override
-  String get moveDeckRight => 'Move Right';
+  String get moveDeckRight => 'Mover à Direita';
 
   @override
-  String get deckSettings => 'Deck Settings';
+  String get deckSettings => 'Configurações do Deck';
 
   @override
-  String get deleteDeck => 'Delete Deck';
+  String get deleteDeck => 'Excluir Deck';
 
   @override
-  String get deckMovedLeft => 'Deck moved left';
+  String get deckMovedLeft => 'Deck movido à esquerda';
 
   @override
-  String get deckMovedRight => 'Deck moved right';
+  String get deckMovedRight => 'Deck movido à direita';
 
   @override
-  String get deckMoveError => 'Failed to move deck';
+  String get deckMoveError => 'Falha ao mover deck';
 
   @override
-  String get deckSettingsComingSoon => 'Deck settings feature is coming soon';
+  String get deckSettingsComingSoon => 'Configurações do deck em breve';
 
   @override
-  String get deleteDeckTitle => 'Delete Deck';
+  String get deleteDeckTitle => 'Excluir Deck';
 
   @override
   String deleteDeckConfirm(String deckTitle) {
-    return 'Delete \"$deckTitle\"? This action cannot be undone.';
+    return 'Excluir \"$deckTitle\"? Esta ação não pode ser desfeita.';
   }
 
   @override
-  String get deleteButton => 'Delete';
+  String get deleteButton => 'Excluir';
 
   @override
   String deckDeletedSuccess(String deckTitle) {
-    return '\"$deckTitle\" has been deleted';
+    return '\"$deckTitle\" foi excluído';
   }
 
   @override
-  String get deckDeleteError => 'Failed to delete deck';
+  String get deckDeleteError => 'Falha ao excluir deck';
+
+  @override
+  String get richTextMentionLabel => 'Menção';
+
+  @override
+  String get richTextHashtagLabel => 'Hashtag';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return 'Menção @$handle tocada';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return 'Hashtag #$tag tocada';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url tocada';
+  }
+
+  @override
+  String get richTextProfileView => 'Ver Perfil';
+
+  @override
+  String get richTextHashtagSearch => 'Buscar Hashtag';
+
+  @override
+  String get richTextOpenUrl => 'Abrir URL';
+
+  @override
+  String get richTextCopyUrl => 'Copiar URL';
+
+  @override
+  String get richTextUrlCopied => 'URL copiada para a área de transferência';
+
+  @override
+  String get richTextUrlOpenFailed => 'Não foi possível abrir a URL';
+
+  @override
+  String get richTextProcessingError => 'Erro no processamento de texto';
+
+  @override
+  String get richTextFeatureNotImplemented =>
+      'Esta funcionalidade está em desenvolvimento';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -963,4 +1012,96 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get deckTypeCustom => 'Personalizado';
+
+  @override
+  String get moveDeckLeft => 'Mover à Esquerda';
+
+  @override
+  String get moveDeckRight => 'Mover à Direita';
+
+  @override
+  String get deckSettings => 'Configurações do Deck';
+
+  @override
+  String get deleteDeck => 'Excluir Deck';
+
+  @override
+  String get deckMovedLeft => 'Deck movido à esquerda';
+
+  @override
+  String get deckMovedRight => 'Deck movido à direita';
+
+  @override
+  String get deckMoveError => 'Falha ao mover deck';
+
+  @override
+  String get deckSettingsComingSoon => 'Configurações do deck em breve';
+
+  @override
+  String get deleteDeckTitle => 'Excluir Deck';
+
+  @override
+  String deleteDeckConfirm(String deckTitle) {
+    return 'Excluir \"$deckTitle\"? Esta ação não pode ser desfeita.';
+  }
+
+  @override
+  String get deleteButton => 'Excluir';
+
+  @override
+  String deckDeletedSuccess(String deckTitle) {
+    return '\"$deckTitle\" foi excluído';
+  }
+
+  @override
+  String get deckDeleteError => 'Falha ao excluir deck';
+
+  @override
+  String get richTextMentionLabel => 'Menção';
+
+  @override
+  String get richTextHashtagLabel => 'Hashtag';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return 'Menção @$handle tocada';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return 'Hashtag #$tag tocada';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url tocada';
+  }
+
+  @override
+  String get richTextProfileView => 'Ver Perfil';
+
+  @override
+  String get richTextHashtagSearch => 'Buscar Hashtag';
+
+  @override
+  String get richTextOpenUrl => 'Abrir URL';
+
+  @override
+  String get richTextCopyUrl => 'Copiar URL';
+
+  @override
+  String get richTextUrlCopied => 'URL copiada para a área de transferência';
+
+  @override
+  String get richTextUrlOpenFailed => 'Não foi possível abrir a URL';
+
+  @override
+  String get richTextProcessingError => 'Erro no processamento de texto';
+
+  @override
+  String get richTextFeatureNotImplemented =>
+      'Esta funcionalidade está em desenvolvimento';
 }

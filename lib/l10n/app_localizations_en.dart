@@ -503,4 +503,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deckDeleteError => 'Failed to delete deck';
+
+  @override
+  String get richTextMentionLabel => 'Mention';
+
+  @override
+  String get richTextHashtagLabel => 'Hashtag';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return 'Mention @$handle tapped';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return 'Hashtag #$tag tapped';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url tapped';
+  }
+
+  @override
+  String get richTextProfileView => 'View Profile';
+
+  @override
+  String get richTextHashtagSearch => 'Search Hashtag';
+
+  @override
+  String get richTextOpenUrl => 'Open URL';
+
+  @override
+  String get richTextCopyUrl => 'Copy URL';
+
+  @override
+  String get richTextUrlCopied => 'URL copied to clipboard';
+
+  @override
+  String get richTextUrlOpenFailed => 'Could not open URL';
+
+  @override
+  String get richTextProcessingError => 'Text processing error';
+
+  @override
+  String get richTextFeatureNotImplemented =>
+      'This feature is under development';
 }
