@@ -50,130 +50,132 @@ class PostItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            // ユーザー情報行
-            Row(
-              children: [
-                // アバター
-                CircleAvatar(
-                  radius: 20,
-                  backgroundImage: authorAvatar != null
-                      ? NetworkImage(authorAvatar!)
-                      : null,
-                  child: authorAvatar == null
-                      ? Text(
-                          authorName.substring(0, 1).toUpperCase(),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        )
-                      : null,
-                ),
-                
-                const SizedBox(width: 12),
-                
-                // 名前とハンドル
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        authorName,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        '@$authorHandle',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).brightness == Brightness.light 
-                              ? const Color(0xFF424242) 
-                              : const Color(0xFFCCCCCC),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                
-                // タイムスタンプ
-                Text(
-                  _formatTimestamp(timestamp),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).brightness == Brightness.light 
-                        ? const Color(0xFF424242) 
-                        : const Color(0xFFCCCCCC),
-                  ),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 12),
-            
-            // ポスト内容
-            Text(
-              content,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).brightness == Brightness.light 
-                    ? const Color(0xFF111111) // より濃い黒
-                    : const Color(0xFFF5F5F5), // 明るい白
-                fontWeight: FontWeight.w400, // Regular
+          // ユーザー情報行
+          Row(
+            children: [
+              // アバター
+              CircleAvatar(
+                radius: 20,
+                backgroundImage: authorAvatar != null
+                    ? NetworkImage(authorAvatar!)
+                    : null,
+                child: authorAvatar == null
+                    ? Text(
+                        authorName.substring(0, 1).toUpperCase(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      )
+                    : null,
               ),
+
+              const SizedBox(width: 12),
+
+              // 名前とハンドル
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      authorName,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '@$authorHandle',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF424242)
+                            : const Color(0xFFCCCCCC),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+
+              // タイムスタンプ
+              Text(
+                _formatTimestamp(timestamp),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? const Color(0xFF424242)
+                      : const Color(0xFFCCCCCC),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // ポスト内容
+          Text(
+            content,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).brightness == Brightness.light
+                  ? const Color(0xFF111111) // より濃い黒
+                  : const Color(0xFFF5F5F5), // 明るい白
+              fontWeight: FontWeight.w400, // Regular
             ),
-            
-            const SizedBox(height: 16),
-            
-            // アクションボタン行
-            Row(
-              children: [
-                // リプライ
-                _buildActionButton(
-                  context: context,
-                  icon: Icons.chat_bubble_outline_rounded,
-                  count: replyCount,
-                  onTap: onReply,
+          ),
+
+          const SizedBox(height: 16),
+
+          // アクションボタン行
+          Row(
+            children: [
+              // リプライ
+              _buildActionButton(
+                context: context,
+                icon: Icons.chat_bubble_outline_rounded,
+                count: replyCount,
+                onTap: onReply,
+              ),
+
+              const SizedBox(width: 24),
+
+              // リポスト
+              _buildActionButton(
+                context: context,
+                icon: Icons.repeat_rounded,
+                count: repostCount,
+                isActive: isReposted,
+                activeColor: Theme.of(context).colorScheme.repostColor,
+                onTap: onRepost,
+              ),
+
+              const SizedBox(width: 24),
+
+              // いいね
+              _buildActionButton(
+                context: context,
+                icon: isLiked
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+                count: likeCount,
+                isActive: isLiked,
+                activeColor: Theme.of(context).colorScheme.likeColor,
+                onTap: onLike,
+              ),
+
+              const Spacer(),
+
+              // メニュー
+              IconButton(
+                icon: Icon(
+                  Icons.more_horiz_rounded,
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? const Color(0xFF424242)
+                      : const Color(0xFFCCCCCC),
                 ),
-                
-                const SizedBox(width: 24),
-                
-                // リポスト
-                _buildActionButton(
-                  context: context,
-                  icon: Icons.repeat_rounded,
-                  count: repostCount,
-                  isActive: isReposted,
-                  activeColor: Theme.of(context).colorScheme.repostColor,
-                  onTap: onRepost,
-                ),
-                
-                const SizedBox(width: 24),
-                
-                // いいね
-                _buildActionButton(
-                  context: context,
-                  icon: isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                  count: likeCount,
-                  isActive: isLiked,
-                  activeColor: Theme.of(context).colorScheme.likeColor,
-                  onTap: onLike,
-                ),
-                
-                const Spacer(),
-                
-                // メニュー
-                IconButton(
-                  icon: Icon(
-                    Icons.more_horiz_rounded,
-                    color: Theme.of(context).brightness == Brightness.light 
-                        ? const Color(0xFF424242) 
-                        : const Color(0xFFCCCCCC),
-                  ),
-                  onPressed: () {
-                    // TODO: メニューを表示
-                  },
-                ),
-              ],
-            ),
+                onPressed: () {
+                  // TODO: メニューを表示
+                },
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -189,10 +191,10 @@ class PostItem extends StatelessWidget {
   }) {
     final color = isActive && activeColor != null
         ? activeColor
-        : (Theme.of(context).brightness == Brightness.light 
-            ? const Color(0xFF424242) 
-            : const Color(0xFFCCCCCC));
-    
+        : (Theme.of(context).brightness == Brightness.light
+              ? const Color(0xFF424242)
+              : const Color(0xFFCCCCCC));
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -202,11 +204,7 @@ class PostItem extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: color,
-            ),
+            Icon(icon, size: 18, color: color),
             if (count > 0) ...[
               const SizedBox(width: 6),
               Expanded(
@@ -230,7 +228,7 @@ class PostItem extends StatelessWidget {
   String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
-    
+
     if (difference.inMinutes < 1) {
       return 'now';
     } else if (difference.inMinutes < 60) {
@@ -273,12 +271,13 @@ class PostListDemo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // テーマ変更を監視して再描画をトリガー
     ref.watch(currentThemeModeProvider);
-    
+
     final demoPosts = [
       PostItem(
         authorName: 'moodeSky Dev',
         authorHandle: 'moodesky.bsky.social',
-        content: 'moodeSkyのテーマシステムが完成しました！空の青をアクセントにしたライトテーマと、夕焼けのオレンジをアクセントにしたダークテーマをお楽しみください。🌅',
+        content:
+            'moodeSkyのテーマシステムが完成しました！空の青をアクセントにしたライトテーマと、夕焼けのオレンジをアクセントにしたダークテーマをお楽しみください。🌅',
         timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
         likeCount: 42,
         repostCount: 8,
@@ -287,7 +286,8 @@ class PostListDemo extends ConsumerWidget {
       PostItem(
         authorName: 'Alice Johnson',
         authorHandle: 'alice.bsky.social',
-        content: 'Just discovered this new Bluesky client called moodeSky! The deck interface is really nice and the themes are beautiful ✨',
+        content:
+            'Just discovered this new Bluesky client called moodeSky! The deck interface is really nice and the themes are beautiful ✨',
         timestamp: DateTime.now().subtract(const Duration(hours: 2)),
         likeCount: 23,
         repostCount: 3,
@@ -297,7 +297,8 @@ class PostListDemo extends ConsumerWidget {
       PostItem(
         authorName: 'Bob Wilson',
         authorHandle: 'bob.dev',
-        content: 'The post design in moodeSky is clean and minimal. Love how they use subtle borders instead of heavy cards! 🎨',
+        content:
+            'The post design in moodeSky is clean and minimal. Love how they use subtle borders instead of heavy cards! 🎨',
         timestamp: DateTime.now().subtract(const Duration(hours: 4)),
         likeCount: 156,
         repostCount: 24,
@@ -307,7 +308,8 @@ class PostListDemo extends ConsumerWidget {
       PostItem(
         authorName: 'Charlie Brown',
         authorHandle: 'charlie.bsky.social',
-        content: 'Multi-account support in moodeSky is seamless. Finally can manage my personal and work accounts in one place! 👏',
+        content:
+            'Multi-account support in moodeSky is seamless. Finally can manage my personal and work accounts in one place! 👏',
         timestamp: DateTime.now().subtract(const Duration(days: 1)),
         likeCount: 89,
         repostCount: 15,
@@ -325,137 +327,149 @@ class PostListDemo extends ConsumerWidget {
             // テーマ変更を確実に検知
             ref.watch(currentThemeModeProvider);
             final itemPostStyle = PostItemStyle(context);
-            
+
             return itemPostStyle.buildPostContainer(
               child: InkWell(
                 onTap: post.onTap,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                // ユーザー情報行
-                Row(
-                  children: [
-                    // アバター
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundImage: post.authorAvatar != null
-                          ? NetworkImage(post.authorAvatar!)
-                          : null,
-                      child: post.authorAvatar == null
-                          ? Text(
-                              post.authorName.substring(0, 1).toUpperCase(),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            )
-                          : null,
-                    ),
-                    
-                    const SizedBox(width: 12),
-                    
-                    // 名前とハンドル
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            post.authorName,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                    // ユーザー情報行
+                    Row(
+                      children: [
+                        // アバター
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundImage: post.authorAvatar != null
+                              ? NetworkImage(post.authorAvatar!)
+                              : null,
+                          child: post.authorAvatar == null
+                              ? Text(
+                                  post.authorName.substring(0, 1).toUpperCase(),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        // 名前とハンドル
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                post.authorName,
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w700),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '@${post.authorHandle}',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color:
+                                          Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? const Color(0xFF424242)
+                                          : const Color(0xFFCCCCCC),
+                                    ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                          Text(
-                            '@${post.authorHandle}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).brightness == Brightness.light 
-                                  ? const Color(0xFF424242) 
-                                  : const Color(0xFFCCCCCC),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                        ),
+
+                        // タイムスタンプ
+                        Text(
+                          _formatTimestampDemo(post.timestamp),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? const Color(0xFF424242)
+                                    : const Color(0xFFCCCCCC),
+                              ),
+                        ),
+                      ],
                     ),
-                    
-                    // タイムスタンプ
+
+                    const SizedBox(height: 12),
+
+                    // ポスト内容
                     Text(
-                      _formatTimestampDemo(post.timestamp),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF424242) 
-                            : const Color(0xFFCCCCCC),
+                      post.content,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF111111) // より濃い黒
+                            : const Color(0xFFF5F5F5), // 明るい白
+                        fontWeight: FontWeight.w400, // Regular
                       ),
                     ),
-                  ],
-                ),
-                
-                const SizedBox(height: 12),
-                
-                // ポスト内容
-                Text(
-                  post.content,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).brightness == Brightness.light 
-                        ? const Color(0xFF111111) // より濃い黒
-                        : const Color(0xFFF5F5F5), // 明るい白
-                    fontWeight: FontWeight.w400, // Regular
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // アクションボタン行
-                Row(
-                  children: [
-                    // リプライ
-                    _buildActionButtonDemo(
-                      context: context,
-                      icon: Icons.chat_bubble_outline_rounded,
-                      count: post.replyCount,
-                      onTap: post.onReply,
+
+                    const SizedBox(height: 16),
+
+                    // アクションボタン行
+                    Row(
+                      children: [
+                        // リプライ
+                        _buildActionButtonDemo(
+                          context: context,
+                          icon: Icons.chat_bubble_outline_rounded,
+                          count: post.replyCount,
+                          onTap: post.onReply,
+                        ),
+
+                        const SizedBox(width: 24),
+
+                        // リポスト
+                        _buildActionButtonDemo(
+                          context: context,
+                          icon: Icons.repeat_rounded,
+                          count: post.repostCount,
+                          isActive: post.isReposted,
+                          activeColor: Theme.of(
+                            context,
+                          ).colorScheme.repostColor,
+                          onTap: post.onRepost,
+                        ),
+
+                        const SizedBox(width: 24),
+
+                        // いいね
+                        _buildActionButtonDemo(
+                          context: context,
+                          icon: post.isLiked
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          count: post.likeCount,
+                          isActive: post.isLiked,
+                          activeColor: Theme.of(context).colorScheme.likeColor,
+                          onTap: post.onLike,
+                        ),
+
+                        const Spacer(),
+
+                        // メニュー
+                        IconButton(
+                          icon: Icon(
+                            Icons.more_horiz_rounded,
+                            color:
+                                Theme.of(context).brightness == Brightness.light
+                                ? const Color(0xFF424242)
+                                : const Color(0xFFCCCCCC),
+                          ),
+                          onPressed: () {
+                            // TODO: メニューを表示
+                          },
+                        ),
+                      ],
                     ),
-                    
-                    const SizedBox(width: 24),
-                    
-                    // リポスト
-                    _buildActionButtonDemo(
-                      context: context,
-                      icon: Icons.repeat_rounded,
-                      count: post.repostCount,
-                      isActive: post.isReposted,
-                      activeColor: Theme.of(context).colorScheme.repostColor,
-                      onTap: post.onRepost,
-                    ),
-                    
-                    const SizedBox(width: 24),
-                    
-                    // いいね
-                    _buildActionButtonDemo(
-                      context: context,
-                      icon: post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                      count: post.likeCount,
-                      isActive: post.isLiked,
-                      activeColor: Theme.of(context).colorScheme.likeColor,
-                      onTap: post.onLike,
-                    ),
-                    
-                    const Spacer(),
-                    
-                    // メニュー
-                    IconButton(
-                      icon: Icon(
-                        Icons.more_horiz_rounded,
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF424242) 
-                            : const Color(0xFFCCCCCC),
-                      ),
-                      onPressed: () {
-                        // TODO: メニューを表示
-                      },
-                    ),
-                  ],
-                ),
                   ],
                 ),
               ),
@@ -476,10 +490,10 @@ class PostListDemo extends ConsumerWidget {
   }) {
     final color = isActive && activeColor != null
         ? activeColor
-        : (Theme.of(context).brightness == Brightness.light 
-            ? const Color(0xFF424242) 
-            : const Color(0xFFCCCCCC));
-    
+        : (Theme.of(context).brightness == Brightness.light
+              ? const Color(0xFF424242)
+              : const Color(0xFFCCCCCC));
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -489,12 +503,8 @@ class PostListDemo extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: color,
-            ),
-            if (count > 0) ...[ 
+            Icon(icon, size: 18, color: color),
+            if (count > 0) ...[
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -517,7 +527,7 @@ class PostListDemo extends ConsumerWidget {
   String _formatTimestampDemo(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
-    
+
     if (difference.inMinutes < 1) {
       return 'now';
     } else if (difference.inMinutes < 60) {

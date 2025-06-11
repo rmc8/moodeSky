@@ -344,18 +344,20 @@ class PostItemStyle {
   
   /// ポストアイテムの内側パディング
   static const EdgeInsets postPadding = EdgeInsets.symmetric(
-    horizontal: 20,
+    horizontal: 6,
     vertical: 16,
   );
   
-  /// ポストアイテム間のマージン
-  static const EdgeInsets postMargin = EdgeInsets.zero;
+  /// ポストアイテム間のマージン (左右の余白)
+  static const EdgeInsets postMargin = EdgeInsets.symmetric(horizontal: 6.0);
   
   /// ポストの区切り線用Widget
   Widget buildPostDivider() {
     return Container(
       height: 0.5,
-      color: Theme.of(context).colorScheme.outline,
+      color: Theme.of(context).brightness == Brightness.light 
+          ? const Color(0xFFE0E0E0) 
+          : const Color(0xFF424242),
     );
   }
   
@@ -374,7 +376,12 @@ class PostItemStyle {
         border: Border(
           // 上ボーダーは廃止（重複による太線を防ぐ）
           bottom: showBottomBorder 
-              ? BorderSide(color: Theme.of(context).colorScheme.outline, width: 0.5)
+              ? BorderSide(
+                  color: Theme.of(context).brightness == Brightness.light 
+                      ? const Color(0xFFE0E0E0) 
+                      : const Color(0xFF424242),
+                  width: 0.5,
+                )
               : BorderSide.none,
         ),
       ),

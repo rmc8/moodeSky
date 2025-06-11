@@ -14,6 +14,7 @@ import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/services/database/database.dart';
 import 'package:moodesky/shared/widgets/deck_item.dart';
 import 'package:moodesky/shared/widgets/post_item.dart';
+import 'package:moodesky/shared/widgets/timeline_widget.dart';
 
 class DeckLayout extends ConsumerStatefulWidget {
   const DeckLayout({super.key});
@@ -765,7 +766,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   Widget _buildDeckContent(Deck deck) {
     switch (deck.deckType) {
       case 'home':
-        return const PostListDemo();
+        return TimelineWidget(accountDid: deck.accountDid);
       case 'notifications':
         return _buildNotificationsList();
       case 'profile':
@@ -777,11 +778,11 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
       case 'thread':
         return _buildThreadView();
       case 'custom_feed':
-        return _buildCustomFeedList();
+        return _buildCustomFeedList(deck);
       case 'local':
-        return _buildLocalTimelineList();
+        return _buildLocalTimelineList(deck);
       case 'hashtag':
-        return _buildHashtagList();
+        return _buildHashtagList(deck);
       case 'mentions':
         return _buildMentionsList();
       default:
@@ -977,19 +978,19 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
     return _buildProfilePostsList();
   }
 
-  Widget _buildCustomFeedList() {
+  Widget _buildCustomFeedList(Deck deck) {
     // Custom feed shows curated posts - similar to home timeline
-    return const PostListDemo();
+    return TimelineWidget(accountDid: deck.accountDid);
   }
 
-  Widget _buildLocalTimelineList() {
+  Widget _buildLocalTimelineList(Deck deck) {
     // Local timeline shows server-specific posts - similar to home timeline
-    return const PostListDemo();
+    return TimelineWidget(accountDid: deck.accountDid);
   }
 
-  Widget _buildHashtagList() {
+  Widget _buildHashtagList(Deck deck) {
     // Hashtag timeline shows hashtag-filtered posts - similar to home timeline
-    return const PostListDemo();
+    return TimelineWidget(accountDid: deck.accountDid);
   }
 
   Widget _buildMentionsList() {
