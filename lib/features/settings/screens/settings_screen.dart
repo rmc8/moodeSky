@@ -99,32 +99,6 @@ class SettingsScreen extends ConsumerWidget {
 
                   const Divider(),
 
-                  // プロフィール更新
-                  ListTile(
-                    leading: const Icon(Icons.refresh),
-                    title: Text(
-                      AppLocalizations.of(context)!.refreshProfiles,
-                      style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF1A1A1A) 
-                            : const Color(0xFFF5F5F5),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    subtitle: Text(
-                      AppLocalizations.of(context)!.refreshProfilesDescription,
-                      style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF222222) 
-                            : const Color(0xFFE0E0E0),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    onTap: () => _refreshProfiles(context, ref),
-                  ),
-
-                  const Divider(),
-
                   ListTile(
                     leading: Icon(
                       Icons.logout,
@@ -252,41 +226,6 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  void _refreshProfiles(BuildContext context, WidgetRef ref) async {
-    // プロフィール更新開始を表示
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.refreshingProfiles),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-
-    try {
-      // プロフィール情報を更新
-      await ref.read(authNotifierProvider.notifier).refreshAllProfiles();
-      
-      // 成功メッセージを表示
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.profilesRefreshed),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
-        );
-      }
-    } catch (e) {
-      // エラーメッセージを表示
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.refreshProfilesError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    }
   }
 
   void _showSignOutConfirmation(BuildContext context, WidgetRef ref) {

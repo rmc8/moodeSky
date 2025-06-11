@@ -12,7 +12,7 @@ import 'package:moodesky/shared/models/auth_models.dart';
 import '../test_helpers.dart';
 import 'bluesky_service_profile_test.mocks.dart';
 
-@GenerateMocks([AppDatabase, AccountDao])
+// @GenerateMocks([AppDatabase, AccountDao])
 void main() {
   group('BlueskyService Profile Methods', () {
     late BlueskyService blueskyService;

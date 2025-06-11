@@ -36,14 +36,39 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // フォーム表示時に必要に応じてプロフィール情報を取得
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshProfilesIfNeeded();
+    });
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     super.dispose();
+  }
+  
+  // 必要に応じてプロフィール情報を更新
+  Future<void> _refreshProfilesIfNeeded() async {
+    try {
+      await ref.read(authNotifierProvider.notifier).refreshProfilesIfNeeded();
+    } catch (e) {
+      // エラーは無視（UIブロックを避ける）
+      debugPrint('Failed to refresh profiles in AddDeckDialog: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final accounts = ref.watch(availableAccountsProvider);
+    
+    // フォーム表示時にプロフィール情報を確認・取得
+    ref.listen(availableAccountsProvider, (previous, next) {
+      // アカウントリストが変更された際に必要に応じてプロフィール情報を更新
+      _refreshProfilesIfNeeded();
+    });
 
     return AlertDialog(
       title: Text(AppLocalizations.of(context).addDeckDialogTitle),
@@ -178,6 +203,11 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
 
     try {
       final deckCreator = ref.read(deckCreatorProvider.notifier);
+      
+      // デッキ作成前に関連アカウントのプロフィール情報を確実に取得
+      if (!_isCrossAccount && _selectedAccountDid != null) {
+        await ref.read(authNotifierProvider.notifier).refreshProfilesIfNeeded();
+      }
       
       await deckCreator.createDeck(
         title: _titleController.text,

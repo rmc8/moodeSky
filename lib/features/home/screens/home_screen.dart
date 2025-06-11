@@ -24,6 +24,25 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
+  void initState() {
+    super.initState();
+    // ホーム画面表示時に必要に応じてプロフィール情報を更新
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshProfilesIfNeeded();
+    });
+  }
+  
+  // 必要に応じてプロフィール情報を更新
+  Future<void> _refreshProfilesIfNeeded() async {
+    try {
+      await ref.read(authNotifierProvider.notifier).refreshProfilesIfNeeded();
+    } catch (e) {
+      // エラーは無視（UIブロックを避ける）
+      debugPrint('Failed to refresh profiles in HomeScreen: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     

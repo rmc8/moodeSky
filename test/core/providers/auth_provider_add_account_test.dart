@@ -13,7 +13,7 @@ import 'package:moodesky/shared/models/auth_models.dart';
 import '../../test_helpers.dart';
 import 'auth_provider_add_account_test.mocks.dart';
 
-@GenerateMocks([BlueskyService, AppDatabase])
+// @GenerateMocks([BlueskyService, AppDatabase])
 void main() {
   group('AuthNotifier.addAccount', () {
     late AuthNotifier authNotifier;

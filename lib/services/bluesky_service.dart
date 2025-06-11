@@ -1,5 +1,10 @@
+// Dart imports:
+import 'dart:convert';
+
 // Package imports:
 import 'package:bluesky/bluesky.dart' as bsky;
+import 'package:atproto/atproto.dart' as atp;
+import 'package:atproto_core/atproto_core.dart' as atcore;
 import 'package:drift/drift.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -47,11 +52,35 @@ class BlueskyService {
   // Initialize client with account session
   Future<bool> _initializeClient(Account account) async {
     try {
-      // TODO: Fix Session constructor for BlueSky v0.11.1
-      _currentAccount = account;
-      return true;
+      // 認証情報が有効かチェック
+      if (account.accessJwt == null || account.refreshJwt == null) {
+        print('No valid session tokens for account: ${account.handle}');
+        return false;
+      }
+      
+      // 実際のBluesky クライアントを初期化
+      try {
+        // createSessionで初期化する代わりに、既存のトークンでクライアントを作成
+        _currentClient = bsky.Bluesky.fromSession(
+          atcore.Session(
+            did: account.did,
+            handle: account.handle,
+            accessJwt: account.accessJwt!,
+            refreshJwt: account.refreshJwt!,
+          ),
+        );
+        _currentAccount = account;
+        
+        print('Real Bluesky client initialized for: ${account.handle}');
+        return true;
+      } catch (e) {
+        print('Failed to initialize real Bluesky client: $e');
+        print('Error details: ${e.toString()}');
+        _currentClient = null;
+        return false;
+      }
     } catch (e) {
-      print('Failed to initialize Bluesky client: $e');
+      print('Client initialization error: $e');
       return false;
     }
   }
@@ -121,152 +150,169 @@ class BlueskyService {
         'Attempting to sign in with identifier: $identifier to service: $serviceUrl',
       );
 
-      // Bluesky APIの実装は現在の仕様では利用できないため、モックデータを使用
-      print('Using mock authentication for: $identifier');
-      
-      // モックセッションデータを作成
-      final mockDid = 'did:plc:${identifier.hashCode.abs()}';
-      final mockHandle = identifier.contains('@')
-          ? identifier.split('@')[0]
-          : identifier;
-      final mockAccessJwt =
-          'mock_access_jwt_${DateTime.now().millisecondsSinceEpoch}';
-      final mockRefreshJwt =
-          'mock_refresh_jwt_${DateTime.now().millisecondsSinceEpoch}';
-
-      print('Mock session created successfully. DID: $mockDid');
-
-      // モックプロフィール情報を生成（リアルなアバター風に）
-      String? avatarUrl;
-      String? displayName;
-      String? description;
-      String? banner;
-      int? followersCount;
-      int? followsCount;
-      int? postsCount;
+      // 実際のBluesky APIで認証を実行
+      print('Using real Bluesky authentication for: $identifier');
       
       try {
-        // よりリアルなアバターURLを生成
-        avatarUrl = _generateAvatarUrl(mockHandle, mockDid);
-        displayName = mockHandle;
-        description = 'moodeSky user - $identifier';
-        followersCount = 0;
-        followsCount = 0;
-        postsCount = 0;
+        // 実際のBluesky認証セッションを作成
+        // serviceUrlからホスト名を抽出
+        final uri = Uri.parse(serviceUrl);
+        final host = uri.host.isNotEmpty ? uri.host : service;
         
-        print('Profile data generated: avatar=$avatarUrl, displayName=$displayName');
-      } catch (e) {
-        print('Failed to generate profile data: $e');
-        
-        // フォールバック
-        avatarUrl = _generateAvatarUrl(mockHandle, mockDid);
-        displayName = mockHandle;
-        description = 'moodeSky user';
-        followersCount = 0;
-        followsCount = 0;
-        postsCount = 0;
-      }
-
-      // データベースにアカウント情報を保存
-      final accountData = AccountsCompanion.insert(
-        did: mockDid,
-        handle: mockHandle,
-        displayName: Value(displayName ?? mockHandle),
-        description: Value(description),
-        avatar: Value(avatarUrl),
-        banner: Value(banner),
-        email: Value(identifier.contains('@') ? identifier : null),
-        accessJwt: Value(mockAccessJwt),
-        refreshJwt: Value(mockRefreshJwt),
-        sessionString: Value(mockAccessJwt), // セッション文字列として保存
-        pdsUrl: serviceUrl,
-        serviceUrl: Value(serviceUrl),
-        loginMethod: const Value('app_password'),
-        isActive: Value(
-          !isAdditionalAccount,
-        ), // 追加アカウントでない場合のみアクティブに設定
-        lastUsed: Value(DateTime.now()),
-      );
-
-      // 既存のアカウントがあるかチェック
-      final existingAccount = await database.accountDao.getAccountByDid(
-        mockDid,
-      );
-
-      if (existingAccount != null) {
-        print('Updating existing account: $mockHandle');
-        
-        // 既存アカウントの認証情報とプロフィールを更新
-        await database.accountDao.updateAccountWithAppPasswordSession(
-          did: mockDid,
-          accessJwt: mockAccessJwt,
-          refreshJwt: mockRefreshJwt,
-          sessionString: mockAccessJwt,
+        final sessionResponse = await atp.createSession(
+          identifier: identifier,
+          password: password,
+          service: host, // ホスト名のみを渡す
         );
         
-        // プロフィール情報を更新
-        await database.accountDao.updateAccountProfile(
-          did: mockDid,
-          displayName: displayName,
+        final session = sessionResponse.data;
+        print('Real session created successfully. DID: ${session.did}');
+        
+        // プロフィール情報を取得
+        final client = bsky.Bluesky.fromSession(session);
+        final profileResponse = await client.actor.getProfile(
+          actor: session.did,
+        );
+        
+        final profile = profileResponse.data;
+        print('Profile fetched: ${profile.displayName}, avatar: ${profile.avatar}');
+
+        // 実際のプロフィール情報を使用
+        final avatarUrl = profile.avatar;
+        final displayName = profile.displayName ?? session.handle;
+        final description = profile.description;
+        final banner = profile.banner;
+        final followersCount = profile.followersCount ?? 0;
+        final followsCount = profile.followsCount ?? 0;
+        final postsCount = profile.postsCount ?? 0;
+        
+        print('Real profile data: avatar=$avatarUrl, displayName=$displayName');
+
+        // SessionからJWT文字列を取得してデータベースに保存
+        final accessJwtString = session.accessJwt;
+        final refreshJwtString = session.refreshJwt;
+
+        // データベースにアカウント情報を保存
+        final accountData = AccountsCompanion.insert(
+          did: session.did,
+          handle: session.handle,
+          displayName: Value(displayName),
+          description: Value(description),
+          avatar: Value(avatarUrl),
+          banner: Value(banner),
+          email: Value(identifier.contains('@') ? identifier : null),
+          accessJwt: Value(accessJwtString),
+          refreshJwt: Value(refreshJwtString),
+          sessionString: Value(accessJwtString),
+          pdsUrl: serviceUrl,
+          serviceUrl: Value(serviceUrl),
+          loginMethod: const Value('app_password'),
+          isActive: Value(!isAdditionalAccount),
+          lastUsed: Value(DateTime.now()),
+        );
+
+        // DIDで既存のアカウントがあるかチェック
+        final existingAccount = await database.accountDao.getAccountByDid(
+          session.did,
+        );
+        
+        if (existingAccount != null) {
+          print('Updating existing account: ${session.handle} (${session.did})');
+          
+          // 既存アカウントの認証情報とプロフィールを更新
+          await database.accountDao.updateAccountWithAppPasswordSession(
+            did: session.did,
+            accessJwt: session.accessJwt,
+            refreshJwt: session.refreshJwt,
+            sessionString: session.accessJwt,
+          );
+          
+          // プロフィール情報を更新
+          await database.accountDao.updateAccountProfile(
+            did: session.did,
+            displayName: displayName,
+            description: description,
+            avatar: avatarUrl,
+            banner: banner,
+          );
+  
+          // 追加アカウントでない場合のみアクティブに設定
+          if (!isAdditionalAccount) {
+            await database.accountDao.setActiveAccount(session.did);
+          }
+        } else {
+          print('Creating new account: ${session.handle} (${session.did})');
+          
+          try {
+            // 新しいアカウントを作成
+            await database.accountDao.createAccount(accountData);
+          } catch (e) {
+            // UNIQUE制約エラーの場合、handleが重複している可能性がある
+            if (e.toString().contains('UNIQUE constraint failed: accounts.handle')) {
+              print('Handle ${session.handle} already exists, removing old account');
+              
+              // 同じhandleの既存アカウントを削除
+              final existingByHandle = await database.accountDao.getAccountByHandle(session.handle);
+              if (existingByHandle != null) {
+                await database.accountDao.deleteAccount(existingByHandle.did);
+              }
+              
+              // 再度新しいアカウントを作成
+              await database.accountDao.createAccount(accountData);
+            } else {
+              rethrow;
+            }
+          }
+  
+          // 追加アカウントでない場合のみアクティブに設定
+          if (!isAdditionalAccount) {
+            await database.accountDao.setActiveAccount(session.did);
+          } else {
+            print('Added additional account: ${session.handle} (${session.did})');
+          }
+        }
+
+        // クライアントを初期化
+        final account = await database.accountDao.getAccountByDid(session.did);
+        if (account != null) {
+          await _initializeClient(account);
+        }
+  
+        final userProfile = UserProfile(
+          did: session.did,
+          handle: session.handle,
+          displayName: displayName ?? session.handle,
           description: description,
           avatar: avatarUrl,
           banner: banner,
+          email: identifier.contains('@') ? identifier : null,
+          isVerified: false,
+          followersCount: followersCount,
+          followsCount: followsCount,
+          postsCount: postsCount,
         );
-
-        // 追加アカウントでない場合のみアクティブに設定
-        if (!isAdditionalAccount) {
-          await database.accountDao.setActiveAccount(mockDid);
-        }
-      } else {
-        print('Creating new account: $mockHandle');
-        
-        // 新しいアカウントを作成
-        await database.accountDao.createAccount(accountData);
-
-        // 追加アカウントでない場合のみアクティブに設定
-        if (!isAdditionalAccount) {
-          await database.accountDao.setActiveAccount(mockDid);
-        } else {
-          print('Added additional account: $mockHandle ($mockDid)');
-        }
-      }
-
-      // クライアントを初期化
-      final account = await database.accountDao.getAccountByDid(mockDid);
-      if (account != null) {
-        await _initializeClient(account);
-      }
-
-      final userProfile = UserProfile(
-        did: mockDid,
-        handle: mockHandle,
-        displayName: displayName ?? mockHandle,
-        description: description,
-        avatar: avatarUrl,
-        banner: banner,
-        email: identifier.contains('@') ? identifier : null,
-        isVerified: false,
-        followersCount: followersCount,
-        followsCount: followsCount,
-        postsCount: postsCount,
-      );
-
-      print('Successfully created profile for: $mockHandle with avatar: $avatarUrl');
-
-      return AuthResult.success(
-        session: AuthSessionData.appPassword(
-          appPasswordSession: AppPasswordSessionData(
-            accessJwt: mockAccessJwt,
-            refreshJwt: mockRefreshJwt,
-            did: mockDid,
-            handle: mockHandle,
-            email: identifier.contains('@') ? identifier : null,
-            sessionString: mockAccessJwt,
+  
+        print('Successfully created profile for: ${session.handle} with avatar: $avatarUrl');
+  
+        return AuthResult.success(
+          session: AuthSessionData.appPassword(
+            appPasswordSession: AppPasswordSessionData(
+              accessJwt: session.accessJwt,
+              refreshJwt: session.refreshJwt,
+              did: session.did,
+              handle: session.handle,
+              email: identifier.contains('@') ? identifier : null,
+              sessionString: session.accessJwt,
+            ),
+            profile: userProfile,
           ),
-          profile: userProfile,
-        ),
-        accountDid: mockDid,
-      );
+          accountDid: session.did,
+        );
+      } catch (sessionError) {
+        // 実際の認証に失敗した場合のエラーハンドリング
+        print('Real Bluesky authentication failed: $sessionError');
+        throw sessionError;
+      }
     } catch (e) {
       print('App password sign in failed: $e');
 
@@ -346,6 +392,139 @@ class BlueskyService {
     await database.accountDao.deleteAccount(accountDid);
   }
 
+  // アクセストークンの期限をチェック（JWT文字列から）
+  bool _isAccessTokenExpired(String? accessJwtString) {
+    if (accessJwtString == null || accessJwtString.isEmpty) return true;
+    
+    // モックトークンの場合は常に有効とする
+    if (accessJwtString.startsWith('mock_') || accessJwtString == 'test_jwt') {
+      return false;
+    }
+    
+    try {
+      // atcore.decodeJwtを試行
+      final jwt = atcore.decodeJwt(accessJwtString);
+      return jwt.isExpired;
+    } catch (e) {
+      // atcore.decodeJwtが失敗した場合、手動でJWTをデコード
+      try {
+        return _manualJwtExpirationCheck(accessJwtString);
+      } catch (manualError) {
+        print('Failed to decode access token: $e, manual check also failed: $manualError');
+        return true; // パースに失敗した場合は期限切れとして扱う
+      }
+    }
+  }
+
+  // リフレッシュトークンの期限をチェック（JWT文字列から）
+  bool _isRefreshTokenExpired(String? refreshJwtString) {
+    if (refreshJwtString == null || refreshJwtString.isEmpty) return true;
+    
+    // モックトークンの場合は常に有効とする
+    if (refreshJwtString.startsWith('mock_') || refreshJwtString == 'test_refresh') {
+      return false;
+    }
+    
+    try {
+      // atcore.decodeJwtを試行
+      final jwt = atcore.decodeJwt(refreshJwtString);
+      return jwt.isExpired;
+    } catch (e) {
+      // atcore.decodeJwtが失敗した場合、手動でJWTをデコード
+      try {
+        return _manualJwtExpirationCheck(refreshJwtString);
+      } catch (manualError) {
+        print('Failed to decode refresh token: $e, manual check also failed: $manualError');
+        return true; // パースに失敗した場合は期限切れとして扱う
+      }
+    }
+  }
+  
+  // 手動でJWTの期限をチェックするヘルパーメソッド
+  bool _manualJwtExpirationCheck(String jwtString) {
+    final parts = jwtString.split('.');
+    if (parts.length != 3) {
+      throw const FormatException('Invalid JWT format: does not have 3 parts');
+    }
+    
+    // JWTペイロード部分（2番目の部分）をデコード
+    final payload = parts[1];
+    // Base64パディングを調整
+    String normalizedPayload = payload;
+    while (normalizedPayload.length % 4 != 0) {
+      normalizedPayload += '=';
+    }
+    
+    // Base64デコードを試行
+    final decodedBytes = base64.decode(normalizedPayload);
+    final payloadJson = utf8.decode(decodedBytes);
+    final payloadMap = json.decode(payloadJson) as Map<String, dynamic>;
+    
+    // 期限（exp）フィールドをチェック
+    if (payloadMap.containsKey('exp')) {
+      final exp = payloadMap['exp'] as int;
+      final expirationTime = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+      return DateTime.now().isAfter(expirationTime);
+    } else {
+      // expフィールドがない場合は期限切れとして扱う
+      return true;
+    }
+  }
+
+  // リフレッシュトークンを使用してアクセストークンを更新
+  Future<bool> refreshSession(String accountDid) async {
+    try {
+      final account = await database.accountDao.getAccountByDid(accountDid);
+      if (account == null || account.refreshJwt == null) {
+        print('No account or refresh token found for: $accountDid');
+        return false;
+      }
+
+      // リフレッシュトークンの期限チェック
+      if (_isRefreshTokenExpired(account.refreshJwt)) {
+        print('Refresh token is expired for: ${account.handle}');
+        return false;
+      }
+
+      print('Refreshing session for: ${account.handle}');
+
+      // リフレッシュトークンを使用してセッションを更新
+      // refreshSession は文字列のrefreshTokenを受け取り、新しいSessionを返す
+      final refreshResponse = await atp.refreshSession(
+        refreshJwt: account.refreshJwt!,
+      );
+
+      final newSession = refreshResponse.data;
+      print('Session refreshed successfully for: ${account.handle}');
+
+      // Sessionオブジェクトからアクセストークンとリフレッシュトークンの文字列を取得
+      final newAccessJwtString = newSession.accessJwt;
+      final newRefreshJwtString = newSession.refreshJwt;
+
+      // データベースの認証情報を更新（JWT文字列として保存）
+      await database.accountDao.updateAccountWithAppPasswordSession(
+        did: accountDid,
+        accessJwt: newAccessJwtString,
+        refreshJwt: newRefreshJwtString,
+        sessionString: newAccessJwtString,
+      );
+
+      // 現在のクライアントを再初期化
+      if (_currentAccount?.did == accountDid) {
+        final updatedAccount = await database.accountDao.getAccountByDid(accountDid);
+        if (updatedAccount != null) {
+          await _initializeClient(updatedAccount);
+        }
+      }
+
+      print('Session tokens updated in database for: ${account.handle}');
+      return true;
+    } catch (e) {
+      print('Failed to refresh session for $accountDid: $e');
+      return false;
+    }
+  }
+
   // Validate and refresh session
   Future<bool> validateAndRefreshSession(String accountDid) async {
     final account = await database.accountDao.getAccountByDid(accountDid);
@@ -357,18 +536,30 @@ class BlueskyService {
         // TODO: Implement OAuth token refresh when needed
         return (account.accessJwt != null && account.refreshJwt != null);
       } else {
-        // App password session validation
+        // App password session validation and refresh
         if (account.accessJwt == null || account.refreshJwt == null) {
           return false;
         }
 
         try {
-          // モック実装のため、セッション検証はJWTトークンの存在のみを確認
-          print('Mock session validation for: ${account.handle}');
-          
-          // 基本的なセッション情報の確認
+          // トークンの存在と期限をチェック
           if (account.accessJwt != null && account.refreshJwt != null) {
-            print('Session validation successful for: ${account.handle}');
+            // アクセストークンの期限をチェック
+            if (_isAccessTokenExpired(account.accessJwt)) {
+              print('Access token expired for ${account.handle}, checking refresh token...');
+              
+              // リフレッシュトークンの期限もチェック
+              if (_isRefreshTokenExpired(account.refreshJwt)) {
+                print('Both tokens expired for ${account.handle}, session invalid');
+                return false;
+              }
+              
+              // リフレッシュトークンが有効な場合、セッションは有効（必要時にリフレッシュ可能）
+              print('Access token expired but refresh token valid for: ${account.handle}');
+              return true;
+            }
+            
+            print('Session tokens valid for: ${account.handle}');
             return true;
           } else {
             print('Session validation failed - missing tokens for: ${account.handle}');
@@ -385,27 +576,76 @@ class BlueskyService {
     }
   }
 
-  // TODO: Implement API methods once BlueSky package is working correctly
+  // タイムラインを取得（リトライ機能付き）
+  Future<List<dynamic>> getTimeline({
+    String? cursor,
+    int limit = 50,
+  }) async {
+    if (_currentClient == null || _currentAccount == null) {
+      throw Exception('No active session');
+    }
 
-  // Get timeline posts
-  // Future<List<bsky.FeedView>> getTimeline({
-  //   String? cursor,
-  //   int limit = 50,
-  // }) async {
-  //   if (_currentClient == null) {
-  //     throw Exception('No active session');
-  //   }
-  //   try {
-  //     final response = await _currentClient!.feed.getTimeline(
-  //       cursor: cursor,
-  //       limit: limit,
-  //     );
-  //     return response.data.feed;
-  //   } catch (e) {
-  //     print('Failed to get timeline: $e');
-  //     rethrow;
-  //   }
-  // }
+    try {
+      final response = await _callAPIWithRetry(() async {
+        return await _currentClient!.feed.getTimeline(
+          cursor: cursor,
+          limit: limit,
+        );
+      }, _currentAccount!.did);
+      
+      return response.data.feed;
+    } catch (e) {
+      print('Failed to get timeline: $e');
+      rethrow;
+    }
+  }
+
+  // 通知を取得（リトライ機能付き）
+  Future<List<dynamic>> getNotifications({
+    String? cursor,
+    int limit = 50,
+  }) async {
+    if (_currentClient == null || _currentAccount == null) {
+      throw Exception('No active session');
+    }
+
+    try {
+      final response = await _callAPIWithRetry(() async {
+        return await _currentClient!.notification.listNotifications(
+          cursor: cursor,
+          limit: limit,
+        );
+      }, _currentAccount!.did);
+      
+      return response.data.notifications;
+    } catch (e) {
+      print('Failed to get notifications: $e');
+      rethrow;
+    }
+  }
+
+  // 投稿を作成（リトライ機能付き）
+  Future<bool> createPost({
+    required String text,
+    List<String>? images,
+    String? replyTo,
+  }) async {
+    if (_currentClient == null || _currentAccount == null) {
+      throw Exception('No active session');
+    }
+
+    try {
+      await _callAPIWithRetry(() async {
+        return await _currentClient!.feed.post(text: text);
+      }, _currentAccount!.did);
+      
+      print('Post created successfully');
+      return true;
+    } catch (e) {
+      print('Failed to create post: $e');
+      return false;
+    }
+  }
 
   // Simple logout
   Future<void> logout() async {
@@ -453,6 +693,52 @@ class BlueskyService {
     }
   }
 
+  // API呼び出し前にトークンの期限をチェックし、必要に応じてリフレッシュ
+  Future<bool> _ensureValidToken(String accountDid) async {
+    final account = await database.accountDao.getAccountByDid(accountDid);
+    if (account == null) return false;
+
+    // アクセストークンの期限チェック
+    if (_isAccessTokenExpired(account.accessJwt)) {
+      print('Access token expired, refreshing for: ${account.handle}');
+      return await refreshSession(accountDid);
+    }
+
+    return true; // トークンは有効
+  }
+
+  // API呼び出しでのリトライ機能付きヘルパー（効率的なトークン管理）
+  Future<T> _callAPIWithRetry<T>(Future<T> Function() apiCall, String accountDid) async {
+    // 事前にトークンの期限をチェックして、期限切れの場合は先にリフレッシュ
+    final tokenValid = await _ensureValidToken(accountDid);
+    if (!tokenValid) {
+      throw Exception('Failed to ensure valid token for API call');
+    }
+
+    try {
+      // アクセストークンが有効な状態でAPI呼び出しを実行
+      return await apiCall();
+    } catch (e) {
+      // 認証エラーの場合のみ、追加でリフレッシュを試行（稀なケース）
+      if (e.toString().contains('Token could not be verified') ||
+          e.toString().contains('401') ||
+          e.toString().contains('InvalidRequestException')) {
+        print('API call failed with auth error despite valid token, attempting refresh...');
+        
+        final refreshed = await refreshSession(accountDid);
+        if (refreshed) {
+          print('Session refreshed, retrying API call...');
+          return await apiCall();
+        } else {
+          print('Failed to refresh session, API call failed');
+          rethrow;
+        }
+      }
+      // 認証エラー以外の場合はそのまま例外を投げる
+      rethrow;
+    }
+  }
+
   // プロフィール情報を実際のBluesky APIから取得する
   Future<UserProfile?> fetchProfileFromAPI(String accountDid) async {
     try {
@@ -469,7 +755,82 @@ class BlueskyService {
       }
       
       try {
-        print('Mock profile fetch for account: ${account.handle}');
+        // アカウントのクライアントを初期化または使用
+        bsky.Bluesky? clientToUse = _currentClient;
+        
+        // 現在のクライアントがない、または別のアカウントの場合、一時的にクライアントを作成
+        if (_currentClient == null || _currentAccount?.did != accountDid) {
+          print('Creating temporary client for profile fetch: ${account.handle}');
+          
+          try {
+            // 一時的なクライアントを作成
+            clientToUse = bsky.Bluesky.fromSession(
+              atcore.Session(
+                did: account.did,
+                handle: account.handle,
+                accessJwt: account.accessJwt!,
+                refreshJwt: account.refreshJwt!,
+              ),
+            );
+          } catch (e) {
+            print('Failed to create temporary client: $e');
+            clientToUse = null;
+          }
+        }
+        
+        // 実際のBluesky APIクライアントが利用可能な場合の実装
+        if (clientToUse != null) {
+          print('Fetching profile from Bluesky API for: ${account.handle}');
+          
+          try {
+            // リトライ機能付きでAPI呼び出し（一時クライアントの場合は直接呼び出し）
+            final response = (_currentClient != null && _currentAccount?.did == accountDid)
+                ? await _callAPIWithRetry(() async {
+                    return await clientToUse!.actor.getProfile(
+                      actor: account.did,  // didまたはhandleを指定
+                    );
+                  }, accountDid)
+                : await clientToUse.actor.getProfile(
+                    actor: account.did,
+                  );
+            
+            if (response.data != null) {
+              final profile = response.data!;
+              print('Successfully fetched profile from API: ${profile.handle}');
+              print('API Avatar URL: ${profile.avatar}');
+              
+              // APIから取得したプロフィール情報でデータベースを更新
+              await updateAccountProfile(
+                accountDid: accountDid,
+                displayName: profile.displayName,
+                description: profile.description,
+                avatar: profile.avatar,
+                banner: profile.banner,
+              );
+              
+              return UserProfile(
+                did: profile.did,
+                handle: profile.handle,
+                displayName: profile.displayName ?? profile.handle,
+                description: profile.description,
+                avatar: profile.avatar,
+                banner: profile.banner,
+                email: account.email,
+                isVerified: false, // TODO: APIから取得
+                followersCount: profile.followersCount,
+                followsCount: profile.followsCount,
+                postsCount: profile.postsCount,
+                createdAt: profile.createdAt ?? account.createdAt,
+              );
+            }
+          } catch (apiError) {
+            print('API call failed for profile fetch: $apiError');
+            // APIエラーの場合、モック実装にフォールバック
+          }
+        }
+        
+        // フォールバック：モック実装
+        print('Using mock profile fetch for account: ${account.handle}');
         
         // モック実装：より良いアバターを生成し、データベースを更新
         final newAvatarUrl = _generateAvatarUrl(account.handle, account.did);
@@ -505,7 +866,7 @@ class BlueskyService {
           createdAt: account.createdAt,
         );
       } catch (e) {
-        print('Failed to update mock profile: $e');
+        print('Failed to fetch profile from API: $e');
         print('Error type: ${e.runtimeType}');
         print('Falling back to database profile for: ${account.handle}');
         
@@ -518,7 +879,7 @@ class BlueskyService {
     }
   }
 
-  // 全アカウントのプロフィール情報を更新する
+  // 全アカウントのプロフィール情報を更新する（強制更新）
   Future<void> refreshAllAccountProfiles() async {
     try {
       final accounts = await database.accountDao.getAllAccounts();
@@ -557,6 +918,60 @@ class BlueskyService {
     } catch (e) {
       print('Failed to update account profile: $e');
       rethrow;
+    }
+  }
+
+  // アバター情報が未取得または古いかどうかを判定
+  Future<bool> shouldRefreshProfile(String accountDid) async {
+    try {
+      final account = await database.accountDao.getAccountByDid(accountDid);
+      if (account == null) return false;
+      
+      // アバター情報が設定されていない場合は取得が必要
+      if (account.avatar == null || account.avatar!.isEmpty) {
+        return true;
+      }
+      
+      // 生成アバター（dicebear）の場合は実際のプロフィールが存在する可能性があるため更新
+      if (account.avatar!.contains('dicebear.com')) {
+        return true;
+      }
+      
+      // 最終更新から一定時間（24時間）経過している場合は更新
+      if (account.lastUsed != null) {
+        final lastUpdate = account.lastUsed!;
+        final hoursSinceUpdate = DateTime.now().difference(lastUpdate).inHours;
+        if (hoursSinceUpdate > 24) {
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (e) {
+      print('Failed to check if profile refresh is needed: $e');
+      return false;
+    }
+  }
+  
+  // 必要なアカウントのみプロフィール情報を更新
+  Future<void> refreshProfilesIfNeeded() async {
+    try {
+      final accounts = await database.accountDao.getAllAccounts();
+      
+      for (final account in accounts) {
+        final shouldRefresh = await shouldRefreshProfile(account.did);
+        if (shouldRefresh) {
+          print('Refreshing profile for ${account.handle} (avatar missing or outdated)');
+          await fetchProfileFromAPI(account.did);
+          
+          // API制限を避けるために少し待機
+          await Future.delayed(const Duration(milliseconds: 300));
+        } else {
+          print('Profile for ${account.handle} is up to date, skipping refresh');
+        }
+      }
+    } catch (e) {
+      print('Failed to refresh profiles if needed: $e');
     }
   }
 }

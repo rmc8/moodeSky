@@ -1,11 +1,12 @@
 // Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Project imports:
+import 'package:moodesky/core/providers/database_provider.dart';
 import 'package:moodesky/features/auth/models/server_config.dart';
 import 'package:moodesky/services/bluesky_service.dart';
-import 'package:moodesky/services/database/database.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
 
 part 'auth_provider.g.dart';
@@ -20,11 +21,7 @@ AuthConfig authConfig(AuthConfigRef ref) {
   );
 }
 
-// Database provider
-@Riverpod(keepAlive: true)
-AppDatabase database(DatabaseRef ref) {
-  return AppDatabase();
-}
+// Note: Database provider is now provided by database_provider.dart
 
 // Secure storage provider
 @Riverpod(keepAlive: true)
@@ -39,7 +36,7 @@ FlutterSecureStorage secureStorage(SecureStorageRef ref) {
 
 // Bluesky service provider
 @Riverpod(keepAlive: true)
-BlueskyService blueskyService(BlueskyServiceRef ref) {
+BlueskyService blueskyService(Ref ref) {
   final database = ref.watch(databaseProvider);
   final secureStorage = ref.watch(secureStorageProvider);
   final authConfig = ref.watch(authConfigProvider);
@@ -81,20 +78,31 @@ class AuthNotifier extends _$AuthNotifier {
       );
 
       if (!isValid) {
+        // セッションが無効でリフレッシュも失敗した場合、ログアウト状態にする
+        print('Session validation failed, signing out user: ${activeAccount.handle}');
         state = const AuthState.unauthenticated();
         return;
       }
 
       final accounts = await _blueskyService.getAllAccounts();
       
-      // バックグラウンドでプロフィール情報を更新（アプリ起動を妨げない）
+      // バックグラウンドで全アカウントのプロフィール情報を強制更新（アプリ起動を妨げない）
       Future.microtask(() async {
         try {
+          print('Starting background profile refresh for all accounts...');
           await _blueskyService.refreshAllAccountProfiles();
           // 更新後に状態を再更新
           await _updateAuthenticatedState();
+          print('Background profile refresh completed successfully');
         } catch (e) {
           print('Background profile refresh failed: $e');
+          // フォールバックとして必要最小限の更新を試行
+          try {
+            await _blueskyService.refreshProfilesIfNeeded();
+            await _updateAuthenticatedState();
+          } catch (fallbackError) {
+            print('Fallback profile refresh also failed: $fallbackError');
+          }
         }
       });
       
@@ -400,6 +408,17 @@ class AuthNotifier extends _$AuthNotifier {
       await _updateAuthenticatedState();
     } catch (e) {
       print('Failed to refresh all profiles: $e');
+    }
+  }
+  
+  // 必要なアカウントのプロフィール情報のみを更新する
+  Future<void> refreshProfilesIfNeeded() async {
+    try {
+      await _blueskyService.refreshProfilesIfNeeded();
+      // 状態を更新してUIに反映
+      await _updateAuthenticatedState();
+    } catch (e) {
+      print('Failed to refresh profiles if needed: $e');
     }
   }
 

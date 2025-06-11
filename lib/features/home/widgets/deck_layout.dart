@@ -195,9 +195,15 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
 
   Widget _buildTab(Deck deck, int index, bool isSelected) {
     final allAccounts = ref.watch(availableAccountsProvider);
-    final account = deck.accountDid != null
+    final activeAccount = ref.watch(activeAccountProvider);
+    
+    // デッキに関連付けられたアカウントを取得
+    var account = deck.accountDid != null
         ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
         : null;
+    
+    // 対応するアカウントが見つからない場合はアクティブアカウントを使用
+    account ??= activeAccount;
 
     return GestureDetector(
       onTap: () {
@@ -536,9 +542,15 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
     List<Deck> allDecks,
   ) {
     final allAccounts = ref.watch(availableAccountsProvider);
-    final account = deck.accountDid != null
+    final activeAccount = ref.watch(activeAccountProvider);
+    
+    // デッキに関連付けられたアカウントを取得
+    var account = deck.accountDid != null
         ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
         : null;
+    
+    // 対応するアカウントが見つからない場合はアクティブアカウントを使用
+    account ??= activeAccount;
 
     // Create tooltip text with deck title and account info
     String tooltipText = deck.title;
@@ -1058,9 +1070,17 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   /// コンパクトなアカウントアバターを構築（アイキャッチとして適切なサイズ）
   Widget _buildCompactAccountAvatar(Deck deck, {bool isUltraCompact = false}) {
     final allAccounts = ref.watch(availableAccountsProvider);
-    final account = deck.accountDid != null
+    final activeAccount = ref.watch(activeAccountProvider);
+    
+    // デッキに関連付けられたアカウントを取得
+    // accountDidが指定されていて、有効なアカウントに対応する場合はそれを使用
+    // そうでなければアクティブアカウントを使用
+    var account = deck.accountDid != null
         ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
         : null;
+    
+    // 対応するアカウントが見つからない場合はアクティブアカウントを使用
+    account ??= activeAccount;
 
     // アイキャッチとして少し大きめに調整
     final radius = isUltraCompact ? 10.0 : 12.0;
@@ -1108,9 +1128,15 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
     if (deck.isCrossAccount) return true;
     
     final allAccounts = ref.watch(availableAccountsProvider);
-    final account = deck.accountDid != null
+    final activeAccount = ref.watch(activeAccountProvider);
+    
+    // デッキに関連付けられたアカウントを取得
+    var account = deck.accountDid != null
         ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
         : null;
+    
+    // 対応するアカウントが見つからない場合はアクティブアカウントを使用
+    account ??= activeAccount;
     
     return account != null;
   }
@@ -1118,9 +1144,15 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
   /// コンパクトなデッキラベルを構築
   String _buildCompactDeckLabel(Deck deck) {
     final allAccounts = ref.watch(availableAccountsProvider);
-    final account = deck.accountDid != null
+    final activeAccount = ref.watch(activeAccountProvider);
+    
+    // デッキに関連付けられたアカウントを取得
+    var account = deck.accountDid != null
         ? allAccounts.firstWhereOrNull((a) => a.did == deck.accountDid)
         : null;
+    
+    // 対応するアカウントが見つからない場合はアクティブアカウントを使用
+    account ??= activeAccount;
 
     final deckTypeName = _getDeckTypeName(deck.deckType);
     
