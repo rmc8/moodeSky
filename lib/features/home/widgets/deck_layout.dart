@@ -13,8 +13,8 @@ import 'package:moodesky/features/home/widgets/add_deck_dialog.dart';
 import 'package:moodesky/features/home/widgets/bluesky_timeline_widget.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/services/database/database.dart';
+import 'package:moodesky/shared/models/auth_models.dart';
 import 'package:moodesky/shared/widgets/deck_item.dart';
-import 'package:moodesky/shared/widgets/post_item.dart';
 import 'package:moodesky/shared/widgets/timeline_widget.dart';
 
 class DeckLayout extends ConsumerStatefulWidget {
@@ -271,104 +271,7 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
               ),
               const SizedBox(width: 6),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      deck.title,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurface,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                    if (account != null) ...[
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          // アバターアイコン（タブ用適切サイズ）
-                          if (account.avatar != null) ...[
-                            CircleAvatar(
-                              radius: 8,
-                              backgroundImage: NetworkImage(account.avatar!),
-                            ),
-                          ] else ...[
-                            CircleAvatar(
-                              radius: 8,
-                              backgroundColor: _getAccountColor(account.did),
-                              child: Text(
-                                account.displayName
-                                        ?.substring(0, 1)
-                                        .toUpperCase() ??
-                                    account.handle
-                                        .substring(0, 1)
-                                        .toUpperCase(),
-                                style: const TextStyle(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              '@${account.handle}',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    fontSize: 10,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withValues(alpha: 0.7),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ] else if (deck.isCrossAccount) ...[
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.group_rounded,
-                            size: 12,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              AppLocalizations.of(context).multiAccount,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    fontSize: 10,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withValues(alpha: 0.6),
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
+                child: _buildTabContent(context, deck, account, isSelected),
               ),
               // Close button
               GestureDetector(
@@ -1418,5 +1321,153 @@ class _DeckLayoutState extends ConsumerState<DeckLayout> {
         ),
       );
     }
+  }
+
+  Widget _buildTabContent(BuildContext context, Deck deck, UserProfile? account, bool isSelected) {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final screenHeight = mediaQuery.size.height;
+    
+    // 横向きまたは高さが制限されている場合はシンプル表示
+    if (isLandscape || screenHeight < 600) {
+      return _buildSimpleTabContent(context, deck, account, isSelected);
+    }
+    
+    // 通常の表示
+    return _buildFullTabContent(context, deck, account, isSelected);
+  }
+
+  Widget _buildSimpleTabContent(BuildContext context, Deck deck, UserProfile? account, bool isSelected) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            deck.title,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurface,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+        if (account != null) ...[
+          const SizedBox(width: 6),
+          CircleAvatar(
+            radius: 8,
+            backgroundImage: account.avatar != null 
+                ? NetworkImage(account.avatar!) 
+                : null,
+            backgroundColor: account.avatar == null 
+                ? _getAccountColor(account.did) 
+                : null,
+            child: account.avatar == null
+                ? Text(
+                    account.displayName?.substring(0, 1).toUpperCase() ??
+                        account.handle.substring(0, 1).toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  )
+                : null,
+          ),
+        ] else if (deck.isCrossAccount) ...[
+          const SizedBox(width: 6),
+          Icon(
+            Icons.group_rounded,
+            size: 12,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildFullTabContent(BuildContext context, Deck deck, UserProfile? account, bool isSelected) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          deck.title,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSurface,
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
+        if (account != null) ...[
+          const SizedBox(height: 2),
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 8,
+                backgroundImage: account.avatar != null 
+                    ? NetworkImage(account.avatar!) 
+                    : null,
+                backgroundColor: account.avatar == null 
+                    ? _getAccountColor(account.did) 
+                    : null,
+                child: account.avatar == null
+                    ? Text(
+                        account.displayName?.substring(0, 1).toUpperCase() ??
+                            account.handle.substring(0, 1).toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  '@${account.handle}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: 10,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ],
+          ),
+        ] else if (deck.isCrossAccount) ...[
+          const SizedBox(height: 2),
+          Row(
+            children: [
+              Icon(
+                Icons.group_rounded,
+                size: 12,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context).multiAccount,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: 10,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    fontStyle: FontStyle.italic,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
   }
 }

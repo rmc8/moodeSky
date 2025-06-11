@@ -65,6 +65,15 @@ dependencies:
   # URL Launcher
   url_launcher: ^6.2.2
 
+  # Video Player
+  video_player: ^2.8.2
+  chewie: ^1.7.5
+  youtube_player_flutter: ^9.0.1
+
+  # Image Gallery & Permissions
+  gal: ^2.3.0
+  permission_handler: ^11.1.0
+
   # Text Processing
   bluesky_text: ^0.7.2
 

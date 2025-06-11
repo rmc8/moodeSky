@@ -11,6 +11,7 @@ import 'package:moodesky/core/providers/theme_provider.dart';
 import 'package:moodesky/core/theme/app_themes.dart';
 import 'package:moodesky/shared/widgets/bluesky_facet_text.dart';
 import 'package:moodesky/shared/widgets/rich_text_widget.dart';
+import 'package:moodesky/shared/widgets/embed/embed_widget.dart';
 
 /// ポストアイテムの表示ウィジェット
 class PostItem extends StatelessWidget {
@@ -19,6 +20,7 @@ class PostItem extends StatelessWidget {
   final String? authorAvatar;
   final String content;
   final List<bsky.Facet>? facets;
+  final Object? embed;
   final DateTime timestamp;
   final int likeCount;
   final int repostCount;
@@ -37,6 +39,7 @@ class PostItem extends StatelessWidget {
     this.authorAvatar,
     required this.content,
     this.facets,
+    this.embed,
     required this.timestamp,
     this.likeCount = 0,
     this.repostCount = 0,
@@ -159,6 +162,12 @@ class PostItem extends StatelessWidget {
                   print('Hashtag tapped: #$tag');
                 },
               ),
+
+          // Embed表示
+          if (embed != null && embed is bsky.EmbedView) ...[
+            const SizedBox(height: 12),
+            EmbedWidget(embed: embed as bsky.EmbedView),
+          ],
 
           const SizedBox(height: 16),
 
