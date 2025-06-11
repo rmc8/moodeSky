@@ -528,3 +528,17 @@ Future<MultiAccountStatus?> multiAccountStatus(
     accountTokenStatus: accountTokenStatus,
   );
 }
+
+/// BlueskyService provider
+@Riverpod(keepAlive: true)
+BlueskyService blueskyServiceApi(Ref ref) {
+  final database = ref.watch(databaseProvider);
+  final secureStorage = ref.watch(secureStorageProvider);
+  final authConfig = ref.watch(authConfigProvider);
+
+  return BlueskyService(
+    database: database,
+    secureStorage: secureStorage,
+    authConfig: authConfig,
+  );
+}

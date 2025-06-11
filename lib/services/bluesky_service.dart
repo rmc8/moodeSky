@@ -974,4 +974,49 @@ class BlueskyService {
       print('Failed to refresh profiles if needed: $e');
     }
   }
+
+  /// Get timeline for a specific account (returns original Bluesky API structure)
+  Future<List<bsky.FeedView>> getTimelineFeed({
+    required String accountDid,
+    String? cursor,
+    int limit = 50,
+  }) async {
+    try {
+      // Get account and create client
+      final account = await database.accountDao.getAccountByDid(accountDid);
+      if (account == null) {
+        throw Exception('Account not found: $accountDid');
+      }
+
+      if (account.accessJwt == null) {
+        throw Exception('No access token for account: ${account.handle}');
+      }
+
+      // Create Bluesky client with account's session
+      final session = atcore.Session(
+        did: account.did,
+        handle: account.handle,
+        accessJwt: account.accessJwt!,
+        refreshJwt: account.refreshJwt ?? '',
+      );
+
+      final client = bsky.Bluesky.fromSession(session);
+
+      print('BlueskyService: Fetching timeline for ${account.handle} (limit: $limit, cursor: $cursor)');
+
+      // Get timeline from API - return original structure
+      final response = await client.feed.getTimeline(
+        limit: limit,
+        cursor: cursor,
+      );
+
+      print('BlueskyService: Timeline API response received: ${response.data.feed.length} posts');
+
+      // Return the original Bluesky feed data for maximum flexibility
+      return response.data.feed;
+    } catch (e) {
+      print('Failed to get timeline for $accountDid: $e');
+      rethrow;
+    }
+  }
 }
