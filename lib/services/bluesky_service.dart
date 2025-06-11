@@ -507,7 +507,9 @@ class BlueskyService {
       }
 
       print('Refreshing session for: ${account.handle}');
-      print('Current refresh token: ${account.refreshJwt?.substring(0, 20)}...');
+      print(
+        'Current refresh token: ${account.refreshJwt?.substring(0, 20)}...',
+      );
 
       // リフレッシュトークンを使用してセッションを更新
       // refreshSession は文字列のrefreshTokenを受け取り、新しいSessionを返す
@@ -521,7 +523,7 @@ class BlueskyService {
       // Sessionオブジェクトからアクセストークンとリフレッシュトークンの文字列を取得
       final newAccessJwtString = newSession.accessJwt;
       final newRefreshJwtString = newSession.refreshJwt;
-      
+
       print('New access token: ${newAccessJwtString.substring(0, 20)}...');
       print('New refresh token: ${newRefreshJwtString.substring(0, 20)}...');
 
@@ -825,9 +827,13 @@ class BlueskyService {
             // すべてのAPI呼び出しでリトライ機能を使用
             final response = await _callAPIWithRetry(() async {
               // 最新のアカウント情報を取得してクライアントを再作成
-              final latestAccount = await database.accountDao.getAccountByDid(accountDid);
+              final latestAccount = await database.accountDao.getAccountByDid(
+                accountDid,
+              );
               if (latestAccount?.accessJwt == null) {
-                throw Exception('No valid access token after refresh for profile fetch');
+                throw Exception(
+                  'No valid access token after refresh for profile fetch',
+                );
               }
 
               final freshClient = bsky.Bluesky.fromSession(
@@ -1056,7 +1062,9 @@ class BlueskyService {
       // Use retry mechanism with token refresh for API call
       final response = await _callAPIWithRetry(() async {
         // Get the latest account data (in case tokens were refreshed)
-        final latestAccount = await database.accountDao.getAccountByDid(accountDid);
+        final latestAccount = await database.accountDao.getAccountByDid(
+          accountDid,
+        );
         if (latestAccount?.accessJwt == null) {
           throw Exception('No valid access token after refresh');
         }
@@ -1072,10 +1080,7 @@ class BlueskyService {
         final client = bsky.Bluesky.fromSession(session);
 
         // Make the API call
-        return await client.feed.getTimeline(
-          limit: limit,
-          cursor: cursor,
-        );
+        return await client.feed.getTimeline(limit: limit, cursor: cursor);
       }, accountDid);
 
       print(
@@ -1095,9 +1100,11 @@ class BlueskyService {
   }
 
   /// テキスト解析機能
-  
+
   /// テキストを分析してファセットを生成
-  Future<List<Map<String, dynamic>>> analyzeTextAndGenerateFacets(String text) async {
+  Future<List<Map<String, dynamic>>> analyzeTextAndGenerateFacets(
+    String text,
+  ) async {
     try {
       final blueskyText = BlueskyText(text);
       return await blueskyText.entities.toFacets();
@@ -1129,7 +1136,8 @@ class BlueskyService {
   List<String> extractMentions(String text) {
     // 正規表現による抽出
     final mentionRegex = RegExp(r'@[\w.-]+\.[\w.-]+');
-    return mentionRegex.allMatches(text)
+    return mentionRegex
+        .allMatches(text)
         .map((m) => m.group(0)!.replaceFirst('@', ''))
         .toList();
   }
@@ -1138,7 +1146,8 @@ class BlueskyService {
   List<String> extractHashtags(String text) {
     // 正規表現による抽出
     final hashtagRegex = RegExp(r'#[\w]+');
-    return hashtagRegex.allMatches(text)
+    return hashtagRegex
+        .allMatches(text)
         .map((m) => m.group(0)!.replaceFirst('#', ''))
         .toList();
   }
@@ -1147,19 +1156,17 @@ class BlueskyService {
   List<String> extractUrls(String text) {
     // 正規表現による抽出
     final urlRegex = RegExp(r'https?://[\w\-./?=#&%]+');
-    return urlRegex.allMatches(text)
-        .map((m) => m.group(0)!)
-        .toList();
+    return urlRegex.allMatches(text).map((m) => m.group(0)!).toList();
   }
 
   /// テキストが投稿可能かチェック（長さ + 内容検証）
   bool canPostText(String text) {
     if (text.trim().isEmpty) return false;
     if (!validatePostText(text)) return false;
-    
+
     // 基本的な内容チェック（必要に応じて拡張）
     if (text.trim().length < 1) return false;
-    
+
     return true;
   }
 
@@ -1175,21 +1182,27 @@ class BlueskyService {
     try {
       // キャッシュチェック（6時間TTL）
       if (!forceRefresh) {
-        final cached = await database.preferencesDao.getCachedPreferences(accountDid);
+        final cached = await database.preferencesDao.getCachedPreferences(
+          accountDid,
+        );
         if (cached != null && cached.lastUpdated != null) {
           final age = DateTime.now().difference(cached.lastUpdated!).inHours;
           if (age < 6) {
-            print('設定をキャッシュから取得: アカウント $accountDid (${cached.preferences.length}項目)');
+            print(
+              '設定をキャッシュから取得: アカウント $accountDid (${cached.preferences.length}項目)',
+            );
             return cached;
           }
         }
       }
 
       print('Bluesky APIから設定を取得中: $accountDid');
-      
+
       // API呼び出し（既存の_callAPIWithRetryパターン使用）
       final response = await _callAPIWithRetry(() async {
-        final latestAccount = await database.accountDao.getAccountByDid(accountDid);
+        final latestAccount = await database.accountDao.getAccountByDid(
+          accountDid,
+        );
         if (latestAccount?.accessJwt == null) {
           throw Exception('有効なアクセストークンがありません');
         }
@@ -1206,8 +1219,13 @@ class BlueskyService {
         return await client.actor.getPreferences();
       }, accountDid);
 
+      // Preference型をMap<String, dynamic>に変換
+      final preferencesMap = response.data.preferences
+          .map((pref) => pref.toJson())
+          .toList();
+
       final userPrefs = UserPreferences(
-        preferences: response.data.preferences,
+        preferences: preferencesMap,
         lastUpdated: DateTime.now(),
         accountDid: accountDid,
       );
@@ -1219,21 +1237,23 @@ class BlueskyService {
       return userPrefs;
     } catch (e) {
       print('設定取得失敗: $e');
-      
+
       // エラー時はキャッシュデータを返す
-      final cached = await database.preferencesDao.getCachedPreferences(accountDid);
+      final cached = await database.preferencesDao.getCachedPreferences(
+        accountDid,
+      );
       if (cached != null) {
         print('エラー時のフォールバック: キャッシュデータを使用');
         return cached;
       }
-      
+
       return null;
     }
   }
 
   /// 統合的なコンテンツモデレーション
   Future<ModerationResult> moderateContent({
-    required bsky.PostView post,
+    required bsky.FeedView post,
     required String accountDid,
     required String context, // 'contentList' or 'contentMedia'
   }) async {
@@ -1243,8 +1263,10 @@ class BlueskyService {
         return const ModerationResult.allow();
       }
 
-      final moderationPrefs = PreferencesParser.extractModerationPrefs(preferences.preferences);
-      
+      final moderationPrefs = PreferencesParser.extractModerationPrefs(
+        preferences.preferences,
+      );
+
       // ContentModeratorを使用して判定
       return ContentModerator.moderatePost(post, moderationPrefs);
     } catch (e) {
@@ -1255,14 +1277,16 @@ class BlueskyService {
 
   /// 投稿がワードミュート対象かチェック
   Future<bool> isPostMuted({
-    required bsky.PostView post,
+    required bsky.FeedView post,
     required String accountDid,
   }) async {
     try {
       final preferences = await getUserPreferences(accountDid: accountDid);
       if (preferences == null) return false;
 
-      final mutedWords = PreferencesParser.extractModerationPrefs(preferences.preferences).mutedWords;
+      final mutedWords = PreferencesParser.extractModerationPrefs(
+        preferences.preferences,
+      ).mutedWords;
       return ContentModerator.isPostMuted(post, mutedWords);
     } catch (e) {
       print('ワードミュートチェックエラー: $e');
@@ -1309,14 +1333,6 @@ class BlueskyService {
     }
   }
 
-  /// キャッシュが有効かチェック
-  bool _isCacheValid(DateTime? lastUpdated) {
-    if (lastUpdated == null) return false;
-    const ttl = Duration(hours: 6);
-    final age = DateTime.now().difference(lastUpdated);
-    return age < ttl;
-  }
-
   /// 設定キャッシュをクリア
   Future<void> clearPreferencesCache(String accountDid) async {
     try {
@@ -1334,6 +1350,99 @@ class BlueskyService {
       print('全設定キャッシュクリア完了');
     } catch (e) {
       print('全設定キャッシュクリアエラー: $e');
+    }
+  }
+}
+
+/// コンテンツモデレーション処理クラス
+class ContentModerator {
+  /// 投稿をモデレーション設定に基づいて判定
+  static ModerationResult moderatePost(
+    bsky.FeedView feedView,
+    ModerationPrefs moderationPrefs,
+  ) {
+    try {
+      // 安全なマップアクセスのためのヘルパー関数
+      T? safeGet<T>(Map<String, dynamic> map, String key) {
+        try {
+          return map[key] as T?;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      // ワードミュートチェック
+      if (isPostMuted(feedView, moderationPrefs.mutedWords)) {
+        return const ModerationResult.filter('muted words');
+      }
+
+      // ミュートされたアクターチェック
+      final authorDid = feedView.post.author.did;
+      if (moderationPrefs.mutedActors.contains(authorDid)) {
+        return const ModerationResult.filter('muted actor');
+      }
+
+      // 隠された投稿チェック
+      final uri = feedView.post.uri.toString();
+      if (moderationPrefs.hiddenPosts.contains(uri)) {
+        return const ModerationResult.filter('hidden post');
+      }
+
+      // ラベルベースのモデレーション
+      final labels = feedView.post.labels ?? [];
+      for (final label in labels) {
+        final labelValue = label.value;
+        if (moderationPrefs.labels.containsKey(labelValue)) {
+          final labelPref = moderationPrefs.labels[labelValue]!;
+          return labelPref.when(
+            hide: () => const ModerationResult.filter('content label'),
+            warn: () => const ModerationResult.blur('content warning'),
+            ignore: () => const ModerationResult.allow(),
+          );
+        }
+      }
+
+      return const ModerationResult.allow();
+    } catch (e) {
+      print('モデレーション判定エラー: $e');
+      return const ModerationResult.allow();
+    }
+  }
+
+  /// 投稿がワードミュート対象かチェック
+  static bool isPostMuted(
+    bsky.FeedView feedView,
+    List<bsky.MutedWord> mutedWords,
+  ) {
+    try {
+      // 投稿本文を取得
+      final text = feedView.post.record.text;
+
+      // 各ミュートワードに対してチェック
+      for (final mutedWord in mutedWords) {
+        final value = mutedWord.value;
+        if (value.isEmpty) continue;
+
+        // 投稿本文にミュートワードが含まれているかチェック
+        if (text.toLowerCase().contains(value.toLowerCase())) {
+          // コンテキストチェック（targets配列が存在する場合）
+          final targets = mutedWord.targets;
+          if (targets.isNotEmpty) {
+            // targetが指定されている場合は、適用可能なコンテキストかチェック
+            if (targets.contains('content')) {
+              return true;
+            }
+          } else {
+            // targetが指定されていない場合はデフォルトで適用
+            return true;
+          }
+        }
+      }
+
+      return false;
+    } catch (e) {
+      print('ワードミュートチェックエラー: $e');
+      return false;
     }
   }
 }
