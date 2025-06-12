@@ -37,6 +37,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _useOAuth = false; // Toggle between OAuth and App Password
+  bool _useRealOAuth = true; // Toggle between mock and real OAuth
   ServerConfig _selectedServer = ServerPresets.blueskyOfficial;
 
   @override
@@ -70,7 +71,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // OAuth sign in
         await ref
             .read(authNotifierProvider.notifier)
-            .signInWithOAuth(userIdentifier: _identifierController.text.trim());
+            .signInWithOAuth(
+              userIdentifier: _identifierController.text.trim(),
+              useRealOAuth: _useRealOAuth,
+            );
       } else {
         // App password sign in
         await ref
@@ -210,35 +214,75 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Row(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(
-                                      _useOAuth
-                                          ? Icons.info
-                                          : Icons.check_circle,
-                                      color: _useOAuth
-                                          ? Colors.orange
-                                          : Colors.blue,
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        _useOAuth
-                                            ? AppLocalizations.of(
-                                                context,
-                                              )!.oAuthInfo
-                                            : AppLocalizations.of(
-                                                context,
-                                              )!.appPasswordRecommended,
-                                        style: TextStyle(
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          _useOAuth
+                                              ? Icons.info
+                                              : Icons.check_circle,
                                           color: _useOAuth
                                               ? Colors.orange
                                               : Colors.blue,
-                                          fontSize: 12,
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            _useOAuth
+                                                ? 'OAuth認証モードです。モックまたは実際の認証を選択できます。'
+                                                : AppLocalizations.of(
+                                                    context,
+                                                  )!.appPasswordRecommended,
+                                            style: TextStyle(
+                                              color: _useOAuth
+                                                  ? Colors.orange
+                                                  : Colors.blue,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    // OAuth設定詳細（OAuth選択時のみ表示）
+                                    if (_useOAuth) ...[
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        children: [
+                                          Checkbox(
+                                            value: _useRealOAuth,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                _useRealOAuth = value ?? false;
+                                              });
+                                            },
+                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              '実際のOAuth認証を使用 (実験的)',
+                                              style: TextStyle(
+                                                color: Colors.orange.withValues(alpha: 0.8),
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Text(
+                                        _useRealOAuth 
+                                            ? '実際のBluesky OAuth認証フローを使用します。'
+                                            : 'テスト用モック認証を使用します。',
+                                        style: TextStyle(
+                                          color: Colors.orange.withValues(alpha: 0.7),
+                                          fontSize: 10,
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -485,7 +529,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                       // Sign in button
                       FilledButton(
-                        onPressed: (_isLoading || _useOAuth) ? null : _signIn,
+                        onPressed: _isLoading ? null : _signIn,
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: _isLoading
@@ -498,9 +542,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 )
                               : Text(
                                   _useOAuth
-                                      ? AppLocalizations.of(
-                                          context,
-                                        )!.oAuthInDevelopment
+                                      ? (_useRealOAuth ? 'OAuth でサインイン (実際)' : 'OAuth でサインイン (モック)')
                                       : AppLocalizations.of(
                                           context,
                                         )!.signInButton,
@@ -578,7 +620,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       // Help text
                       Text(
                         _useOAuth
-                            ? AppLocalizations.of(context)!.helpTextOAuth
+                            ? (_useRealOAuth 
+                                ? '実際のBluesky OAuth認証を使用します。有効なBlueskyハンドルを入力してください。' 
+                                : 'OAuth認証（テスト用モック実装）を使用します。任意のハンドルまたはメールアドレスを入力してテストできます。')
                             : AppLocalizations.of(context)!.helpTextAppPassword,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(

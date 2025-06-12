@@ -167,5 +167,16 @@
   "richTextUrlCopied": "URL copiada para a área de transferência",
   "richTextUrlOpenFailed": "Não foi possível abrir a URL",
   "richTextProcessingError": "Erro no processamento de texto",
-  "richTextFeatureNotImplemented": "Esta funcionalidade está em desenvolvimento"
+  "richTextFeatureNotImplemented": "Esta funcionalidade está em desenvolvimento",
+  
+  "repostedBy": "Repostado por {name}",
+  "@repostedBy": {
+    "description": "Displayed when a post has been reposted by someone",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name or handle of the user who reposted"
+      }
+    }
+  }
 }

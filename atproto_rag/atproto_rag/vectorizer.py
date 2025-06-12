@@ -592,8 +592,8 @@ class AtprotoVectorizer:
                             f"{chunk.file_path}:{chunk.name}:{chunk.type}".encode()
                         ).hexdigest()
                         
-                        
                         payload = {
+                            "document": chunk.get_embedding_text(),  # この行を追加
                             "type": chunk.type,
                             "name": chunk.name,
                             "file_path": chunk.file_path,
@@ -603,7 +603,7 @@ class AtprotoVectorizer:
                             "information": chunk.get_information_text(),
                             "metadata": chunk.metadata.model_dump()
                         }
-                        
+
                         # Convert embedding to list with error handling
                         if hasattr(embedding, 'tolist'):
                             vector = embedding.tolist()

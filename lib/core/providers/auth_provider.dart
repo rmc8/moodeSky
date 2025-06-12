@@ -15,8 +15,9 @@ part 'auth_provider.g.dart';
 @Riverpod(keepAlive: true)
 AuthConfig authConfig(AuthConfigRef ref) {
   return const AuthConfig(
-    clientMetadataUrl: 'https://moodesky.app/oauth/client-metadata.json',
-    callbackUrlScheme: 'com.moodesky.app',
+    // rmc-8.com OAuth エンドポイント使用
+    clientMetadataUrl: 'https://rmc-8.com/api/moodesky/oauth/client-metadata.json',
+    callbackUrlScheme: 'com.rmc8.moodesky',
     defaultPdsHost: 'bsky.social',
   );
 }
@@ -139,6 +140,7 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> signInWithOAuth({
     String? userIdentifier,
     String? pdsHost,
+    bool useRealOAuth = false,
   }) async {
     state = const AuthState.loading();
 
@@ -146,6 +148,7 @@ class AuthNotifier extends _$AuthNotifier {
       final result = await _blueskyService.signInWithOAuth(
         userIdentifier: userIdentifier,
         pdsHost: pdsHost,
+        useRealOAuth: useRealOAuth, // パラメータを使用
       );
 
       result.when(

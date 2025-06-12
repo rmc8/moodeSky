@@ -1,0 +1,14 @@
+{
+  "client_id": "http://localhost:8080/oauth/client-metadata.json",
+  "client_name": "MoodeSky (Local Development)",
+  "client_uri": "http://localhost:8080",
+  "redirect_uris": [
+    "com.rmc8.moodesky://oauth/callback"
+  ],
+  "response_types": ["code"],
+  "grant_types": ["authorization_code", "refresh_token"],
+  "token_endpoint_auth_method": "none",
+  "application_type": "native",
+  "dpop_bound_access_tokens": true,
+  "scope": "atproto"
+}

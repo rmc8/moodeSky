@@ -48,6 +48,42 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
     return into(accounts).insert(account);
   }
 
+  // Upsert account (insert or update based on DID)
+  Future<int> upsertAccountByDid(AccountsCompanion account) async {
+    return await transaction(() async {
+      if (!account.did.present) {
+        throw ArgumentError('DID must be provided for upsert operation');
+      }
+
+      final did = account.did.value;
+      final handle = account.handle.present ? account.handle.value : null;
+
+      // Check if account with this DID already exists
+      final existingAccountByDid = await getAccountByDid(did);
+      
+      if (existingAccountByDid != null) {
+        // Update existing account by DID
+        final updatedRows = await (update(accounts)..where((t) => t.did.equals(did)))
+            .write(account.copyWith(id: const Value.absent()));
+        return updatedRows;
+      } else if (handle != null) {
+        // Check if an account with the same handle but different DID exists
+        final existingAccountByHandle = await getAccountByHandle(handle);
+        
+        if (existingAccountByHandle != null) {
+          // Remove the old account with same handle but different DID
+          await (delete(accounts)..where((t) => t.handle.equals(handle))).go();
+        }
+        
+        // Insert new account
+        return await into(accounts).insert(account);
+      } else {
+        // Insert new account (no handle conflict possible)
+        return await into(accounts).insert(account);
+      }
+    });
+  }
+
   // Update account
   Future<bool> updateAccount(Account account) {
     return update(accounts).replace(account);

@@ -11,6 +11,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Project imports:
 import 'package:moodesky/services/database/database.dart';
+import 'package:moodesky/services/oauth_service.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
 import 'package:moodesky/shared/models/preferences_models.dart';
 
@@ -21,12 +22,29 @@ class BlueskyService {
 
   bsky.Bluesky? _currentClient;
   Account? _currentAccount;
+  OAuthService? _oauthService;
 
   BlueskyService({
     required this.database,
     required this.secureStorage,
     required this.authConfig,
-  });
+  }) {
+    // OAuth サービス初期化
+    _oauthService = OAuthService(
+      secureStorage: secureStorage,
+      config: authConfig,
+    );
+    _initializeOAuth();
+  }
+
+  /// OAuth サービス初期化
+  Future<void> _initializeOAuth() async {
+    try {
+      await _oauthService?.initialize();
+    } catch (e) {
+      print('OAuth service initialization failed: $e');
+    }
+  }
 
   // Get current Bluesky client
   bsky.Bluesky? get currentClient => _currentClient;
@@ -105,27 +123,99 @@ class BlueskyService {
   Future<AuthResult> signInWithOAuth({
     String? userIdentifier,
     String? pdsHost,
+    bool useRealOAuth = false,
   }) async {
     try {
-      final service = pdsHost ?? authConfig.defaultPdsHost;
-      final serviceUrl = service.startsWith('http')
-          ? service
-          : 'https://$service';
+      if (_oauthService == null) {
+        return const AuthResult.failure(
+          error: 'OAuth service not initialized',
+          errorDescription: 'OAuth service is not available',
+          errorType: AuthErrorType.unknownError,
+        );
+      }
 
-      // For now, implement OAuth using direct login with app password requirements
-      // In a real OAuth implementation, we would:
-      // 1. Launch authorization URL
-      // 2. Handle redirect with authorization code
-      // 3. Exchange code for tokens with DPoP
-      // 4. Store tokens securely
+      print('Starting OAuth authentication for: $userIdentifier');
+      print('PDS Host: $pdsHost');
+      print('Use Real OAuth: $useRealOAuth');
 
-      // For demonstration purposes, show OAuth-style interface but require app password
-      return const AuthResult.failure(
-        error: 'OAuth requires app password setup',
-        errorDescription:
-            'Please use App Password method to sign in. OAuth with DPoP will be implemented in a future version.',
-        errorType: AuthErrorType.unknownError,
+      // OAuth認証フローを開始（改良されたエラーハンドリング付き）
+      final result = await _oauthService!.authenticate(
+        userIdentifier: userIdentifier,
+        pdsHost: pdsHost,
+        useRealOAuth: useRealOAuth,
+      ).timeout(
+        const Duration(minutes: 5), // OAuth認証のタイムアウト設定
+        onTimeout: () {
+          return const AuthResult.failure(
+            error: 'OAuth認証がタイムアウトしました',
+            errorDescription: '認証フローが時間内に完了しませんでした',
+            errorType: AuthErrorType.networkError,
+          );
+        },
       );
+
+      // 成功時はアカウントをデータベースに保存
+      if (result is AuthSuccess) {
+        final sessionData = result.session;
+        
+        // sessionDataがOAuthSession型かAppPasswordSession型かをチェック
+        final profile = sessionData.when(
+          oauth: (oauthSession, profile) => profile,
+          appPassword: (appPasswordSession, profile) => profile,
+        );
+        
+        final oauthSessionData = sessionData.when(
+          oauth: (oauthSession, _) => oauthSession,
+          appPassword: (_, __) => null,
+        );
+
+        if (oauthSessionData != null) {
+          print('Saving OAuth account to database: ${profile.handle}');
+
+          // アカウントをデータベースに保存
+          final accountData = AccountsCompanion.insert(
+            did: profile.did,
+            handle: profile.handle,
+            displayName: Value(profile.displayName),
+            description: Value(profile.description),
+            avatar: Value(profile.avatar),
+            email: Value(profile.email),
+            accessJwt: Value(oauthSessionData.accessToken),
+            refreshJwt: Value(oauthSessionData.refreshToken),
+            sessionString: Value(oauthSessionData.accessToken),
+            pdsUrl: pdsHost ?? authConfig.defaultPdsHost,
+            serviceUrl: Value('https://${pdsHost ?? authConfig.defaultPdsHost}'),
+            loginMethod: const Value('oauth'),
+            isActive: const Value(true),
+            lastUsed: Value(DateTime.now()),
+          );
+
+          try {
+            print('Upserting OAuth account: ${profile.handle} (DID: ${profile.did})');
+            
+            // DIDをキーにしたupsert処理
+            await database.accountDao.upsertAccountByDid(accountData);
+            await database.accountDao.setActiveAccount(profile.did);
+            
+            // クライアントを初期化
+            final account = await database.accountDao.getAccountByDid(profile.did);
+            if (account != null) {
+              await _initializeClient(account);
+            }
+
+            print('OAuth account upserted successfully: ${profile.handle}');
+          } catch (e) {
+            print('Failed to save OAuth account: $e');
+            return AuthResult.failure(
+              error: 'アカウント保存に失敗しました',
+              errorDescription: e.toString(),
+              errorType: AuthErrorType.unknownError,
+            );
+          }
+        }
+      }
+
+      return result;
     } catch (e) {
       return AuthResult.failure(
         error: 'OAuth sign in failed',

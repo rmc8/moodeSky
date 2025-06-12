@@ -720,6 +720,11 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
       'Escolha seu idioma preferido para o aplicativo';
 
   @override
+  String repostedBy(String name) {
+    return 'Repostado por $name';
+  }
+
+  @override
   String get selectLanguage => 'Selecionar Idioma';
 
   @override

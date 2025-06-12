@@ -42,6 +42,7 @@ dependencies:
 
   # Utilities
   collection: ^1.18.0
+  crypto: ^3.0.3
 
   # Database
   drift: ^2.14.1
@@ -54,6 +55,10 @@ dependencies:
   bluesky: ^0.18.10
   atproto: ^0.13.3
   atproto_core: ^0.11.2
+  
+  # OAuth Authentication
+  atproto_oauth: ^0.1.0
+  flutter_web_auth_2: ^4.0.1
 
   # Internationalization
   intl: ^0.20.2
