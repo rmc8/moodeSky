@@ -20,6 +20,7 @@
   "identifierRequired": "ハンドルまたはメールを入力してください",
   "passwordRequired": "アプリパスワードを入力してください",
   "signInButton": "サインイン",
+  "signingIn": "サインイン中...",
   "oAuthInDevelopment": "OAuth開発中",
   "addAccountButton": "アカウントを追加",
   "aboutAppPassword": "アプリパスワードについて",

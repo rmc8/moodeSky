@@ -96,6 +96,11 @@
     "description": "Text for sign in button"
   },
   
+  "signingIn": "Signing in...",
+  "@signingIn": {
+    "description": "Loading message while signing in"
+  },
+  
   "oAuthInDevelopment": "OAuth in development",
   "@oAuthInDevelopment": {
     "description": "Button text when OAuth is selected"

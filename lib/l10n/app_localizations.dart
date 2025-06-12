@@ -219,6 +219,12 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get signInButton;
 
+  /// Loading message while signing in
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in...'**
+  String get signingIn;
+
   /// Button text when OAuth is selected
   ///
   /// In en, this message translates to:

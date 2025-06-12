@@ -90,12 +90,12 @@ class TestProfiles {
 
 /// テスト用のAuthCredentials作成ヘルパー
 class TestCredentials {
-  static const AuthCredentials oauthCredentials = AuthCredentials(
-    identifier: 'test@bsky.social',
-    password: '', // OAuthではパスワード不要
-    serviceUrl: 'https://bsky.social',
-    method: AuthMethod.oauth,
-  );
+  // static const AuthCredentials oauthCredentials = AuthCredentials(
+  //   identifier: 'test@bsky.social',
+  //   password: '', // OAuthではパスワード不要
+  //   serviceUrl: 'https://bsky.social',
+  //   method: AuthMethod.oauth, // TODO: AuthMethod.oauthが存在しない
+  // );
 
   static const AuthCredentials appPasswordCredentials = AuthCredentials(
     identifier: 'test@bsky.social',
@@ -217,8 +217,8 @@ class MockAuthNotifier extends Mock implements AuthNotifier {
   Future<bool> mockLogin(AuthCredentials credentials) async {
     // 成功パターン
     if (credentials.identifier.isNotEmpty &&
-        (credentials.method == AuthMethod.oauth ||
-            credentials.password.isNotEmpty)) {
+        // (credentials.method == AuthMethod.oauth || // TODO: AuthMethod.oauthが存在しない
+            credentials.password.isNotEmpty) {
       return true;
     }
 

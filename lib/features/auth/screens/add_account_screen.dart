@@ -9,6 +9,7 @@ import 'package:moodesky/core/providers/auth_provider.dart';
 import 'package:moodesky/features/auth/models/server_config.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
+import 'package:moodesky/shared/widgets/common/index.dart';
 
 class AddAccountScreen extends ConsumerStatefulWidget {
   const AddAccountScreen({super.key});
@@ -129,96 +130,96 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Info card
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.info, color: Colors.blue, size: 20),
-                                const SizedBox(width: 8),
-                                Text(
-                                  AppLocalizations.of(context)!.newAccountInfo,
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        color: Colors.blue,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              AppLocalizations.of(context)!.multiAccountInfo,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
+                    CommonContainerFactories.card(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.info,
+                                color: context.appColors.info,
+                                size: 20,
                               ),
-                            ),
-                          ],
-                        ),
+                              AppSpacing.horizontalSpacerSM,
+                              Text(
+                                AppLocalizations.of(context)!.newAccountInfo,
+                                style: context.appTextStyles.titleMedium.copyWith(
+                                  color: context.appColors.info,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          AppSpacing.verticalSpacerSM,
+                          Text(
+                            AppLocalizations.of(context)!.multiAccountInfo,
+                            style: context.appTextStyles.caption,
+                          ),
+                        ],
                       ),
                     ),
 
                     const SizedBox(height: 16),
 
                     // OAuth temporarily disabled - showing info card
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                    CommonContainerFactories.card(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.key,
+                                color: context.appColors.info,
+                                size: 20,
+                              ),
+                              AppSpacing.horizontalSpacerSM,
+                              Text(
+                                AppLocalizations.of(context)!.authMethodAppPassword,
+                                style: context.appTextStyles.titleMedium.copyWith(
+                                  color: context.appColors.info,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          AppSpacing.verticalSpacerSM,
+                          CommonContainer(
+                            style: CommonContainerStyle.none,
+                            padding: AppSpacing.paddingMD,
+                            color: context.appColors.infoWithOpacity,
+                            borderRadius: AppBorderRadius.sm,
+                            border: Border.all(
+                              color: context.appColors.info.withValues(alpha: 0.3),
+                            ),
+                            child: Row(
                               children: [
-                                Icon(Icons.key, color: Colors.blue, size: 20),
-                                const SizedBox(width: 8),
-                                Text(
-                                  AppLocalizations.of(context)!.authMethodAppPassword,
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.bold,
+                                Icon(
+                                  Icons.check_circle,
+                                  color: context.appColors.info,
+                                  size: 16,
+                                ),
+                                AppSpacing.horizontalSpacerSM,
+                                Expanded(
+                                  child: Text(
+                                    AppLocalizations.of(context)!.appPasswordRecommended,
+                                    style: context.appTextStyles.bodySmall.copyWith(
+                                      color: context.appColors.info,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withValues(alpha: 0.1),
-                                border: Border.all(
-                                  color: Colors.blue.withValues(alpha: 0.3),
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.check_circle, color: Colors.blue, size: 16),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      AppLocalizations.of(context)!.appPasswordRecommended,
-                                      style: const TextStyle(
-                                        color: Colors.blue,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
 
                     const SizedBox(height: 16),
 
                     // Server selection
-                    Card(
+                    CommonContainerFactories.card(
                       child: ExpansionTile(
                         leading: Icon(
                           _selectedServer.isOfficial
@@ -342,42 +343,40 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                       const SizedBox(height: 8),
 
                       // App Password help
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.1),
-                          border: Border.all(
-                            color: Colors.blue.withValues(alpha: 0.3),
-                          ),
-                          borderRadius: BorderRadius.circular(8),
+                      CommonContainer(
+                        style: CommonContainerStyle.none,
+                        padding: AppSpacing.paddingMD,
+                        color: context.appColors.infoWithOpacity,
+                        borderRadius: AppBorderRadius.sm,
+                        border: Border.all(
+                          color: context.appColors.info.withValues(alpha: 0.3),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.info, color: Colors.blue, size: 16),
-                                const SizedBox(width: 6),
+                                Icon(
+                                  Icons.info,
+                                  color: context.appColors.info,
+                                  size: 16,
+                                ),
+                                AppSpacing.horizontalSpacerSM,
                                 Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.aboutAppPassword,
-                                  style: const TextStyle(
+                                  AppLocalizations.of(context)!.aboutAppPassword,
+                                  style: context.appTextStyles.labelSmall.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue,
-                                    fontSize: 12,
+                                    color: context.appColors.info,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 4),
+                            AppSpacing.verticalSpacerXS,
                             Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.appPasswordDescription,
-                              style: const TextStyle(fontSize: 11),
+                              AppLocalizations.of(context)!.appPasswordDescription,
+                              style: context.appTextStyles.caption,
                             ),
-                            const SizedBox(height: 6),
+                            AppSpacing.verticalSpacerSM,
                             InkWell(
                               onTap: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -386,9 +385,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                                       _selectedServer.appPasswordUrl,
                                     ),
                                     action: SnackBarAction(
-                                      label: AppLocalizations.of(
-                                        context,
-                                      )!.copyButton,
+                                      label: AppLocalizations.of(context)!.copyButton,
                                       onPressed: () {
                                         // TODO: URLをクリップボードにコピー
                                       },
@@ -397,12 +394,9 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                                 );
                               },
                               child: Text(
-                                AppLocalizations.of(
-                                  context,
-                                )!.generateAppPassword,
-                                style: const TextStyle(
-                                  color: Colors.blue,
-                                  fontSize: 11,
+                                AppLocalizations.of(context)!.generateAppPassword,
+                                style: context.appTextStyles.caption.copyWith(
+                                  color: context.appColors.info,
                                   decoration: TextDecoration.underline,
                                 ),
                               ),
@@ -414,69 +408,21 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                     const SizedBox(height: 24),
 
                     // Add account button
-                    FilledButton(
-                      onPressed: _isLoading ? null : _addAccount,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(AppLocalizations.of(context)!.addAccountButton),
-                      ),
+                    CommonButtonFactories.primary(
+                      onPressed: _addAccount,
+                      isLoading: _isLoading,
+                      width: double.infinity,
+                      size: CommonButtonSize.large,
+                      child: Text(AppLocalizations.of(context)!.addAccountButton),
                     ),
 
                     // Error display
                     if (authState is AuthError) ...[
-                      const SizedBox(height: 16),
-                      Card(
-                        color: Theme.of(context).colorScheme.errorContainer,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onErrorContainer,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.accountAddError,
-                                      style: TextStyle(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onErrorContainer,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                authState.message,
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onErrorContainer,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      AppSpacing.verticalSpacerMD,
+                      ErrorWidgets.card(
+                        title: AppLocalizations.of(context)!.accountAddError,
+                        message: authState.message,
+                        margin: EdgeInsets.zero,
                       ),
                     ],
 
@@ -485,11 +431,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                     // Help text
                     Text(
                       AppLocalizations.of(context)!.multiAccountHelpText,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
+                      style: context.appTextStyles.caption,
                       textAlign: TextAlign.center,
                     ),
                   ],

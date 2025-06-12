@@ -66,6 +66,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get signInButton => 'サインイン';
 
   @override
+  String get signingIn => 'サインイン中...';
+
+  @override
   String get oAuthInDevelopment => 'OAuth開発中';
 
   @override

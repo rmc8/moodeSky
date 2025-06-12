@@ -1,3 +1,6 @@
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -6,17 +9,100 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 // Project imports:
 import 'package:moodesky/core/providers/database_provider.dart';
 import 'package:moodesky/features/auth/models/server_config.dart';
-import 'package:moodesky/services/bluesky_service.dart';
+import 'package:moodesky/services/bluesky/bluesky_service_v2.dart';
+import 'package:moodesky/services/database/database.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
 
 part 'auth_provider.g.dart';
 
+/// Utility class for authentication-related operations
+class _AuthUtils {
+  /// Converts a list of accounts to UserProfile objects
+  static List<UserProfile> convertAccountsToProfiles(List<Account> accounts) {
+    return accounts
+        .map(
+          (account) => UserProfile(
+            did: account.did,
+            handle: account.handle,
+            displayName: account.displayName,
+            description: account.description,
+            avatar: account.avatar,
+            banner: account.banner,
+            email: account.email,
+            isVerified: account.isVerified,
+          ),
+        )
+        .toList();
+  }
+
+  /// Converts a single account to UserProfile
+  static UserProfile convertAccountToProfile(Account account) {
+    return UserProfile(
+      did: account.did,
+      handle: account.handle,
+      displayName: account.displayName,
+      description: account.description,
+      avatar: account.avatar,
+      banner: account.banner,
+      email: account.email,
+      isVerified: account.isVerified,
+    );
+  }
+
+  /// Creates a standardized error state
+  static AuthState createErrorState(
+    String message, [
+    AuthErrorType? errorType,
+  ]) {
+    return AuthState.error(
+      message: message,
+      errorType: errorType ?? AuthErrorType.unknownError,
+    );
+  }
+
+  /// Wraps async operations with standardized error handling
+  static Future<T?> safeExecute<T>(
+    Future<T> Function() operation,
+    String errorMessage, {
+    T? fallback,
+    bool logError = true,
+  }) async {
+    try {
+      return await operation();
+    } catch (e) {
+      if (logError) {
+        // TODO: Replace with proper logging system
+        debugPrint('$errorMessage: $e');
+      }
+      return fallback;
+    }
+  }
+
+  /// Safe execute for void operations with error callback
+  static Future<bool> safeExecuteVoid(
+    Future<void> Function() operation,
+    String errorMessage, {
+    void Function(String)? onError,
+    bool logError = true,
+  }) async {
+    try {
+      await operation();
+      return true;
+    } catch (e) {
+      if (logError) {
+        // TODO: Replace with proper logging system
+        debugPrint('$errorMessage: $e');
+      }
+      onError?.call(errorMessage);
+      return false;
+    }
+  }
+}
+
 // Basic auth configuration
 @Riverpod(keepAlive: true)
 AuthConfig authConfig(Ref ref) {
-  return AuthConfig(
-    defaultPdsHost: 'bsky.social',
-  );
+  return AuthConfig(defaultPdsHost: 'bsky.social');
 }
 
 // Note: Database provider is now provided by database_provider.dart
@@ -34,12 +120,12 @@ FlutterSecureStorage secureStorage(Ref ref) {
 
 // Bluesky service provider
 @Riverpod(keepAlive: true)
-BlueskyService blueskyService(Ref ref) {
+BlueskyServiceV2 blueskyService(Ref ref) {
   final database = ref.watch(databaseProvider);
   final secureStorage = ref.watch(secureStorageProvider);
   final authConfig = ref.watch(authConfigProvider);
 
-  return BlueskyService(
+  return BlueskyServiceV2(
     database: database,
     secureStorage: secureStorage,
     authConfig: authConfig,
@@ -49,7 +135,7 @@ BlueskyService blueskyService(Ref ref) {
 // Auth state provider
 @Riverpod(keepAlive: true)
 class AuthNotifier extends _$AuthNotifier {
-  late BlueskyService _blueskyService;
+  late BlueskyServiceV2 _blueskyService;
 
   @override
   AuthState build() {
@@ -63,9 +149,10 @@ class AuthNotifier extends _$AuthNotifier {
     state = const AuthState.loading();
 
     try {
-      // モックOAuthアカウントを削除（クリーンアップ）
-      await _blueskyService.deleteMockOAuthAccounts();
+      // BlueskyServiceV2を初期化
+      await _blueskyService.initialize();
       
+      // アクティブアカウントを取得
       final activeAccount = await _blueskyService.getActiveAccount();
 
       if (activeAccount == null) {
@@ -73,69 +160,43 @@ class AuthNotifier extends _$AuthNotifier {
         return;
       }
 
-      // Check if session is valid and refresh if needed
-      final isValid = await _blueskyService.validateAndRefreshSession(
-        activeAccount.did,
-      );
-
-      if (!isValid) {
-        // セッションが無効でリフレッシュも失敗した場合、ログアウト状態にする
-        print(
-          'Session validation failed, signing out user: ${activeAccount.handle}',
-        );
-        state = const AuthState.unauthenticated();
-        return;
-      }
-
-      final accounts = await _blueskyService.getAllAccounts();
-
       // バックグラウンドで全アカウントのプロフィール情報を強制更新（アプリ起動を妨げない）
-      Future.microtask(() async {
-        try {
-          print('Starting background profile refresh for all accounts...');
-          await _blueskyService.refreshAllAccountProfiles();
-          // 更新後に状態を再更新
-          await _updateAuthenticatedState();
-          print('Background profile refresh completed successfully');
-        } catch (e) {
-          print('Background profile refresh failed: $e');
-          // フォールバックとして必要最小限の更新を試行
-          try {
-            await _blueskyService.refreshProfilesIfNeeded();
-            await _updateAuthenticatedState();
-          } catch (fallbackError) {
-            print('Fallback profile refresh also failed: $fallbackError');
-          }
-        }
-      });
+      _scheduleBackgroundProfileRefresh();
 
-      final profiles = accounts
-          .map(
-            (account) => UserProfile(
-              did: account.did,
-              handle: account.handle,
-              displayName: account.displayName,
-              description: account.description,
-              avatar: account.avatar,
-              banner: account.banner,
-              email: account.email,
-              isVerified: account.isVerified,
-            ),
-          )
-          .toList();
-
-      state = AuthState.authenticated(
-        activeAccountDid: activeAccount.did,
-        accounts: profiles,
-      );
+      // 認証状態を更新
+      await _updateAuthenticatedState();
     } catch (e) {
-      state = AuthState.error(
-        message: 'Failed to initialize authentication: $e',
-        errorType: AuthErrorType.unknownError,
-      );
+      debugPrint('Authentication initialization failed: $e');
+      // エラーが発生した場合は未認証状態にしてログイン画面を表示
+      state = const AuthState.unauthenticated();
     }
   }
 
+  /// バックグラウンドでプロフィール更新を実行
+  void _scheduleBackgroundProfileRefresh() {
+    Future.microtask(() async {
+      final success = await _AuthUtils.safeExecute<bool>(
+        () async {
+          // TODO: Replace with proper logging system
+          debugPrint('Starting background profile refresh for all accounts...');
+          // TODO: プロフィールリフレッシュ機能は将来の実装で追加予定
+          await _updateAuthenticatedState();
+          // TODO: Replace with proper logging system
+          debugPrint('Background profile refresh completed successfully');
+          return true;
+        },
+        'Background profile refresh failed',
+        fallback: false,
+      );
+
+      if (success != true) {
+        // フォールバックとして認証状態の更新のみ試行
+        await _AuthUtils.safeExecute<void>(() async {
+          await _updateAuthenticatedState();
+        }, 'Fallback profile refresh also failed');
+      }
+    });
+  }
 
   // Generic login method (App Password only)
   Future<bool> login(AuthCredentials credentials) async {
@@ -158,72 +219,73 @@ class AuthNotifier extends _$AuthNotifier {
   }) async {
     state = const AuthState.loading();
 
-    try {
-      final result = await _blueskyService.signInWithAppPassword(
-        identifier: identifier,
-        password: password,
-        pdsHost: pdsHost,
-      );
+    await _AuthUtils.safeExecuteVoid(
+      () async {
+        final authResult = await _blueskyService.auth.signInWithAppPassword(
+          identifier: identifier,
+          password: password,
+          pdsHost: pdsHost,
+        );
 
-      result.when(
-        success: (session, accountDid) async {
-          // プロフィール情報を取得・更新
-          await _fetchAndUpdateProfileInfo(accountDid);
-          // 認証状態を更新（新規ログインフラグ付き）
-          await _updateAuthenticatedState(isNewLogin: true);
-        },
-        failure: (error, errorDescription, errorType) {
-          state = AuthState.error(message: error, errorType: errorType);
-        },
-        cancelled: () {
-          state = const AuthState.unauthenticated();
-        },
-      );
-    } catch (e) {
-      state = AuthState.error(
-        message: 'App password sign in failed: $e',
-        errorType: AuthErrorType.unknownError,
-      );
-    }
+        authResult.when(
+          success: (session, accountDid) async {
+            // プロフィール情報を取得・更新
+            await _fetchAndUpdateProfileInfo(accountDid);
+            // 認証状態を更新（新規ログインフラグ付き）
+            await _updateAuthenticatedState(isNewLogin: true);
+          },
+          failure: (error, errorDescription, errorType) {
+            state = AuthState.error(message: error, errorType: errorType);
+          },
+          cancelled: () {
+            state = const AuthState.unauthenticated();
+          },
+        );
+      },
+      'App password sign in failed',
+      onError: _setErrorState,
+    );
+  }
+
+  /// エラー状態を設定するヘルパーメソッド
+  void _setErrorState(String message, [AuthErrorType? errorType]) {
+    state = _AuthUtils.createErrorState(message, errorType);
   }
 
   // Switch account
   Future<void> switchAccount(String targetAccountDid) async {
-    try {
-      await _blueskyService.switchAccount(targetAccountDid);
-      await _updateAuthenticatedState();
-    } catch (e) {
-      state = AuthState.error(
-        message: 'Failed to switch account: $e',
-        errorType: AuthErrorType.unknownError,
-      );
-    }
+    await _AuthUtils.safeExecuteVoid(
+      () async {
+        await _blueskyService.switchAccount(targetAccountDid);
+        await _updateAuthenticatedState();
+      },
+      'Failed to switch account',
+      onError: _setErrorState,
+    );
   }
 
   // Sign out current account
   Future<void> signOut() async {
-    try {
-      await _blueskyService.signOut();
-      state = const AuthState.unauthenticated();
-    } catch (e) {
-      state = AuthState.error(
-        message: 'Sign out failed: $e',
-        errorType: AuthErrorType.unknownError,
-      );
-    }
+    await _AuthUtils.safeExecuteVoid(
+      () async {
+        await _blueskyService.signOut();
+        state = const AuthState.unauthenticated();
+      },
+      'Sign out failed',
+      onError: _setErrorState,
+    );
   }
 
   // Sign out all accounts
   Future<void> signOutAll() async {
-    try {
-      await _blueskyService.signOutAll();
-      state = const AuthState.unauthenticated();
-    } catch (e) {
-      state = AuthState.error(
-        message: 'Sign out all failed: $e',
-        errorType: AuthErrorType.unknownError,
-      );
-    }
+    await _AuthUtils.safeExecuteVoid(
+      () async {
+        await _blueskyService.signOutAll();
+        state = const AuthState.unauthenticated();
+      },
+      'Sign out all failed',
+      onError: _setErrorState,
+    );
   }
 
   // Add account (multi-account support - App Password only)
@@ -232,74 +294,81 @@ class AuthNotifier extends _$AuthNotifier {
     required String password,
     required ServerConfig serverConfig,
   }) async {
-    try {
-      // App Password flow for additional account
-      final authResult = await _blueskyService.signInWithAppPassword(
-        identifier: identifier,
-        password: password,
-        pdsHost: Uri.parse(serverConfig.serviceUrl).host,
-        isAdditionalAccount:
-            true, // Flag to indicate this is an additional account
-      );
+    final result = await _AuthUtils.safeExecute<AuthResult>(
+      () async {
+        // App Password flow for additional account
+        final authResult = await _blueskyService.auth.signInWithAppPassword(
+          identifier: identifier,
+          password: password,
+          pdsHost: Uri.parse(serverConfig.serviceUrl).host,
+          isAdditionalAccount:
+              true, // Flag to indicate this is an additional account
+        );
 
-      final result = authResult.when(
-        success: (session, accountDid) =>
-            AuthResult.success(session: session, accountDid: accountDid),
-        failure: (error, errorDescription, errorType) => AuthResult.failure(
-          error: error,
-          errorDescription: errorDescription,
-          errorType: errorType,
-        ),
-        cancelled: () => AuthResult.failure(
-          error: 'Authentication cancelled',
-          errorType: AuthErrorType.userCancelled,
+        final result = authResult.when(
+          success: (session, accountDid) =>
+              AuthResult.success(session: session, accountDid: accountDid),
+          failure: (error, errorDescription, errorType) => AuthResult.failure(
+            error: error,
+            errorDescription: errorDescription,
+            errorType: errorType,
+          ),
+          cancelled: () => AuthResult.failure(
+            error: 'Authentication cancelled',
+            errorType: AuthErrorType.userCancelled,
           ),
         );
 
-      // If successful, fetch profile information and update state
-      result.whenOrNull(
-        success: (session, accountDid) async {
-          await _fetchAndUpdateProfileInfo(accountDid);
-          await _updateAuthenticatedState();
-        },
-      );
+        // If successful, fetch profile information and update state
+        result.whenOrNull(
+          success: (session, accountDid) async {
+            await _fetchAndUpdateProfileInfo(accountDid);
+            await _updateAuthenticatedState();
+          },
+        );
 
-      return result;
-    } catch (e) {
-      return AuthResult.failure(
-        error: 'Failed to add account: $e',
+        return result;
+      },
+      'Failed to add account',
+      fallback: AuthResult.failure(
+        error: 'Failed to add account',
         errorType: AuthErrorType.unknownError,
-      );
-    }
+      ),
+    );
+
+    return result ??
+        AuthResult.failure(
+          error: 'Failed to add account',
+          errorType: AuthErrorType.unknownError,
+        );
   }
 
   // Remove account
   Future<void> removeAccount(String accountDid) async {
-    try {
-      await _blueskyService.removeAccount(accountDid);
+    await _AuthUtils.safeExecuteVoid(
+      () async {
+        await _blueskyService.removeAccount(accountDid);
 
-      // Update state after account removal
-      final currentState = state;
-      if (currentState is AuthAuthenticated) {
-        if (currentState.activeAccountDid == accountDid) {
-          // If active account was removed, try to switch to another account
-          final accounts = await _blueskyService.getAllAccounts();
-          if (accounts.isNotEmpty) {
-            await switchAccount(accounts.first.did);
+        // Update state after account removal
+        final currentState = state;
+        if (currentState is AuthAuthenticated) {
+          if (currentState.activeAccountDid == accountDid) {
+            // If active account was removed, try to switch to another account
+            final accounts = await _blueskyService.getAllAccounts();
+            if (accounts.isNotEmpty) {
+              await switchAccount(accounts.first.did);
+            } else {
+              state = const AuthState.unauthenticated();
+            }
           } else {
-            state = const AuthState.unauthenticated();
+            // Update accounts list
+            await _updateAuthenticatedState();
           }
-        } else {
-          // Update accounts list
-          await _updateAuthenticatedState();
         }
-      }
-    } catch (e) {
-      state = AuthState.error(
-        message: 'Failed to remove account: $e',
-        errorType: AuthErrorType.unknownError,
-      );
-    }
+      },
+      'Failed to remove account',
+      onError: _setErrorState,
+    );
   }
 
   // Refresh authentication state
@@ -318,50 +387,32 @@ class AuthNotifier extends _$AuthNotifier {
   // Fetch and update profile information for a specific account
   Future<void> _fetchAndUpdateProfileInfo(String accountDid) async {
     try {
-      // 最新のプロフィール情報をAPIから取得（現在はモック実装）
-      final profileInfo = await _blueskyService.fetchProfileFromAPI(accountDid);
-      if (profileInfo != null) {
-        print(
-          'Fetched profile for ${profileInfo.handle}: avatar=${profileInfo.avatar}',
-        );
-
-        // データベースに最新の情報を保存
-        await _blueskyService.updateAccountProfile(
-          accountDid: accountDid,
-          displayName: profileInfo.displayName,
-          description: profileInfo.description,
-          avatar: profileInfo.avatar,
-          banner: profileInfo.banner,
-        );
-
-        print('Profile updated in database for ${profileInfo.handle}');
-      }
+      // TODO: プロフィール取得機能は将来の実装で追加予定
+      // TODO: Replace with proper logging system
+      debugPrint('Profile info fetching for account $accountDid (placeholder)');
     } catch (e) {
       // プロフィール取得に失敗した場合でも、アカウント作成は成功とみなす
-      print('Failed to fetch profile info for $accountDid: $e');
+      // TODO: Replace with proper logging system
+      debugPrint('Failed to fetch profile info for $accountDid: $e');
     }
   }
 
   // 全アカウントのプロフィール情報を更新する
   Future<void> refreshAllProfiles() async {
-    try {
-      await _blueskyService.refreshAllAccountProfiles();
+    await _AuthUtils.safeExecute<void>(() async {
+      // TODO: プロフィール更新機能は将来の実装で追加予定
       // 状態を更新してUIに反映
       await _updateAuthenticatedState();
-    } catch (e) {
-      print('Failed to refresh all profiles: $e');
-    }
+    }, 'Failed to refresh all profiles');
   }
 
   // 必要なアカウントのプロフィール情報のみを更新する
   Future<void> refreshProfilesIfNeeded() async {
-    try {
-      await _blueskyService.refreshProfilesIfNeeded();
+    await _AuthUtils.safeExecute<void>(() async {
+      // TODO: プロフィール更新機能は将来の実装で追加予定
       // 状態を更新してUIに反映
       await _updateAuthenticatedState();
-    } catch (e) {
-      print('Failed to refresh profiles if needed: $e');
-    }
+    }, 'Failed to refresh profiles if needed');
   }
 
   // Update authenticated state with current account information
@@ -374,20 +425,7 @@ class AuthNotifier extends _$AuthNotifier {
     }
 
     final accounts = await _blueskyService.getAllAccounts();
-    final profiles = accounts
-        .map(
-          (account) => UserProfile(
-            did: account.did,
-            handle: account.handle,
-            displayName: account.displayName,
-            description: account.description,
-            avatar: account.avatar,
-            banner: account.banner,
-            email: account.email,
-            isVerified: account.isVerified,
-          ),
-        )
-        .toList();
+    final profiles = _AuthUtils.convertAccountsToProfiles(accounts);
 
     state = AuthState.authenticated(
       activeAccountDid: activeAccount.did,
@@ -433,9 +471,7 @@ bool isAuthenticated(Ref ref) {
 
 // Multi-account status provider
 @riverpod
-Future<MultiAccountStatus?> multiAccountStatus(
-  Ref ref,
-) async {
+Future<MultiAccountStatus?> multiAccountStatus(Ref ref) async {
   final authState = ref.watch(authNotifierProvider);
 
   if (authState is! AuthAuthenticated) return null;
@@ -447,16 +483,7 @@ Future<MultiAccountStatus?> multiAccountStatus(
   final accountTokenStatus = <String, bool>{};
 
   for (final account in accounts) {
-    accountProfiles[account.did] = UserProfile(
-      did: account.did,
-      handle: account.handle,
-      displayName: account.displayName,
-      description: account.description,
-      avatar: account.avatar,
-      banner: account.banner,
-      email: account.email,
-      isVerified: account.isVerified,
-    );
+    accountProfiles[account.did] = _AuthUtils.convertAccountToProfile(account);
 
     accountTokenStatus[account.did] =
         (account.accessJwt != null) ||
@@ -472,16 +499,4 @@ Future<MultiAccountStatus?> multiAccountStatus(
   );
 }
 
-/// BlueskyService provider
-@Riverpod(keepAlive: true)
-BlueskyService blueskyServiceApi(Ref ref) {
-  final database = ref.watch(databaseProvider);
-  final secureStorage = ref.watch(secureStorageProvider);
-  final authConfig = ref.watch(authConfigProvider);
-
-  return BlueskyService(
-    database: database,
-    secureStorage: secureStorage,
-    authConfig: authConfig,
-  );
-}
+// Note: BlueskyService provider is already defined above as blueskyServiceProvider

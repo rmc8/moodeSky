@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moodesky/core/providers/auth_provider.dart';
 import 'package:moodesky/features/settings/screens/account_management_screen.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
+import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
 import 'package:moodesky/shared/widgets/language_selector.dart';
 import 'package:moodesky/shared/widgets/theme_selector.dart';
 
@@ -16,6 +17,8 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final textStyles = context.appTextStyles;
+    
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.settingsTitle)),
       body: ListView(
@@ -30,7 +33,7 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.appearanceSettings,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: textStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -59,7 +62,7 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.accountSettings,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: textStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -70,7 +73,7 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(
                       AppLocalizations.of(context)!.manageAccounts,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light
+                        color: context.isLight
                             ? const Color(0xFF1A1A1A)
                             : const Color(0xFFF5F5F5),
                         fontWeight: FontWeight.w500,
@@ -79,7 +82,7 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: Text(
                       AppLocalizations.of(context)!.manageAccountsDescription,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light
+                        color: context.isLight
                             ? const Color(0xFF222222)
                             : const Color(0xFFE0E0E0),
                         fontWeight: FontWeight.w500,
@@ -100,19 +103,19 @@ class SettingsScreen extends ConsumerWidget {
                   ListTile(
                     leading: Icon(
                       Icons.logout,
-                      color: Theme.of(context).colorScheme.error,
+                      color: context.appColors.error,
                     ),
                     title: Text(
                       AppLocalizations.of(context)!.signOutAll,
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+                        color: context.appColors.error,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     subtitle: Text(
                       AppLocalizations.of(context)!.signOutAllDescription,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light
+                        color: context.isLight
                             ? const Color(0xFF222222)
                             : const Color(0xFFE0E0E0),
                         fontWeight: FontWeight.w500,
@@ -136,7 +139,7 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.appInformation,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: textStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),

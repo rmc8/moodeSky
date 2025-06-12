@@ -69,6 +69,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get signInButton => 'Entrar';
 
   @override
+  String get signingIn => 'Signing in...';
+
+  @override
   String get oAuthInDevelopment => 'OAuth em desenvolvimento';
 
   @override

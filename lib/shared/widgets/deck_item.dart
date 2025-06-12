@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:moodesky/core/theme/app_themes.dart';
+import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 
 /// デッキアイテムの基本レイアウト - PostItemと統一されたデザイン
@@ -32,6 +33,9 @@ class DeckItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final textStyles = context.appTextStyles;
+    
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -52,7 +56,7 @@ class DeckItem extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      style: textStyles.titleSmall.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                       maxLines: 1,
@@ -60,8 +64,8 @@ class DeckItem extends StatelessWidget {
                     ),
                     Text(
                       subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).brightness == Brightness.light
+                      style: textStyles.bodySmall.copyWith(
+                        color: context.isLight
                             ? const Color(0xFF424242)
                             : const Color(0xFFCCCCCC),
                       ),
@@ -76,8 +80,8 @@ class DeckItem extends StatelessWidget {
               if (timestamp != null)
                 Text(
                   timestamp!,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).brightness == Brightness.light
+                  style: textStyles.bodySmall.copyWith(
+                    color: context.isLight
                         ? const Color(0xFF424242)
                         : const Color(0xFFCCCCCC),
                   ),
@@ -91,8 +95,8 @@ class DeckItem extends StatelessWidget {
           // コンテンツ
           Text(
             content,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).brightness == Brightness.light
+            style: textStyles.bodyLarge.copyWith(
+              color: context.isLight
                   ? const Color(0xFF000000) // 純粋な黒
                   : const Color(0xFFF5F5F5),
               fontWeight: FontWeight.w400, // Regular
@@ -115,7 +119,7 @@ class DeckItem extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.more_horiz,
-                    color: Theme.of(context).brightness == Brightness.light
+                    color: context.isLight
                         ? const Color(0xFF424242)
                         : const Color(0xFFCCCCCC),
                   ),

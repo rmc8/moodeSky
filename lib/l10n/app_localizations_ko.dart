@@ -66,6 +66,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get signInButton => '로그인';
 
   @override
+  String get signingIn => 'Signing in...';
+
+  @override
   String get oAuthInDevelopment => 'OAuth 개발 중';
 
   @override

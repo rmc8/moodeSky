@@ -13,6 +13,7 @@ import 'package:moodesky/core/theme/app_themes.dart';
 import 'package:moodesky/features/auth/screens/login_screen.dart';
 import 'package:moodesky/features/home/screens/home_screen.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
+import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
 
 void main() {
   runApp(const ProviderScope(child: MoodeSkyApp()));
@@ -130,12 +131,12 @@ class AppRouter extends ConsumerWidget {
                     activeAccount.displayName ?? activeAccount.handle,
                   ),
                 ),
-                backgroundColor: Theme.of(context).colorScheme.primary,
+                backgroundColor: context.appColors.primary,
                 duration: const Duration(seconds: 3),
                 behavior: SnackBarBehavior.floating,
                 action: SnackBarAction(
                   label: AppLocalizations.of(context)!.close,
-                  textColor: Theme.of(context).colorScheme.onPrimary,
+                  textColor: context.appColors.onPrimary,
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   },
@@ -176,13 +177,13 @@ class LoadingScreen extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
+                color: context.appColors.primary,
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Icon(
                 Icons.cloud,
                 size: 64,
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: context.appColors.onPrimary,
               ),
             ),
             const SizedBox(height: 24),
@@ -197,8 +198,8 @@ class LoadingScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               AppLocalizations.of(context)!.loadingText,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              style: context.appTextStyles.bodyMedium?.copyWith(
+                color: context.appColors.onSurface.withOpacity(0.6),
               ),
             ),
           ],
@@ -226,18 +227,18 @@ class ErrorScreen extends StatelessWidget {
               Icon(
                 Icons.error_outline,
                 size: 64,
-                color: Theme.of(context).colorScheme.error,
+                color: context.appColors.error,
               ),
               const SizedBox(height: 24),
               Text(
                 AppLocalizations.of(context)!.errorTitle,
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: context.appTextStyles.headlineMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 message,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: context.appTextStyles.bodyMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),

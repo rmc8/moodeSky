@@ -277,4 +277,31 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   Future<int> deleteMockOAuthAccounts() {
     return (delete(accounts)..where((t) => t.did.like('did:plc:oauth_mock_%'))).go();
   }
+
+  // Alias methods for backward compatibility
+  Future<Account?> getAccount(String did) => getAccountByDid(did);
+  
+  Future<void> setAllAccountsInactive() async {
+    await (update(accounts)).write(
+      const AccountsCompanion(
+        isActive: Value(false),
+      ),
+    );
+  }
+  
+  Future<void> setAccountActive(String did) async {
+    await setActiveAccount(did);
+  }
+  
+  Future<void> setAccountInactive(String did) async {
+    await (update(accounts)..where((t) => t.did.equals(did))).write(
+      const AccountsCompanion(
+        isActive: Value(false),
+      ),
+    );
+  }
+  
+  Future<void> deleteAllAccounts() async {
+    await delete(accounts).go();
+  }
 }
