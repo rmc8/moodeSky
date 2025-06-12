@@ -1,13 +1,18 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 // Project imports:
 import 'package:moodesky/core/theme/app_themes.dart';
+import 'package:moodesky/services/database/database.dart';
 import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
+import 'package:moodesky/features/home/widgets/deck_layout/deck_utils.dart';
 
 /// デッキアイテムの基本レイアウト - PostItemと統一されたデザイン
-class DeckItem extends StatelessWidget {
+class DeckItem extends ConsumerWidget {
   final Widget avatar;
   final String title;
   final String subtitle;
@@ -17,6 +22,7 @@ class DeckItem extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? trailing;
   final Color? accentColor;
+  final Deck? deck; // デッキメニュー表示用（削除処理はDeckUtilsで統一）
 
   const DeckItem({
     super.key,
@@ -29,11 +35,11 @@ class DeckItem extends StatelessWidget {
     this.onTap,
     this.trailing,
     this.accentColor,
+    this.deck,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
+  Widget build(BuildContext context, WidgetRef ref) {
     final textStyles = context.appTextStyles;
     
     return InkWell(
@@ -103,30 +109,48 @@ class DeckItem extends StatelessWidget {
             ),
           ),
 
-          if (actionButtons != null && actionButtons!.isNotEmpty) ...[
+          // アクションボタンまたはメニューボタンがある場合のみスペースを追加
+          if ((actionButtons != null && actionButtons!.isNotEmpty) || deck != null) ...[
             const SizedBox(height: 16),
 
-            // アクションボタン行
+            // アクションボタン行（メニューボタンを常に含む）
             Row(
               children: [
-                ...actionButtons!
-                    .expand((widget) => [widget, const SizedBox(width: 24)])
-                    .take(actionButtons!.length * 2 - 1),
+                // アクションボタンがある場合は表示
+                if (actionButtons != null && actionButtons!.isNotEmpty) ...[
+                  ...actionButtons!
+                      .expand((widget) => [widget, const SizedBox(width: 24)])
+                      .take(actionButtons!.length * 2 - 1),
+                ],
 
                 const Spacer(),
 
-                // メニュー
-                IconButton(
-                  icon: Icon(
-                    Icons.more_horiz,
-                    color: context.isLight
-                        ? const Color(0xFF424242)
-                        : const Color(0xFFCCCCCC),
+                // デッキが指定されている場合はメニューボタンを表示
+                if (deck != null)
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_horiz,
+                      color: context.isLight
+                          ? const Color(0xFF424242)
+                          : const Color(0xFFCCCCCC),
+                    ),
+                    onSelected: (value) async {
+                      // DeckUtilsで統一された処理を使用
+                      await DeckUtils.handleDeckMenuAction(
+                        context, 
+                        ref, 
+                        value, 
+                        deck!, 
+                        0, // インデックスは暫定的に0、実際は使用されない
+                        1  // 総数は暫定的に1、実際は使用されない
+                      );
+                    },
+                    itemBuilder: (context) => DeckUtils.buildDeckMenuItems(
+                      context, 
+                      0, // インデックスは暫定的に0
+                      1  // 総数は暫定的に1
+                    ),
                   ),
-                  onPressed: () {
-                    // TODO: メニューを表示
-                  },
-                ),
               ],
             ),
           ],
@@ -145,6 +169,7 @@ class NotificationItem extends StatelessWidget {
   final String? postContent;
   final DateTime timestamp;
   final VoidCallback? onTap;
+  final Deck? deck;
 
   const NotificationItem({
     super.key,
@@ -155,6 +180,7 @@ class NotificationItem extends StatelessWidget {
     this.postContent,
     required this.timestamp,
     this.onTap,
+    this.deck,
   });
 
   @override
@@ -181,6 +207,7 @@ class NotificationItem extends StatelessWidget {
       trailing: Icon(icon, color: color, size: 16),
       onTap: onTap,
       accentColor: color,
+      deck: deck,
     );
   }
 
@@ -259,6 +286,7 @@ class ProfilePostItem extends StatelessWidget {
   final VoidCallback? onRepost;
   final VoidCallback? onReply;
   final VoidCallback? onTap;
+  final Deck? deck;
 
   const ProfilePostItem({
     super.key,
@@ -276,6 +304,7 @@ class ProfilePostItem extends StatelessWidget {
     this.onRepost,
     this.onReply,
     this.onTap,
+    this.deck,
   });
 
   @override
@@ -324,6 +353,7 @@ class ProfilePostItem extends StatelessWidget {
         ),
       ],
       onTap: onTap,
+      deck: deck,
     );
   }
 
@@ -418,6 +448,7 @@ class SearchResultItem extends StatelessWidget {
   final String content;
   final String? metadata;
   final VoidCallback? onTap;
+  final Deck? deck;
 
   const SearchResultItem({
     super.key,
@@ -428,6 +459,7 @@ class SearchResultItem extends StatelessWidget {
     required this.content,
     this.metadata,
     this.onTap,
+    this.deck,
   });
 
   @override
@@ -444,6 +476,7 @@ class SearchResultItem extends StatelessWidget {
       content: content,
       onTap: onTap,
       accentColor: color,
+      deck: deck,
     );
   }
 
@@ -470,6 +503,7 @@ class ListMemberItem extends StatelessWidget {
   final bool isFollowing;
   final VoidCallback? onFollow;
   final VoidCallback? onTap;
+  final Deck? deck;
 
   const ListMemberItem({
     super.key,
@@ -480,6 +514,7 @@ class ListMemberItem extends StatelessWidget {
     this.isFollowing = false,
     this.onFollow,
     this.onTap,
+    this.deck,
   });
 
   @override
@@ -507,6 +542,7 @@ class ListMemberItem extends StatelessWidget {
         ),
       ),
       onTap: onTap,
+      deck: deck,
     );
   }
 }
