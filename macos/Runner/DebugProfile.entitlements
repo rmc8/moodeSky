@@ -3,14 +3,14 @@
 <plist version="1.0">
 <dict>
 	<key>com.apple.security.app-sandbox</key>
-	<true/>
+	<false/>
 	<key>com.apple.security.cs.allow-jit</key>
 	<true/>
 	<key>com.apple.security.network.server</key>
 	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
-	<!-- Temporarily disabled for development - requires Apple Developer signing
+	<!-- セキュアストレージ権限: 開発署名なしでテストするため一時的にコメントアウト
 	<key>com.apple.security.app-sandbox.keychain</key>
 	<true/>
 	<key>keychain-access-groups</key>

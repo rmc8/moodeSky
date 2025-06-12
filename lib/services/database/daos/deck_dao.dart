@@ -1,5 +1,6 @@
 // Package imports:
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 
 // Project imports:
 import 'package:moodesky/services/database/database.dart';
@@ -51,8 +52,13 @@ class DeckDao extends DatabaseAccessor<AppDatabase> with _$DeckDaoMixin {
   }
 
   // Delete deck
-  Future<int> deleteDeck(String deckId) {
-    return (delete(decks)..where((t) => t.deckId.equals(deckId))).go();
+  Future<int> deleteDeck(String deckId) async {
+    debugPrint('🗃️ DeckDao.deleteDeck: Starting deletion for deckId=$deckId');
+    
+    final result = await (delete(decks)..where((t) => t.deckId.equals(deckId))).go();
+    
+    debugPrint('🗃️ DeckDao.deleteDeck: Deleted $result rows for deckId=$deckId');
+    return result;
   }
 
   // Update deck order

@@ -10,7 +10,12 @@ import 'package:moodesky/core/providers/deck_provider.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 
 class AddDeckDialog extends ConsumerStatefulWidget {
-  const AddDeckDialog({super.key});
+  final Function(int)? onDeckCreated; // 新しいデッキのインデックスを渡すコールバック
+
+  const AddDeckDialog({
+    super.key,
+    this.onDeckCreated,
+  });
 
   @override
   ConsumerState<AddDeckDialog> createState() => _AddDeckDialogState();
@@ -253,6 +258,10 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
         await ref.read(authNotifierProvider.notifier).refreshProfilesIfNeeded();
       }
 
+      // デッキ作成前のデッキ数を取得
+      final existingDecks = ref.read(allDecksProvider).valueOrNull ?? [];
+      final newDeckIndex = existingDecks.length; // 新しいデッキは最後のインデックスになる
+
       await deckCreator.createDeck(
         title: _titleController.text,
         deckType: _selectedDeckType,
@@ -261,6 +270,12 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
+        
+        // デッキリストの更新を少し待ってからコールバック実行
+        Future.delayed(const Duration(milliseconds: 50), () {
+          widget.onDeckCreated?.call(newDeckIndex);
+        });
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

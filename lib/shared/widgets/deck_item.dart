@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
+import 'package:moodesky/core/providers/deck_provider.dart';
 import 'package:moodesky/core/theme/app_themes.dart';
 import 'package:moodesky/services/database/database.dart';
 import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
@@ -135,21 +136,38 @@ class DeckItem extends ConsumerWidget {
                           : const Color(0xFFCCCCCC),
                     ),
                     onSelected: (value) async {
+                      debugPrint('🔽 DeckItem menu selected: $value for deck: ${deck!.title}');
+                      
+                      // 現在のデッキリストから正確なインデックスを取得
+                      final decksAsync = ref.read(decksStreamProvider);
+                      final decks = decksAsync.valueOrNull ?? [];
+                      final currentIndex = decks.indexWhere((d) => d.deckId == deck!.deckId);
+                      
+                      debugPrint('🔽 Current deck index: $currentIndex, total decks: ${decks.length}');
+                      
                       // DeckUtilsで統一された処理を使用
                       await DeckUtils.handleDeckMenuAction(
                         context, 
                         ref, 
                         value, 
                         deck!, 
-                        0, // インデックスは暫定的に0、実際は使用されない
-                        1  // 総数は暫定的に1、実際は使用されない
+                        currentIndex >= 0 ? currentIndex : 0,
+                        decks.length
+                      );
+                      debugPrint('🔽 DeckItem menu action completed: $value');
+                    },
+                    itemBuilder: (context) {
+                      // メニュー構築時も正確なインデックスを使用
+                      final decksAsync = ref.read(decksStreamProvider);
+                      final decks = decksAsync.valueOrNull ?? [];
+                      final currentIndex = decks.indexWhere((d) => d.deckId == deck!.deckId);
+                      
+                      return DeckUtils.buildDeckMenuItems(
+                        context, 
+                        currentIndex >= 0 ? currentIndex : 0,
+                        decks.length
                       );
                     },
-                    itemBuilder: (context) => DeckUtils.buildDeckMenuItems(
-                      context, 
-                      0, // インデックスは暫定的に0
-                      1  // 総数は暫定的に1
-                    ),
                   ),
               ],
             ),

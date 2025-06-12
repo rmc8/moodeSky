@@ -1,5 +1,6 @@
 // Package imports:
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
@@ -25,6 +26,9 @@ final allDecksFutureProvider = allDecksProvider;
 /// 🚀 最適化: ストリーミング監視は必要な場合のみ
 final decksStreamProvider = StreamProvider<List<Deck>>((ref) {
   final dao = ref.watch(deckDaoProvider);
+  
+  // distinct()を削除して全ての更新を通知するようにする
+  // デッキの追加・削除・更新が即座に反映される
   return dao.watchAllDecks();
 });
 
@@ -60,7 +64,7 @@ class CachedDecksNotifier extends StateNotifier<List<Deck>> {
       final newDecks = await dao.getAllDecks();
       
       // リスト内容が同じ場合は更新をスキップ
-      if (_areDecksEqual(state, newDecks)) return;
+      if (listEquals(state, newDecks)) return;
       
       state = newDecks;
     } catch (error) {
@@ -68,25 +72,6 @@ class CachedDecksNotifier extends StateNotifier<List<Deck>> {
     }
   }
 
-  /// デッキリストの内容比較（パフォーマンス最適化）
-  bool _areDecksEqual(List<Deck> oldDecks, List<Deck> newDecks) {
-    if (oldDecks.length != newDecks.length) return false;
-    
-    for (int i = 0; i < oldDecks.length; i++) {
-      final oldDeck = oldDecks[i];
-      final newDeck = newDecks[i];
-      
-      // 重要なフィールドのみ比較
-      if (oldDeck.deckId != newDeck.deckId ||
-          oldDeck.title != newDeck.title ||
-          oldDeck.deckOrder != newDeck.deckOrder ||
-          oldDeck.isVisible != newDeck.isVisible) {
-        return false;
-      }
-    }
-    
-    return true;
-  }
 
   /// 手動でデッキ追加（UIで即座に反映）
   void addDeck(Deck deck) {
@@ -129,6 +114,12 @@ class DeckCreator extends StateNotifier<AsyncValue<void>> {
     try {
       final dao = ref.read(deckDaoProvider);
 
+      // Get existing decks to determine the next order number
+      final existingDecks = await dao.getAllDecks();
+      final nextOrder = existingDecks.isEmpty 
+          ? 0 
+          : existingDecks.map((d) => d.deckOrder).reduce((a, b) => a > b ? a : b) + 1;
+
       // Generate unique deck ID
       final deckId =
           '${accountDid}_${deckType}_${DateTime.now().millisecondsSinceEpoch}';
@@ -141,9 +132,16 @@ class DeckCreator extends StateNotifier<AsyncValue<void>> {
         description: Value(description),
         targetIdentifier: Value(targetIdentifier),
         isCrossAccount: Value(accountDid.isEmpty),
+        deckOrder: Value(nextOrder), // Set proper order
       );
 
       await dao.createDeck(deck);
+      
+      // キャッシュと提供者を更新
+      ref.read(cachedDecksProvider.notifier).refreshDecks();
+      ref.invalidate(decksStreamProvider);
+      ref.invalidate(allDecksProvider);
+      
       state = const AsyncValue.data(null);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
@@ -164,6 +162,11 @@ class DeckOrderUpdater {
   Future<void> updateOrder(String deckId, int newOrder) async {
     final dao = ref.read(deckDaoProvider);
     await dao.updateDeckOrder(deckId, newOrder);
+    
+    // 更新後にキャッシュをリフレッシュ
+    ref.read(cachedDecksProvider.notifier).refreshDecks();
+    ref.invalidate(decksStreamProvider);
+    ref.invalidate(allDecksProvider);
   }
 }
 
@@ -179,7 +182,19 @@ class DeckDeleter {
 
   Future<void> deleteDeck(String deckId) async {
     final dao = ref.read(deckDaoProvider);
-    await dao.deleteDeck(deckId);
+    final deletedRows = await dao.deleteDeck(deckId);
+    
+    debugPrint('🗑️ DAO deleteDeck result: $deletedRows rows deleted');
+    
+    if (deletedRows > 0) {
+      // データベースから削除された後、キャッシュされているリストからも削除する
+      ref.read(cachedDecksProvider.notifier).removeDeck(deckId);
+      // StreamProviderも無効化して最新データを取得
+      ref.invalidate(decksStreamProvider);
+      ref.invalidate(allDecksProvider);
+    } else {
+      throw Exception('No deck found with ID: $deckId');
+    }
   }
 }
 
@@ -196,5 +211,10 @@ class DeckFavoriteToggler {
   Future<void> toggleFavorite(String deckId, bool isFavorite) async {
     final dao = ref.read(deckDaoProvider);
     await dao.updateDeckFavorite(deckId, isFavorite);
+    
+    // 更新後にキャッシュをリフレッシュ
+    ref.read(cachedDecksProvider.notifier).refreshDecks();
+    ref.invalidate(decksStreamProvider);
+    ref.invalidate(allDecksProvider);
   }
 }
