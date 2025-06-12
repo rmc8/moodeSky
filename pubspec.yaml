@@ -55,6 +55,7 @@ dependencies:
   bluesky: ^0.18.10
   atproto: ^0.13.3
   atproto_core: ^0.11.2
+  shelf: ^1.4.1
   
   # OAuth Authentication
   atproto_oauth: ^0.1.0
@@ -83,7 +84,7 @@ dependencies:
   bluesky_text: ^0.7.2
 
   # Serialization
-  freezed_annotation: ^2.4.1
+  freezed_annotation: ^2.4.4
   json_annotation: ^4.8.1
   # AI (Optional) - 後で追加予定
   # langchain_dart: ^0.7.0
@@ -97,14 +98,14 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
   # Testing
-  mockito: ^5.4.2
+  mockito: ^5.4.6
 
   # Code Generation
   build_runner: ^2.4.7
-  riverpod_generator: ^2.3.9
+  riverpod_generator: ^2.6.4
   drift_dev: ^2.14.1
   json_serializable: ^6.7.1
-  freezed: ^2.4.7
+  freezed: ^2.5.8
   import_sorter: ^4.6.0
 
 # For information on the generic Dart part of this file, see the

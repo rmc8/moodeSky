@@ -201,6 +201,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get signOutAllDescription => '모든 계정에서 로그아웃하고 로그인 화면으로 돌아갑니다';
 
   @override
+  String loginSuccess(String userName) {
+    return 'Login successful: $userName';
+  }
+
+  @override
+  String get close => 'Close';
+
+  @override
   String get appInformation => '앱 정보';
 
   @override

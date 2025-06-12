@@ -202,6 +202,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get signOutAllDescription => 'すべてのアカウントからサインアウトしてログイン画面に戻る';
 
   @override
+  String loginSuccess(String userName) {
+    return 'ログイン成功: $userName';
+  }
+
+  @override
+  String get close => '閉じる';
+
+  @override
   String get appInformation => 'アプリ情報';
 
   @override

@@ -138,6 +138,16 @@ app.*.symbols
 *.g.dart
 *.freezed.dart
 
+# OAuth related files (removed functionality)
+web/oauth/
+scripts/*oauth*
+scripts/start_local_metadata_server.*
+**/oauth_service*.dart
+**/local_oauth_server.dart
+**/client-metadata*.json
+oauth-callback.html
+oauth-success.html
+
 # Security sensitive files
 keystore.properties
 google-services.json

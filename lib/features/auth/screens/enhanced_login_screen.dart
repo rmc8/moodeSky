@@ -24,7 +24,6 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
   final _passwordController = TextEditingController();
 
   ServerConfig _selectedServer = ServerPresets.blueskyOfficial;
-  AuthMethod _authMethod = AuthMethod.appPassword;
   bool _isPasswordVisible = false;
   bool _isLoading = false;
   bool _rememberServer = true;
@@ -46,8 +45,7 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
   }
 
   bool get _showAppPasswordWarning {
-    return _authMethod == AuthMethod.appPassword &&
-        _passwordController.text.isNotEmpty &&
+    return _passwordController.text.isNotEmpty &&
         !_isAppPasswordFormat;
   }
 
@@ -63,7 +61,7 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
         identifier: _identifierController.text.trim(),
         password: _passwordController.text,
         serviceUrl: _selectedServer.serviceUrl,
-        method: _authMethod,
+        method: AuthMethod.appPassword,
       );
 
       final success = await ref
@@ -131,32 +129,6 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
     }
   }
 
-  Future<void> _startOAuthFlow() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // TODO: Implement OAuth flow
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('OAuth機能は開発中です'),
-          backgroundColor: Colors.blue,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('OAuthエラー: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -228,51 +200,7 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
 
                         const SizedBox(height: 16),
 
-                        // Authentication method tabs
-                        Row(
-                          children: [
-                            if (_selectedServer.supportsAppPasswords)
-                              Expanded(
-                                child: ChoiceChip(
-                                  label: const Text('App Password'),
-                                  selected:
-                                      _authMethod == AuthMethod.appPassword,
-                                  onSelected: (selected) {
-                                    if (selected) {
-                                      setState(() {
-                                        _authMethod = AuthMethod.appPassword;
-                                      });
-                                    }
-                                  },
-                                ),
-                              ),
-
-                            if (_selectedServer.supportsAppPasswords &&
-                                _selectedServer.supportsOAuth)
-                              const SizedBox(width: 8),
-
-                            if (_selectedServer.supportsOAuth)
-                              Expanded(
-                                child: ChoiceChip(
-                                  label: const Text('OAuth'),
-                                  selected: _authMethod == AuthMethod.oauth,
-                                  onSelected: (selected) {
-                                    if (selected) {
-                                      setState(() {
-                                        _authMethod = AuthMethod.oauth;
-                                      });
-                                    }
-                                  },
-                                ),
-                              ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Authentication form based on selected method
-                        if (_authMethod == AuthMethod.appPassword) ...[
-                          // App Password login form
+                        // App Password login form
                           TextFormField(
                             controller: _identifierController,
                             decoration: const InputDecoration(
@@ -447,55 +375,6 @@ class _EnhancedLoginScreenState extends ConsumerState<EnhancedLoginScreen> {
                                   )
                                 : const Text('ログイン'),
                           ),
-                        ] else ...[
-                          // OAuth login
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.security,
-                                  size: 48,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'OAuthによる安全なログイン',
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'ブラウザが開き、${_selectedServer.displayName}でのログインが求められます。',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 16),
-                                FilledButton.icon(
-                                  onPressed: _isLoading
-                                      ? null
-                                      : _startOAuthFlow,
-                                  icon: _isLoading
-                                      ? const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : const Icon(Icons.open_in_new),
-                                  label: const Text('ブラウザでログイン'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
 
                         // Remember server option
                         if (_selectedServer.isCustom) ...[

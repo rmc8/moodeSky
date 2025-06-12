@@ -37,16 +37,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https"
-                      android:host="moodesky.app"
-                      android:path="/oauth/callback" />
+                      android:host="rmc-8.com"
+                      android:path="/moodesky/oauth/callback" />
             </intent-filter>
             
-            <!-- Fallback custom scheme handling -->
+            <!-- OAuth custom scheme handling -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="com.rmc8.moodesky" />
+                <data android:scheme="moodesky" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

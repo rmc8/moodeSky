@@ -324,6 +324,21 @@
     "description": "Description for sign out all option"
   },
   
+  "loginSuccess": "Login successful: {userName}",
+  "@loginSuccess": {
+    "description": "Login success notification message",
+    "placeholders": {
+      "userName": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "close": "Close",
+  "@close": {
+    "description": "Close button text"
+  },
+  
   "appInformation": "App Information",
   "@appInformation": {
     "description": "Title for app information section"

@@ -36,8 +36,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   bool _isLoading = false;
   bool _obscurePassword = true;
-  bool _useOAuth = false; // Toggle between OAuth and App Password
-  bool _useRealOAuth = true; // Toggle between mock and real OAuth
   ServerConfig _selectedServer = ServerPresets.blueskyOfficial;
 
   @override
@@ -67,23 +65,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      if (_useOAuth) {
-        // OAuth sign in
-        await ref
-            .read(authNotifierProvider.notifier)
-            .signInWithOAuth(
-              userIdentifier: _identifierController.text.trim(),
-              useRealOAuth: _useRealOAuth,
-            );
-      } else {
-        // App password sign in
-        await ref
-            .read(authNotifierProvider.notifier)
-            .signInWithAppPassword(
-              identifier: _identifierController.text.trim(),
-              password: _passwordController.text,
-            );
-      }
+      // App password sign in only
+      await ref
+          .read(authNotifierProvider.notifier)
+          .signInWithAppPassword(
+            identifier: _identifierController.text.trim(),
+            password: _passwordController.text,
+          );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -170,47 +158,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const SizedBox(height: 8),
-                              SegmentedButton<bool>(
-                                segments: [
-                                  ButtonSegment(
-                                    value: false,
-                                    label: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.authMethodAppPassword,
-                                    ),
-                                    icon: const Icon(Icons.key),
-                                  ),
-                                  ButtonSegment(
-                                    value: true,
-                                    label: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.authMethodOAuth,
-                                    ),
-                                    icon: const Icon(Icons.security),
-                                  ),
-                                ],
-                                selected: {_useOAuth},
-                                onSelectionChanged: (selection) {
-                                  setState(() {
-                                    _useOAuth = selection.first;
-                                    _passwordController.clear();
-                                  });
-                                },
-                              ),
-                              const SizedBox(height: 8),
-                              // Method explanation
+                              // App Password info
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: _useOAuth
-                                      ? Colors.orange.withValues(alpha: 0.1)
-                                      : Colors.blue.withValues(alpha: 0.1),
+                                  color: Colors.blue.withValues(alpha: 0.1),
                                   border: Border.all(
-                                    color: _useOAuth
-                                        ? Colors.orange.withValues(alpha: 0.3)
-                                        : Colors.blue.withValues(alpha: 0.3),
+                                    color: Colors.blue.withValues(alpha: 0.3),
                                   ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -219,70 +173,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   children: [
                                     Row(
                                       children: [
-                                        Icon(
-                                          _useOAuth
-                                              ? Icons.info
-                                              : Icons.check_circle,
-                                          color: _useOAuth
-                                              ? Colors.orange
-                                              : Colors.blue,
+                                        const Icon(
+                                          Icons.check_circle,
+                                          color: Colors.blue,
                                           size: 16,
                                         ),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
-                                            _useOAuth
-                                                ? 'OAuth認証モードです。モックまたは実際の認証を選択できます。'
-                                                : AppLocalizations.of(
-                                                    context,
-                                                  )!.appPasswordRecommended,
-                                            style: TextStyle(
-                                              color: _useOAuth
-                                                  ? Colors.orange
-                                                  : Colors.blue,
+                                            AppLocalizations.of(
+                                              context,
+                                            )!.appPasswordRecommended,
+                                            style: const TextStyle(
+                                              color: Colors.blue,
                                               fontSize: 12,
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    // OAuth設定詳細（OAuth選択時のみ表示）
-                                    if (_useOAuth) ...[
-                                      const SizedBox(height: 12),
-                                      Row(
-                                        children: [
-                                          Checkbox(
-                                            value: _useRealOAuth,
-                                            onChanged: (value) {
-                                              setState(() {
-                                                _useRealOAuth = value ?? false;
-                                              });
-                                            },
-                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              '実際のOAuth認証を使用 (実験的)',
-                                              style: TextStyle(
-                                                color: Colors.orange.withValues(alpha: 0.8),
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Text(
-                                        _useRealOAuth 
-                                            ? '実際のBluesky OAuth認証フローを使用します。'
-                                            : 'テスト用モック認証を使用します。',
-                                        style: TextStyle(
-                                          color: Colors.orange.withValues(alpha: 0.7),
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                    ],
                                   ],
                                 ),
                               ),
@@ -396,9 +305,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           border: const OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.emailAddress,
-                        textInputAction: _useOAuth
-                            ? TextInputAction.done
-                            : TextInputAction.next,
+                        textInputAction: TextInputAction.next,
                         validator: (value) {
                           if (value?.trim().isEmpty ?? true) {
                             return AppLocalizations.of(
@@ -409,51 +316,50 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         },
                       ),
 
-                      // Password field (only for app password)
-                      if (!_useOAuth) ...[
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _passwordController,
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(
-                              context,
-                            )!.passwordLabel,
-                            hintText: AppLocalizations.of(
-                              context,
-                            )!.passwordHint,
-                            prefixIcon: const Icon(Icons.lock),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                              ),
-                              onPressed: () {
-                                setState(
-                                  () => _obscurePassword = !_obscurePassword,
-                                );
-                              },
+                      // Password field
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(
+                            context,
+                          )!.passwordLabel,
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.passwordHint,
+                          prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                             ),
-                            border: const OutlineInputBorder(),
+                            onPressed: () {
+                              setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              );
+                            },
                           ),
-                          obscureText: _obscurePassword,
-                          textInputAction: TextInputAction.done,
-                          validator: (value) {
-                            if (value?.trim().isEmpty ?? true) {
-                              return AppLocalizations.of(
-                                context,
-                              )!.passwordRequired;
-                            }
-                            return null;
-                          },
+                          border: const OutlineInputBorder(),
                         ),
+                        obscureText: _obscurePassword,
+                        textInputAction: TextInputAction.done,
+                        validator: (value) {
+                          if (value?.trim().isEmpty ?? true) {
+                            return AppLocalizations.of(
+                              context,
+                            )!.passwordRequired;
+                          }
+                          return null;
+                        },
+                      ),
 
-                        const SizedBox(height: 8),
+                      const SizedBox(height: 8),
 
-                        // App Password help and warning
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
+                      // App Password help and warning
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
                             color: Colors.blue.withValues(alpha: 0.1),
                             border: Border.all(
                               color: Colors.blue.withValues(alpha: 0.3),
@@ -523,7 +429,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ],
                           ),
                         ),
-                      ],
 
                       const SizedBox(height: 24),
 
@@ -541,11 +446,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 )
                               : Text(
-                                  _useOAuth
-                                      ? (_useRealOAuth ? 'OAuth でサインイン (実際)' : 'OAuth でサインイン (モック)')
-                                      : AppLocalizations.of(
-                                          context,
-                                        )!.signInButton,
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.signInButton,
                                 ),
                         ),
                       ),
@@ -619,11 +522,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                       // Help text
                       Text(
-                        _useOAuth
-                            ? (_useRealOAuth 
-                                ? '実際のBluesky OAuth認証を使用します。有効なBlueskyハンドルを入力してください。' 
-                                : 'OAuth認証（テスト用モック実装）を使用します。任意のハンドルまたはメールアドレスを入力してテストできます。')
-                            : AppLocalizations.of(context)!.helpTextAppPassword,
+                        AppLocalizations.of(context)!.helpTextAppPassword,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(
                             context,

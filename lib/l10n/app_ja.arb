@@ -71,6 +71,15 @@
   "profilesRefreshed": "プロフィール情報が更新されました",
   "refreshProfilesError": "プロフィール更新に失敗しました",
   "signOutAllDescription": "すべてのアカウントからサインアウトしてログイン画面に戻る",
+  "loginSuccess": "ログイン成功: {userName}",
+  "@loginSuccess": {
+    "placeholders": {
+      "userName": {
+        "type": "String"
+      }
+    }
+  },
+  "close": "閉じる",
   "appInformation": "アプリ情報",
   "aboutApp": "moodeSkyについて",
   "appVersion": "バージョン {version}",

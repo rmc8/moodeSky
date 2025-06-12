@@ -471,6 +471,18 @@ abstract class AppLocalizations {
   /// **'Sign out of all accounts and return to login screen'**
   String get signOutAllDescription;
 
+  /// Login success notification message
+  ///
+  /// In en, this message translates to:
+  /// **'Login successful: {userName}'**
+  String loginSuccess(String userName);
+
+  /// Close button text
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
   /// Title for app information section
   ///
   /// In en, this message translates to:

@@ -24,7 +24,6 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
 
   bool _isLoading = false;
   bool _obscurePassword = true;
-  bool _useOAuth = false; // App Password default for add account
   ServerConfig _selectedServer = ServerPresets.blueskyOfficial;
 
   @override
@@ -46,7 +45,6 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
             identifier: _identifierController.text.trim(),
             password: _passwordController.text,
             serverConfig: _selectedServer,
-            useOAuth: _useOAuth,
           );
 
       result.when(
@@ -166,85 +164,45 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
 
                     const SizedBox(height: 16),
 
-                    // Auth method toggle
+                    // OAuth temporarily disabled - showing info card
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              AppLocalizations.of(context)!.loginMethod,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 8),
-                            SegmentedButton<bool>(
-                              segments: [
-                                ButtonSegment(
-                                  value: false,
-                                  label: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.authMethodAppPassword,
+                            Row(
+                              children: [
+                                Icon(Icons.key, color: Colors.blue, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppLocalizations.of(context)!.authMethodAppPassword,
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  icon: const Icon(Icons.key),
-                                ),
-                                ButtonSegment(
-                                  value: true,
-                                  label: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.authMethodOAuth,
-                                  ),
-                                  icon: const Icon(Icons.security),
                                 ),
                               ],
-                              selected: {_useOAuth},
-                              onSelectionChanged: (selection) {
-                                setState(() {
-                                  _useOAuth = selection.first;
-                                  _passwordController.clear();
-                                });
-                              },
                             ),
                             const SizedBox(height: 8),
-                            // Method explanation
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: _useOAuth
-                                    ? Colors.orange.withValues(alpha: 0.1)
-                                    : Colors.blue.withValues(alpha: 0.1),
+                                color: Colors.blue.withValues(alpha: 0.1),
                                 border: Border.all(
-                                  color: _useOAuth
-                                      ? Colors.orange.withValues(alpha: 0.3)
-                                      : Colors.blue.withValues(alpha: 0.3),
+                                  color: Colors.blue.withValues(alpha: 0.3),
                                 ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    _useOAuth ? Icons.info : Icons.check_circle,
-                                    color: _useOAuth
-                                        ? Colors.orange
-                                        : Colors.blue,
-                                    size: 16,
-                                  ),
+                                  Icon(Icons.check_circle, color: Colors.blue, size: 16),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      _useOAuth
-                                          ? AppLocalizations.of(
-                                              context,
-                                            )!.oAuthInfo
-                                          : AppLocalizations.of(
-                                              context,
-                                            )!.appPasswordRecommended,
-                                      style: TextStyle(
-                                        color: _useOAuth
-                                            ? Colors.orange
-                                            : Colors.blue,
+                                      AppLocalizations.of(context)!.appPasswordRecommended,
+                                      style: const TextStyle(
+                                        color: Colors.blue,
                                         fontSize: 12,
                                       ),
                                     ),
@@ -334,9 +292,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                         border: const OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      textInputAction: _useOAuth
-                          ? TextInputAction.done
-                          : TextInputAction.next,
+                      textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value?.trim().isEmpty ?? true) {
                           return AppLocalizations.of(
@@ -347,9 +303,8 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                       },
                     ),
 
-                    // Password field (only for app password)
-                    if (!_useOAuth) ...[
-                      const SizedBox(height: 16),
+                    // Password field
+                    const SizedBox(height: 16),
                       TextFormField(
                         controller: _passwordController,
                         decoration: InputDecoration(
@@ -455,13 +410,12 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                           ],
                         ),
                       ),
-                    ],
 
                     const SizedBox(height: 24),
 
                     // Add account button
                     FilledButton(
-                      onPressed: (_isLoading || _useOAuth) ? null : _addAccount,
+                      onPressed: _isLoading ? null : _addAccount,
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: _isLoading
@@ -472,15 +426,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Text(
-                                _useOAuth
-                                    ? AppLocalizations.of(
-                                        context,
-                                      )!.oAuthInDevelopment
-                                    : AppLocalizations.of(
-                                        context,
-                                      )!.addAccountButton,
-                              ),
+                            : Text(AppLocalizations.of(context)!.addAccountButton),
                       ),
                     ),
 

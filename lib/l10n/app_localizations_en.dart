@@ -210,6 +210,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sign out of all accounts and return to login screen';
 
   @override
+  String loginSuccess(String userName) {
+    return 'Login successful: $userName';
+  }
+
+  @override
+  String get close => 'Close';
+
+  @override
   String get appInformation => 'App Information';
 
   @override

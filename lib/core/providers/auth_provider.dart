@@ -11,13 +11,10 @@ import 'package:moodesky/shared/models/auth_models.dart';
 
 part 'auth_provider.g.dart';
 
-// Auth configuration provider
+// Basic auth configuration
 @Riverpod(keepAlive: true)
-AuthConfig authConfig(AuthConfigRef ref) {
-  return const AuthConfig(
-    // rmc-8.com OAuth エンドポイント使用
-    clientMetadataUrl: 'https://rmc-8.com/api/moodesky/oauth/client-metadata.json',
-    callbackUrlScheme: 'com.rmc8.moodesky',
+AuthConfig authConfig(Ref ref) {
+  return AuthConfig(
     defaultPdsHost: 'bsky.social',
   );
 }
@@ -26,7 +23,7 @@ AuthConfig authConfig(AuthConfigRef ref) {
 
 // Secure storage provider
 @Riverpod(keepAlive: true)
-FlutterSecureStorage secureStorage(SecureStorageRef ref) {
+FlutterSecureStorage secureStorage(Ref ref) {
   return const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(
@@ -66,6 +63,9 @@ class AuthNotifier extends _$AuthNotifier {
     state = const AuthState.loading();
 
     try {
+      // モックOAuthアカウントを削除（クリーンアップ）
+      await _blueskyService.deleteMockOAuthAccounts();
+      
       final activeAccount = await _blueskyService.getActiveAccount();
 
       if (activeAccount == null) {
@@ -136,62 +136,14 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  // Sign in with OAuth
-  Future<void> signInWithOAuth({
-    String? userIdentifier,
-    String? pdsHost,
-    bool useRealOAuth = false,
-  }) async {
-    state = const AuthState.loading();
 
-    try {
-      final result = await _blueskyService.signInWithOAuth(
-        userIdentifier: userIdentifier,
-        pdsHost: pdsHost,
-        useRealOAuth: useRealOAuth, // パラメータを使用
-      );
-
-      result.when(
-        success: (session, accountDid) async {
-          // プロフィール情報を取得・更新
-          await _fetchAndUpdateProfileInfo(accountDid);
-          // 認証状態を更新
-          await _updateAuthenticatedState();
-        },
-        failure: (error, errorDescription, errorType) {
-          state = AuthState.error(message: error, errorType: errorType);
-        },
-        cancelled: () {
-          state = const AuthState.unauthenticated();
-        },
-      );
-    } catch (e) {
-      state = AuthState.error(
-        message: 'OAuth sign in failed: $e',
-        errorType: AuthErrorType.unknownError,
-      );
-    }
-  }
-
-  // Generic login method
+  // Generic login method (App Password only)
   Future<bool> login(AuthCredentials credentials) async {
-    switch (credentials.method) {
-      case AuthMethod.oauth:
-        await signInWithOAuth(
-          userIdentifier: credentials.identifier.isNotEmpty
-              ? credentials.identifier
-              : null,
-          pdsHost: Uri.parse(credentials.serviceUrl).host,
-        );
-        break;
-      case AuthMethod.appPassword:
-        await signInWithAppPassword(
-          identifier: credentials.identifier,
-          password: credentials.password,
-          pdsHost: Uri.parse(credentials.serviceUrl).host,
-        );
-        break;
-    }
+    await signInWithAppPassword(
+      identifier: credentials.identifier,
+      password: credentials.password,
+      pdsHost: Uri.parse(credentials.serviceUrl).host,
+    );
 
     // Return true if authentication succeeded
     final currentState = state;
@@ -217,8 +169,8 @@ class AuthNotifier extends _$AuthNotifier {
         success: (session, accountDid) async {
           // プロフィール情報を取得・更新
           await _fetchAndUpdateProfileInfo(accountDid);
-          // 認証状態を更新
-          await _updateAuthenticatedState();
+          // 認証状態を更新（新規ログインフラグ付き）
+          await _updateAuthenticatedState(isNewLogin: true);
         },
         failure: (error, errorDescription, errorType) {
           state = AuthState.error(message: error, errorType: errorType);
@@ -274,60 +226,35 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  // Add account (multi-account support)
+  // Add account (multi-account support - App Password only)
   Future<AuthResult> addAccount({
     required String identifier,
     required String password,
     required ServerConfig serverConfig,
-    bool useOAuth = false,
   }) async {
     try {
-      late AuthResult result;
+      // App Password flow for additional account
+      final authResult = await _blueskyService.signInWithAppPassword(
+        identifier: identifier,
+        password: password,
+        pdsHost: Uri.parse(serverConfig.serviceUrl).host,
+        isAdditionalAccount:
+            true, // Flag to indicate this is an additional account
+      );
 
-      if (useOAuth) {
-        // OAuth flow for additional account
-        final authResult = await _blueskyService.signInWithOAuth(
-          userIdentifier: identifier.isNotEmpty ? identifier : null,
-          pdsHost: Uri.parse(serverConfig.serviceUrl).host,
-        );
-
-        result = authResult.when(
-          success: (session, accountDid) =>
-              AuthResult.success(session: session, accountDid: accountDid),
-          failure: (error, errorDescription, errorType) => AuthResult.failure(
-            error: error,
-            errorDescription: errorDescription,
-            errorType: errorType,
-          ),
-          cancelled: () => AuthResult.failure(
-            error: 'OAuth cancelled',
-            errorType: AuthErrorType.userCancelled,
+      final result = authResult.when(
+        success: (session, accountDid) =>
+            AuthResult.success(session: session, accountDid: accountDid),
+        failure: (error, errorDescription, errorType) => AuthResult.failure(
+          error: error,
+          errorDescription: errorDescription,
+          errorType: errorType,
+        ),
+        cancelled: () => AuthResult.failure(
+          error: 'Authentication cancelled',
+          errorType: AuthErrorType.userCancelled,
           ),
         );
-      } else {
-        // App Password flow for additional account
-        final authResult = await _blueskyService.signInWithAppPassword(
-          identifier: identifier,
-          password: password,
-          pdsHost: Uri.parse(serverConfig.serviceUrl).host,
-          isAdditionalAccount:
-              true, // Flag to indicate this is an additional account
-        );
-
-        result = authResult.when(
-          success: (session, accountDid) =>
-              AuthResult.success(session: session, accountDid: accountDid),
-          failure: (error, errorDescription, errorType) => AuthResult.failure(
-            error: error,
-            errorDescription: errorDescription,
-            errorType: errorType,
-          ),
-          cancelled: () => AuthResult.failure(
-            error: 'Authentication cancelled',
-            errorType: AuthErrorType.userCancelled,
-          ),
-        );
-      }
 
       // If successful, fetch profile information and update state
       result.whenOrNull(
@@ -380,6 +307,14 @@ class AuthNotifier extends _$AuthNotifier {
     await _initializeAuth();
   }
 
+  // Clear new login flag (to prevent duplicate notifications)
+  void clearNewLoginFlag() {
+    final currentState = state;
+    if (currentState is AuthAuthenticated && currentState.isNewLogin) {
+      state = currentState.copyWith(isNewLogin: false);
+    }
+  }
+
   // Fetch and update profile information for a specific account
   Future<void> _fetchAndUpdateProfileInfo(String accountDid) async {
     try {
@@ -430,7 +365,7 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   // Update authenticated state with current account information
-  Future<void> _updateAuthenticatedState() async {
+  Future<void> _updateAuthenticatedState({bool isNewLogin = false}) async {
     final activeAccount = await _blueskyService.getActiveAccount();
 
     if (activeAccount == null) {
@@ -457,17 +392,18 @@ class AuthNotifier extends _$AuthNotifier {
     state = AuthState.authenticated(
       activeAccountDid: activeAccount.did,
       accounts: profiles,
+      isNewLogin: isNewLogin,
     );
   }
 }
 
 // Active account provider
 @riverpod
-UserProfile? activeAccount(ActiveAccountRef ref) {
+UserProfile? activeAccount(Ref ref) {
   final authState = ref.watch(authNotifierProvider);
 
   return authState.maybeWhen(
-    authenticated: (activeAccountDid, accounts) {
+    authenticated: (activeAccountDid, accounts, isNewLogin) {
       return accounts.firstWhere(
         (account) => account.did == activeAccountDid,
         orElse: () => accounts.first,
@@ -479,18 +415,18 @@ UserProfile? activeAccount(ActiveAccountRef ref) {
 
 // Available accounts provider
 @riverpod
-List<UserProfile> availableAccounts(AvailableAccountsRef ref) {
+List<UserProfile> availableAccounts(Ref ref) {
   final authState = ref.watch(authNotifierProvider);
 
   return authState.maybeWhen(
-    authenticated: (_, accounts) => accounts,
+    authenticated: (_, accounts, __) => accounts,
     orElse: () => [],
   );
 }
 
 // Authentication status provider
 @riverpod
-bool isAuthenticated(IsAuthenticatedRef ref) {
+bool isAuthenticated(Ref ref) {
   final authState = ref.watch(authNotifierProvider);
   return authState is AuthAuthenticated;
 }
@@ -498,7 +434,7 @@ bool isAuthenticated(IsAuthenticatedRef ref) {
 // Multi-account status provider
 @riverpod
 Future<MultiAccountStatus?> multiAccountStatus(
-  MultiAccountStatusRef ref,
+  Ref ref,
 ) async {
   final authState = ref.watch(authNotifierProvider);
 

@@ -114,7 +114,44 @@ class AppRouter extends ConsumerWidget {
     return authState.when(
       initial: () => const LoadingScreen(),
       loading: () => const LoadingScreen(),
-      authenticated: (activeAccountDid, accounts) => const HomeScreen(),
+      authenticated: (activeAccountDid, accounts, isNewLogin) {
+        // ログイン成功通知を表示
+        if (isNewLogin) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final activeAccount = accounts.firstWhere(
+              (account) => account.did == activeAccountDid,
+              orElse: () => accounts.first,
+            );
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  AppLocalizations.of(context)!.loginSuccess(
+                    activeAccount.displayName ?? activeAccount.handle,
+                  ),
+                ),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                duration: const Duration(seconds: 3),
+                behavior: SnackBarBehavior.floating,
+                action: SnackBarAction(
+                  label: AppLocalizations.of(context)!.close,
+                  textColor: Theme.of(context).colorScheme.onPrimary,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  },
+                ),
+              ),
+            );
+            
+            // フラグをリセット（重複表示防止）
+            Future.delayed(const Duration(seconds: 1), () {
+              ref.read(authNotifierProvider.notifier).clearNewLoginFlag();
+            });
+          });
+        }
+        
+        return const HomeScreen();
+      },
       unauthenticated: () => const LoginScreen(),
       error: (message, errorType) => ErrorScreen(
         message: message,

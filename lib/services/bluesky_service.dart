@@ -11,7 +11,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Project imports:
 import 'package:moodesky/services/database/database.dart';
-import 'package:moodesky/services/oauth_service.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
 import 'package:moodesky/shared/models/preferences_models.dart';
 
@@ -22,29 +21,12 @@ class BlueskyService {
 
   bsky.Bluesky? _currentClient;
   Account? _currentAccount;
-  OAuthService? _oauthService;
 
   BlueskyService({
     required this.database,
     required this.secureStorage,
     required this.authConfig,
-  }) {
-    // OAuth サービス初期化
-    _oauthService = OAuthService(
-      secureStorage: secureStorage,
-      config: authConfig,
-    );
-    _initializeOAuth();
-  }
-
-  /// OAuth サービス初期化
-  Future<void> _initializeOAuth() async {
-    try {
-      await _oauthService?.initialize();
-    } catch (e) {
-      print('OAuth service initialization failed: $e');
-    }
-  }
+  });
 
   // Get current Bluesky client
   bsky.Bluesky? get currentClient => _currentClient;
@@ -72,7 +54,9 @@ class BlueskyService {
   // Initialize client with account session
   Future<bool> _initializeClient(Account account) async {
     try {
-      // 認証情報が有効かチェック
+      print('Initializing Bluesky client for: ${account.handle} (${account.loginMethod})');
+      
+      // App Password認証の場合
       if (account.accessJwt == null || account.refreshJwt == null) {
         print('No valid session tokens for account: ${account.handle}');
         return false;
@@ -117,112 +101,6 @@ class BlueskyService {
   // Get all accounts
   Future<List<Account>> getAllAccounts() async {
     return database.accountDao.getAllAccounts();
-  }
-
-  // Sign in with OAuth
-  Future<AuthResult> signInWithOAuth({
-    String? userIdentifier,
-    String? pdsHost,
-    bool useRealOAuth = false,
-  }) async {
-    try {
-      if (_oauthService == null) {
-        return const AuthResult.failure(
-          error: 'OAuth service not initialized',
-          errorDescription: 'OAuth service is not available',
-          errorType: AuthErrorType.unknownError,
-        );
-      }
-
-      print('Starting OAuth authentication for: $userIdentifier');
-      print('PDS Host: $pdsHost');
-      print('Use Real OAuth: $useRealOAuth');
-
-      // OAuth認証フローを開始（改良されたエラーハンドリング付き）
-      final result = await _oauthService!.authenticate(
-        userIdentifier: userIdentifier,
-        pdsHost: pdsHost,
-        useRealOAuth: useRealOAuth,
-      ).timeout(
-        const Duration(minutes: 5), // OAuth認証のタイムアウト設定
-        onTimeout: () {
-          return const AuthResult.failure(
-            error: 'OAuth認証がタイムアウトしました',
-            errorDescription: '認証フローが時間内に完了しませんでした',
-            errorType: AuthErrorType.networkError,
-          );
-        },
-      );
-
-      // 成功時はアカウントをデータベースに保存
-      if (result is AuthSuccess) {
-        final sessionData = result.session;
-        
-        // sessionDataがOAuthSession型かAppPasswordSession型かをチェック
-        final profile = sessionData.when(
-          oauth: (oauthSession, profile) => profile,
-          appPassword: (appPasswordSession, profile) => profile,
-        );
-        
-        final oauthSessionData = sessionData.when(
-          oauth: (oauthSession, _) => oauthSession,
-          appPassword: (_, __) => null,
-        );
-
-        if (oauthSessionData != null) {
-          print('Saving OAuth account to database: ${profile.handle}');
-
-          // アカウントをデータベースに保存
-          final accountData = AccountsCompanion.insert(
-            did: profile.did,
-            handle: profile.handle,
-            displayName: Value(profile.displayName),
-            description: Value(profile.description),
-            avatar: Value(profile.avatar),
-            email: Value(profile.email),
-            accessJwt: Value(oauthSessionData.accessToken),
-            refreshJwt: Value(oauthSessionData.refreshToken),
-            sessionString: Value(oauthSessionData.accessToken),
-            pdsUrl: pdsHost ?? authConfig.defaultPdsHost,
-            serviceUrl: Value('https://${pdsHost ?? authConfig.defaultPdsHost}'),
-            loginMethod: const Value('oauth'),
-            isActive: const Value(true),
-            lastUsed: Value(DateTime.now()),
-          );
-
-          try {
-            print('Upserting OAuth account: ${profile.handle} (DID: ${profile.did})');
-            
-            // DIDをキーにしたupsert処理
-            await database.accountDao.upsertAccountByDid(accountData);
-            await database.accountDao.setActiveAccount(profile.did);
-            
-            // クライアントを初期化
-            final account = await database.accountDao.getAccountByDid(profile.did);
-            if (account != null) {
-              await _initializeClient(account);
-            }
-
-            print('OAuth account upserted successfully: ${profile.handle}');
-          } catch (e) {
-            print('Failed to save OAuth account: $e');
-            return AuthResult.failure(
-              error: 'アカウント保存に失敗しました',
-              errorDescription: e.toString(),
-              errorType: AuthErrorType.unknownError,
-            );
-          }
-        }
-      }
-
-      return result;
-    } catch (e) {
-      return AuthResult.failure(
-        error: 'OAuth sign in failed',
-        errorDescription: e.toString(),
-        errorType: AuthErrorType.networkError,
-      );
-    }
   }
 
   // Sign in with app password
@@ -501,10 +379,6 @@ class BlueskyService {
   bool _isAccessTokenExpired(String? accessJwtString) {
     if (accessJwtString == null || accessJwtString.isEmpty) return true;
 
-    // モックトークンの場合は常に有効とする
-    if (accessJwtString.startsWith('mock_') || accessJwtString == 'test_jwt') {
-      return false;
-    }
 
     try {
       // atcore.decodeJwtを試行
@@ -527,11 +401,6 @@ class BlueskyService {
   bool _isRefreshTokenExpired(String? refreshJwtString) {
     if (refreshJwtString == null || refreshJwtString.isEmpty) return true;
 
-    // モックトークンの場合は常に有効とする
-    if (refreshJwtString.startsWith('mock_') ||
-        refreshJwtString == 'test_refresh') {
-      return false;
-    }
 
     try {
       // atcore.decodeJwtを試行
@@ -649,52 +518,46 @@ class BlueskyService {
     if (account == null) return false;
 
     try {
-      if (account.loginMethod == 'oauth') {
-        // OAuth token refresh logic
-        // TODO: Implement OAuth token refresh when needed
-        return (account.accessJwt != null && account.refreshJwt != null);
-      } else {
-        // App password session validation and refresh
-        if (account.accessJwt == null || account.refreshJwt == null) {
-          return false;
-        }
+      // App password session validation and refresh
+      if (account.accessJwt == null || account.refreshJwt == null) {
+        return false;
+      }
 
-        try {
-          // トークンの存在と期限をチェック
-          if (account.accessJwt != null && account.refreshJwt != null) {
-            // アクセストークンの期限をチェック
-            if (_isAccessTokenExpired(account.accessJwt)) {
+      try {
+        // トークンの存在と期限をチェック
+        if (account.accessJwt != null && account.refreshJwt != null) {
+          // アクセストークンの期限をチェック
+          if (_isAccessTokenExpired(account.accessJwt)) {
+            print(
+              'Access token expired for ${account.handle}, checking refresh token...',
+            );
+
+            // リフレッシュトークンの期限もチェック
+            if (_isRefreshTokenExpired(account.refreshJwt)) {
               print(
-                'Access token expired for ${account.handle}, checking refresh token...',
+                'Both tokens expired for ${account.handle}, session invalid',
               );
-
-              // リフレッシュトークンの期限もチェック
-              if (_isRefreshTokenExpired(account.refreshJwt)) {
-                print(
-                  'Both tokens expired for ${account.handle}, session invalid',
-                );
-                return false;
-              }
-
-              // リフレッシュトークンが有効な場合、セッションは有効（必要時にリフレッシュ可能）
-              print(
-                'Access token expired but refresh token valid for: ${account.handle}',
-              );
-              return true;
+              return false;
             }
 
-            print('Session tokens valid for: ${account.handle}');
-            return true;
-          } else {
+            // リフレッシュトークンが有効な場合、セッションは有効（必要時にリフレッシュ可能）
             print(
-              'Session validation failed - missing tokens for: ${account.handle}',
+              'Access token expired but refresh token valid for: ${account.handle}',
             );
-            return false;
+            return true;
           }
-        } catch (e) {
-          print('Session validation failed for ${account.handle}: $e');
+
+          print('Session tokens valid for: ${account.handle}');
+          return true;
+        } else {
+          print(
+            'Session validation failed - missing tokens for: ${account.handle}',
+          );
           return false;
         }
+      } catch (e) {
+        print('Session validation failed for ${account.handle}: $e');
+        return false;
       }
     } catch (e) {
       print('Session validation failed: $e');
@@ -1705,6 +1568,7 @@ class BlueskyService {
       return feedView.post.viewer.like != null; // エラー時は元の状態を返す
     }
   }
+
 }
 
 /// コンテンツモデレーション処理クラス

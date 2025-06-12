@@ -1,0 +1,622 @@
+Analyzing moodeSky...                                           
+
+   info • Don't invoke 'print' in production code • lib/core/providers/auth_provider.dart:86:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/auth_provider.dart:98:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/auth_provider.dart:102:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/auth_provider.dart:104:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/auth_provider.dart:110:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/auth_provider.dart:398:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/auth_provider.dart:411:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/auth_provider.dart:415:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/auth_provider.dart:426:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/auth_provider.dart:437:7 • avoid_print
+   info • 'AutoDisposeFutureProviderRef' is deprecated and shouldn't be used. will be removed in 3.0.0. Use Ref instead • lib/core/providers/locale_provider.dart:95:3 • deprecated_member_use
+   info • 'AutoDisposeProviderRef' is deprecated and shouldn't be used. will be removed in 3.0.0. Use Ref instead • lib/core/providers/locale_provider.dart:156:23 • deprecated_member_use
+  error • The getter 'value' isn't defined for the type 'Map<String, dynamic>' • lib/core/providers/post_moderation_provider.dart:258:15 • undefined_getter
+   info • 'ActiveUserPreferencesRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/preferences_provider.dart:65:3 • deprecated_member_use_from_same_package
+   info • 'ActiveModerationPrefsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/preferences_provider.dart:81:3 • deprecated_member_use_from_same_package
+   info • 'ModeratePostRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/preferences_provider.dart:92:3 • deprecated_member_use_from_same_package
+   info • 'IsPostMutedRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/preferences_provider.dart:109:26 • deprecated_member_use_from_same_package
+   info • 'ActiveFeedViewPrefsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/preferences_provider.dart:123:3 • deprecated_member_use_from_same_package
+   info • 'ActiveThreadViewPrefsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/preferences_provider.dart:135:3 • deprecated_member_use_from_same_package
+   info • 'ActiveSavedFeedsPrefsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/preferences_provider.dart:147:3 • deprecated_member_use_from_same_package
+   info • 'AutoDisposeProviderRef' is deprecated and shouldn't be used. will be removed in 3.0.0. Use Ref instead • lib/core/providers/theme_provider.dart:104:32 • deprecated_member_use
+   info • 'AutoDisposeProviderRef' is deprecated and shouldn't be used. will be removed in 3.0.0. Use Ref instead • lib/core/providers/theme_provider.dart:114:28 • deprecated_member_use
+   info • 'AutoDisposeProviderRef' is deprecated and shouldn't be used. will be removed in 3.0.0. Use Ref instead • lib/core/providers/theme_provider.dart:121:22 • deprecated_member_use
+   info • 'AutoDisposeProviderRef' is deprecated and shouldn't be used. will be removed in 3.0.0. Use Ref instead • lib/core/providers/theme_provider.dart:128:21 • deprecated_member_use
+   info • 'AutoDisposeProviderRef' is deprecated and shouldn't be used. will be removed in 3.0.0. Use Ref instead • lib/core/providers/theme_provider.dart:135:26 • deprecated_member_use
+   info • 'AutoDisposeProviderRef' is deprecated and shouldn't be used. will be removed in 3.0.0. Use Ref instead • lib/core/providers/theme_provider.dart:143:3 • deprecated_member_use
+   info • 'AutoDisposeProviderRef' is deprecated and shouldn't be used. will be removed in 3.0.0. Use Ref instead • lib/core/providers/theme_provider.dart:158:3 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:25:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:41:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:50:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:57:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:66:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:73:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:84:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:98:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:112:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:126:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:132:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:138:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:139:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:144:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:145:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:207:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:208:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:220:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:221:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:222:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:233:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:238:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:247:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:249:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:265:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:266:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:280:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:281:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:292:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:304:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:306:7 • avoid_print
+warning • Unnecessary type check; the result is always 'false' • lib/core/providers/timeline_provider.dart:322:13 • unnecessary_type_check
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:323:11 • avoid_print
+warning • Unnecessary cast • lib/core/providers/timeline_provider.dart:348:24 • unnecessary_cast
+   info • Don't invoke 'print' in production code • lib/core/providers/timeline_provider.dart:379:9 • avoid_print
+warning • Unused import: 'package:moodesky/core/theme/app_fonts.dart' • lib/core/theme/app_themes.dart:6:8 • unused_import
+   info • The private field _useOAuth could be 'final' • lib/features/auth/screens/add_account_screen.dart:27:8 • prefer_final_fields
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:59:47 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:71:47 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:83:47 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:96:43 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:115:49 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:145:63 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:156:59 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:181:63 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:205:67 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:291:26 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:292:63 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:304:28 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:318:28 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:319:65 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:341:30 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:369:36 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:382:32 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:396:40 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:407:34 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:435:64 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:462:40 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/add_account_screen.dart:493:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:167:61 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:185:42 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:241:46 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:325:34 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:330:34 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:339:40 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:357:28 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:360:28 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:372:30 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:386:30 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:389:30 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:411:32 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:443:38 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:456:34 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:470:42 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:481:36 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:513:42 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:516:42 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:544:42 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:576:67 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/auth/screens/login_screen.dart:590:53 • unnecessary_non_null_assertion
+   info • The import of 'package:flutter/services.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/features/auth/widgets/server_selection_widget.dart:3:8 • unnecessary_import
+warning • Unused import: 'package:url_launcher/url_launcher.dart' • lib/features/auth/widgets/server_selection_widget.dart:5:8 • unused_import
+warning • The value of the field '_showCustomInput' isn't used • lib/features/auth/widgets/server_selection_widget.dart:29:8 • unused_field
+warning • The value of the field '_validatedCustomServer' isn't used • lib/features/auth/widgets/server_selection_widget.dart:31:17 • unused_field
+warning • The value of the field '_isValidating' isn't used • lib/features/auth/widgets/server_selection_widget.dart:32:8 • unused_field
+warning • The declaration '_validateCustomServer' isn't referenced • lib/features/auth/widgets/server_selection_widget.dart:65:16 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/widgets/server_selection_widget.dart:313:56 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/widgets/server_selection_widget.dart:414:22 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/widgets/server_selection_widget.dart:416:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/widgets/server_selection_widget.dart:685:56 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/widgets/server_selection_widget.dart:687:58 • deprecated_member_use
+warning • The '!' will have no effect because the receiver can't be null • lib/features/home/widgets/account_switcher.dart:31:45 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/home/widgets/account_switcher.dart:76:53 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/home/widgets/account_switcher.dart:103:55 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/home/widgets/account_switcher.dart:162:49 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/home/widgets/account_switcher.dart:163:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/home/widgets/account_switcher.dart:167:53 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/home/widgets/account_switcher.dart:175:53 • unnecessary_non_null_assertion
+warning • Unused import: 'package:bluesky/bluesky.dart' • lib/features/home/widgets/timeline_widget.dart:5:8 • unused_import
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:20:62 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:32:49 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:61:49 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:71:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:80:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:106:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:113:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:138:49 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:148:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:157:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:176:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:190:57 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:200:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:214:57 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:233:49 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:234:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:238:53 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:245:53 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/features/settings/screens/settings_screen.dart:270:51 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/main.dart:129:47 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/main.dart:137:54 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/main.dart:199:43 • unnecessary_non_null_assertion
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/main.dart:201:64 • deprecated_member_use
+warning • The '!' will have no effect because the receiver can't be null • lib/main.dart:233:45 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/main.dart:248:59 • unnecessary_non_null_assertion
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:44:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:46:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:48:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:78:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:87:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:104:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:107:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:108:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:113:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:121:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:124:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:142:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:146:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:151:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:164:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:168:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:175:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:208:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:209:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:242:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:263:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:275:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:277:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:310:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:315:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:330:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:339:9 • avoid_print
+warning • The left operand can't be null, so the right operand is never executed • lib/services/bluesky_service.dart:348:58 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/services/bluesky_service.dart:349:54 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/services/bluesky_service.dart:350:50 • dead_null_aware_expression
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:352:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:383:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:409:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:419:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:441:13 • avoid_print
+warning • The left operand can't be null, so the right operand is never executed • lib/services/bluesky_service.dart:456:39 • dead_null_aware_expression
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:467:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:487:9 • avoid_print
+   info • Use 'rethrow' to rethrow a caught exception • lib/services/bluesky_service.dart:488:9 • use_rethrow_when_possible
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:491:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:583:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:605:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:649:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:655:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:659:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:660:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:671:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:677:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:678:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:698:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:701:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:727:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:733:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:740:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:746:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:749:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:755:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:760:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:781:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:805:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:825:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:828:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:875:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:887:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:913:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:919:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:922:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:936:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:942:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:952:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:967:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:974:11 • avoid_print
+warning • The operand can't be 'null', so the condition is always 'true' • lib/services/bluesky_service.dart:1003:31 • unnecessary_null_comparison
+warning • The '!' will have no effect because the receiver can't be null • lib/services/bluesky_service.dart:1004:44 • unnecessary_non_null_assertion
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1005:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1006:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1033:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1039:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1047:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1048:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1059:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1076:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1077:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1078:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1084:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1098:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1107:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1128:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1160:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1173:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1181:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1187:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1208:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1236:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1243:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1244:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1245:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1246:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1250:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1253:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1256:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1260:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1270:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1285:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1296:7 • avoid_print
+   info • Use 'isEmpty' instead of 'length' to test whether the collection is empty • lib/services/bluesky_service.dart:1341:9 • prefer_is_empty
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1364:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1372:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1409:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1412:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1419:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1446:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1465:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1478:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1491:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1504:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1513:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1515:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1523:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1525:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1566:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1569:7 • avoid_print
+warning • The value of the local variable 'client' isn't used • lib/services/bluesky_service.dart:1598:15 • unused_local_variable
+warning • The value of the local variable 'rkey' isn't used • lib/services/bluesky_service.dart:1602:15 • unused_local_variable
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1614:7 • avoid_print
+warning • Dead code • lib/services/bluesky_service.dart:1614:7 • dead_code
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1617:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1646:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1684:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1687:7 • avoid_print
+warning • The value of the local variable 'client' isn't used • lib/services/bluesky_service.dart:1716:15 • unused_local_variable
+warning • The value of the local variable 'rkey' isn't used • lib/services/bluesky_service.dart:1720:15 • unused_local_variable
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1732:7 • avoid_print
+warning • Dead code • lib/services/bluesky_service.dart:1732:7 • dead_code
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1735:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1764:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1774:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1777:7 • avoid_print
+warning • The declaration 'safeGet' isn't referenced • lib/services/bluesky_service.dart:1791:10 • unused_element
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1832:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bluesky_service.dart:1869:7 • avoid_print
+   info • Parameter 'db' could be a super parameter • lib/services/database/daos/account_dao.dart:12:3 • use_super_parameters
+   info • Parameter 'db' could be a super parameter • lib/services/database/daos/deck_dao.dart:12:3 • use_super_parameters
+   info • Parameter 'db' could be a super parameter • lib/services/database/daos/post_dao.dart:12:3 • use_super_parameters
+  error • The name 'Post' isn't a type, so it can't be used as a type argument • lib/services/database/daos/post_dao.dart:15:15 • non_type_as_type_argument
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:21:24 • undefined_getter
+  error • The getter 'indexedAt' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:23:43 • undefined_getter
+  error • The getter 'indexedAt' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:28:37 • undefined_getter
+  error • The name 'Post' isn't a type, so it can't be used as a type argument • lib/services/database/daos/post_dao.dart:35:15 • non_type_as_type_argument
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:44:18 • undefined_getter
+  error • The getter 'deckType' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:44:52 • undefined_getter
+  error • The getter 'indexedAt' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:47:43 • undefined_getter
+  error • The getter 'deckIdentifier' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:52:37 • undefined_getter
+  error • The getter 'indexedAt' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:56:37 • undefined_getter
+  error • The name 'Post' isn't a type, so it can't be used as a type argument • lib/services/database/daos/post_dao.dart:63:10 • non_type_as_type_argument
+  error • The getter 'uri' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:64:43 • undefined_getter
+  error • Undefined class 'PostsCompanion' • lib/services/database/daos/post_dao.dart:68:34 • undefined_class
+  error • A value of type 'Future<int>' can't be returned from the method 'updatePostEngagement' because it has a return type of 'Future<bool>' • lib/services/database/daos/post_dao.dart:80:12 • return_of_invalid_type
+  error • The getter 'uri' isn't defined for the type 'Table' • lib/services/database/daos/post_dao.dart:80:43 • undefined_getter
+  error • The method 'PostsCompanion' isn't defined for the type 'PostDao' • lib/services/database/daos/post_dao.dart:81:7 • undefined_method
+  error • A value of type 'Future<int>' can't be returned from the method 'updateUserInteraction' because it has a return type of 'Future<bool>' • lib/services/database/daos/post_dao.dart:104:12 • return_of_invalid_type
+  error • The getter 'uri' isn't defined for the type 'Table' • lib/services/database/daos/post_dao.dart:104:43 • undefined_getter
+  error • The method 'PostsCompanion' isn't defined for the type 'PostDao' • lib/services/database/daos/post_dao.dart:105:7 • undefined_method
+  error • A value of type 'Future<int>' can't be returned from the method 'markPostAsRead' because it has a return type of 'Future<bool>' • lib/services/database/daos/post_dao.dart:122:12 • return_of_invalid_type
+  error • The getter 'uri' isn't defined for the type 'Table' • lib/services/database/daos/post_dao.dart:122:43 • undefined_getter
+  error • The name 'PostsCompanion' isn't a class • lib/services/database/daos/post_dao.dart:123:13 • creation_with_non_type
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:137:34 • undefined_getter
+  error • The getter 'indexedAt' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:140:35 • undefined_getter
+  error • The getter 'accountDid' isn't defined for the type 'Table' • lib/services/database/daos/post_dao.dart:151:21 • undefined_getter
+  error • The getter 'indexedAt' isn't defined for the type 'Table' • lib/services/database/daos/post_dao.dart:152:21 • undefined_getter
+  error • The getter 'accountDid' isn't defined for the type 'Table' • lib/services/database/daos/post_dao.dart:160:17 • undefined_getter
+  error • The getter 'fetchedAt' isn't defined for the type 'Table' • lib/services/database/daos/post_dao.dart:161:17 • undefined_getter
+  error • The name 'Post' isn't a type, so it can't be used as a type argument • lib/services/database/daos/post_dao.dart:181:15 • non_type_as_type_argument
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:189:19 • undefined_getter
+  error • The getter 'text' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:189:53 • undefined_getter
+  error • The getter 'indexedAt' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:193:44 • undefined_getter
+  error • The name 'Post' isn't a type, so it can't be used as a type argument • lib/services/database/daos/post_dao.dart:200:15 • non_type_as_type_argument
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:205:28 • undefined_getter
+  error • The getter 'indexedAt' isn't defined for the type 'HasResultSet' • lib/services/database/daos/post_dao.dart:208:44 • undefined_getter
+  error • Undefined class '$PostsTable' • lib/services/database/daos/post_dao.g.dart:7:3 • undefined_class
+  error • The getter 'posts' isn't defined for the type 'AppDatabase' • lib/services/database/daos/post_dao.g.dart:7:45 • undefined_getter
+warning • Unused import: 'package:bluesky/bluesky.dart' • lib/services/database/daos/preferences_dao.dart:5:8 • unused_import
+   info • Parameter 'db' could be a super parameter • lib/services/database/daos/preferences_dao.dart:17:3 • use_super_parameters
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:26:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:30:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:52:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:60:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:77:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:79:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:97:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:112:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:115:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:125:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:127:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:135:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:137:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database/daos/preferences_dao.dart:159:7 • avoid_print
+   info • Parameter 'db' could be a super parameter • lib/services/database/daos/settings_dao.dart:13:3 • use_super_parameters
+  error • The name 'Setting' isn't a type, so it can't be used as a type argument • lib/services/database/daos/settings_dao.dart:16:10 • non_type_as_type_argument
+  error • The getter 'key' isn't defined for the type 'HasResultSet' • lib/services/database/daos/settings_dao.dart:19:17 • undefined_getter
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/settings_dao.dart:21:23 • undefined_getter
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/settings_dao.dart:22:23 • undefined_getter
+  error • The name 'Setting' isn't a type, so it can't be used as a type argument • lib/services/database/daos/settings_dao.dart:28:15 • non_type_as_type_argument
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/settings_dao.dart:31:19 • undefined_getter
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/settings_dao.dart:32:19 • undefined_getter
+  error • Undefined name 'SettingsCompanion' • lib/services/database/daos/settings_dao.dart:45:7 • undefined_identifier
+  error • The getter 'key' isn't defined for the type 'Table' • lib/services/database/daos/settings_dao.dart:111:17 • undefined_getter
+  error • The getter 'accountDid' isn't defined for the type 'Table' • lib/services/database/daos/settings_dao.dart:113:23 • undefined_getter
+  error • The getter 'accountDid' isn't defined for the type 'Table' • lib/services/database/daos/settings_dao.dart:114:23 • undefined_getter
+  error • The getter 'accountDid' isn't defined for the type 'Table' • lib/services/database/daos/settings_dao.dart:123:23 • undefined_getter
+  error • The name 'Setting' isn't a type, so it can't be used as a type argument • lib/services/database/daos/settings_dao.dart:127:10 • non_type_as_type_argument
+  error • The getter 'key' isn't defined for the type 'HasResultSet' • lib/services/database/daos/settings_dao.dart:130:17 • undefined_getter
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/settings_dao.dart:132:23 • undefined_getter
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/settings_dao.dart:133:23 • undefined_getter
+  error • The name 'Setting' isn't a type, so it can't be used as a type argument • lib/services/database/daos/settings_dao.dart:139:15 • non_type_as_type_argument
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/settings_dao.dart:142:19 • undefined_getter
+  error • The getter 'accountDid' isn't defined for the type 'HasResultSet' • lib/services/database/daos/settings_dao.dart:143:19 • undefined_getter
+  error • Undefined class '$SettingsTable' • lib/services/database/daos/settings_dao.g.dart:7:3 • undefined_class
+  error • The getter 'settings' isn't defined for the type 'AppDatabase' • lib/services/database/daos/settings_dao.g.dart:7:51 • undefined_getter
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:37:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:42:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:53:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:54:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:55:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:56:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:60:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:64:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:83:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:85:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:122:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:135:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:162:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:184:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:186:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:188:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:203:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:232:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:242:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:364:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:368:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_oauth_server.dart:369:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:52:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:59:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:65:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:66:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:68:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:71:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:78:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:79:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:90:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:91:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:92:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:93:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:96:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:119:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:124:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:134:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:140:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:141:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:148:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:158:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:167:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:178:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:207:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:220:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:227:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:236:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:253:7 • avoid_print
+warning • The left operand can't be null, so the right operand is never executed • lib/services/oauth_service_v2.dart:279:56 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/services/oauth_service_v2.dart:280:52 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/services/oauth_service_v2.dart:281:48 • dead_null_aware_expression
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:284:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:316:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:323:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:325:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:342:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:356:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:359:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:365:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:375:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:376:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:378:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:383:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:425:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:426:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:427:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/oauth_service_v2.dart:429:7 • avoid_print
+warning • The annotation 'JsonKey.new' can only be used on fields or getters • lib/shared/models/post_models.dart:38:6 • invalid_annotation_target
+warning • The annotation 'JsonKey.new' can only be used on fields or getters • lib/shared/models/post_models.dart:40:6 • invalid_annotation_target
+warning • The annotation 'JsonKey.new' can only be used on fields or getters • lib/shared/models/post_models.dart:41:6 • invalid_annotation_target
+  error • The getter 'value' isn't defined for the type 'Map<String, dynamic>' • lib/shared/models/post_moderation_models.dart:247:31 • undefined_getter
+  error • The getter 'targets' isn't defined for the type 'Map<String, dynamic>' • lib/shared/models/post_moderation_models.dart:248:33 • undefined_getter
+warning • The annotation 'JsonKey.new' can only be used on fields or getters • lib/shared/models/timeline_models.dart:17:6 • invalid_annotation_target
+warning • The annotation 'JsonKey.new' can only be used on fields or getters • lib/shared/models/timeline_models.dart:25:6 • invalid_annotation_target
+warning • The annotation 'JsonKey.new' can only be used on fields or getters • lib/shared/models/timeline_models.dart:27:6 • invalid_annotation_target
+warning • The annotation 'JsonKey.new' can only be used on fields or getters • lib/shared/models/timeline_models.dart:75:6 • invalid_annotation_target
+warning • The annotation 'JsonKey.new' can only be used on fields or getters • lib/shared/models/timeline_models.dart:77:6 • invalid_annotation_target
+   info • Use interpolation to compose strings and values • lib/shared/utils/user_display_utils.dart:82:14 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/shared/widgets/embed/embed_external_widget.dart:341:7 • avoid_print
+warning • The declaration '_buildModeratedImages' isn't referenced • lib/shared/widgets/embed/embed_images_widget.dart:65:10 • unused_element
+warning • The declaration '_buildLoadingPlaceholder' isn't referenced • lib/shared/widgets/embed/embed_images_widget.dart:116:10 • unused_element
+   info • Don't invoke 'print' in production code • lib/shared/widgets/embed/embed_video_widget.dart:64:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/embed/embed_video_widget.dart:97:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/embed/embed_video_widget.dart:136:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/embed/embed_video_widget.dart:139:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/embed/embed_video_widget.dart:168:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/embed/embed_video_widget.dart:173:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/embed/embed_video_widget.dart:179:7 • avoid_print
+warning • The declaration '_buildModeratedVideo' isn't referenced • lib/shared/widgets/embed/embed_video_widget.dart:219:10 • unused_element
+warning • The declaration '_buildLoadingPlaceholder' isn't referenced • lib/shared/widgets/embed/embed_video_widget.dart:252:10 • unused_element
+   info • Don't invoke 'print' in production code • lib/shared/widgets/embed/embed_video_widget.dart:482:7 • avoid_print
+warning • Unused import: 'package:moodesky/core/theme/app_fonts.dart' • lib/shared/widgets/font_demo_widget.dart:10:8 • unused_import
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/language_selector.dart:96:41 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/language_selector.dart:135:39 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/language_selector.dart:162:49 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/language_selector.dart:198:53 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/language_selector.dart:206:49 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/language_selector.dart:211:53 • unnecessary_non_null_assertion
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:145:19 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:152:19 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:165:19 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:172:19 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:354:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:357:7 • avoid_print
+warning • Unnecessary cast • lib/shared/widgets/post_item.dart:403:20 • unnecessary_cast
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:407:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:489:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:495:15 • avoid_print
+warning • The left operand can't be null, so the right operand is never executed • lib/shared/widgets/post_item.dart:514:43 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/shared/widgets/post_item.dart:524:44 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/shared/widgets/post_item.dart:538:42 • dead_null_aware_expression
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:687:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:690:7 • avoid_print
+warning • The declaration '_launchUrl' isn't referenced • lib/shared/widgets/post_item.dart:1013:23 • unused_element
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:1019:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/post_item.dart:1022:7 • avoid_print
+warning • The value of the local variable 'blueskyText' isn't used • lib/shared/widgets/rich_text_widget.dart:59:13 • unused_local_variable
+   info • Don't invoke 'print' in production code • lib/shared/widgets/rich_text_widget.dart:65:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/rich_text_widget.dart:149:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/rich_text_widget.dart:153:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/rich_text_widget.dart:162:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/rich_text_widget.dart:209:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/shared/widgets/rich_text_widget.dart:212:7 • avoid_print
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/theme_selector.dart:85:41 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/theme_selector.dart:121:39 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/theme_selector.dart:134:46 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/theme_selector.dart:160:49 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/theme_selector.dart:189:53 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/theme_selector.dart:197:49 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/theme_selector.dart:202:53 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/theme_selector.dart:210:46 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null • lib/shared/widgets/theme_selector.dart:222:46 • unnecessary_non_null_assertion
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:18:7 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:19:7 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:20:7 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:21:7 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:22:7 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:29:9 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:30:9 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:32:9 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:41:5 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:60:7 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:91:5 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:104:7 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:106:7 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:181:5 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:194:7 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:195:7 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:204:5 • avoid_print
+   info • Don't invoke 'print' in production code • scripts/start_local_metadata_server.dart:212:5 • avoid_print
+  error • Target of URI doesn't exist: 'auth_provider_add_account_test.mocks.dart' • test/core/providers/auth_provider_add_account_test.dart:14:8 • uri_does_not_exist
+  error • Undefined class 'MockBlueskyService' • test/core/providers/auth_provider_add_account_test.dart:20:10 • undefined_class
+  error • Undefined class 'MockAppDatabase' • test/core/providers/auth_provider_add_account_test.dart:21:10 • undefined_class
+warning • The value of the local variable 'mockDatabase' isn't used • test/core/providers/auth_provider_add_account_test.dart:21:26 • unused_local_variable
+  error • The function 'MockBlueskyService' isn't defined • test/core/providers/auth_provider_add_account_test.dart:24:28 • undefined_function
+  error • The function 'MockAppDatabase' isn't defined • test/core/providers/auth_provider_add_account_test.dart:25:22 • undefined_function
+  error • The named parameter 'handle' is required, but there's no corresponding argument • test/core/providers/auth_provider_add_account_test.dart:315:27 • missing_required_argument
+  error • The named parameter 'appPasswordUrl' isn't defined • test/core/providers/auth_provider_add_account_test.dart:431:11 • undefined_named_parameter
+  error • The argument type 'Null' can't be assigned to the parameter type 'String'.  • test/features/auth/screens/add_account_screen_test.dart:160:23 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'String'.  • test/features/auth/screens/add_account_screen_test.dart:161:21 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'ServerConfig'.  • test/features/auth/screens/add_account_screen_test.dart:162:25 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'bool'.  • test/features/auth/screens/add_account_screen_test.dart:163:21 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'ServerConfig'.  • test/features/auth/screens/add_account_screen_test.dart:208:25 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'String'.  • test/features/auth/screens/add_account_screen_test.dart:218:23 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'String'.  • test/features/auth/screens/add_account_screen_test.dart:219:21 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'ServerConfig'.  • test/features/auth/screens/add_account_screen_test.dart:220:25 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'bool'.  • test/features/auth/screens/add_account_screen_test.dart:221:21 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'String'.  • test/features/auth/screens/add_account_screen_test.dart:251:23 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'String'.  • test/features/auth/screens/add_account_screen_test.dart:252:21 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'ServerConfig'.  • test/features/auth/screens/add_account_screen_test.dart:253:25 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'bool'.  • test/features/auth/screens/add_account_screen_test.dart:254:21 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'String'.  • test/features/auth/screens/add_account_screen_test.dart:282:23 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'String'.  • test/features/auth/screens/add_account_screen_test.dart:283:21 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'ServerConfig'.  • test/features/auth/screens/add_account_screen_test.dart:284:25 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'bool'.  • test/features/auth/screens/add_account_screen_test.dart:285:21 • argument_type_not_assignable
+   info • The imported package 'mocktail' isn't a dependency of the importing package • test/services/bluesky_service_preferences_test.dart:6:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:mocktail/mocktail.dart' • test/services/bluesky_service_preferences_test.dart:6:8 • uri_does_not_exist
+  error • Missing concrete implementations of 'class FlutterSecureStorage.containsKey', 'class FlutterSecureStorage.delete', 'class FlutterSecureStorage.deleteAll', 'class FlutterSecureStorage.isCupertinoProtectedDataAvailable', and 14 more • test/services/bluesky_service_preferences_test.dart:15:7 • non_abstract_class_inherits_abstract_member
+  error • Classes can only extend other classes • test/services/bluesky_service_preferences_test.dart:15:40 • extends_non_class
+warning • The value of the local variable 'blueskyService' isn't used • test/services/bluesky_service_preferences_test.dart:19:25 • unused_local_variable
+  error • The method 'test' isn't defined for the type 'AppDatabase' • test/services/bluesky_service_preferences_test.dart:26:30 • undefined_method
+  error • The class 'bsky.Preference' doesn't have an unnamed constructor • test/services/bluesky_service_preferences_test.dart:50:9 • new_with_undefined_constructor_default
+  error • The argument type 'List<Preference>' can't be assigned to the parameter type 'List<Map<String, dynamic>>'.  • test/services/bluesky_service_preferences_test.dart:57:22 • argument_type_not_assignable
+  error • The class 'bsky.Preference' doesn't have an unnamed constructor • test/services/bluesky_service_preferences_test.dart:103:9 • new_with_undefined_constructor_default
+  error • The class 'bsky.Preference' doesn't have an unnamed constructor • test/services/bluesky_service_preferences_test.dart:107:9 • new_with_undefined_constructor_default
+  error • The class 'bsky.Preference' doesn't have an unnamed constructor • test/services/bluesky_service_preferences_test.dart:114:9 • new_with_undefined_constructor_default
+  error • The argument type 'List<Preference>' can't be assigned to the parameter type 'List<Map<String, dynamic>>'.  • test/services/bluesky_service_preferences_test.dart:128:72 • argument_type_not_assignable
+  error • The name 'LabelWarn' isn't a type, so it can't be used as a type argument • test/services/bluesky_service_preferences_test.dart:132:52 • non_type_as_type_argument
+  error • The getter 'value' isn't defined for the type 'Map<String, dynamic>' • test/services/bluesky_service_preferences_test.dart:134:47 • undefined_getter
+warning • The declaration 'test' isn't referenced • test/services/bluesky_service_preferences_test.dart:150:22 • unused_element
+  error • Undefined class 'QueryExecutor' • test/services/bluesky_service_preferences_test.dart:150:27 • undefined_class
+  error • The method 'internal' isn't defined for the type 'AppDatabase' • test/services/bluesky_service_preferences_test.dart:151:24 • undefined_method
+  error • Target of URI doesn't exist: 'bluesky_service_profile_test.mocks.dart' • test/services/bluesky_service_profile_test.dart:13:8 • uri_does_not_exist
+  error • Undefined class 'MockAppDatabase' • test/services/bluesky_service_profile_test.dart:19:10 • undefined_class
+  error • Undefined class 'MockAccountDao' • test/services/bluesky_service_profile_test.dart:20:10 • undefined_class
+  error • The function 'MockAppDatabase' isn't defined • test/services/bluesky_service_profile_test.dart:24:22 • undefined_function
+  error • The function 'MockAccountDao' isn't defined • test/services/bluesky_service_profile_test.dart:25:24 • undefined_function
+  error • The argument type 'MockSecureStorage' can't be assigned to the parameter type 'FlutterSecureStorage'.  • test/services/bluesky_service_profile_test.dart:36:24 • argument_type_not_assignable
+  error • The named parameter 'accountStatus' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:45:29 • missing_required_argument
+  error • The named parameter 'offlineMode' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:45:29 • missing_required_argument
+  error • The named parameter 'syncEnabled' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:45:29 • missing_required_argument
+  error • The named parameter 'tokenType' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:45:29 • missing_required_argument
+  error • The named parameter 'accountStatus' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:135:29 • missing_required_argument
+  error • The named parameter 'offlineMode' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:135:29 • missing_required_argument
+  error • The named parameter 'syncEnabled' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:135:29 • missing_required_argument
+  error • The named parameter 'tokenType' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:135:29 • missing_required_argument
+  error • The named parameter 'accountStatus' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:178:29 • missing_required_argument
+  error • The named parameter 'offlineMode' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:178:29 • missing_required_argument
+  error • The named parameter 'syncEnabled' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:178:29 • missing_required_argument
+  error • The named parameter 'tokenType' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:178:29 • missing_required_argument
+  error • The named parameter 'accountStatus' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:408:33 • missing_required_argument
+  error • The named parameter 'offlineMode' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:408:33 • missing_required_argument
+  error • The named parameter 'syncEnabled' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:408:33 • missing_required_argument
+  error • The named parameter 'tokenType' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:408:33 • missing_required_argument
+  error • The named parameter 'accountStatus' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:432:32 • missing_required_argument
+  error • The named parameter 'offlineMode' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:432:32 • missing_required_argument
+  error • The named parameter 'syncEnabled' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:432:32 • missing_required_argument
+  error • The named parameter 'tokenType' is required, but there's no corresponding argument • test/services/bluesky_service_profile_test.dart:432:32 • missing_required_argument
+  error • The argument type 'Null Function(String, List<UserProfile>)' can't be assigned to the parameter type 'Never Function(String, List<UserProfile>, bool)'.  • test/shared/models/auth_models_test.dart:173:24 • argument_type_not_assignable
+  error • The argument type 'Never Function(String, List<UserProfile>)' can't be assigned to the parameter type 'Null Function(String, List<UserProfile>, bool)'.  • test/shared/models/auth_models_test.dart:197:24 • argument_type_not_assignable
+  error • The named parameter 'handle' is required, but there's no corresponding argument • test/shared/models/auth_models_test.dart:245:27 • missing_required_argument
+  error • The class 'bsky.Preference' doesn't have an unnamed constructor • test/shared/models/preferences_models_test.dart:12:9 • new_with_undefined_constructor_default
+  error • The argument type 'List<Preference>' can't be assigned to the parameter type 'List<Map<String, dynamic>>'.  • test/shared/models/preferences_models_test.dart:19:22 • argument_type_not_assignable
+  error • The class 'bsky.Preference' doesn't have an unnamed constructor • test/shared/models/preferences_models_test.dart:31:9 • new_with_undefined_constructor_default
+  error • The argument type 'List<Preference>' can't be assigned to the parameter type 'List<Map<String, dynamic>>'.  • test/shared/models/preferences_models_test.dart:38:22 • argument_type_not_assignable
+  error • The class 'bsky.Preference' doesn't have an unnamed constructor • test/shared/models/preferences_models_test.dart:55:9 • new_with_undefined_constructor_default
+  error • The class 'bsky.Preference' doesn't have an unnamed constructor • test/shared/models/preferences_models_test.dart:59:9 • new_with_undefined_constructor_default
+  error • The argument type 'List<Preference>' can't be assigned to the parameter type 'List<Map<String, dynamic>>'.  • test/shared/models/preferences_models_test.dart:68:72 • argument_type_not_assignable
+  error • The name 'LabelHide' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:72:50 • non_type_as_type_argument
+  error • The class 'bsky.Preference' doesn't have an unnamed constructor • test/shared/models/preferences_models_test.dart:77:9 • new_with_undefined_constructor_default
+  error • The argument type 'List<Preference>' can't be assigned to the parameter type 'List<Map<String, dynamic>>'.  • test/shared/models/preferences_models_test.dart:87:68 • argument_type_not_assignable
+  error • The name 'LabelHide' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:102:24 • non_type_as_type_argument
+  error • The name 'LabelWarn' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:103:24 • non_type_as_type_argument
+  error • The name 'LabelIgnore' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:104:26 • non_type_as_type_argument
+  error • The name 'LabelHide' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:116:24 • non_type_as_type_argument
+  error • The name 'LabelWarn' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:117:24 • non_type_as_type_argument
+  error • The name 'LabelIgnore' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:118:26 • non_type_as_type_argument
+  error • The name 'ModerationAllow' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:128:25 • non_type_as_type_argument
+  error • The name 'ModerationFilter' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:129:26 • non_type_as_type_argument
+  error • The name 'ModerationBlur' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:130:24 • non_type_as_type_argument
+  error • The name 'ModerationAllow' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:142:25 • non_type_as_type_argument
+  error • The name 'ModerationFilter' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:143:26 • non_type_as_type_argument
+  error • The name 'ModerationBlur' isn't a type, so it can't be used as a type argument • test/shared/models/preferences_models_test.dart:144:24 • non_type_as_type_argument
+warning • Unused import: 'package:flutter/material.dart' • test/shared/widgets/embed_video_widget_test.dart:2:8 • unused_import
+warning • Unused import: 'package:bluesky/bluesky.dart' • test/shared/widgets/embed_video_widget_test.dart:6:8 • unused_import
+warning • Unused import: 'package:flutter/material.dart' • test/shared/widgets/simple_repost_test.dart:2:8 • unused_import
+  error • The name 'moodeSkyApp' isn't a class • test/widget_test.dart:17:35 • creation_with_non_type
+
+618 issues found. (ran in 3.1s)

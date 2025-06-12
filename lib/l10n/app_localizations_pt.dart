@@ -211,6 +211,14 @@ class AppLocalizationsPt extends AppLocalizations {
       'Sair de todas as contas e retornar à tela de login';
 
   @override
+  String loginSuccess(String userName) {
+    return 'Login successful: $userName';
+  }
+
+  @override
+  String get close => 'Close';
+
+  @override
   String get appInformation => 'Informações do App';
 
   @override

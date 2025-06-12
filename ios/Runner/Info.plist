@@ -57,10 +57,10 @@
 		<!-- Custom scheme for OAuth callback -->
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.rmc8.moodesky.oauth</string>
+			<string>moodesky.oauth</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.rmc8.moodesky</string>
+				<string>moodesky</string>
 			</array>
 		</dict>
 		<!-- HTTPS Universal Link for OAuth callback -->
@@ -77,7 +77,7 @@
 	<!-- Associated Domains for Universal Links -->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:moodesky.app</string>
+		<string>applinks:rmc-8.com</string>
 	</array>
 </dict>
 </plist>

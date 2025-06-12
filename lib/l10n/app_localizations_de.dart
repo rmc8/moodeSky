@@ -212,6 +212,14 @@ class AppLocalizationsDe extends AppLocalizations {
       'Von allen Konten abmelden und zum Anmeldebildschirm zurückkehren';
 
   @override
+  String loginSuccess(String userName) {
+    return 'Login successful: $userName';
+  }
+
+  @override
+  String get close => 'Close';
+
+  @override
   String get appInformation => 'App-Informationen';
 
   @override

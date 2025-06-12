@@ -272,4 +272,9 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
         ]))
         .watch();
   }
+
+  // Delete all mock OAuth accounts
+  Future<int> deleteMockOAuthAccounts() {
+    return (delete(accounts)..where((t) => t.did.like('did:plc:oauth_mock_%'))).go();
+  }
 }
