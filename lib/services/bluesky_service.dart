@@ -1087,6 +1087,29 @@ class BlueskyService {
         'BlueskyService: Timeline API response received: ${response.data.feed.length} posts',
       );
 
+      // デバッグ: タイムラインの各投稿をチェック
+      for (int i = 0; i < response.data.feed.length && i < 5; i++) {
+        final feedView = response.data.feed[i];
+        print('BlueskyService DEBUG: Post $i - URI: ${feedView.post.uri}');
+        print('BlueskyService DEBUG: Post $i - Author: ${feedView.post.author.handle}');
+        print('BlueskyService DEBUG: Post $i - Reason: ${feedView.reason}');
+        print('BlueskyService DEBUG: Post $i - Reason Type: ${feedView.reason.runtimeType}');
+        if (feedView.reason != null) {
+          feedView.reason!.when(
+            repost: (repost) {
+              print('BlueskyService DEBUG: Post $i - REPOST by ${repost.by.handle}');
+            },
+            pin: (pin) {
+              print('BlueskyService DEBUG: Post $i - PIN found');
+            },
+            unknown: (data) {
+              print('BlueskyService DEBUG: Post $i - Unknown reason: $data');
+            },
+          );
+        }
+        print('BlueskyService DEBUG: ----');
+      }
+
       // Return both feed data and cursor for proper pagination
       // Create a mutable copy of the feed list to avoid unmodifiable list issues
       return (
@@ -1284,10 +1307,10 @@ class BlueskyService {
       final preferences = await getUserPreferences(accountDid: accountDid);
       if (preferences == null) return false;
 
-      final mutedWords = PreferencesParser.extractModerationPrefs(
+      final moderationPrefs = PreferencesParser.extractModerationPrefs(
         preferences.preferences,
-      ).mutedWords;
-      return ContentModerator.isPostMuted(post, mutedWords);
+      );
+      return ContentModerator.isPostMuted(post, moderationPrefs.nativeMutedWords);
     } catch (e) {
       print('ワードミュートチェックエラー: $e');
       return false;
@@ -1352,6 +1375,246 @@ class BlueskyService {
       print('全設定キャッシュクリアエラー: $e');
     }
   }
+
+  // ========================================
+  // Repost 機能（ネイティブ型のみ使用）
+  // ========================================
+
+  /// リポストを作成（ネイティブ型使用）
+  Future<bool> createRepost({
+    required String accountDid,
+    required bsky.FeedView feedView,
+  }) async {
+    try {
+      final account = await database.accountDao.getAccountByDid(accountDid);
+      if (account == null) {
+        throw Exception('Account not found: $accountDid');
+      }
+
+      final response = await _callAPIWithRetry(() async {
+        final latestAccount = await database.accountDao.getAccountByDid(accountDid);
+        if (latestAccount?.accessJwt == null) {
+          throw Exception('No valid access token for repost');
+        }
+
+        final session = atcore.Session(
+          did: latestAccount!.did,
+          handle: latestAccount.handle,
+          accessJwt: latestAccount.accessJwt!,
+          refreshJwt: latestAccount.refreshJwt ?? '',
+        );
+
+        final client = bsky.Bluesky.fromSession(session);
+        
+        // ネイティブ型で直接リポスト作成
+        return await client.feed.repost(
+          cid: feedView.post.cid,
+          uri: feedView.post.uri,
+        );
+      }, accountDid);
+
+      print('Repost created successfully: ${response.data.uri}');
+      return true;
+    } catch (e) {
+      print('Failed to create repost: $e');
+      return false;
+    }
+  }
+
+  /// リポストを削除（ネイティブ型使用）
+  Future<bool> deleteRepost({
+    required String accountDid,
+    required String repostUri,
+  }) async {
+    try {
+      final account = await database.accountDao.getAccountByDid(accountDid);
+      if (account == null) {
+        throw Exception('Account not found: $accountDid');
+      }
+
+      await _callAPIWithRetry(() async {
+        final latestAccount = await database.accountDao.getAccountByDid(accountDid);
+        if (latestAccount?.accessJwt == null) {
+          throw Exception('No valid access token for delete repost');
+        }
+
+        final session = atcore.Session(
+          did: latestAccount!.did,
+          handle: latestAccount.handle,
+          accessJwt: latestAccount.accessJwt!,
+          refreshJwt: latestAccount.refreshJwt ?? '',
+        );
+
+        final client = bsky.Bluesky.fromSession(session);
+        
+        // リポストURIからrkeyを抽出
+        final uri = atcore.AtUri.parse(repostUri);
+        final rkey = uri.rkey;
+        
+        // ネイティブ型で直接リポスト削除
+        // TODO: Fix deleteRecord API call
+        throw UnimplementedError('deleteRecord API call needs to be fixed');
+        // return await client.atproto.repo.deleteRecord(
+        //   repo: latestAccount.did,
+        //   collection: 'app.bsky.feed.repost',
+        //   rkey: rkey,
+        // );
+      }, accountDid);
+
+      print('Repost deleted successfully: $repostUri');
+      return true;
+    } catch (e) {
+      print('Failed to delete repost: $e');
+      return false;
+    }
+  }
+
+  /// リポスト状態をトグル（ネイティブ型使用）
+  Future<bool> toggleRepost({
+    required String accountDid,
+    required bsky.FeedView feedView,
+  }) async {
+    try {
+      final isCurrentlyReposted = feedView.post.viewer.repost != null;
+      
+      if (isCurrentlyReposted) {
+        // リポスト削除
+        final success = await deleteRepost(
+          accountDid: accountDid,
+          repostUri: feedView.post.viewer.repost!.toString(),
+        );
+        return success ? false : true; // 削除成功時はfalse、失敗時は元の状態を維持
+      } else {
+        // リポスト作成
+        final success = await createRepost(
+          accountDid: accountDid,
+          feedView: feedView,
+        );
+        return success ? true : false; // 作成成功時はtrue、失敗時は元の状態を維持
+      }
+    } catch (e) {
+      print('Failed to toggle repost: $e');
+      return feedView.post.viewer.repost != null; // エラー時は元の状態を返す
+    }
+  }
+
+  /// いいねを作成（ネイティブ型使用）
+  Future<bool> createLike({
+    required String accountDid,
+    required bsky.FeedView feedView,
+  }) async {
+    try {
+      final account = await database.accountDao.getAccountByDid(accountDid);
+      if (account == null) {
+        throw Exception('Account not found: $accountDid');
+      }
+
+      final response = await _callAPIWithRetry(() async {
+        final latestAccount = await database.accountDao.getAccountByDid(accountDid);
+        if (latestAccount?.accessJwt == null) {
+          throw Exception('No valid access token for like');
+        }
+
+        final session = atcore.Session(
+          did: latestAccount!.did,
+          handle: latestAccount.handle,
+          accessJwt: latestAccount.accessJwt!,
+          refreshJwt: latestAccount.refreshJwt ?? '',
+        );
+
+        final client = bsky.Bluesky.fromSession(session);
+        
+        // ネイティブ型で直接いいね作成
+        return await client.feed.like(
+          cid: feedView.post.cid,
+          uri: feedView.post.uri,
+        );
+      }, accountDid);
+
+      print('Like created successfully: ${response.data.uri}');
+      return true;
+    } catch (e) {
+      print('Failed to create like: $e');
+      return false;
+    }
+  }
+
+  /// いいねを削除（ネイティブ型使用）
+  Future<bool> deleteLike({
+    required String accountDid,
+    required String likeUri,
+  }) async {
+    try {
+      final account = await database.accountDao.getAccountByDid(accountDid);
+      if (account == null) {
+        throw Exception('Account not found: $accountDid');
+      }
+
+      await _callAPIWithRetry(() async {
+        final latestAccount = await database.accountDao.getAccountByDid(accountDid);
+        if (latestAccount?.accessJwt == null) {
+          throw Exception('No valid access token for delete like');
+        }
+
+        final session = atcore.Session(
+          did: latestAccount!.did,
+          handle: latestAccount.handle,
+          accessJwt: latestAccount.accessJwt!,
+          refreshJwt: latestAccount.refreshJwt ?? '',
+        );
+
+        final client = bsky.Bluesky.fromSession(session);
+        
+        // いいねURIからrkeyを抽出
+        final uri = atcore.AtUri.parse(likeUri);
+        final rkey = uri.rkey;
+        
+        // ネイティブ型で直接いいね削除
+        // TODO: Fix deleteRecord API call  
+        throw UnimplementedError('deleteRecord API call needs to be fixed');
+        // return await client.atproto.repo.deleteRecord(
+        //   repo: latestAccount.did,
+        //   collection: 'app.bsky.feed.like',
+        //   rkey: rkey,
+        // );
+      }, accountDid);
+
+      print('Like deleted successfully: $likeUri');
+      return true;
+    } catch (e) {
+      print('Failed to delete like: $e');
+      return false;
+    }
+  }
+
+  /// いいね状態をトグル（ネイティブ型使用）
+  Future<bool> toggleLike({
+    required String accountDid,
+    required bsky.FeedView feedView,
+  }) async {
+    try {
+      final isCurrentlyLiked = feedView.post.viewer.like != null;
+      
+      if (isCurrentlyLiked) {
+        // いいね削除
+        final success = await deleteLike(
+          accountDid: accountDid,
+          likeUri: feedView.post.viewer.like!.toString(),
+        );
+        return success ? false : true; // 削除成功時はfalse、失敗時は元の状態を維持
+      } else {
+        // いいね作成
+        final success = await createLike(
+          accountDid: accountDid,
+          feedView: feedView,
+        );
+        return success ? true : false; // 作成成功時はtrue、失敗時は元の状態を維持
+      }
+    } catch (e) {
+      print('Failed to toggle like: $e');
+      return feedView.post.viewer.like != null; // エラー時は元の状態を返す
+    }
+  }
 }
 
 /// コンテンツモデレーション処理クラス
@@ -1372,7 +1635,7 @@ class ContentModerator {
       }
 
       // ワードミュートチェック
-      if (isPostMuted(feedView, moderationPrefs.mutedWords)) {
+      if (isPostMuted(feedView, moderationPrefs.nativeMutedWords)) {
         return const ModerationResult.filter('muted words');
       }
 

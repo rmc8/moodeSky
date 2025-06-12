@@ -69,10 +69,12 @@ class AtprotoVectorizer:
             # Create new collection
             self.client.create_collection(
                 collection_name=self.config.collection_name,
-                vectors_config=models.VectorParams(
-                    size=self.config.embedding_dimensions,
-                    distance=models.Distance.COSINE,
-                ),
+                vectors_config={
+                    "fast-bge-small-en-v1.5": models.VectorParams(
+                        size=self.config.embedding_dimensions,
+                        distance=models.Distance.COSINE,
+                    )
+                },
             )
             
             console.print(f"[green]✓ Created collection '{self.config.collection_name}'[/green]")
@@ -612,7 +614,7 @@ class AtprotoVectorizer:
                         
                         points.append(models.PointStruct(
                             id=point_id,
-                            vector=vector,
+                            vector={"fast-bge-small-en-v1.5": vector},
                             payload=payload
                         ))
                     except Exception as inner_e:

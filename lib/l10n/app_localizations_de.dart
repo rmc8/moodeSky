@@ -165,6 +165,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wählen Sie Ihre bevorzugte Sprache für die App';
 
   @override
+  String repostedBy(String name) {
+    return 'Von $name geteilt';
+  }
+
+  @override
   String get selectLanguage => 'Sprache auswählen';
 
   @override

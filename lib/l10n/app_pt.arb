@@ -48,6 +48,16 @@
   "errorTitle": "Algo deu errado",
   "languageLabel": "Idioma",
   "languageDescription": "Escolha seu idioma preferido para o aplicativo",
+  "repostedBy": "Repostado por {name}",
+  "@repostedBy": {
+    "description": "Exibido quando uma postagem foi repostada por alguém",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "O nome de exibição ou handle do usuário que repostou"
+      }
+    }
+  },
   "selectLanguage": "Selecionar Idioma",
   "languageSettings": "Configurações de Idioma",
   "settingsTitle": "Configurações",

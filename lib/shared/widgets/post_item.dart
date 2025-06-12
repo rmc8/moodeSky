@@ -12,6 +12,8 @@ import 'package:moodesky/core/theme/app_themes.dart';
 import 'package:moodesky/shared/widgets/bluesky_facet_text.dart';
 import 'package:moodesky/shared/widgets/rich_text_widget.dart';
 import 'package:moodesky/shared/widgets/embed/embed_widget.dart';
+import 'package:moodesky/shared/utils/user_display_utils.dart';
+import 'package:moodesky/l10n/app_localizations.dart';
 
 /// ポストアイテムの表示ウィジェット
 class PostItem extends StatelessWidget {
@@ -31,6 +33,9 @@ class PostItem extends StatelessWidget {
   final VoidCallback? onRepost;
   final VoidCallback? onReply;
   final VoidCallback? onTap;
+  // リポスト情報
+  final String? repostedBy;
+  final DateTime? repostedAt;
 
   const PostItem({
     super.key,
@@ -50,6 +55,8 @@ class PostItem extends StatelessWidget {
     this.onRepost,
     this.onReply,
     this.onTap,
+    this.repostedBy,
+    this.repostedAt,
   });
 
   @override
@@ -59,6 +66,9 @@ class PostItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // リポストヘッダー（リポストされた投稿の場合）
+          _buildRepostHeader(context),
+          
           // ユーザー情報行
           Row(
             children: [
@@ -229,6 +239,51 @@ class PostItem extends StatelessWidget {
     );
   }
 
+  /// リポストヘッダーを構築
+  Widget _buildRepostHeader(BuildContext context) {
+    if (repostedBy == null || repostedAt == null) {
+      return const SizedBox.shrink();
+    }
+
+    final l10n = AppLocalizations.of(context);
+    final greyColor = Theme.of(context).brightness == Brightness.light
+        ? const Color(0xFF666666)
+        : const Color(0xFF999999);
+    
+    return Container(
+      padding: const EdgeInsets.only(left: 0, bottom: 12, top: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.repeat,
+            size: 16,
+            color: greyColor,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.repostedBy(repostedBy!),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: greyColor,
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Text(
+            _formatTimestamp(repostedAt!),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: greyColor,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildActionButton({
     required BuildContext context,
     required IconData icon,
@@ -264,6 +319,339 @@ class PostItem extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inMinutes < 1) {
+      return 'now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d';
+    } else {
+      return '${timestamp.month}/${timestamp.day}';
+    }
+  }
+
+  static Future<void> _launchUrl(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        print('Could not launch URL: $url');
+      }
+    } catch (e) {
+      print('Failed to launch URL: $e');
+    }
+  }
+
+  String _formatCount(int count) {
+    if (count < 1000) {
+      return count.toString();
+    } else if (count < 1000000) {
+      final k = count / 1000;
+      if (k == k.round()) {
+        return '${k.round()}K';
+      } else {
+        return '${k.toStringAsFixed(1)}K';
+      }
+    } else {
+      final m = count / 1000000;
+      if (m == m.round()) {
+        return '${m.round()}M';
+      } else {
+        return '${m.toStringAsFixed(1)}M';
+      }
+    }
+  }
+}
+
+/// FeedViewを直接受け取るポストアイテム（ネイティブ型使用）
+class FeedViewPostItem extends StatelessWidget {
+  final bsky.FeedView feedView;
+  final VoidCallback? onLike;
+  final VoidCallback? onRepost;
+  final VoidCallback? onReply;
+  final VoidCallback? onTap;
+
+  const FeedViewPostItem({
+    super.key,
+    required this.feedView,
+    this.onLike,
+    this.onRepost,
+    this.onReply,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final post = feedView.post;
+    final author = post.author;
+    final record = post.record as bsky.PostRecord;
+    
+    // デバッグ: 投稿ごとにリポスト情報をチェック
+    if (feedView.reason != null) {
+      print('DEBUG: Post has reason: ${feedView.reason.runtimeType}');
+    }
+    
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // リポストヘッダー（リポストされた投稿の場合）
+          _buildRepostHeader(context),
+          
+          // ユーザー情報行
+          Row(
+            children: [
+              // アバター
+              CircleAvatar(
+                radius: 20,
+                backgroundImage: author.avatar != null
+                    ? NetworkImage(author.avatar.toString())
+                    : null,
+                child: author.avatar == null
+                    ? Text(
+                        UserDisplayUtils.getDisplayName(author).substring(0, 1).toUpperCase(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      )
+                    : null,
+              ),
+
+              const SizedBox(width: 12),
+
+              // 名前とハンドル
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      UserDisplayUtils.getDisplayName(author),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '@${author.handle}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF424242)
+                            : const Color(0xFFCCCCCC),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+
+              // タイムスタンプ
+              Text(
+                _formatTimestamp(post.indexedAt),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? const Color(0xFF424242)
+                      : const Color(0xFFCCCCCC),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // ポスト内容 - ネイティブfacetsを使用
+          BlueskyFacetText(
+            text: record.text,
+            facets: record.facets ?? [],
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).brightness == Brightness.light
+                  ? const Color(0xFF111111)
+                  : const Color(0xFFF5F5F5),
+              fontWeight: FontWeight.w400,
+            ),
+            onMentionTap: (did) {
+              print('Mention tapped: $did');
+            },
+            onLinkTap: (url) {
+              _launchUrl(url);
+            },
+            onHashtagTap: (tag) {
+              print('Hashtag tapped: #$tag');
+            },
+          ),
+
+          // Embed表示（ネイティブ型）
+          if (post.embed != null) ...[
+            const SizedBox(height: 12),
+            EmbedWidget(embed: post.embed!),
+          ],
+
+          const SizedBox(height: 16),
+
+          // アクションボタン行
+          Row(
+            children: [
+              // リプライ
+              _buildActionButton(
+                context: context,
+                icon: Icons.chat_bubble_outline_rounded,
+                count: post.replyCount ?? 0,
+                onTap: onReply,
+              ),
+
+              const SizedBox(width: 24),
+
+              // リポスト
+              _buildActionButton(
+                context: context,
+                icon: Icons.repeat_rounded,
+                count: post.repostCount ?? 0,
+                isActive: post.viewer.repost != null,
+                activeColor: Theme.of(context).colorScheme.repostColor,
+                onTap: onRepost,
+              ),
+
+              const SizedBox(width: 24),
+
+              // いいね
+              _buildActionButton(
+                context: context,
+                icon: post.viewer.like != null
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+                count: post.likeCount ?? 0,
+                isActive: post.viewer.like != null,
+                activeColor: Theme.of(context).colorScheme.likeColor,
+                onTap: onLike,
+              ),
+
+              const Spacer(),
+
+              // メニュー
+              IconButton(
+                icon: Icon(
+                  Icons.more_horiz_rounded,
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? const Color(0xFF424242)
+                      : const Color(0xFFCCCCCC),
+                ),
+                onPressed: () {
+                  // TODO: メニューを表示
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// リポストヘッダーを構築（ネイティブ型使用）
+  Widget _buildRepostHeader(BuildContext context) {
+    if (feedView.reason == null) {
+      return const SizedBox.shrink();
+    }
+
+    return feedView.reason!.when(
+      repost: (bsky.ReasonRepost repost) {
+        final l10n = AppLocalizations.of(context);
+        final reposterName = UserDisplayUtils.getDisplayName(repost.by);
+        final greyColor = Theme.of(context).brightness == Brightness.light
+            ? const Color(0xFF666666)
+            : const Color(0xFF999999);
+        
+        return Container(
+          padding: const EdgeInsets.only(left: 0, bottom: 12, top: 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.repeat,
+                size: 16,
+                color: greyColor,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.repostedBy(reposterName),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: greyColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Text(
+                _formatTimestamp(repost.indexedAt),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: greyColor,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      pin: (pin) {
+        return const SizedBox.shrink(); // ピン投稿の場合は表示しない
+      },
+      unknown: (data) {
+        return const SizedBox.shrink(); // 不明な理由の場合は表示しない
+      },
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required IconData icon,
+    required int count,
+    bool isActive = false,
+    Color? activeColor,
+    VoidCallback? onTap,
+  }) {
+    final color = isActive && activeColor != null
+        ? activeColor
+        : (Theme.of(context).brightness == Brightness.light
+              ? const Color(0xFF424242)
+              : const Color(0xFFCCCCCC));
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: color,
+            ),
+            if (count > 0) ...[
+              const SizedBox(width: 4),
+              Text(
+                _formatCount(count),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],

@@ -48,6 +48,7 @@
   "errorTitle": "Etwas ist schiefgelaufen",
   "languageLabel": "Sprache",
   "languageDescription": "Wählen Sie Ihre bevorzugte Sprache für die App",
+  "repostedBy": "Von {name} geteilt",
   "selectLanguage": "Sprache auswählen",
   "languageSettings": "Spracheinstellungen",
   "settingsTitle": "Einstellungen",

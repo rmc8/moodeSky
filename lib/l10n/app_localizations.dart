@@ -387,6 +387,12 @@ abstract class AppLocalizations {
   /// **'Choose your preferred language for the app'**
   String get languageDescription;
 
+  /// Displayed when a post has been reposted by someone
+  ///
+  /// In en, this message translates to:
+  /// **'Reposted by {name}'**
+  String repostedBy(String name);
+
   /// Title for language selection dialog
   ///
   /// In en, this message translates to:

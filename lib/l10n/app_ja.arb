@@ -48,6 +48,16 @@
   "errorTitle": "問題が発生しました",
   "languageLabel": "言語",
   "languageDescription": "アプリの言語を選択してください",
+  "repostedBy": "{name}がリポストしました",
+  "@repostedBy": {
+    "description": "Displayed when a post has been reposted by someone",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name or handle of the user who reposted"
+      }
+    }
+  },
   "selectLanguage": "言語を選択",
   "languageSettings": "言語設定",
   "appearanceSettings": "外観設定",

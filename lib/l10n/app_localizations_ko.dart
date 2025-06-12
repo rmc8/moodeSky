@@ -157,6 +157,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get languageDescription => '앱에서 사용할 언어를 선택하세요';
 
   @override
+  String repostedBy(String name) {
+    return '$name님이 리포스트했습니다';
+  }
+
+  @override
   String get selectLanguage => '언어 선택';
 
   @override

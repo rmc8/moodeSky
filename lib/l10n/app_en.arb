@@ -247,6 +247,17 @@
   "@languageDescription": {
     "description": "Description for language selection"
   },
+
+  "repostedBy": "Reposted by {name}",
+  "@repostedBy": {
+    "description": "Displayed when a post has been reposted by someone",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name or handle of the user who reposted"
+      }
+    }
+  },
   
   "selectLanguage": "Select Language",
   "@selectLanguage": {

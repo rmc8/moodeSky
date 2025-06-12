@@ -158,6 +158,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languageDescription => 'アプリの言語を選択してください';
 
   @override
+  String repostedBy(String name) {
+    return '$nameがリポストしました';
+  }
+
+  @override
   String get selectLanguage => '言語を選択';
 
   @override

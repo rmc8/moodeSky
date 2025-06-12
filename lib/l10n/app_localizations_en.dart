@@ -164,6 +164,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose your preferred language for the app';
 
   @override
+  String repostedBy(String name) {
+    return 'Reposted by $name';
+  }
+
+  @override
   String get selectLanguage => 'Select Language';
 
   @override
