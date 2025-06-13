@@ -126,19 +126,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           children: [
                             Text(
                               'moodeSky',
-                              style: context.appTextStyles.headlineLarge.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: context.appColors.primary,
-                              ),
+                              style: context.appTextStyles.headlineLarge
+                                  .copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: context.appColors.primary,
+                                  ),
                             ),
                             if (widget.isReauth) ...[
                               const SizedBox(height: 8),
                               Text(
                                 '再認証',
-                                style: context.appTextStyles.titleMedium.copyWith(
-                                  color: context.appColors.secondary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: context.appTextStyles.titleMedium
+                                    .copyWith(
+                                      color: context.appColors.secondary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ],
                           ],
@@ -162,7 +164,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               color: context.appColors.infoWithOpacity,
                               borderRadius: AppBorderRadius.sm,
                               border: Border.all(
-                                color: context.appColors.info.withValues(alpha: 0.3),
+                                color: context.appColors.info.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                               child: Row(
                                 children: [
@@ -174,10 +178,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   AppSpacing.horizontalSpacerSM,
                                   Expanded(
                                     child: Text(
-                                      AppLocalizations.of(context)!.appPasswordRecommended,
-                                      style: context.appTextStyles.bodySmall.copyWith(
-                                        color: context.appColors.info,
-                                      ),
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.appPasswordRecommended,
+                                      style: context.appTextStyles.bodySmall
+                                          .copyWith(
+                                            color: context.appColors.info,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -311,9 +318,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           labelText: AppLocalizations.of(
                             context,
                           )!.passwordLabel,
-                          hintText: AppLocalizations.of(
-                            context,
-                          )!.passwordHint,
+                          hintText: AppLocalizations.of(context)!.passwordHint,
                           prefixIcon: const Icon(Icons.lock),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -364,17 +369,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                                 AppSpacing.horizontalSpacerSM,
                                 Text(
-                                  AppLocalizations.of(context)!.aboutAppPassword,
-                                  style: context.appTextStyles.labelSmall.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: context.appColors.info,
-                                  ),
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.aboutAppPassword,
+                                  style: context.appTextStyles.labelSmall
+                                      .copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: context.appColors.info,
+                                      ),
                                 ),
                               ],
                             ),
                             AppSpacing.verticalSpacerXS,
                             Text(
-                              AppLocalizations.of(context)!.appPasswordDescription,
+                              AppLocalizations.of(
+                                context,
+                              )!.appPasswordDescription,
                               style: context.appTextStyles.caption,
                             ),
                             AppSpacing.verticalSpacerSM,
@@ -386,7 +396,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       _selectedServer.appPasswordUrl,
                                     ),
                                     action: SnackBarAction(
-                                      label: AppLocalizations.of(context)!.copyButton,
+                                      label: AppLocalizations.of(
+                                        context,
+                                      )!.copyButton,
                                       onPressed: () {
                                         // TODO: URLをクリップボードにコピー
                                       },
@@ -395,7 +407,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 );
                               },
                               child: Text(
-                                AppLocalizations.of(context)!.generateAppPassword,
+                                AppLocalizations.of(
+                                  context,
+                                )!.generateAppPassword,
                                 style: context.appTextStyles.caption.copyWith(
                                   color: context.appColors.info,
                                   decoration: TextDecoration.underline,
@@ -414,9 +428,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         isLoading: _isLoading,
                         width: double.infinity,
                         size: CommonButtonSize.large,
-                        child: Text(
-                          AppLocalizations.of(context)!.signInButton,
-                        ),
+                        child: Text(AppLocalizations.of(context)!.signInButton),
                       ),
 
                       // Error display
@@ -426,8 +438,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           title: AppLocalizations.of(context)!.loginError,
                           message: authState.message,
                           margin: EdgeInsets.zero,
-                          onRetry: authState.errorType == AuthErrorType.networkError
-                              ? () => ref.read(authNotifierProvider.notifier).refresh()
+                          onRetry:
+                              authState.errorType == AuthErrorType.networkError
+                              ? () => ref
+                                    .read(authNotifierProvider.notifier)
+                                    .refresh()
                               : null,
                           retryLabel: AppLocalizations.of(context)!.retryButton,
                         ),

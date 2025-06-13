@@ -151,7 +151,7 @@ class AuthNotifier extends _$AuthNotifier {
     try {
       // BlueskyServiceV2を初期化
       await _blueskyService.initialize();
-      
+
       // アクティブアカウントを取得
       final activeAccount = await _blueskyService.getActiveAccount();
 

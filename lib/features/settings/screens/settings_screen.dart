@@ -18,7 +18,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textStyles = context.appTextStyles;
-    
+
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.settingsTitle)),
       body: ListView(
@@ -101,10 +101,7 @@ class SettingsScreen extends ConsumerWidget {
                   const Divider(),
 
                   ListTile(
-                    leading: Icon(
-                      Icons.logout,
-                      color: context.appColors.error,
-                    ),
+                    leading: Icon(Icons.logout, color: context.appColors.error),
                     title: Text(
                       AppLocalizations.of(context)!.signOutAll,
                       style: TextStyle(

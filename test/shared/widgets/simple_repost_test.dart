@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:flutter_test/flutter_test.dart';
 import 'package:bluesky/bluesky.dart' as bsky;
+import 'package:flutter_test/flutter_test.dart';
 
 // Project imports:
 import 'package:moodesky/shared/utils/user_display_utils.dart';
@@ -46,7 +46,7 @@ void main() {
 
     test('FeedView ネイティブ型が正しく動作する', () {
       final createdAt = DateTime.now();
-      
+
       // 通常投稿のFeedView
       final normalFeedView = bsky.FeedView.fromJson({
         'post': {

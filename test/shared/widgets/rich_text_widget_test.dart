@@ -11,38 +11,36 @@ void main() {
   group('BlueskyRichText', () {
     testWidgets('renders plain text correctly', (WidgetTester tester) async {
       const plainText = 'This is a simple text without any special elements.';
-      
+
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: BlueskyRichText(text: plainText),
-          ),
+          home: Scaffold(body: BlueskyRichText(text: plainText)),
         ),
       );
 
       // RichTextウィジェットが存在することを確認
       expect(find.byType(RichText), findsOneWidget);
-      
+
       // RichTextウィジェット内のテキストを確認
       final richTextWidget = tester.widget<RichText>(find.byType(RichText));
       final TextSpan span = richTextWidget.text as TextSpan;
       expect(span.toPlainText(), equals(plainText));
     });
 
-    testWidgets('creates RichText widget for text with mentions', (WidgetTester tester) async {
+    testWidgets('creates RichText widget for text with mentions', (
+      WidgetTester tester,
+    ) async {
       const textWithMention = 'Hello @user.bsky.social how are you?';
-      
+
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: BlueskyRichText(text: textWithMention),
-          ),
+          home: Scaffold(body: BlueskyRichText(text: textWithMention)),
         ),
       );
 
       // RichTextが存在することを確認
       expect(find.byType(RichText), findsOneWidget);
-      
+
       // テキスト全体が含まれていることを確認
       final richTextWidget = tester.widget<RichText>(find.byType(RichText));
       final TextSpan span = richTextWidget.text as TextSpan;
@@ -51,19 +49,19 @@ void main() {
       expect(span.toPlainText(), contains('how are you?'));
     });
 
-    testWidgets('creates RichText widget for text with URLs', (WidgetTester tester) async {
+    testWidgets('creates RichText widget for text with URLs', (
+      WidgetTester tester,
+    ) async {
       const textWithUrl = 'Check out https://example.com for more info!';
-      
+
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: BlueskyRichText(text: textWithUrl),
-          ),
+          home: Scaffold(body: BlueskyRichText(text: textWithUrl)),
         ),
       );
 
       expect(find.byType(RichText), findsOneWidget);
-      
+
       final richTextWidget = tester.widget<RichText>(find.byType(RichText));
       final TextSpan span = richTextWidget.text as TextSpan;
       expect(span.toPlainText(), contains('Check out'));
@@ -71,19 +69,19 @@ void main() {
       expect(span.toPlainText(), contains('for more info!'));
     });
 
-    testWidgets('creates RichText widget for text with hashtags', (WidgetTester tester) async {
+    testWidgets('creates RichText widget for text with hashtags', (
+      WidgetTester tester,
+    ) async {
       const textWithHashtag = 'This is a test post #flutter #development';
-      
+
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: BlueskyRichText(text: textWithHashtag),
-          ),
+          home: Scaffold(body: BlueskyRichText(text: textWithHashtag)),
         ),
       );
 
       expect(find.byType(RichText), findsOneWidget);
-      
+
       final richTextWidget = tester.widget<RichText>(find.byType(RichText));
       final TextSpan span = richTextWidget.text as TextSpan;
       expect(span.toPlainText(), contains('This is a test post'));
@@ -91,19 +89,20 @@ void main() {
       expect(span.toPlainText(), contains('#development'));
     });
 
-    testWidgets('handles multiple entity types in one text', (WidgetTester tester) async {
-      const complexText = 'Hey @user.bsky.social check out https://flutter.dev #awesome';
-      
+    testWidgets('handles multiple entity types in one text', (
+      WidgetTester tester,
+    ) async {
+      const complexText =
+          'Hey @user.bsky.social check out https://flutter.dev #awesome';
+
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: BlueskyRichText(text: complexText),
-          ),
+          home: Scaffold(body: BlueskyRichText(text: complexText)),
         ),
       );
 
       expect(find.byType(RichText), findsOneWidget);
-      
+
       final richTextWidget = tester.widget<RichText>(find.byType(RichText));
       final TextSpan span = richTextWidget.text as TextSpan;
       expect(span.toPlainText(), contains('Hey'));
@@ -115,46 +114,45 @@ void main() {
     testWidgets('handles empty text gracefully', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: BlueskyRichText(text: ''),
-          ),
+          home: Scaffold(body: BlueskyRichText(text: '')),
         ),
       );
 
       expect(find.byType(RichText), findsOneWidget);
     });
 
-    testWidgets('applies custom text styles correctly', (WidgetTester tester) async {
+    testWidgets('applies custom text styles correctly', (
+      WidgetTester tester,
+    ) async {
       const testText = 'Custom styled text';
       const customStyle = TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
         color: Colors.red,
       );
-      
+
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: BlueskyRichText(
-              text: testText,
-              style: customStyle,
-            ),
+            body: BlueskyRichText(text: testText, style: customStyle),
           ),
         ),
       );
 
       expect(find.byType(RichText), findsOneWidget);
-      
+
       // RichTextウィジェットを取得してスタイルを確認
       final richTextWidget = tester.widget<RichText>(find.byType(RichText));
       final textStyle = richTextWidget.text.style;
-      
+
       expect(textStyle?.fontSize, equals(20));
       expect(textStyle?.fontWeight, equals(FontWeight.bold));
       expect(textStyle?.color, equals(Colors.red));
     });
 
-    testWidgets('handles text alignment correctly', (WidgetTester tester) async {
+    testWidgets('handles text alignment correctly', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -175,7 +173,8 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: BlueskyRichText(
-              text: 'This is a very long text that should be limited to max lines',
+              text:
+                  'This is a very long text that should be limited to max lines',
               maxLines: 2,
             ),
           ),
@@ -218,23 +217,25 @@ void main() {
 
       // ウィジェットが作成されることを確認
       expect(find.byType(BlueskyRichText), findsOneWidget);
-      
+
       // コールバック関数が設定されていることを確認（タップは実際のUIテストでテストするため、ここでは存在確認のみ）
-      final widget = tester.widget<BlueskyRichText>(find.byType(BlueskyRichText));
+      final widget = tester.widget<BlueskyRichText>(
+        find.byType(BlueskyRichText),
+      );
       expect(widget.onMentionTap, isNotNull);
       expect(widget.onHashtagTap, isNotNull);
       expect(widget.onLinkTap, isNotNull);
     });
 
-    testWidgets('handles processing errors gracefully', (WidgetTester tester) async {
+    testWidgets('handles processing errors gracefully', (
+      WidgetTester tester,
+    ) async {
       // 不正なテキストでも正常にフォールバックすることを確認
       const problematicText = 'Some text that might cause issues';
-      
+
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: BlueskyRichText(text: problematicText),
-          ),
+          home: Scaffold(body: BlueskyRichText(text: problematicText)),
         ),
       );
 

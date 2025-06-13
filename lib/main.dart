@@ -123,7 +123,7 @@ class AppRouter extends ConsumerWidget {
               (account) => account.did == activeAccountDid,
               orElse: () => accounts.first,
             );
-            
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -143,14 +143,14 @@ class AppRouter extends ConsumerWidget {
                 ),
               ),
             );
-            
+
             // フラグをリセット（重複表示防止）
             Future.delayed(const Duration(seconds: 1), () {
               ref.read(authNotifierProvider.notifier).clearNewLoginFlag();
             });
           });
         }
-        
+
         return const HomeScreen();
       },
       unauthenticated: () => const LoginScreen(),

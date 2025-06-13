@@ -572,36 +572,36 @@ extension BlueskyTextColors on ColorScheme {
   /// メンション（@username）のカラー - プライマリーカラーを使用
   /// ライトテーマ: 空の青 #2196F3, ダークテーマ: 夕焼けオレンジ #FF7043
   Color get mentionColor => primary;
-  
+
   /// ハッシュタグ（#hashtag）のカラー - ターシャリーカラーを使用
   /// ライトテーマ: ライトブルー #4FC3F7, ダークテーマ: ディープオレンジ #FFAB91
   Color get hashtagColor => tertiary;
-  
+
   /// URL（https://...）のカラー - セカンダリーカラーを使用
   /// ライトテーマ: 明るい青 #64B5F6, ダークテーマ: 明るいオレンジ #FF8A65
   Color get urlColor => secondary;
-  
+
   /// メンションのホバー/アクティブ状態のカラー
   Color get mentionActiveColor => primaryContainer;
-  
+
   /// ハッシュタグのホバー/アクティブ状態のカラー
   Color get hashtagActiveColor => tertiaryContainer;
-  
+
   /// URLのホバー/アクティブ状態のカラー
   Color get urlActiveColor => secondaryContainer;
-  
+
   /// 高コントラスト版のメンションカラー（可読性重視）
-  Color get mentionColorHighContrast => brightness == Brightness.light 
-    ? const Color(0xFF1565C0) // より濃い青
-    : const Color(0xFFFF8A65); // より明るいオレンジ
-    
+  Color get mentionColorHighContrast => brightness == Brightness.light
+      ? const Color(0xFF1565C0) // より濃い青
+      : const Color(0xFFFF8A65); // より明るいオレンジ
+
   /// 高コントラスト版のハッシュタグカラー（可読性重視）
   Color get hashtagColorHighContrast => brightness == Brightness.light
-    ? const Color(0xFF0277BD) // より濃いライトブルー
-    : const Color(0xFFFFCC80); // より明るいディープオレンジ
-    
+      ? const Color(0xFF0277BD) // より濃いライトブルー
+      : const Color(0xFFFFCC80); // より明るいディープオレンジ
+
   /// 高コントラスト版のURLカラー（可読性重視）
   Color get urlColorHighContrast => brightness == Brightness.light
-    ? const Color(0xFF1976D2) // より濃い青
-    : const Color(0xFFFFB74D); // より明るいオレンジ
+      ? const Color(0xFF1976D2) // より濃い青
+      : const Color(0xFFFFB74D); // より明るいオレンジ
 }

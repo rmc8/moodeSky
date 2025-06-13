@@ -4,7 +4,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'auth_models.freezed.dart';
 part 'auth_models.g.dart';
 
-
 // App Password session data model
 @freezed
 class AppPasswordSessionData with _$AppPasswordSessionData {

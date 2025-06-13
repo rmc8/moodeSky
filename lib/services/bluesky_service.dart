@@ -6,6 +6,8 @@ export 'package:moodesky/services/bluesky/index.dart';
 
 // 後方互換性のための型エイリアス
 // これにより既存のコードを破綻させることなく新しいアーキテクチャに移行可能
+
+// Project imports:
 import 'package:moodesky/services/bluesky/bluesky_service_v2.dart';
 
 typedef BlueskyService = BlueskyServiceV2;

@@ -144,10 +144,11 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                               AppSpacing.horizontalSpacerSM,
                               Text(
                                 AppLocalizations.of(context)!.newAccountInfo,
-                                style: context.appTextStyles.titleMedium.copyWith(
-                                  color: context.appColors.info,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: context.appTextStyles.titleMedium
+                                    .copyWith(
+                                      color: context.appColors.info,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             ],
                           ),
@@ -176,11 +177,14 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                               ),
                               AppSpacing.horizontalSpacerSM,
                               Text(
-                                AppLocalizations.of(context)!.authMethodAppPassword,
-                                style: context.appTextStyles.titleMedium.copyWith(
-                                  color: context.appColors.info,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                AppLocalizations.of(
+                                  context,
+                                )!.authMethodAppPassword,
+                                style: context.appTextStyles.titleMedium
+                                    .copyWith(
+                                      color: context.appColors.info,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             ],
                           ),
@@ -191,7 +195,9 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                             color: context.appColors.infoWithOpacity,
                             borderRadius: AppBorderRadius.sm,
                             border: Border.all(
-                              color: context.appColors.info.withValues(alpha: 0.3),
+                              color: context.appColors.info.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
                             child: Row(
                               children: [
@@ -203,10 +209,13 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                                 AppSpacing.horizontalSpacerSM,
                                 Expanded(
                                   child: Text(
-                                    AppLocalizations.of(context)!.appPasswordRecommended,
-                                    style: context.appTextStyles.bodySmall.copyWith(
-                                      color: context.appColors.info,
-                                    ),
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.appPasswordRecommended,
+                                    style: context.appTextStyles.bodySmall
+                                        .copyWith(
+                                          color: context.appColors.info,
+                                        ),
                                   ),
                                 ),
                               ],
@@ -306,104 +315,103 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
 
                     // Password field
                     const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(
-                            context,
-                          )!.passwordLabel,
-                          hintText: AppLocalizations.of(context)!.passwordHint,
-                          prefixIcon: const Icon(Icons.lock),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                            ),
-                            onPressed: () {
-                              setState(
-                                () => _obscurePassword = !_obscurePassword,
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.passwordLabel,
+                        hintText: AppLocalizations.of(context)!.passwordHint,
+                        prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            );
+                          },
+                        ),
+                        border: const OutlineInputBorder(),
+                      ),
+                      obscureText: _obscurePassword,
+                      textInputAction: TextInputAction.done,
+                      validator: (value) {
+                        if (value?.trim().isEmpty ?? true) {
+                          return AppLocalizations.of(context)!.passwordRequired;
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // App Password help
+                    CommonContainer(
+                      style: CommonContainerStyle.none,
+                      padding: AppSpacing.paddingMD,
+                      color: context.appColors.infoWithOpacity,
+                      borderRadius: AppBorderRadius.sm,
+                      border: Border.all(
+                        color: context.appColors.info.withValues(alpha: 0.3),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.info,
+                                color: context.appColors.info,
+                                size: 16,
+                              ),
+                              AppSpacing.horizontalSpacerSM,
+                              Text(
+                                AppLocalizations.of(context)!.aboutAppPassword,
+                                style: context.appTextStyles.labelSmall
+                                    .copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: context.appColors.info,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          AppSpacing.verticalSpacerXS,
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.appPasswordDescription,
+                            style: context.appTextStyles.caption,
+                          ),
+                          AppSpacing.verticalSpacerSM,
+                          InkWell(
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(_selectedServer.appPasswordUrl),
+                                  action: SnackBarAction(
+                                    label: AppLocalizations.of(
+                                      context,
+                                    )!.copyButton,
+                                    onPressed: () {
+                                      // TODO: URLをクリップボードにコピー
+                                    },
+                                  ),
+                                ),
                               );
                             },
-                          ),
-                          border: const OutlineInputBorder(),
-                        ),
-                        obscureText: _obscurePassword,
-                        textInputAction: TextInputAction.done,
-                        validator: (value) {
-                          if (value?.trim().isEmpty ?? true) {
-                            return AppLocalizations.of(
-                              context,
-                            )!.passwordRequired;
-                          }
-                          return null;
-                        },
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // App Password help
-                      CommonContainer(
-                        style: CommonContainerStyle.none,
-                        padding: AppSpacing.paddingMD,
-                        color: context.appColors.infoWithOpacity,
-                        borderRadius: AppBorderRadius.sm,
-                        border: Border.all(
-                          color: context.appColors.info.withValues(alpha: 0.3),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.info,
-                                  color: context.appColors.info,
-                                  size: 16,
-                                ),
-                                AppSpacing.horizontalSpacerSM,
-                                Text(
-                                  AppLocalizations.of(context)!.aboutAppPassword,
-                                  style: context.appTextStyles.labelSmall.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: context.appColors.info,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            AppSpacing.verticalSpacerXS,
-                            Text(
-                              AppLocalizations.of(context)!.appPasswordDescription,
-                              style: context.appTextStyles.caption,
-                            ),
-                            AppSpacing.verticalSpacerSM,
-                            InkWell(
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      _selectedServer.appPasswordUrl,
-                                    ),
-                                    action: SnackBarAction(
-                                      label: AppLocalizations.of(context)!.copyButton,
-                                      onPressed: () {
-                                        // TODO: URLをクリップボードにコピー
-                                      },
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                AppLocalizations.of(context)!.generateAppPassword,
-                                style: context.appTextStyles.caption.copyWith(
-                                  color: context.appColors.info,
-                                  decoration: TextDecoration.underline,
-                                ),
+                            child: Text(
+                              AppLocalizations.of(context)!.generateAppPassword,
+                              style: context.appTextStyles.caption.copyWith(
+                                color: context.appColors.info,
+                                decoration: TextDecoration.underline,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
+                    ),
 
                     const SizedBox(height: 24),
 
@@ -413,7 +421,9 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                       isLoading: _isLoading,
                       width: double.infinity,
                       size: CommonButtonSize.large,
-                      child: Text(AppLocalizations.of(context)!.addAccountButton),
+                      child: Text(
+                        AppLocalizations.of(context)!.addAccountButton,
+                      ),
                     ),
 
                     // Error display

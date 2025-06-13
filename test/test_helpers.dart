@@ -1,5 +1,7 @@
-// Package imports:
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -218,7 +220,7 @@ class MockAuthNotifier extends Mock implements AuthNotifier {
     // 成功パターン
     if (credentials.identifier.isNotEmpty &&
         // (credentials.method == AuthMethod.oauth || // TODO: AuthMethod.oauthが存在しない
-            credentials.password.isNotEmpty) {
+        credentials.password.isNotEmpty) {
       return true;
     }
 

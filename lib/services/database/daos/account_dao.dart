@@ -60,21 +60,23 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
 
       // Check if account with this DID already exists
       final existingAccountByDid = await getAccountByDid(did);
-      
+
       if (existingAccountByDid != null) {
         // Update existing account by DID
-        final updatedRows = await (update(accounts)..where((t) => t.did.equals(did)))
-            .write(account.copyWith(id: const Value.absent()));
+        final updatedRows =
+            await (update(accounts)..where((t) => t.did.equals(did))).write(
+              account.copyWith(id: const Value.absent()),
+            );
         return updatedRows;
       } else if (handle != null) {
         // Check if an account with the same handle but different DID exists
         final existingAccountByHandle = await getAccountByHandle(handle);
-        
+
         if (existingAccountByHandle != null) {
           // Remove the old account with same handle but different DID
           await (delete(accounts)..where((t) => t.handle.equals(handle))).go();
         }
-        
+
         // Insert new account
         return await into(accounts).insert(account);
       } else {
@@ -275,32 +277,30 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
 
   // Delete all mock OAuth accounts
   Future<int> deleteMockOAuthAccounts() {
-    return (delete(accounts)..where((t) => t.did.like('did:plc:oauth_mock_%'))).go();
+    return (delete(
+      accounts,
+    )..where((t) => t.did.like('did:plc:oauth_mock_%'))).go();
   }
 
   // Alias methods for backward compatibility
   Future<Account?> getAccount(String did) => getAccountByDid(did);
-  
+
   Future<void> setAllAccountsInactive() async {
-    await (update(accounts)).write(
-      const AccountsCompanion(
-        isActive: Value(false),
-      ),
-    );
+    await (update(
+      accounts,
+    )).write(const AccountsCompanion(isActive: Value(false)));
   }
-  
+
   Future<void> setAccountActive(String did) async {
     await setActiveAccount(did);
   }
-  
+
   Future<void> setAccountInactive(String did) async {
     await (update(accounts)..where((t) => t.did.equals(did))).write(
-      const AccountsCompanion(
-        isActive: Value(false),
-      ),
+      const AccountsCompanion(isActive: Value(false)),
     );
   }
-  
+
   Future<void> deleteAllAccounts() async {
     await delete(accounts).go();
   }

@@ -7,10 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:moodesky/core/providers/deck_provider.dart';
 import 'package:moodesky/core/theme/app_themes.dart';
+import 'package:moodesky/features/home/widgets/deck_layout/deck_utils.dart';
+import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/services/database/database.dart';
 import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
-import 'package:moodesky/l10n/app_localizations.dart';
-import 'package:moodesky/features/home/widgets/deck_layout/deck_utils.dart';
 
 /// デッキアイテムの基本レイアウト - PostItemと統一されたデザイン
 class DeckItem extends ConsumerWidget {
@@ -42,7 +42,7 @@ class DeckItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textStyles = context.appTextStyles;
-    
+
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -111,7 +111,8 @@ class DeckItem extends ConsumerWidget {
           ),
 
           // アクションボタンまたはメニューボタンがある場合のみスペースを追加
-          if ((actionButtons != null && actionButtons!.isNotEmpty) || deck != null) ...[
+          if ((actionButtons != null && actionButtons!.isNotEmpty) ||
+              deck != null) ...[
             const SizedBox(height: 16),
 
             // アクションボタン行（メニューボタンを常に含む）
@@ -136,23 +137,29 @@ class DeckItem extends ConsumerWidget {
                           : const Color(0xFFCCCCCC),
                     ),
                     onSelected: (value) async {
-                      debugPrint('🔽 DeckItem menu selected: $value for deck: ${deck!.title}');
-                      
+                      debugPrint(
+                        '🔽 DeckItem menu selected: $value for deck: ${deck!.title}',
+                      );
+
                       // 現在のデッキリストから正確なインデックスを取得
                       final decksAsync = ref.read(decksStreamProvider);
                       final decks = decksAsync.valueOrNull ?? [];
-                      final currentIndex = decks.indexWhere((d) => d.deckId == deck!.deckId);
-                      
-                      debugPrint('🔽 Current deck index: $currentIndex, total decks: ${decks.length}');
-                      
+                      final currentIndex = decks.indexWhere(
+                        (d) => d.deckId == deck!.deckId,
+                      );
+
+                      debugPrint(
+                        '🔽 Current deck index: $currentIndex, total decks: ${decks.length}',
+                      );
+
                       // DeckUtilsで統一された処理を使用
                       await DeckUtils.handleDeckMenuAction(
-                        context, 
-                        ref, 
-                        value, 
-                        deck!, 
+                        context,
+                        ref,
+                        value,
+                        deck!,
                         currentIndex >= 0 ? currentIndex : 0,
-                        decks.length
+                        decks.length,
                       );
                       debugPrint('🔽 DeckItem menu action completed: $value');
                     },
@@ -160,12 +167,14 @@ class DeckItem extends ConsumerWidget {
                       // メニュー構築時も正確なインデックスを使用
                       final decksAsync = ref.read(decksStreamProvider);
                       final decks = decksAsync.valueOrNull ?? [];
-                      final currentIndex = decks.indexWhere((d) => d.deckId == deck!.deckId);
-                      
+                      final currentIndex = decks.indexWhere(
+                        (d) => d.deckId == deck!.deckId,
+                      );
+
                       return DeckUtils.buildDeckMenuItems(
-                        context, 
+                        context,
                         currentIndex >= 0 ? currentIndex : 0,
-                        decks.length
+                        decks.length,
                       );
                     },
                   ),

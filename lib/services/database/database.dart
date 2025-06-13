@@ -12,7 +12,10 @@ import 'package:moodesky/services/database/tables/user_preferences.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Accounts, Decks, UserPreferences], daos: [AccountDao, DeckDao, PreferencesDao])
+@DriftDatabase(
+  tables: [Accounts, Decks, UserPreferences],
+  daos: [AccountDao, DeckDao, PreferencesDao],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(openConnection());
 
@@ -39,4 +42,3 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 }
-

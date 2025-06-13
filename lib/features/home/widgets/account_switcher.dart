@@ -14,7 +14,7 @@ import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
 import 'package:moodesky/shared/widgets/optimized/optimized_account_tile.dart';
 
 /// 🚀 パフォーマンス最適化済みアカウントスイッチャー
-/// 
+///
 /// 部分監視により不必要なWidget再構築を約70%削減
 class AccountSwitcher extends ConsumerWidget {
   const AccountSwitcher({super.key});
@@ -37,7 +37,9 @@ class AccountSwitcher extends ConsumerWidget {
             children: [
               Text(
                 AppLocalizations.of(context)!.switchAccount,
-                style: context.textStyles.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: context.textStyles.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const Spacer(),
               IconButton(
@@ -64,16 +66,18 @@ class AccountSwitcher extends ConsumerWidget {
             const SizedBox(height: 8),
             ...availableAccountsInfo
                 .where((account) => account.did != activeAccountInfo?.did)
-                .map((account) => OptimizedAccountTile(
-                      accountInfo: account,
-                      isActive: false,
-                      onTap: () async {
-                        Navigator.of(context).pop();
-                        await ref
-                            .read(authNotifierProvider.notifier)
-                            .switchAccount(account.did);
-                      },
-                    )),
+                .map(
+                  (account) => OptimizedAccountTile(
+                    accountInfo: account,
+                    isActive: false,
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                      await ref
+                          .read(authNotifierProvider.notifier)
+                          .switchAccount(account.did);
+                    },
+                  ),
+                ),
           ],
 
           const SizedBox(height: 16),

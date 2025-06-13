@@ -12,10 +12,7 @@ import 'package:moodesky/l10n/app_localizations.dart';
 class AddDeckDialog extends ConsumerStatefulWidget {
   final Function(int)? onDeckCreated; // 新しいデッキのインデックスを渡すコールバック
 
-  const AddDeckDialog({
-    super.key,
-    this.onDeckCreated,
-  });
+  const AddDeckDialog({super.key, this.onDeckCreated});
 
   @override
   ConsumerState<AddDeckDialog> createState() => _AddDeckDialogState();
@@ -270,12 +267,12 @@ class _AddDeckDialogState extends ConsumerState<AddDeckDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        
+
         // デッキリストの更新を少し待ってからコールバック実行
         Future.delayed(const Duration(milliseconds: 50), () {
           widget.onDeckCreated?.call(newDeckIndex);
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
