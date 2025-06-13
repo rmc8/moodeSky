@@ -83,6 +83,9 @@ dependencies:
   # Text Processing
   bluesky_text: ^0.7.2
 
+  # Infinite Scroll & Pagination
+  infinite_scroll_pagination: ^4.0.0
+
   # Serialization
   freezed_annotation: ^2.4.4
   json_annotation: ^4.8.1

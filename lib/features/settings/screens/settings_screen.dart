@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/core/theme/app_themes.dart';
 import 'package:moodesky/features/settings/screens/account_management_screen.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
@@ -101,12 +102,15 @@ class SettingsScreen extends ConsumerWidget {
                   const Divider(),
 
                   ListTile(
-                    leading: Icon(Icons.logout, color: context.appColors.error),
+                    leading: Icon(
+                      Icons.logout, 
+                      color: Theme.of(context).colorScheme.strongErrorColor,
+                    ),
                     title: Text(
                       AppLocalizations.of(context)!.signOutAll,
                       style: TextStyle(
-                        color: context.appColors.error,
-                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.strongErrorColor,
+                        fontWeight: FontWeight.w600, // フォントウェイトも少し上げる
                       ),
                     ),
                     subtitle: Text(
@@ -242,6 +246,10 @@ class SettingsScreen extends ConsumerWidget {
               Navigator.of(context).pop();
               await ref.read(authNotifierProvider.notifier).signOutAll();
             },
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.strongErrorColor,
+              foregroundColor: Colors.white,
+            ),
             child: Text(AppLocalizations.of(context)!.signOutButton),
           ),
         ],

@@ -573,22 +573,22 @@ extension BlueskyTextColors on ColorScheme {
   /// ライトテーマ: 空の青 #2196F3, ダークテーマ: 夕焼けオレンジ #FF7043
   Color get mentionColor => primary;
 
-  /// ハッシュタグ（#hashtag）のカラー - ターシャリーカラーを使用
-  /// ライトテーマ: ライトブルー #4FC3F7, ダークテーマ: ディープオレンジ #FFAB91
-  Color get hashtagColor => tertiary;
+  /// ハッシュタグ（#hashtag）のカラー - プライマリーカラーを使用（統一性のため）
+  /// ライトテーマ: 空の青 #2196F3, ダークテーマ: 夕焼けオレンジ #FF7043
+  Color get hashtagColor => primary;
 
-  /// URL（https://...）のカラー - セカンダリーカラーを使用
-  /// ライトテーマ: 明るい青 #64B5F6, ダークテーマ: 明るいオレンジ #FF8A65
-  Color get urlColor => secondary;
+  /// URL（https://...）のカラー - プライマリーカラーを使用（統一性のため）
+  /// ライトテーマ: 空の青 #2196F3, ダークテーマ: 夕焼けオレンジ #FF7043
+  Color get urlColor => primary;
 
   /// メンションのホバー/アクティブ状態のカラー
   Color get mentionActiveColor => primaryContainer;
 
   /// ハッシュタグのホバー/アクティブ状態のカラー
-  Color get hashtagActiveColor => tertiaryContainer;
+  Color get hashtagActiveColor => primaryContainer;
 
   /// URLのホバー/アクティブ状態のカラー
-  Color get urlActiveColor => secondaryContainer;
+  Color get urlActiveColor => primaryContainer;
 
   /// 高コントラスト版のメンションカラー（可読性重視）
   Color get mentionColorHighContrast => brightness == Brightness.light
@@ -597,11 +597,20 @@ extension BlueskyTextColors on ColorScheme {
 
   /// 高コントラスト版のハッシュタグカラー（可読性重視）
   Color get hashtagColorHighContrast => brightness == Brightness.light
-      ? const Color(0xFF0277BD) // より濃いライトブルー
-      : const Color(0xFFFFCC80); // より明るいディープオレンジ
+      ? const Color(0xFF1565C0) // より濃い青（統一）
+      : const Color(0xFFFF8A65); // より明るいオレンジ（統一）
 
   /// 高コントラスト版のURLカラー（可読性重視）
   Color get urlColorHighContrast => brightness == Brightness.light
-      ? const Color(0xFF1976D2) // より濃い青
-      : const Color(0xFFFFB74D); // より明るいオレンジ
+      ? const Color(0xFF1565C0) // より濃い青（統一）
+      : const Color(0xFFFF8A65); // より明るいオレンジ（統一）
+}
+
+/// 危険なアクション（サインアウト・削除）用のカラー拡張
+extension DangerousActionColors on ColorScheme {
+  /// 強化されたエラーカラー（サインアウト・削除用）
+  /// ライトテーマ: より強い赤 #D32F2F, ダークテーマ: より明るい赤 #FF5252
+  Color get strongErrorColor => brightness == Brightness.light
+      ? const Color(0xFFD32F2F) // Material Red 700
+      : const Color(0xFFFF5252); // Material Red 400
 }
