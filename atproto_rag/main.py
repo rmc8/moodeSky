@@ -542,6 +542,254 @@ def status(
         raise typer.Exit(1)
 
 
+@app.command("vector-all")
+def vector_all(
+    qdrant_url: str = typer.Option(
+        "http://localhost:6333",
+        "--qdrant-url", "-q",
+        help="Qdrant server URL"
+    ),
+    embedding_model: str = typer.Option(
+        "BAAI/bge-small-en-v1.5",
+        "--model", "-m",
+        help="FastEmbed model (BAAI/bge-small-en-v1.5, BAAI/bge-base-en-v1.5)"
+    ),
+    batch_size: int = typer.Option(
+        100,
+        "--batch-size", "-b",
+        help="Batch size for embedding requests"
+    ),
+    include_tests: bool = typer.Option(
+        False,
+        "--include-tests",
+        help="Include test files in vectorization"
+    ),
+    include_generated: bool = typer.Option(
+        False,
+        "--include-generated",
+        help="Include generated files (.g.dart) in vectorization"
+    ),
+    force_update: bool = typer.Option(
+        False,
+        "--force-update", "-f",
+        help="Force update even if repository exists"
+    ),
+    skip_flutter: bool = typer.Option(
+        False,
+        "--skip-flutter",
+        help="Skip Flutter official documentation vectorization"
+    ),
+    skip_atproto: bool = typer.Option(
+        False,
+        "--skip-atproto",
+        help="Skip atproto-dart vectorization"
+    ),
+    skip_moode: bool = typer.Option(
+        False,
+        "--skip-moode",
+        help="Skip moodeSky project vectorization"
+    ),
+    flutter_dir: Optional[Path] = typer.Option(
+        None,
+        "--flutter-dir",
+        help="Path to Flutter project directory (defaults to parent directory)"
+    ),
+):
+    """
+    Vectorize all three repositories: Flutter docs, atproto-dart, and moodeSky project.
+    
+    This command will sequentially:
+    1. Vectorize Flutter official documentation (collection: flutter-docs)
+    2. Vectorize atproto-dart repository (collection: atproto-dart)
+    3. Vectorize moodeSky Flutter project (collection: moodeSky)
+    """
+    
+    import time
+    start_time = time.time()
+    
+    console.print("[bold blue]🚀 Starting comprehensive vectorization process[/bold blue]")
+    console.print()
+    
+    # Setup paths
+    if flutter_dir is None:
+        flutter_dir = Path.cwd().parent
+    
+    # Verify Flutter project directory exists
+    if not skip_moode:
+        pubspec_path = flutter_dir / "pubspec.yaml"
+        if not pubspec_path.exists():
+            console.print(f"[red]✗ Flutter project not found at: {flutter_dir}[/red]")
+            console.print("[yellow]Use --skip-moode to skip Flutter project vectorization[/yellow]")
+            raise typer.Exit(1)
+    
+    stats_summary = []
+    
+    # Step 1: Flutter Documentation
+    if not skip_flutter:
+        console.print("[bold cyan]Step 1: Vectorizing Flutter Official Documentation[/bold cyan]")
+        step_start = time.time()
+        
+        try:
+            config = VectorizationConfig(
+                qdrant_url=qdrant_url,
+                collection_name="flutter-docs",
+                embedding_model=embedding_model,
+                batch_size=batch_size,
+                include_tests=include_tests,
+                include_generated=include_generated
+            )
+            
+            vectorizer = AtprotoVectorizer(config)
+            clone_dir = DEFAULT_CLONE_DIR
+            clone_dir.mkdir(parents=True, exist_ok=True)
+            target_path = clone_dir / "website"
+            
+            stats = asyncio.run(vectorizer.run_full_process(FLUTTER_DOCS_URL, target_path))
+            
+            step_duration = time.time() - step_start
+            stats_summary.append({
+                "name": "Flutter Docs",
+                "collection": "flutter-docs",
+                "stats": stats,
+                "duration": step_duration
+            })
+            
+            console.print(f"[green]✅ Flutter documentation vectorized in {step_duration:.1f}s[/green]")
+            
+        except Exception as e:
+            console.print(f"[red]✗ Flutter documentation vectorization failed: {e}[/red]")
+            raise typer.Exit(1)
+    else:
+        console.print("[yellow]⏭️  Skipping Flutter documentation vectorization[/yellow]")
+    
+    console.print()
+    
+    # Step 2: atproto-dart
+    if not skip_atproto:
+        console.print("[bold cyan]Step 2: Vectorizing atproto-dart Repository[/bold cyan]")
+        step_start = time.time()
+        
+        try:
+            config = VectorizationConfig(
+                qdrant_url=qdrant_url,
+                collection_name="atproto-dart",
+                embedding_model=embedding_model,
+                batch_size=batch_size,
+                include_tests=include_tests,
+                include_generated=include_generated
+            )
+            
+            vectorizer = AtprotoVectorizer(config)
+            clone_dir = DEFAULT_CLONE_DIR
+            clone_dir.mkdir(parents=True, exist_ok=True)
+            target_path = clone_dir / "atproto.dart"
+            
+            stats = asyncio.run(vectorizer.run_full_process(ATPROTO_DART_URL, target_path))
+            
+            step_duration = time.time() - step_start
+            stats_summary.append({
+                "name": "atproto-dart",
+                "collection": "atproto-dart",
+                "stats": stats,
+                "duration": step_duration
+            })
+            
+            console.print(f"[green]✅ atproto-dart vectorized in {step_duration:.1f}s[/green]")
+            
+        except Exception as e:
+            console.print(f"[red]✗ atproto-dart vectorization failed: {e}[/red]")
+            raise typer.Exit(1)
+    else:
+        console.print("[yellow]⏭️  Skipping atproto-dart vectorization[/yellow]")
+    
+    console.print()
+    
+    # Step 3: moodeSky Project
+    if not skip_moode:
+        console.print("[bold cyan]Step 3: Vectorizing moodeSky Flutter Project[/bold cyan]")
+        step_start = time.time()
+        
+        try:
+            config = VectorizationConfig(
+                qdrant_url=qdrant_url,
+                collection_name="moodeSky",
+                embedding_model=embedding_model,
+                batch_size=batch_size,
+                include_tests=include_tests,
+                include_generated=include_generated
+            )
+            
+            vectorizer = AtprotoVectorizer(config)
+            stats = asyncio.run(vectorizer.run_flutter_process(flutter_dir))
+            
+            step_duration = time.time() - step_start
+            stats_summary.append({
+                "name": "moodeSky Project",
+                "collection": "moodeSky",
+                "stats": stats,
+                "duration": step_duration
+            })
+            
+            console.print(f"[green]✅ moodeSky project vectorized in {step_duration:.1f}s[/green]")
+            
+        except Exception as e:
+            console.print(f"[red]✗ moodeSky project vectorization failed: {e}[/red]")
+            raise typer.Exit(1)
+    else:
+        console.print("[yellow]⏭️  Skipping moodeSky project vectorization[/yellow]")
+    
+    # Final Summary
+    total_duration = time.time() - start_time
+    console.print()
+    console.print("[bold green]🎉 Comprehensive Vectorization Complete![/bold green]")
+    
+    summary_table = Table(title="Vectorization Summary")
+    summary_table.add_column("Repository", style="cyan")
+    summary_table.add_column("Collection", style="blue")
+    summary_table.add_column("Files", style="white")
+    summary_table.add_column("Chunks", style="yellow")
+    summary_table.add_column("Duration", style="green")
+    
+    total_files = 0
+    total_chunks = 0
+    
+    for item in stats_summary:
+        files = item["stats"].repository.total_files
+        chunks = item["stats"].chunks_uploaded
+        duration = f"{item['duration']:.1f}s"
+        
+        summary_table.add_row(
+            item["name"],
+            item["collection"],
+            str(files),
+            str(chunks),
+            duration
+        )
+        
+        total_files += files
+        total_chunks += chunks
+    
+    summary_table.add_row(
+        "[bold]TOTAL[/bold]",
+        "[bold]3 Collections[/bold]",
+        f"[bold]{total_files}[/bold]",
+        f"[bold]{total_chunks}[/bold]",
+        f"[bold]{total_duration:.1f}s[/bold]"
+    )
+    
+    console.print(summary_table)
+    
+    console.print()
+    console.print("[bold green]🎯 All collections are ready for use with Claude Code MCP![/bold green]")
+    console.print("[cyan]Available MCP tools:[/cyan]")
+    if not skip_flutter:
+        console.print("[cyan]  • mcp_flutter_docs_find --query \"Flutter widget examples\"[/cyan]")
+    if not skip_atproto:
+        console.print("[cyan]  • mcp_atproto_dart_rag_find --query \"AT Protocol authentication\"[/cyan]")
+    if not skip_moode:
+        console.print("[cyan]  • mcp_moodesky_docs_find --query \"moodeSky deck implementation\"[/cyan]")
+
+
 @app.command()
 def setup_mcp(
     qdrant_url: str = typer.Option(
