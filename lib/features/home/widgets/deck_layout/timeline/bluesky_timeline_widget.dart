@@ -31,6 +31,7 @@ class BlueskyTimelineWidget extends BaseTimelineWidget {
 class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelineWidget> {
   bool _isLoading = false;
   bool _isLoadingMore = false;
+  bool _isRefreshing = false;
   bool _hasError = false;
   String _errorMessage = '';
   List<bsky.FeedView> _feedData = [];
@@ -344,19 +345,133 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
     }
   }
 
+  /// リフレッシュ専用のタイムライン読み込み（既存データを保持）
+  Future<void> _loadTimelineForRefresh() async {
+    debugPrint('📱 Loading timeline for refresh (preserving existing data)');
+    
+    _startPerformanceTimer('refresh_timeline_load_api_call');
+
+    try {
+      // Use the deck's account if specified, otherwise fall back to active account
+      final String? accountDid;
+      if (widget.deck.accountDid != null && !widget.deck.isCrossAccount) {
+        // Use the specific account for this deck
+        accountDid = widget.deck.accountDid;
+        debugPrint('📱 Refreshing timeline for deck account: $accountDid');
+      } else {
+        // Cross-account deck or no specific account - use active account
+        final activeAccount = ref.read(activeAccountProvider);
+        if (activeAccount == null) {
+          throw Exception('No active account');
+        }
+        accountDid = activeAccount.did;
+        debugPrint('📱 Refreshing timeline for active account: $accountDid');
+      }
+
+      final database = ref.read(databaseProvider);
+      final blueskyService = BlueskyServiceV2(
+        database: database,
+        secureStorage: const FlutterSecureStorage(),
+        authConfig: const AuthConfig(defaultPdsHost: 'bsky.social'),
+      );
+
+      await blueskyService.initialize();
+
+      final response = await blueskyService.getTimelineFeed(
+        accountDid: accountDid!,
+        limit: 20,
+      );
+
+      if (!mounted) return;
+      
+      // 成功時のみ既存データを新しいデータで置き換え
+      setState(() {
+        _feedData = response.feed.toList();
+        _nextCursor = response.cursor;
+        debugPrint('📱 Timeline refreshed successfully: ${_feedData.length} posts (replaced existing data)');
+      });
+      
+      _logPerformanceMetrics('refresh_timeline_load_api_call', null);
+    } catch (e) {
+      if (!mounted) return;
+      
+      // エラー時は既存データを保持し、エラー状態のみ更新
+      debugPrint('⚠️ Timeline refresh failed (existing data preserved): $e');
+      setState(() {
+        _hasError = true;
+        _errorMessage = e.toString();
+      });
+      
+      // エラー時もパフォーマンス測定を終了
+      _logPerformanceMetrics('refresh_timeline_load_api_call', null);
+    }
+  }
+
   @override
   Widget buildContent() {
     if (_hasError) {
       return _buildErrorState();
     }
 
-    return RefreshIndicator(
-      onRefresh: refresh,
+    // デバッグログ: ローディング状態を確認
+    debugPrint('📱 BuildContent - isLoading: $_isLoading, isRefreshing: $_isRefreshing, feedData.length: ${_feedData.length}');
+    
+    // リフレッシュローディング表示の詳細ログ
+    if (_isRefreshing) {
+      debugPrint('📱 REFRESH LOADING: Will show refresh loading indicator at top');
+    } else {
+      debugPrint('📱 REFRESH LOADING: NOT showing refresh loading (_isRefreshing = false)');
+    }
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        // オーバースクロール検出による pull-to-refresh
+        if (notification is OverscrollNotification) {
+          if (notification.overscroll < -30 && !_isRefreshing) {
+            // 上方向へ30px以上オーバースクロール時にリフレッシュ
+            debugPrint('📱 Pull-to-refresh triggered by overscroll: ${notification.overscroll}');
+            refresh();
+          }
+        }
+        return false;
+      },
       child: CustomScrollView(
         controller: scrollController,
         slivers: [
+          // Loading indicator at top (for refresh - unified style with enhanced visibility)
+          if (_isRefreshing)
+            SliverToBoxAdapter(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 6.0),
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 12),
+                    Text(
+                      AppLocalizations.of(context).loadingNewPosts,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
           // Loading indicator at top (for initial load when no data)
-          if (_isLoading && _feedData.isEmpty)
+          if (_isLoading && _feedData.isEmpty && !_isRefreshing)
             SliverToBoxAdapter(
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -475,19 +590,32 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
 
   @override
   Future<void> refresh() async {
-    if (!mounted) return;
+    if (!mounted || _isRefreshing) {
+      debugPrint('📱 Timeline refresh SKIPPED: mounted=$mounted, isRefreshing=$_isRefreshing');
+      return;
+    }
     
-    debugPrint('📱 Timeline refresh initiated');
+    debugPrint('📱 Pull-to-Refresh: Timeline refresh initiated (preserving existing posts)');
     
     setState(() {
-      // clear()の代わりに新しい空リストを代入してエラーを回避
-      _feedData = <bsky.FeedView>[];
-      _nextCursor = null;
+      _isRefreshing = true;
       _hasError = false;
-      debugPrint('📱 Timeline data cleared for refresh');
+      debugPrint('📱 Pull-to-Refresh: REFRESH FLAG SET: _isRefreshing = true');
     });
     
-    await _loadTimeline();
+    try {
+      // リフレッシュ専用のタイムライン読み込み
+      await _loadTimelineForRefresh();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRefreshing = false;
+          debugPrint('📱 REFRESH FLAG RESET: _isRefreshing = false');
+        });
+      } else {
+        debugPrint('📱 REFRESH COMPLETED: Widget not mounted, cannot reset flag');
+      }
+    }
   }
 
   Widget _buildErrorState() {
