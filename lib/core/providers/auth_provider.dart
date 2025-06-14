@@ -160,6 +160,19 @@ class AuthNotifier extends _$AuthNotifier {
         return;
       }
 
+      // セッション検証を実行（詳細ログ付き）
+      debugPrint('🔐 Validating session for account: ${activeAccount.did}');
+      final isSessionValid = await _blueskyService.auth.validateSession(activeAccount.did);
+      if (!isSessionValid) {
+        debugPrint('❌ Active account session is invalid, clearing and setting unauthenticated');
+        debugPrint('   Account: ${activeAccount.handle} (${activeAccount.did})');
+        debugPrint('   This may be due to token expiration or verification failure');
+        await _blueskyService.auth.clearInvalidSessions();
+        state = const AuthState.unauthenticated();
+        return;
+      }
+      debugPrint('✅ Session validation successful for ${activeAccount.handle}');
+
       // バックグラウンドで全アカウントのプロフィール情報を強制更新（アプリ起動を妨げない）
       _scheduleBackgroundProfileRefresh();
 
@@ -229,15 +242,26 @@ class AuthNotifier extends _$AuthNotifier {
 
         authResult.when(
           success: (session, accountDid) async {
+            debugPrint('✅ Authentication successful, updating profile info');
             // プロフィール情報を取得・更新
             await _fetchAndUpdateProfileInfo(accountDid);
             // 認証状態を更新（新規ログインフラグ付き）
             await _updateAuthenticatedState(isNewLogin: true);
           },
           failure: (error, errorDescription, errorType) {
-            state = AuthState.error(message: error, errorType: errorType);
+            debugPrint('❌ Authentication failed:');
+            debugPrint('   Error: $error');
+            debugPrint('   Error Type: $errorType');
+            debugPrint('   Error Description: $errorDescription');
+            
+            // 詳細なエラー情報を含めてエラー状態を設定
+            state = AuthState.error(
+              message: error,
+              errorType: errorType ?? AuthErrorType.unknownError,
+            );
           },
           cancelled: () {
+            debugPrint('🚫 Authentication cancelled by user');
             state = const AuthState.unauthenticated();
           },
         );
@@ -249,7 +273,47 @@ class AuthNotifier extends _$AuthNotifier {
 
   /// エラー状態を設定するヘルパーメソッド
   void _setErrorState(String message, [AuthErrorType? errorType]) {
-    state = _AuthUtils.createErrorState(message, errorType);
+    // Determine error type based on message if not provided
+    final detectedErrorType = errorType ?? _detectErrorType(message);
+    state = _AuthUtils.createErrorState(message, detectedErrorType);
+  }
+
+  /// エラーメッセージからエラータイプを自動検出
+  AuthErrorType _detectErrorType(String message) {
+    final lowerMessage = message.toLowerCase();
+    
+    if (lowerMessage.contains('token could not be verified') ||
+        lowerMessage.contains('tokenvalidationfailed') ||
+        lowerMessage.contains('invalidsignature') ||
+        lowerMessage.contains('token verification failed')) {
+      return AuthErrorType.tokenVerificationFailed;
+    }
+    
+    if (lowerMessage.contains('token has expired') ||
+        lowerMessage.contains('expiredtoken') ||
+        lowerMessage.contains('session expired')) {
+      return AuthErrorType.tokenExpired;
+    }
+    
+    if (lowerMessage.contains('invalid credentials') ||
+        lowerMessage.contains('authentication failed') ||
+        lowerMessage.contains('unauthorized')) {
+      return AuthErrorType.invalidCredentials;
+    }
+    
+    if (lowerMessage.contains('network') ||
+        lowerMessage.contains('connection') ||
+        lowerMessage.contains('timeout')) {
+      return AuthErrorType.networkError;
+    }
+    
+    if (lowerMessage.contains('server error') ||
+        lowerMessage.contains('internal server error') ||
+        lowerMessage.contains('service unavailable')) {
+      return AuthErrorType.serverError;
+    }
+    
+    return AuthErrorType.unknownError;
   }
 
   // Switch account

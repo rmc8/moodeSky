@@ -34,6 +34,133 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
     super.dispose();
   }
 
+  /// エラータイプに応じた詳細なエラーダイアログを表示
+  void _showErrorDialog(String error, AuthErrorType? errorType, String? errorDescription) {
+    String title;
+    String message;
+    List<Widget> actions = [];
+
+    switch (errorType) {
+      case AuthErrorType.tokenVerificationFailed:
+        title = 'トークン検証エラー';
+        message = 'トークンの検証に失敗しました。\n'
+            'これは以下の原因が考えられます：\n\n'
+            '• アプリパスワードが無効または期限切れ\n'
+            '• サーバーとの通信エラー\n'
+            '• アカウント設定の問題\n\n'
+            'アプリパスワードを再生成してから再試行してください。';
+        actions = [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('閉じる'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // アプリパスワード生成ページへのガイダンス
+              _showAppPasswordGuide();
+            },
+            child: const Text('アプリパスワード生成'),
+          ),
+        ];
+        break;
+        
+      case AuthErrorType.invalidCredentials:
+        title = '認証情報エラー';
+        message = 'ユーザー名またはアプリパスワードが正しくありません。\n\n'
+            '入力内容を確認してください：\n'
+            '• ユーザー名（ハンドル）が正しいか\n'
+            '• アプリパスワードが正しいか\n'
+            '• 通常のパスワードではなくアプリパスワードを使用しているか';
+        break;
+        
+      case AuthErrorType.networkError:
+        title = 'ネットワークエラー';
+        message = 'ネットワーク接続に問題があります。\n\n'
+            'インターネット接続を確認してから再試行してください。';
+        break;
+        
+      case AuthErrorType.serverError:
+        title = 'サーバーエラー';
+        message = 'Blueskyサーバーで問題が発生しています。\n\n'
+            'しばらく時間をおいてから再試行してください。';
+        break;
+        
+      default:
+        title = 'ログインエラー';
+        message = error;
+    }
+
+    // デフォルトアクションを追加
+    if (actions.isEmpty) {
+      actions = [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('閉じる'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            // 再試行
+          },
+          child: const Text('再試行'),
+        ),
+      ];
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(message),
+              if (errorDescription != null && errorDescription.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Text('詳細情報:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text(
+                  errorDescription,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: actions,
+      ),
+    );
+  }
+
+  /// アプリパスワード生成ガイドを表示
+  void _showAppPasswordGuide() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('アプリパスワードの生成'),
+        content: const Text(
+          'Blueskyアプリでアプリパスワードを生成してください：\n\n'
+          '1. Blueskyアプリを開く\n'
+          '2. 設定 → プライバシーとセキュリティ\n'
+          '3. アプリパスワード → 新しいアプリパスワードを追加\n'
+          '4. 生成されたパスワードをこのアプリで使用',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('了解'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _addAccount() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -64,14 +191,13 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
         },
         failure: (error, errorDescription, errorType) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  AppLocalizations.of(context)!.accountAddFailed(error),
-                ),
-                backgroundColor: Colors.red,
-              ),
-            );
+            debugPrint('❌ Account add failed in UI:');
+            debugPrint('   Error: $error');
+            debugPrint('   Error Type: $errorType');
+            debugPrint('   Error Description: $errorDescription');
+            
+            // エラータイプに応じたメッセージとアクションを表示
+            _showErrorDialog(error, errorType, errorDescription);
           }
         },
         cancelled: () {

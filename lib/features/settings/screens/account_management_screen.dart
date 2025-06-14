@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/features/auth/screens/add_account_screen.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
 import 'package:moodesky/shared/widgets/common/index.dart';
 
@@ -103,7 +104,11 @@ class AccountManagementScreen extends ConsumerWidget {
 
   void _addAccount(BuildContext context) {
     // 新しいアカウント追加画面に遷移
-    Navigator.of(context).pushNamed('/add-account');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const AddAccountScreen(),
+      ),
+    );
   }
 
   void _showAccountOptions(BuildContext context, WidgetRef ref, UserProfile account) {

@@ -200,11 +200,11 @@ class BlueskyServiceV2 {
       // Try API call
       return await apiCall(client);
     } catch (e) {
-      // Check if token expired
-      if (e.toString().contains('Token has expired') || 
-          e.toString().contains('ExpiredToken') ||
-          e.toString().contains('InvalidToken')) {
-        debugPrint('BlueskyService: Token expired, attempting refresh for ${account.handle}');
+      final errorString = e.toString();
+      
+      // Check for various token-related errors
+      if (_isTokenError(errorString)) {
+        debugPrint('BlueskyService: Token error detected for ${account.handle}: $errorString');
         
         // Attempt token refresh
         final refreshResult = await auth.refreshSession(account.did);
@@ -231,11 +231,40 @@ class BlueskyServiceV2 {
         }
         
         debugPrint('BlueskyService: Token refresh failed for ${account?.handle}');
-        throw Exception('Session expired and refresh failed');
+        
+        // Determine specific error type for better user feedback
+        if (_isTokenVerificationError(errorString)) {
+          throw Exception('Token could not be verified. Please sign in again.');
+        } else {
+          throw Exception('Session expired and refresh failed');
+        }
       }
       
       // Re-throw non-token related errors
       rethrow;
     }
+  }
+
+  /// Check if error is related to token issues
+  bool _isTokenError(String errorString) {
+    final lowerString = errorString.toLowerCase();
+    return lowerString.contains('token has expired') ||
+           lowerString.contains('expiredtoken') ||
+           lowerString.contains('invalidtoken') ||
+           lowerString.contains('token could not be verified') ||
+           lowerString.contains('tokenvalidationfailed') ||
+           lowerString.contains('invalidsignature') ||
+           lowerString.contains('unauthorized') ||
+           lowerString.contains('token is invalid') ||
+           lowerString.contains('authentication failed');
+  }
+
+  /// Check if error is specifically related to token verification
+  bool _isTokenVerificationError(String errorString) {
+    final lowerString = errorString.toLowerCase();
+    return lowerString.contains('token could not be verified') ||
+           lowerString.contains('tokenvalidationfailed') ||
+           lowerString.contains('invalidsignature') ||
+           lowerString.contains('token verification failed');
   }
 }

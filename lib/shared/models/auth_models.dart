@@ -90,6 +90,7 @@ enum AuthErrorType {
   networkError,
   invalidCredentials,
   tokenExpired,
+  tokenVerificationFailed, // Added for "Token could not be verified" errors
   serverError,
   userCancelled,
   unknownError,
