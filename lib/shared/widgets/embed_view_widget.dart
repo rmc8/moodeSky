@@ -765,28 +765,50 @@ class EmbedViewWidget extends StatelessWidget {
   /// 投稿引用埋め込みウィジェット
   Widget _buildRecordEmbed(BuildContext context, dynamic record) {
     debugPrint('💬 Building record embed: ${record.runtimeType}');
+    debugPrint('💬 Record object structure: ${record.toString()}');
     
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        children: [
-          Icon(
-            Icons.format_quote,
-            color: Theme.of(context).colorScheme.primary,
-            size: 24.0,
+    try {
+      // レコードデータを抽出
+      final recordData = _extractRecordData(record);
+      
+      if (recordData == null) {
+        return _buildRecordError(context, 'レコードデータが見つかりません');
+      }
+      
+      return GestureDetector(
+        onTap: () {
+          debugPrint('💬 Record tapped');
+          // TODO: 引用投稿の詳細表示
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              width: 1.0,
+            ),
+            borderRadius: BorderRadius.circular(8.0),
           ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Text(
-              '投稿引用 (${record.runtimeType})',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildRecordHeader(context, recordData),
+                const SizedBox(height: 8.0),
+                _buildRecordContent(context, recordData),
+                if (_hasRecordImages(recordData)) ...[
+                  const SizedBox(height: 8.0),
+                  _buildRecordImages(context, recordData),
+                ],
+              ],
             ),
           ),
-        ],
-      ),
-    );
+        ),
+      );
+    } catch (e) {
+      debugPrint('❌ Error building record embed: $e');
+      return _buildRecordError(context, 'レコードの読み込みに失敗しました');
+    }
   }
 
   /// メディア付き投稿引用埋め込みウィジェット
@@ -835,6 +857,210 @@ class EmbedViewWidget extends StatelessWidget {
           Expanded(
             child: Text(
               '未対応の埋め込みタイプ (${data.runtimeType})',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// レコードデータを抽出
+  Map<String, dynamic>? _extractRecordData(dynamic record) {
+    try {
+      // レコード構造の解析
+      final recordObj = record.record;
+      if (recordObj == null) return null;
+      
+      // 投稿者情報を抽出
+      final author = recordObj.author;
+      final authorName = author?.displayName ?? author?.handle ?? 'Unknown User';
+      final authorHandle = author?.handle ?? '';
+      final authorAvatar = author?.avatar;
+      
+      // 投稿内容を抽出
+      final value = recordObj.value;
+      final text = value?.text ?? '';
+      
+      // 埋め込み画像を抽出
+      final embeds = value?.embed;
+      
+      debugPrint('💬 Extracted record data:');
+      debugPrint('  Author: $authorName (@$authorHandle)');
+      debugPrint('  Text: ${text.length > 50 ? text.substring(0, 50) + '...' : text}');
+      debugPrint('  Has embeds: ${embeds != null}');
+      
+      return {
+        'authorName': authorName,
+        'authorHandle': authorHandle,
+        'authorAvatar': authorAvatar,
+        'text': text,
+        'embeds': embeds,
+      };
+    } catch (e) {
+      debugPrint('❌ Error extracting record data: $e');
+      return null;
+    }
+  }
+  
+  /// レコードヘッダー（投稿者情報）を構築
+  Widget _buildRecordHeader(BuildContext context, Map<String, dynamic> recordData) {
+    final theme = Theme.of(context);
+    final authorName = recordData['authorName'] as String;
+    final authorHandle = recordData['authorHandle'] as String;
+    final authorAvatar = recordData['authorAvatar'] as String?;
+    
+    return Row(
+      children: [
+        // アバター
+        CircleAvatar(
+          radius: 16.0,
+          backgroundImage: authorAvatar != null && authorAvatar.isNotEmpty
+              ? NetworkImage(authorAvatar)
+              : null,
+          child: authorAvatar == null || authorAvatar.isEmpty
+              ? Text(
+                  authorName.isNotEmpty ? authorName[0].toUpperCase() : '?',
+                  style: const TextStyle(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : null,
+        ),
+        
+        const SizedBox(width: 8.0),
+        
+        // 名前とハンドル
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                authorName,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (authorHandle.isNotEmpty)
+                Text(
+                  '@$authorHandle',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+            ],
+          ),
+        ),
+        
+        // 引用アイコン
+        Icon(
+          Icons.format_quote,
+          size: 16.0,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ],
+    );
+  }
+  
+  /// レコードコンテンツ（投稿テキスト）を構築
+  Widget _buildRecordContent(BuildContext context, Map<String, dynamic> recordData) {
+    final theme = Theme.of(context);
+    final text = recordData['text'] as String;
+    
+    if (text.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    
+    return Text(
+      text,
+      style: theme.textTheme.bodyMedium,
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+  
+  /// レコードに画像があるかチェック
+  bool _hasRecordImages(Map<String, dynamic> recordData) {
+    final embeds = recordData['embeds'];
+    if (embeds == null) return false;
+    
+    try {
+      // 埋め込み内容をチェック（簡易実装）
+      final embedString = embeds.toString();
+      return embedString.contains('images') || embedString.contains('image');
+    } catch (e) {
+      return false;
+    }
+  }
+  
+  /// レコード画像を構築
+  Widget _buildRecordImages(BuildContext context, Map<String, dynamic> recordData) {
+    final theme = Theme.of(context);
+    
+    // 簡易実装：画像プレースホルダー
+    return Container(
+      height: 100.0,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(6.0),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.6),
+          width: 0.5,
+        ),
+      ),
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.image_outlined,
+              color: theme.colorScheme.onSurfaceVariant,
+              size: 20.0,
+            ),
+            const SizedBox(width: 8.0),
+            Text(
+              '画像',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  /// レコードエラー表示を構築
+  Widget _buildRecordError(BuildContext context, String message) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.3),
+          width: 1.0,
+        ),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: theme.colorScheme.onSurfaceVariant,
+            size: 20.0,
+          ),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Text(
+              message,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
