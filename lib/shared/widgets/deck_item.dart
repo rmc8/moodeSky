@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bluesky/bluesky.dart' as bsky;
 
 // Project imports:
 import 'package:moodesky/core/providers/deck_provider.dart';
@@ -11,6 +12,7 @@ import 'package:moodesky/features/home/widgets/deck_layout/deck_utils.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/services/database/database.dart';
 import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
+import 'package:moodesky/shared/widgets/bluesky_facet_text.dart';
 
 /// デッキアイテムの基本レイアウト - PostItemと統一されたデザイン
 class DeckItem extends ConsumerWidget {
@@ -19,6 +21,10 @@ class DeckItem extends ConsumerWidget {
   final String subtitle;
   final String? timestamp;
   final String content;
+  final List<bsky.Facet>? facets;
+  final Function(String)? onMentionTap;
+  final Function(String)? onLinkTap;
+  final Function(String)? onHashtagTap;
   final List<Widget>? actionButtons;
   final VoidCallback? onTap;
   final Widget? trailing;
@@ -32,6 +38,10 @@ class DeckItem extends ConsumerWidget {
     required this.subtitle,
     this.timestamp,
     required this.content,
+    this.facets,
+    this.onMentionTap,
+    this.onLinkTap,
+    this.onHashtagTap,
     this.actionButtons,
     this.onTap,
     this.trailing,
@@ -99,15 +109,38 @@ class DeckItem extends ConsumerWidget {
 
           const SizedBox(height: 12),
 
-          // コンテンツ
-          Text(
-            content,
-            style: textStyles.bodyLarge.copyWith(
-              color: context.isLight
-                  ? const Color(0xFF000000) // 純粋な黒
-                  : const Color(0xFFF5F5F5),
-              fontWeight: FontWeight.w400, // Regular
-            ),
+          // コンテンツ（facets対応）
+          Builder(
+            builder: (context) {
+              if (facets != null && facets!.isNotEmpty) {
+                debugPrint('📝 DeckItem using BlueskyFacetText for ${facets!.length} facets');
+                return BlueskyFacetText(
+                  text: content,
+                  facets: facets!,
+                  style: textStyles.bodyLarge.copyWith(
+                    // facetsのデフォルト色を設定（facetテキスト以外の部分用）
+                    color: context.isLight
+                        ? const Color(0xFF000000) // 純粋な黒
+                        : const Color(0xFFF5F5F5),
+                    fontWeight: FontWeight.w400, // Regular
+                  ),
+                  onMentionTap: onMentionTap,
+                  onLinkTap: onLinkTap,
+                  onHashtagTap: onHashtagTap,
+                );
+              } else {
+                debugPrint('📝 DeckItem using regular Text (no facets)');
+                return Text(
+                  content,
+                  style: textStyles.bodyLarge.copyWith(
+                    color: context.isLight
+                        ? const Color(0xFF000000) // 純粋な黒
+                        : const Color(0xFFF5F5F5),
+                    fontWeight: FontWeight.w400, // Regular
+                  ),
+                );
+              }
+            },
           ),
 
           // アクションボタンまたはメニューボタンがある場合のみスペースを追加
@@ -303,6 +336,7 @@ class ProfilePostItem extends StatelessWidget {
   final String authorHandle;
   final String? authorAvatar;
   final String content;
+  final List<bsky.Facet> facets;
   final DateTime timestamp;
   final int likeCount;
   final int repostCount;
@@ -313,6 +347,9 @@ class ProfilePostItem extends StatelessWidget {
   final VoidCallback? onRepost;
   final VoidCallback? onReply;
   final VoidCallback? onTap;
+  final Function(String)? onMentionTap;
+  final Function(String)? onLinkTap;
+  final Function(String)? onHashtagTap;
   final Deck? deck;
 
   const ProfilePostItem({
@@ -321,6 +358,7 @@ class ProfilePostItem extends StatelessWidget {
     required this.authorHandle,
     this.authorAvatar,
     required this.content,
+    this.facets = const [],
     required this.timestamp,
     this.likeCount = 0,
     this.repostCount = 0,
@@ -331,6 +369,9 @@ class ProfilePostItem extends StatelessWidget {
     this.onRepost,
     this.onReply,
     this.onTap,
+    this.onMentionTap,
+    this.onLinkTap,
+    this.onHashtagTap,
     this.deck,
   });
 
@@ -353,6 +394,10 @@ class ProfilePostItem extends StatelessWidget {
       subtitle: '@$authorHandle',
       timestamp: _formatTimestamp(timestamp),
       content: content,
+      facets: facets,
+      onMentionTap: onMentionTap,
+      onLinkTap: onLinkTap,
+      onHashtagTap: onHashtagTap,
       actionButtons: [
         _buildActionButton(
           context: context,

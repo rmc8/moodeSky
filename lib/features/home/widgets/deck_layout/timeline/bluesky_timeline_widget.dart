@@ -539,6 +539,7 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
     
     // Extract post content and metadata
     final content = feedView.post.record.text;
+    final facets = feedView.post.record.facets ?? [];
     final timestamp = feedView.post.indexedAt;
     
     // Extract engagement metrics (if available)
@@ -564,6 +565,7 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
           authorHandle: authorHandle,
           authorAvatar: authorAvatar,
           content: content,
+          facets: facets,
           timestamp: timestamp,
           likeCount: likeCount,
           repostCount: repostCount,
@@ -581,6 +583,51 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
           },
           onTap: () {
             // TODO: Implement post tap navigation
+          },
+          onMentionTap: (did) {
+            debugPrint('📱 Mention tapped: $did');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context).richTextMentionTapped(did)),
+                action: SnackBarAction(
+                  label: AppLocalizations.of(context).richTextProfileView,
+                  onPressed: () {
+                    debugPrint('🔍 Profile view: $did');
+                    // TODO: プロフィール表示機能の実装
+                  },
+                ),
+              ),
+            );
+          },
+          onLinkTap: (url) {
+            debugPrint('📱 Link tapped: $url');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context).richTextUrlTapped(url)),
+                action: SnackBarAction(
+                  label: AppLocalizations.of(context).richTextOpenUrl,
+                  onPressed: () {
+                    debugPrint('🔗 Open URL: $url');
+                    // TODO: URLを開く機能の実装
+                  },
+                ),
+              ),
+            );
+          },
+          onHashtagTap: (tag) {
+            debugPrint('📱 Hashtag tapped: $tag');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context).richTextHashtagTapped(tag)),
+                action: SnackBarAction(
+                  label: AppLocalizations.of(context).richTextHashtagSearch,
+                  onPressed: () {
+                    debugPrint('🔍 Hashtag search: $tag');
+                    // TODO: ハッシュタグ検索機能の実装
+                  },
+                ),
+              ),
+            );
           },
           deck: widget.deck,
         ),
