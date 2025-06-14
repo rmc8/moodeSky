@@ -30,6 +30,7 @@ class DeckItem extends ConsumerWidget {
   final Widget? trailing;
   final Color? accentColor;
   final Deck? deck; // デッキメニュー表示用（削除処理はDeckUtilsで統一）
+  final Widget? embedWidget;
 
   const DeckItem({
     super.key,
@@ -47,6 +48,7 @@ class DeckItem extends ConsumerWidget {
     this.trailing,
     this.accentColor,
     this.deck,
+    this.embedWidget,
   });
 
   @override
@@ -142,6 +144,12 @@ class DeckItem extends ConsumerWidget {
               }
             },
           ),
+
+          // 埋め込みコンテンツ（アクションボタンの上に表示）
+          if (embedWidget != null) ...[
+            const SizedBox(height: 12),
+            embedWidget!,
+          ],
 
           // アクションボタンまたはメニューボタンがある場合のみスペースを追加
           if ((actionButtons != null && actionButtons!.isNotEmpty) ||
@@ -351,6 +359,7 @@ class ProfilePostItem extends StatelessWidget {
   final Function(String)? onLinkTap;
   final Function(String)? onHashtagTap;
   final Deck? deck;
+  final Widget? embedWidget;
 
   const ProfilePostItem({
     super.key,
@@ -373,6 +382,7 @@ class ProfilePostItem extends StatelessWidget {
     this.onLinkTap,
     this.onHashtagTap,
     this.deck,
+    this.embedWidget,
   });
 
   @override
@@ -398,6 +408,7 @@ class ProfilePostItem extends StatelessWidget {
       onMentionTap: onMentionTap,
       onLinkTap: onLinkTap,
       onHashtagTap: onHashtagTap,
+      embedWidget: embedWidget,
       actionButtons: [
         _buildActionButton(
           context: context,

@@ -19,6 +19,9 @@ import 'package:moodesky/shared/utils/url_utils.dart';
 /// - 投稿引用（record）
 /// - メディア付き投稿引用（recordWithMedia）
 class EmbedViewWidget extends StatelessWidget {
+  /// 画像間の余白サイズ
+  static const double _imageSpacing = 4.0;
+
   /// 表示するEmbedViewデータ
   final bsky.EmbedView embedView;
 
@@ -97,9 +100,367 @@ class EmbedViewWidget extends StatelessWidget {
     debugPrint('🖼️ Building images embed: ${images.runtimeType}');
     debugPrint('🖼️ Images object structure: ${images.toString()}');
     
-    // 詳細な構造調査
-    _debugImagesStructure(images);
+    try {
+      // 画像リストを抽出
+      final imagesList = images.images as List<dynamic>?;
+      
+      if (imagesList == null || imagesList.isEmpty) {
+        debugPrint('❌ No images found in embed');
+        return _buildImagesPlaceholder(context);
+      }
+      
+      debugPrint('🖼️ Found ${imagesList.length} images');
+      
+      // 画像数に応じてレイアウトを選択
+      switch (imagesList.length) {
+        case 1:
+          return _buildSingleImage(context, imagesList[0]);
+        case 2:
+          return _buildTwoImages(context, imagesList);
+        case 3:
+          return _buildThreeImages(context, imagesList);
+        case 4:
+        default:
+          return _buildFourImages(context, imagesList.take(4).toList());
+      }
+    } catch (e) {
+      debugPrint('❌ Error building images embed: $e');
+      return _buildImagesPlaceholder(context);
+    }
+  }
+  
+  /// 1枚画像レイアウト
+  Widget _buildSingleImage(BuildContext context, dynamic image) {
+    return AspectRatio(
+      aspectRatio: 16 / 9, // 全体を16:9に統一
+      child: _buildImageWidget(
+        context, 
+        image,
+        aspectRatio: 16 / 9,
+        borderRadius: BorderRadius.circular(6.0),
+      ),
+    );
+  }
+  
+  /// 2枚画像レイアウト（横並び）
+  Widget _buildTwoImages(BuildContext context, List<dynamic> images) {
+    return AspectRatio(
+      aspectRatio: 16 / 9, // 全体を16:9に統一
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildImageWidget(
+              context,
+              images[0],
+              aspectRatio: 8 / 9, // 16:9を2分割したアスペクト比
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(6.0),
+                bottomLeft: Radius.circular(6.0),
+              ),
+            ),
+          ),
+          SizedBox(width: _imageSpacing),
+          Expanded(
+            child: _buildImageWidget(
+              context,
+              images[1],
+              aspectRatio: 8 / 9,
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(6.0),
+                bottomRight: Radius.circular(6.0),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  /// 3枚画像レイアウト（参考実装ベース）
+  Widget _buildThreeImages(BuildContext context, List<dynamic> images) {
+    return AspectRatio(
+      aspectRatio: 16 / 9, // 全体を16:9に統一
+      child: Row(
+        children: [
+          _buildSingleColumn(context, images[0]), // 左列：1枚
+          SizedBox(width: _imageSpacing),
+          _buildDoubleColumn(context, images[1], images[2]), // 右列：2枚
+        ],
+      ),
+    );
+  }
+  
+  /// 左列：1枚画像（3枚レイアウト用）
+  Widget _buildSingleColumn(BuildContext context, dynamic image) {
+    return Expanded(
+      child: _buildImageWidget(
+        context,
+        image,
+        aspectRatio: 8 / 9, // 16:9の半分幅
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(6.0),
+          bottomLeft: Radius.circular(6.0),
+        ),
+      ),
+    );
+  }
+  
+  /// 右列：2枚画像（3枚レイアウト用）
+  Widget _buildDoubleColumn(BuildContext context, dynamic image1, dynamic image2) {
+    return Expanded(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final totalHeight = constraints.maxHeight;
+          final imageHeight = (totalHeight - _imageSpacing) / 2; // 余白を引いて2で割る
+          
+          return Column(
+            children: [
+              SizedBox(
+                height: imageHeight,
+                child: _buildImageWidget(
+                  context,
+                  image1,
+                  aspectRatio: null, // ピクセル値で高さ指定するためnull
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(6.0),
+                  ),
+                ),
+              ),
+              SizedBox(height: _imageSpacing), // 余白はそのまま
+              SizedBox(
+                height: imageHeight,
+                child: _buildImageWidget(
+                  context,
+                  image2,
+                  aspectRatio: null, // ピクセル値で高さ指定するためnull
+                  borderRadius: const BorderRadius.only(
+                    bottomRight: Radius.circular(6.0),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+  
+  /// 4枚画像レイアウト（2x2グリッド）
+  Widget _buildFourImages(BuildContext context, List<dynamic> images) {
+    return AspectRatio(
+      aspectRatio: 16 / 9, // 全体を16:9に統一
+      child: Column(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildImageWidget(
+                    context,
+                    images[0],
+                    aspectRatio: 8 / 4.5, // 半分幅、半分高さ
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(6.0),
+                    ),
+                  ),
+                ),
+                SizedBox(width: _imageSpacing),
+                Expanded(
+                  child: _buildImageWidget(
+                    context,
+                    images[1],
+                    aspectRatio: 8 / 4.5,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(6.0),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: _imageSpacing),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildImageWidget(
+                    context,
+                    images[2],
+                    aspectRatio: 8 / 4.5,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(6.0),
+                    ),
+                  ),
+                ),
+                SizedBox(width: _imageSpacing),
+                Expanded(
+                  child: _buildImageWidget(
+                    context,
+                    images[3],
+                    aspectRatio: 8 / 4.5,
+                    borderRadius: const BorderRadius.only(
+                      bottomRight: Radius.circular(6.0),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  /// 共通画像ウィジェット
+  Widget _buildImageWidget(
+    BuildContext context,
+    dynamic imageData, {
+    required double? aspectRatio, // nullableに変更
+    required BorderRadius borderRadius,
+  }) {
+    try {
+      // 画像URLを抽出
+      final thumbnailUrl = imageData.thumbnail as String?;
+      
+      if (thumbnailUrl == null || thumbnailUrl.isEmpty) {
+        return _buildImagePlaceholder(context, aspectRatio, borderRadius);
+      }
+      
+      return GestureDetector(
+        onTap: () {
+          // TODO: フルサイズ画像表示
+          final fullsizeUrl = imageData.fullsize as String?;
+          debugPrint('🖼️ Image tapped: thumbnail=$thumbnailUrl, fullsize=$fullsizeUrl');
+        },
+        child: aspectRatio != null 
+          ? AspectRatio(
+              aspectRatio: aspectRatio,
+              child: _buildImageContainer(context, thumbnailUrl, borderRadius),
+            )
+          : _buildImageContainer(context, thumbnailUrl, borderRadius),
+      );
+    } catch (e) {
+      debugPrint('❌ Error building image widget: $e');
+      return _buildImagePlaceholder(context, aspectRatio, borderRadius);
+    }
+  }
+  
+  /// 画像コンテナ（AspectRatio有無に関わらず共通）
+  Widget _buildImageContainer(BuildContext context, String thumbnailUrl, BorderRadius borderRadius) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.6),
+          width: 0.5,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Image.network(
+          thumbnailUrl,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: borderRadius,
+              ),
+              child: Center(
+                child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                      : null,
+                ),
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('❌ Image load error: $error');
+            return _buildImageError(context, null, borderRadius);
+          },
+        ),
+      ),
+    );
+  }
+  
+  /// 画像プレースホルダー
+  Widget _buildImagePlaceholder(BuildContext context, double? aspectRatio, BorderRadius borderRadius) {
+    final theme = Theme.of(context);
+    final content = Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: borderRadius,
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.6),
+          width: 0.5,
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.image_outlined,
+          color: theme.colorScheme.onSurfaceVariant,
+          size: 32.0,
+        ),
+      ),
+    );
     
+    return aspectRatio != null 
+      ? AspectRatio(aspectRatio: aspectRatio, child: content)
+      : content;
+  }
+  
+  /// 画像エラー表示
+  Widget _buildImageError(BuildContext context, double? aspectRatio, BorderRadius borderRadius) {
+    final theme = Theme.of(context);
+    final content = Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: borderRadius,
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.6),
+          width: 0.5,
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.broken_image,
+              color: theme.colorScheme.onSurfaceVariant,
+              size: 32.0,
+            ),
+            SizedBox(height: _imageSpacing),
+            Text(
+              '画像読み込み失敗',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    
+    return aspectRatio != null 
+      ? AspectRatio(aspectRatio: aspectRatio, child: content)
+      : content;
+  }
+  
+  /// 画像埋め込みプレースホルダー（画像なしの場合）
+  Widget _buildImagesPlaceholder(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -112,7 +473,7 @@ class EmbedViewWidget extends StatelessWidget {
           const SizedBox(width: 12.0),
           Expanded(
             child: Text(
-              '画像 (${images.runtimeType})',
+              '画像が見つかりません',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -121,25 +482,6 @@ class EmbedViewWidget extends StatelessWidget {
         ],
       ),
     );
-  }
-  
-  /// 画像オブジェクトの構造を詳細調査
-  void _debugImagesStructure(dynamic images) {
-    debugPrint('🔍 Images embed detailed analysis:');
-    debugPrint('  Runtime type: ${images.runtimeType}');
-    
-    // 一般的なプロパティの存在をチェック
-    final commonProps = ['images', 'image', 'data', 'items', 'list'];
-    for (final prop in commonProps) {
-      try {
-        final objString = images.toString();
-        if (objString.contains(prop)) {
-          debugPrint('  Contains "$prop" in structure');
-        }
-      } catch (e) {
-        // エラーは無視
-      }
-    }
   }
 
   /// 動画埋め込みウィジェット

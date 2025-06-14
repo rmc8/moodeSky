@@ -601,6 +601,13 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
                   replyCount: replyCount,
                   isLiked: false, // TODO: Implement like state
                   isReposted: false, // TODO: Implement repost state
+                  // Embed content (アクションボタンの上に表示)
+                  embedWidget: embedView != null 
+                    ? EmbedViewWidget(
+                        embedView: embedView,
+                        borderRadius: BorderRadius.circular(8),
+                      )
+                    : null,
               onLike: () {
                 // TODO: Implement like action
               },
@@ -660,16 +667,6 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
               },
               deck: widget.deck,
             ),
-            
-            // Embed content (if available)
-            if (embedView != null) ...[
-              const SizedBox(height: 12),
-              EmbedViewWidget(
-                embedView: embedView,
-                padding: const EdgeInsets.all(12),
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ],
           ],
         ),
       ),
