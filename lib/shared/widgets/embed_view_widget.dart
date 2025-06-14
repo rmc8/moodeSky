@@ -962,23 +962,185 @@ class EmbedViewWidget extends StatelessWidget {
   /// メディア付き投稿引用埋め込みウィジェット
   Widget _buildRecordWithMediaEmbed(BuildContext context, dynamic recordWithMedia) {
     debugPrint('🎬 Building record with media embed: ${recordWithMedia.runtimeType}');
+    debugPrint('🎬 RecordWithMedia object structure: ${recordWithMedia.toString()}');
+    
+    try {
+      // recordWithMediaの構造を分析
+      _debugRecordWithMediaStructure(recordWithMedia);
+      
+      // recordとmediaを抽出
+      dynamic record;
+      dynamic media;
+      
+      if (recordWithMedia != null) {
+        try {
+          record = recordWithMedia.record;
+          debugPrint('🎬 Record extracted: ${record?.runtimeType}');
+        } catch (e) {
+          debugPrint('❌ Failed to extract record: $e');
+        }
+        
+        try {
+          media = recordWithMedia.media;
+          debugPrint('🎬 Media extracted: ${media?.runtimeType}');
+        } catch (e) {
+          debugPrint('❌ Failed to extract media: $e');
+        }
+      }
+      
+      // メディア付きレコード埋め込みを構築
+      return _buildRecordWithMediaContent(
+        context,
+        record: record,
+        media: media,
+      );
+      
+    } catch (e) {
+      debugPrint('❌ Error building record with media embed: $e');
+      return _buildRecordWithMediaFallback(context, recordWithMedia);
+    }
+  }
+  
+  /// レコード付きメディアの構造をデバッグ
+  void _debugRecordWithMediaStructure(dynamic recordWithMedia) {
+    debugPrint('🔍 Starting record with media structure analysis...');
+    debugPrint('🔍 RecordWithMedia type: ${recordWithMedia.runtimeType}');
+    debugPrint('🔍 recordWithMedia: $recordWithMedia');
+    
+    if (recordWithMedia != null) {
+      final objString = recordWithMedia.toString();
+      debugPrint('🔍   recordWithMedia contains "record" in structure: ${objString.contains('record')}');
+      debugPrint('🔍   recordWithMedia contains "media" in structure: ${objString.contains('media')}');
+      debugPrint('🔍   recordWithMedia contains "images" in structure: ${objString.contains('images')}');
+      debugPrint('🔍   recordWithMedia contains "video" in structure: ${objString.contains('video')}');
+      debugPrint('🔍   recordWithMedia contains "external" in structure: ${objString.contains('external')}');
+      
+      // 文字列の最初の200文字をプレビュー
+      final preview = objString.length > 200 ? '${objString.substring(0, 200)}...' : objString;
+      debugPrint('🔍   recordWithMedia preview: $preview');
+    }
+  }
+  
+  /// レコード付きメディアコンテンツを構築
+  Widget _buildRecordWithMediaContent(
+    BuildContext context, {
+    required dynamic record,
+    required dynamic media,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // メディア部分を最初に表示
+        if (media != null) ...[
+          _buildMediaWidget(context, media),
+          const SizedBox(height: 8.0),
+        ],
+        
+        // レコード部分を下に表示
+        if (record != null)
+          _buildRecordEmbed(context, record),
+      ],
+    );
+  }
+  
+  /// メディアウィジェットを構築（images, video, external をサポート）
+  Widget _buildMediaWidget(BuildContext context, dynamic media) {
+    debugPrint('🎬 Building media widget: ${media.runtimeType}');
+    
+    try {
+      // メディアタイプを判定してそれぞれの埋め込みウィジェットを呼び出し
+      if (media != null) {
+        final mediaString = media.toString();
+        debugPrint('🎬 Media string contains: images=${mediaString.contains('images')}, video=${mediaString.contains('video')}, external=${mediaString.contains('external')}');
+        
+        // media.when() またはタイプチェックを使用してメディアタイプを判定
+        try {
+          // EmbedViewMediaのwhenパターンマッチングを試行
+          return media.when(
+            images: (images) {
+              debugPrint('🎬 Media is images type');
+              return _buildImagesEmbed(context, images);
+            },
+            video: (video) {
+              debugPrint('🎬 Media is video type');
+              return _buildVideoEmbed(context, video);
+            },
+            external: (external) {
+              debugPrint('🎬 Media is external type');
+              return _buildExternalEmbed(context, external);
+            },
+            unknown: (data) {
+              debugPrint('🎬 Media is unknown type: ${data.runtimeType}');
+              return _buildUnknownEmbed(context, data);
+            },
+          );
+        } catch (e) {
+          debugPrint('❌ when() pattern matching failed: $e');
+          
+          // フォールバック: 文字列ベースの判定
+          if (mediaString.contains('EmbedVideoView') || mediaString.contains('video')) {
+            debugPrint('🎬 Fallback: detected video media');
+            return _buildVideoEmbed(context, media);
+          } else if (mediaString.contains('EmbedImagesView') || mediaString.contains('images')) {
+            debugPrint('🎬 Fallback: detected images media');
+            return _buildImagesEmbed(context, media);
+          } else if (mediaString.contains('EmbedExternalView') || mediaString.contains('external')) {
+            debugPrint('🎬 Fallback: detected external media');
+            return _buildExternalEmbed(context, media);
+          } else {
+            debugPrint('🎬 Fallback: unknown media type');
+            return _buildUnknownEmbed(context, media);
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error building media widget: $e');
+    }
+    
+    return _buildUnknownEmbed(context, media);
+  }
+  
+  /// レコード付きメディアのフォールバック表示
+  Widget _buildRecordWithMediaFallback(BuildContext context, dynamic recordWithMedia) {
+    final borderRadius = BorderRadius.circular(6.0);
     
     return Container(
       padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: borderRadius,
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.6),
+          width: 0.5,
+        ),
+      ),
       child: Row(
         children: [
           Icon(
             Icons.perm_media,
-            color: Theme.of(context).colorScheme.primary,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             size: 24.0,
           ),
           const SizedBox(width: 12.0),
           Expanded(
-            child: Text(
-              'メディア付き投稿引用 (${recordWithMedia.runtimeType})',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'メディア付き投稿引用',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (recordWithMedia != null)
+                  Text(
+                    '(${recordWithMedia.runtimeType})',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
