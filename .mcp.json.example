@@ -72,6 +72,11 @@
             "env": {
                 "TAVILY_API_KEY": "your_tavily_api_key_here"
             }
+        },
+        "context7": {
+            "type": "stdio",
+            "command": "npx",
+            "args": ["-y", "@upstash/context7-mcp"]
         }
     }
 }

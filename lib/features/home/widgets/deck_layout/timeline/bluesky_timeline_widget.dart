@@ -15,6 +15,7 @@ import 'package:moodesky/services/bluesky/bluesky_service_v2.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
 import 'package:moodesky/shared/widgets/deck_item.dart';
 import 'package:moodesky/shared/widgets/simple_repost_widget.dart';
+import 'package:moodesky/shared/widgets/embed_view_widget.dart';
 import 'timeline_widget.dart';
 
 /// Bluesky-specific timeline widget
@@ -542,6 +543,7 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
     final content = feedView.post.record.text;
     final facets = feedView.post.record.facets ?? [];
     final timestamp = feedView.post.indexedAt;
+    final embedView = feedView.post.embed;
     
     // Extract engagement metrics (if available)
     final likeCount = feedView.post.likeCount;
@@ -585,18 +587,20 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
           // Main post content
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 16),
-            child: ProfilePostItem(
-              authorName: authorName,
-              authorHandle: authorHandle,
-              authorAvatar: authorAvatar,
-              content: content,
-              facets: facets,
-              timestamp: timestamp,
-              likeCount: likeCount,
-              repostCount: repostCount,
-              replyCount: replyCount,
-              isLiked: false, // TODO: Implement like state
-              isReposted: false, // TODO: Implement repost state
+            child: Column(
+              children: [
+                ProfilePostItem(
+                  authorName: authorName,
+                  authorHandle: authorHandle,
+                  authorAvatar: authorAvatar,
+                  content: content,
+                  facets: facets,
+                  timestamp: timestamp,
+                  likeCount: likeCount,
+                  repostCount: repostCount,
+                  replyCount: replyCount,
+                  isLiked: false, // TODO: Implement like state
+                  isReposted: false, // TODO: Implement repost state
               onLike: () {
                 // TODO: Implement like action
               },
@@ -656,10 +660,22 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
               },
               deck: widget.deck,
             ),
-          ),
-        ],
+            
+            // Embed content (if available)
+            if (embedView != null) ...[
+              const SizedBox(height: 12),
+              EmbedViewWidget(
+                embedView: embedView,
+                padding: const EdgeInsets.all(12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ],
+          ],
+        ),
       ),
-    );
+    ],
+  ),
+);
   }
 
   @override
