@@ -772,7 +772,7 @@ class EmbedViewWidget extends StatelessWidget {
       final recordData = _extractRecordData(record);
       
       if (recordData == null) {
-        return _buildRecordError(context, 'レコードデータが見つかりません');
+        return _buildRecordError(context, 'レコードデータが見つかりません', record: record);
       }
       
       return GestureDetector(
@@ -807,7 +807,7 @@ class EmbedViewWidget extends StatelessWidget {
       );
     } catch (e) {
       debugPrint('❌ Error building record embed: $e');
-      return _buildRecordError(context, 'レコードの読み込みに失敗しました');
+      return _buildRecordError(context, 'レコードの読み込みに失敗しました: $e', record: record);
     }
   }
 
@@ -867,41 +867,197 @@ class EmbedViewWidget extends StatelessWidget {
     );
   }
 
-  /// レコードデータを抽出
+  /// レコードデータを抽出（AT Protocol仕様準拠）
   Map<String, dynamic>? _extractRecordData(dynamic record) {
+    debugPrint('🔍 Starting AT Protocol compliant record analysis...');
+    debugPrint('🔍 Record type: ${record.runtimeType}');
+    
     try {
-      // レコード構造の解析
-      final recordObj = record.record;
-      if (recordObj == null) return null;
+      // record は EmbedViewRecord
+      debugPrint('🔍 Accessing record.record (EmbedViewRecordView)...');
+      final recordView = record.record; // EmbedViewRecordView (union型)
       
-      // 投稿者情報を抽出
-      final author = recordObj.author;
-      final authorName = author?.displayName ?? author?.handle ?? 'Unknown User';
-      final authorHandle = author?.handle ?? '';
-      final authorAvatar = author?.avatar;
+      if (recordView == null) {
+        debugPrint('❌ recordView is null');
+        return null;
+      }
       
-      // 投稿内容を抽出
-      final value = recordObj.value;
-      final text = value?.text ?? '';
+      debugPrint('🔍 RecordView type: ${recordView.runtimeType}');
+      _debugRecordStructure(recordView, 'recordView');
       
-      // 埋め込み画像を抽出
-      final embeds = value?.embed;
+      // union型の場合分けを実行
+      // AT Protocol仕様: viewRecord, viewNotFound, viewBlocked, viewDetached など
       
-      debugPrint('💬 Extracted record data:');
-      debugPrint('  Author: $authorName (@$authorHandle)');
-      debugPrint('  Text: ${text.length > 50 ? text.substring(0, 50) + '...' : text}');
-      debugPrint('  Has embeds: ${embeds != null}');
+      // Case 1: viewRecord - 実際の投稿データ
+      try {
+        // bluesky.dartライブラリでは UEmbedViewRecordViewRecord として実装
+        if (recordView.runtimeType.toString().contains('UEmbedViewRecordViewRecord')) {
+          debugPrint('🔍 Found UEmbedViewRecordViewRecord - extracting data...');
+          final actualRecord = recordView.data; // EmbedViewRecordViewRecord
+          
+          debugPrint('🔍 ActualRecord type: ${actualRecord.runtimeType}');
+          _debugRecordStructure(actualRecord, 'actualRecord');
+          
+          // 投稿者情報（ActorBasic）
+          final author = actualRecord.author;
+          debugPrint('🔍 Author type: ${author.runtimeType}');
+          _debugRecordStructure(author, 'author');
+          
+          final authorName = author.displayName ?? author.handle;
+          final authorHandle = author.handle;
+          final authorAvatar = author.avatar;
+          
+          debugPrint('🔍 Author info extracted:');
+          debugPrint('  - Name: $authorName');
+          debugPrint('  - Handle: $authorHandle');
+          debugPrint('  - Avatar: $authorAvatar');
+          
+          // 投稿内容（PostRecord）
+          final postValue = actualRecord.value;
+          debugPrint('🔍 PostValue type: ${postValue.runtimeType}');
+          _debugRecordStructure(postValue, 'postValue');
+          
+          final text = postValue.text ?? '';
+          debugPrint('🔍 Text extracted: "${text.length > 50 ? text.substring(0, 50) + '...' : text}"');
+          
+          // 埋め込みコンテンツ
+          final embeds = actualRecord.embeds;
+          debugPrint('🔍 Embeds: ${embeds?.length ?? 0} items');
+          
+          debugPrint('✅ Successfully extracted record data');
+          return {
+            'authorName': authorName,
+            'authorHandle': authorHandle,
+            'authorAvatar': authorAvatar,
+            'text': text,
+            'embeds': embeds,
+            'uri': actualRecord.uri.toString(),
+            'cid': actualRecord.cid,
+            'likeCount': actualRecord.likeCount,
+            'repostCount': actualRecord.repostCount,
+            'replyCount': actualRecord.replyCount,
+          };
+        }
+      } catch (e) {
+        debugPrint('🔍 UEmbedViewRecordViewRecord extraction failed: $e');
+      }
       
-      return {
-        'authorName': authorName,
-        'authorHandle': authorHandle,
-        'authorAvatar': authorAvatar,
-        'text': text,
-        'embeds': embeds,
-      };
-    } catch (e) {
-      debugPrint('❌ Error extracting record data: $e');
+      // Case 2: Dynamic approach - プロパティが直接アクセス可能な場合
+      try {
+        debugPrint('🔍 Attempting dynamic property access...');
+        
+        // recordView上で直接プロパティにアクセス
+        final author = recordView.author;
+        final value = recordView.value;
+        final uri = recordView.uri;
+        
+        if (author != null && value != null) {
+          debugPrint('🔍 Dynamic access successful');
+          _debugRecordStructure(author, 'dynamic_author');
+          _debugRecordStructure(value, 'dynamic_value');
+          
+          final authorName = author.displayName ?? author.handle ?? 'Unknown User';
+          final authorHandle = author.handle ?? '';
+          final authorAvatar = author.avatar;
+          final text = value.text ?? '';
+          
+          debugPrint('✅ Successfully extracted via dynamic access');
+          return {
+            'authorName': authorName,
+            'authorHandle': authorHandle, 
+            'authorAvatar': authorAvatar,
+            'text': text,
+            'embeds': recordView.embeds,
+            'uri': uri?.toString(),
+          };
+        }
+      } catch (e) {
+        debugPrint('🔍 Dynamic property access failed: $e');
+      }
+      
+      // Case 3: viewNotFound, viewBlocked, viewDetached などの処理
+      final recordViewString = recordView.toString();
+      if (recordViewString.contains('viewNotFound') || recordViewString.contains('notFound')) {
+        debugPrint('🔍 Record not found');
+        return {
+          'authorName': '投稿が見つかりません',
+          'authorHandle': '',
+          'authorAvatar': null,
+          'text': 'この投稿は削除されたか、アクセスできません。',
+          'embeds': null,
+          'isNotFound': true,
+        };
+      }
+      
+      if (recordViewString.contains('viewBlocked') || recordViewString.contains('blocked')) {
+        debugPrint('🔍 Record blocked');
+        return {
+          'authorName': 'ブロックされたユーザー',
+          'authorHandle': '',
+          'authorAvatar': null,
+          'text': 'この投稿は表示できません。',
+          'embeds': null,
+          'isBlocked': true,
+        };
+      }
+      
+      if (recordViewString.contains('viewDetached') || recordViewString.contains('detached')) {
+        debugPrint('🔍 Record detached');
+        return {
+          'authorName': '切り離された投稿',
+          'authorHandle': '',
+          'authorAvatar': null,
+          'text': 'この投稿は切り離されています。',
+          'embeds': null,
+          'isDetached': true,
+        };
+      }
+      
+      debugPrint('❌ Unknown record view type');
       return null;
+      
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error extracting record data: $e');
+      debugPrint('❌ Stack trace: $stackTrace');
+      return null;
+    }
+  }
+  
+  /// レコード構造をデバッグ出力
+  void _debugRecordStructure(dynamic obj, String path) {
+    if (obj == null) {
+      debugPrint('🔍 $path: null');
+      return;
+    }
+    
+    debugPrint('🔍 $path: ${obj.runtimeType}');
+    
+    // よく使われるプロパティを確認
+    final commonProperties = [
+      'author', 'value', 'text', 'embed', 'embeds',
+      'handle', 'displayName', 'avatar', 'did',
+      'record', 'uri', 'cid'
+    ];
+    
+    for (final prop in commonProperties) {
+      try {
+        // リフレクションの代わりに toString() でプロパティの存在を推測
+        final objString = obj.toString();
+        if (objString.contains(prop)) {
+          debugPrint('🔍   $path contains "$prop" in structure');
+        }
+      } catch (e) {
+        // エラーは無視
+      }
+    }
+    
+    // オブジェクトの文字列表現を確認（最初の200文字のみ）
+    try {
+      final objString = obj.toString();
+      final preview = objString.length > 200 ? objString.substring(0, 200) + '...' : objString;
+      debugPrint('🔍   $path preview: $preview');
+    } catch (e) {
+      debugPrint('🔍   $path preview failed: $e');
     }
   }
   
@@ -912,23 +1068,59 @@ class EmbedViewWidget extends StatelessWidget {
     final authorHandle = recordData['authorHandle'] as String;
     final authorAvatar = recordData['authorAvatar'] as String?;
     
+    // 特別な状態の確認
+    final isNotFound = recordData['isNotFound'] as bool? ?? false;
+    final isBlocked = recordData['isBlocked'] as bool? ?? false;
+    final isDetached = recordData['isDetached'] as bool? ?? false;
+    
+    // 特別な状態の場合のアイコン選択
+    IconData headerIcon = Icons.format_quote;
+    Color iconColor = theme.colorScheme.onSurfaceVariant;
+    
+    if (isNotFound) {
+      headerIcon = Icons.not_interested;
+      iconColor = theme.colorScheme.error;
+    } else if (isBlocked) {
+      headerIcon = Icons.block;
+      iconColor = theme.colorScheme.error;
+    } else if (isDetached) {
+      headerIcon = Icons.link_off;
+      iconColor = theme.colorScheme.onSurfaceVariant;
+    }
+    
     return Row(
       children: [
         // アバター
         CircleAvatar(
           radius: 16.0,
-          backgroundImage: authorAvatar != null && authorAvatar.isNotEmpty
+          backgroundColor: theme.colorScheme.surfaceContainerHighest,
+          backgroundImage: (!isNotFound && !isBlocked && !isDetached && 
+                           authorAvatar != null && authorAvatar.isNotEmpty)
               ? NetworkImage(authorAvatar)
               : null,
-          child: authorAvatar == null || authorAvatar.isEmpty
-              ? Text(
-                  authorName.isNotEmpty ? authorName[0].toUpperCase() : '?',
-                  style: const TextStyle(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              : null,
+          onBackgroundImageError: (exception, stackTrace) {
+            // アバター画像の読み込みエラー時のログ出力
+            debugPrint('❌ Avatar image load error: $exception');
+          },
+          child: (!isNotFound && !isBlocked && !isDetached && 
+                 authorAvatar != null && authorAvatar.isNotEmpty)
+              ? null  // アバター画像がある場合は子要素を表示しない
+              : (isNotFound || isBlocked || isDetached)
+                  ? Icon(
+                      isNotFound ? Icons.person_off : 
+                      isBlocked ? Icons.block :
+                      Icons.person_outline,
+                      size: 20.0,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    )
+                  : Text(
+                      authorName.isNotEmpty ? authorName[0].toUpperCase() : '?',
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
         ),
         
         const SizedBox(width: 8.0),
@@ -942,11 +1134,14 @@ class EmbedViewWidget extends StatelessWidget {
                 authorName,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: (isNotFound || isBlocked) 
+                      ? theme.colorScheme.onSurfaceVariant 
+                      : null,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (authorHandle.isNotEmpty)
+              if (authorHandle.isNotEmpty && !isNotFound && !isBlocked)
                 Text(
                   '@$authorHandle',
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -959,11 +1154,11 @@ class EmbedViewWidget extends StatelessWidget {
           ),
         ),
         
-        // 引用アイコン
+        // 状態に応じたアイコン
         Icon(
-          Icons.format_quote,
+          headerIcon,
           size: 16.0,
-          color: theme.colorScheme.onSurfaceVariant,
+          color: iconColor,
         ),
       ],
     );
@@ -974,13 +1169,25 @@ class EmbedViewWidget extends StatelessWidget {
     final theme = Theme.of(context);
     final text = recordData['text'] as String;
     
+    // 特別な状態の確認
+    final isNotFound = recordData['isNotFound'] as bool? ?? false;
+    final isBlocked = recordData['isBlocked'] as bool? ?? false;
+    final isDetached = recordData['isDetached'] as bool? ?? false;
+    
     if (text.isEmpty) {
       return const SizedBox.shrink();
     }
     
     return Text(
       text,
-      style: theme.textTheme.bodyMedium,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: (isNotFound || isBlocked || isDetached)
+            ? theme.colorScheme.onSurfaceVariant
+            : null,
+        fontStyle: (isNotFound || isBlocked || isDetached)
+            ? FontStyle.italic
+            : null,
+      ),
       maxLines: 3,
       overflow: TextOverflow.ellipsis,
     );
@@ -1038,7 +1245,7 @@ class EmbedViewWidget extends StatelessWidget {
   }
   
   /// レコードエラー表示を構築
-  Widget _buildRecordError(BuildContext context, String message) {
+  Widget _buildRecordError(BuildContext context, String message, {dynamic record}) {
     final theme = Theme.of(context);
     
     return Container(
@@ -1050,22 +1257,66 @@ class EmbedViewWidget extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(8.0),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.error_outline,
-            color: theme.colorScheme.onSurfaceVariant,
-            size: 20.0,
-          ),
-          const SizedBox(width: 8.0),
-          Expanded(
-            child: Text(
-              message,
-              style: theme.textTheme.bodyMedium?.copyWith(
+          Row(
+            children: [
+              Icon(
+                Icons.error_outline,
                 color: theme.colorScheme.onSurfaceVariant,
+                size: 20.0,
+              ),
+              const SizedBox(width: 8.0),
+              Expanded(
+                child: Text(
+                  message,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // デバッグ用の詳細情報表示
+          if (record != null) ...[
+            const SizedBox(height: 8.0),
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(4.0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'デバッグ情報:',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    'Type: ${record.runtimeType}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                  const SizedBox(height: 2.0),
+                  Text(
+                    'Data: ${record.toString().length > 100 ? record.toString().substring(0, 100) + '...' : record.toString()}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
