@@ -58,46 +58,46 @@ class AuthService {
         service: pdsHost ?? authConfig.defaultPdsHost,
       );
 
-      final session = sessionResponse.data;
-      debugPrint('✅ Authentication successful for: ${session.handle}');
-      debugPrint('   DID: ${session.did}');
-      debugPrint('   Email: ${session.email ?? 'N/A'}');
+      final sessionData = sessionResponse.data;
+      debugPrint('✅ Authentication successful for: ${sessionData.handle}');
+      debugPrint('   DID: ${sessionData.did}');
+      debugPrint('   Email: ${sessionData.email ?? 'N/A'}');
 
       // セッションデータを作成
-      final sessionData = AppPasswordSessionData(
-        accessJwt: session.accessJwt,
-        refreshJwt: session.refreshJwt,
-        did: session.did,
-        handle: session.handle,
-        email: session.email,
+      final appPasswordSession = AppPasswordSessionData(
+        accessJwt: sessionData.accessJwt,
+        refreshJwt: sessionData.refreshJwt,
+        did: sessionData.did,
+        handle: sessionData.handle,
+        email: sessionData.email,
         sessionString: null,
       );
 
       // ユーザープロフィールを作成
       final profile = UserProfile(
-        did: session.did,
-        handle: session.handle,
-        displayName: session.handle, // 初期値としてhandleを使用
+        did: sessionData.did,
+        handle: sessionData.handle,
+        displayName: sessionData.handle, // 初期値としてhandleを使用
         description: null,
         avatar: null,
         banner: null,
-        email: session.email,
+        email: sessionData.email,
         isVerified: false,
       );
 
       final authSessionData = AuthSessionData.appPassword(
-        appPasswordSession: sessionData,
+        appPasswordSession: appPasswordSession,
         profile: profile,
       );
 
       // アカウント情報をデータベースに保存
-      await _storeAccount(sessionData, profile, isAdditionalAccount);
+      await _storeAccount(appPasswordSession, profile, isAdditionalAccount);
 
       debugPrint('✅ Account stored successfully in database');
 
       return AuthResult.success(
         session: authSessionData,
-        accountDid: sessionData.did,
+        accountDid: appPasswordSession.did,
       );
     } catch (e) {
       debugPrint('❌ App password sign in failed: $e');
@@ -270,7 +270,7 @@ class AuthService {
 
       debugPrint('Attempting token refresh for account: ${account.handle}');
       
-      // Call AT Protocol refresh session endpoint directly
+      // Call AT Protocol refresh session endpoint
       final refreshResponse = await atproto.refreshSession(
         refreshJwt: account.refreshJwt!,
         service: authConfig.defaultPdsHost,

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:bluesky/bluesky.dart' as bsky;
+import 'package:chewie/chewie.dart';
+import 'package:video_player/video_player.dart';
 
 // Project imports:
 import 'package:moodesky/shared/utils/url_utils.dart';
@@ -487,26 +489,172 @@ class EmbedViewWidget extends StatelessWidget {
   /// 動画埋め込みウィジェット
   Widget _buildVideoEmbed(BuildContext context, dynamic video) {
     debugPrint('🎥 Building video embed: ${video.runtimeType}');
+    debugPrint('🎥 Video object structure: ${video.toString()}');
     
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        children: [
-          Icon(
-            Icons.videocam,
-            color: Theme.of(context).colorScheme.primary,
-            size: 24.0,
+    try {
+      // EmbedVideoViewの構造を分析
+      _debugVideoStructure(video);
+      
+      // EmbedVideoViewからデータを抽出
+      String? playlistUrl;
+      String? thumbnailUrl;
+      String? altText;
+      double? aspectRatioValue;
+      
+      if (video != null) {
+        // playlist URLの抽出
+        try {
+          playlistUrl = video.playlist as String?;
+          debugPrint('🎥 Playlist URL: $playlistUrl');
+        } catch (e) {
+          debugPrint('❌ Failed to extract playlist: $e');
+        }
+        
+        // サムネイルURLの抽出
+        try {
+          thumbnailUrl = video.thumbnail as String?;
+          debugPrint('🎥 Thumbnail URL: $thumbnailUrl');
+        } catch (e) {
+          debugPrint('❌ Failed to extract thumbnail: $e');
+        }
+        
+        // Alt textの抽出
+        try {
+          altText = video.alt as String?;
+          debugPrint('🎥 Alt text: $altText');
+        } catch (e) {
+          debugPrint('❌ Failed to extract alt text: $e');
+        }
+        
+        // アスペクト比の抽出
+        try {
+          final aspectRatio = video.aspectRatio;
+          if (aspectRatio != null) {
+            final width = aspectRatio.width as num?;
+            final height = aspectRatio.height as num?;
+            if (width != null && height != null && height != 0) {
+              aspectRatioValue = width / height;
+              debugPrint('🎥 Aspect ratio: $aspectRatioValue ($width:$height)');
+            }
+          }
+        } catch (e) {
+          debugPrint('❌ Failed to extract aspect ratio: $e');
+        }
+      }
+      
+      // 動画プレイヤーの構築
+      return _buildVideoPlayer(
+        context, 
+        playlistUrl: playlistUrl,
+        thumbnailUrl: thumbnailUrl,
+        altText: altText,
+        aspectRatio: aspectRatioValue ?? 16/9, // デフォルト16:9
+      );
+      
+    } catch (e) {
+      debugPrint('❌ Error building video embed: $e');
+      return _buildVideoFallback(context, video);
+    }
+  }
+  
+  /// 動画構造をデバッグ
+  void _debugVideoStructure(dynamic video) {
+    debugPrint('🔍 Starting video structure analysis...');
+    debugPrint('🔍 Video type: ${video.runtimeType}');
+    debugPrint('🔍 video: $video');
+    
+    if (video != null) {
+      final videoString = video.toString();
+      debugPrint('🔍   video contains "playlist" in structure: ${videoString.contains('playlist')}');
+      debugPrint('🔍   video contains "thumbnail" in structure: ${videoString.contains('thumbnail')}');
+      debugPrint('🔍   video contains "alt" in structure: ${videoString.contains('alt')}');
+      debugPrint('🔍   video contains "aspectRatio" in structure: ${videoString.contains('aspectRatio')}');
+      debugPrint('🔍   video contains "cid" in structure: ${videoString.contains('cid')}');
+      
+      // 文字列の最初の200文字をプレビュー
+      final preview = videoString.length > 200 ? '${videoString.substring(0, 200)}...' : videoString;
+      debugPrint('🔍   video preview: $preview');
+    }
+  }
+  
+  /// 動画プレイヤーを構築
+  Widget _buildVideoPlayer(
+    BuildContext context, {
+    required String? playlistUrl,
+    required String? thumbnailUrl,
+    required String? altText,
+    required double aspectRatio,
+  }) {
+    final borderRadius = BorderRadius.circular(6.0);
+    
+    if (playlistUrl == null || playlistUrl.isEmpty) {
+      debugPrint('🎥 No playlist URL available, showing fallback');
+      return _buildVideoFallback(context, null);
+    }
+    
+    return AspectRatio(
+      aspectRatio: aspectRatio,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.6),
+            width: 0.5,
           ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Text(
-              '動画 (${video.runtimeType})',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        ),
+        child: ClipRRect(
+          borderRadius: borderRadius,
+          child: VideoPlayerWidget(
+            playlistUrl: playlistUrl,
+            thumbnailUrl: thumbnailUrl,
+            altText: altText,
+          ),
+        ),
+      ),
+    );
+  }
+  
+  /// 動画フォールバック表示
+  Widget _buildVideoFallback(BuildContext context, dynamic video) {
+    final borderRadius = BorderRadius.circular(6.0);
+    
+    return AspectRatio(
+      aspectRatio: 16/9,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: borderRadius,
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.6),
+            width: 0.5,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.videocam_off,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 48.0,
               ),
-            ),
+              const SizedBox(height: 12.0),
+              Text(
+                '動画を読み込めません',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              if (video != null)
+                Text(
+                  '(${video.runtimeType})',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -918,7 +1066,7 @@ class EmbedViewWidget extends StatelessWidget {
           _debugRecordStructure(postValue, 'postValue');
           
           final text = postValue.text ?? '';
-          debugPrint('🔍 Text extracted: "${text.length > 50 ? text.substring(0, 50) + '...' : text}"');
+          debugPrint('🔍 Text extracted: "${text.length > 50 ? '${text.substring(0, 50)}...' : text}"');
           
           // 埋め込みコンテンツ
           final embeds = actualRecord.embeds;
@@ -1054,7 +1202,7 @@ class EmbedViewWidget extends StatelessWidget {
     // オブジェクトの文字列表現を確認（最初の200文字のみ）
     try {
       final objString = obj.toString();
-      final preview = objString.length > 200 ? objString.substring(0, 200) + '...' : objString;
+      final preview = objString.length > 200 ? '${objString.substring(0, 200)}...' : objString;
       debugPrint('🔍   $path preview: $preview');
     } catch (e) {
       debugPrint('🔍   $path preview failed: $e');
@@ -1307,7 +1455,7 @@ class EmbedViewWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 2.0),
                   Text(
-                    'Data: ${record.toString().length > 100 ? record.toString().substring(0, 100) + '...' : record.toString()}',
+                    'Data: ${record.toString().length > 100 ? '${record.toString().substring(0, 100)}...' : record.toString()}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontFamily: 'monospace',
@@ -1331,6 +1479,361 @@ class EmbedViewWidget extends StatelessWidget {
       record: (_) => 'record',
       recordWithMedia: (_) => 'recordWithMedia',
       unknown: (_) => 'unknown',
+    );
+  }
+}
+
+/// 動画プレイヤーウィジェット
+class VideoPlayerWidget extends StatefulWidget {
+  final String playlistUrl;
+  final String? thumbnailUrl;
+  final String? altText;
+  
+  const VideoPlayerWidget({
+    super.key,
+    required this.playlistUrl,
+    this.thumbnailUrl,
+    this.altText,
+  });
+  
+  @override
+  State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
+}
+
+class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
+  VideoPlayerController? _videoController;
+  ChewieController? _chewieController;
+  bool _isInitialized = false;
+  bool _hasError = false;
+  String? _errorMessage;
+  
+  @override
+  void initState() {
+    super.initState();
+    _initializePlayer();
+  }
+  
+  @override
+  void dispose() {
+    _disposeControllers();
+    super.dispose();
+  }
+  
+  void _disposeControllers() {
+    _chewieController?.dispose();
+    _videoController?.dispose();
+  }
+  
+  Future<void> _initializePlayer() async {
+    try {
+      debugPrint('🎥 Initializing video player for: ${widget.playlistUrl}');
+      
+      // VideoPlayerControllerを作成
+      _videoController = VideoPlayerController.networkUrl(
+        Uri.parse(widget.playlistUrl),
+      );
+      
+      // 初期化
+      await _videoController!.initialize();
+      
+      if (!mounted) return;
+      
+      // ChewieControllerを作成
+      _chewieController = ChewieController(
+        videoPlayerController: _videoController!,
+        autoPlay: false, // 自動再生しない
+        looping: false,
+        aspectRatio: _videoController!.value.aspectRatio,
+        autoInitialize: true,
+        showControlsOnInitialize: true,
+        materialProgressColors: ChewieProgressColors(
+          playedColor: Theme.of(context).colorScheme.primary,
+          handleColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+          bufferedColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+        ),
+        placeholder: _buildThumbnailPlaceholder(),
+        errorBuilder: (context, errorMessage) {
+          debugPrint('❌ Video player error: $errorMessage');
+          return _buildError(errorMessage);
+        },
+      );
+      
+      setState(() {
+        _isInitialized = true;
+        _hasError = false;
+      });
+      
+      debugPrint('✅ Video player initialized successfully');
+      
+    } catch (e) {
+      debugPrint('❌ Failed to initialize video player: $e');
+      
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _errorMessage = e.toString();
+          _isInitialized = false;
+        });
+      }
+    }
+  }
+  
+  Widget _buildThumbnailPlaceholder() {
+    if (widget.thumbnailUrl != null && widget.thumbnailUrl!.isNotEmpty) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.network(
+            widget.thumbnailUrl!,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              debugPrint('❌ Thumbnail load error: $error');
+              return _buildDefaultThumbnail();
+            },
+          ),
+          // 動画インジケーター（左上）
+          Positioned(
+            top: 8.0,
+            left: 8.0,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(4.0),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.videocam,
+                    color: Colors.white,
+                    size: 12.0,
+                  ),
+                  const SizedBox(width: 4.0),
+                  Text(
+                    'VIDEO',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10.0,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // 中央の大きな再生ボタン
+          Center(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.7),
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(20.0),
+              child: Icon(
+                Icons.play_arrow,
+                color: Colors.white,
+                size: 40.0,
+              ),
+            ),
+          ),
+          // 右下の動画時間インジケーター（プレースホルダー）
+          Positioned(
+            bottom: 8.0,
+            right: 8.0,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(4.0),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.access_time,
+                    color: Colors.white,
+                    size: 10.0,
+                  ),
+                  const SizedBox(width: 4.0),
+                  Text(
+                    '--:--',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    
+    return _buildDefaultThumbnail();
+  }
+  
+  Widget _buildDefaultThumbnail() {
+    return Container(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Stack(
+        children: [
+          // 背景グラデーション
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
+                ],
+              ),
+            ),
+          ),
+          // 動画インジケーター（左上）
+          Positioned(
+            top: 8.0,
+            left: 8.0,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+                borderRadius: BorderRadius.circular(4.0),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.videocam,
+                    color: Colors.white,
+                    size: 12.0,
+                  ),
+                  const SizedBox(width: 4.0),
+                  Text(
+                    'VIDEO',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10.0,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // 中央のコンテンツ
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(20.0),
+                  child: Icon(
+                    Icons.play_circle_filled,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 48.0,
+                  ),
+                ),
+                const SizedBox(height: 12.0),
+                Text(
+                  '動画を再生',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildError(String errorMessage) {
+    return Container(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Theme.of(context).colorScheme.error,
+              size: 48.0,
+            ),
+            const SizedBox(height: 12.0),
+            Text(
+              '動画の読み込みに失敗しました',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 4.0),
+            Text(
+              errorMessage,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildLoading() {
+    return Container(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 12.0),
+            Text(
+              '動画を読み込み中...',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    // エラー状態
+    if (_hasError) {
+      return _buildError(_errorMessage ?? 'Unknown error');
+    }
+    
+    // ローディング状態
+    if (!_isInitialized || _chewieController == null) {
+      return _buildLoading();
+    }
+    
+    // 動画プレイヤー
+    return Semantics(
+      label: widget.altText ?? '動画コンテンツ',
+      child: Chewie(
+        controller: _chewieController!,
+      ),
     );
   }
 }
