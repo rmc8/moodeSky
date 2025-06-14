@@ -1,21 +1,36 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bluesky/bluesky.dart' as bsky;
+
 // Project imports:
+import 'package:moodesky/core/providers/deck_provider.dart';
 import 'package:moodesky/core/theme/app_themes.dart';
+import 'package:moodesky/features/home/widgets/deck_layout/deck_utils.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
+import 'package:moodesky/services/database/database.dart';
+import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
+import 'package:moodesky/shared/widgets/bluesky_facet_text.dart';
 
 /// デッキアイテムの基本レイアウト - PostItemと統一されたデザイン
-class DeckItem extends StatelessWidget {
+class DeckItem extends ConsumerWidget {
   final Widget avatar;
   final String title;
   final String subtitle;
   final String? timestamp;
   final String content;
+  final List<bsky.Facet>? facets;
+  final Function(String)? onMentionTap;
+  final Function(String)? onLinkTap;
+  final Function(String)? onHashtagTap;
   final List<Widget>? actionButtons;
   final VoidCallback? onTap;
   final Widget? trailing;
   final Color? accentColor;
+  final Deck? deck; // デッキメニュー表示用（削除処理はDeckUtilsで統一）
+  final Widget? embedWidget;
 
   const DeckItem({
     super.key,
@@ -24,14 +39,22 @@ class DeckItem extends StatelessWidget {
     required this.subtitle,
     this.timestamp,
     required this.content,
+    this.facets,
+    this.onMentionTap,
+    this.onLinkTap,
+    this.onHashtagTap,
     this.actionButtons,
     this.onTap,
     this.trailing,
     this.accentColor,
+    this.deck,
+    this.embedWidget,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textStyles = context.appTextStyles;
+
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -52,7 +75,7 @@ class DeckItem extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      style: textStyles.titleSmall.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                       maxLines: 1,
@@ -60,9 +83,9 @@ class DeckItem extends StatelessWidget {
                     ),
                     Text(
                       subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF424242) 
+                      style: textStyles.bodySmall.copyWith(
+                        color: context.isLight
+                            ? const Color(0xFF424242)
                             : const Color(0xFFCCCCCC),
                       ),
                       maxLines: 1,
@@ -76,9 +99,9 @@ class DeckItem extends StatelessWidget {
               if (timestamp != null)
                 Text(
                   timestamp!,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).brightness == Brightness.light 
-                        ? const Color(0xFF424242) 
+                  style: textStyles.bodySmall.copyWith(
+                    color: context.isLight
+                        ? const Color(0xFF424242)
                         : const Color(0xFFCCCCCC),
                   ),
                 ),
@@ -88,41 +111,114 @@ class DeckItem extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // コンテンツ
-          Text(
-            content, 
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).brightness == Brightness.light 
-                  ? const Color(0xFF222222) 
-                  : const Color(0xFFF5F5F5),
-              fontWeight: FontWeight.w500,
-            ),
+          // コンテンツ（facets対応）
+          Builder(
+            builder: (context) {
+              if (facets != null && facets!.isNotEmpty) {
+                debugPrint('📝 DeckItem using BlueskyFacetText for ${facets!.length} facets');
+                return BlueskyFacetText(
+                  text: content,
+                  facets: facets!,
+                  style: textStyles.bodyLarge.copyWith(
+                    // facetsのデフォルト色を設定（facetテキスト以外の部分用）
+                    color: context.isLight
+                        ? const Color(0xFF000000) // 純粋な黒
+                        : const Color(0xFFF5F5F5),
+                    fontWeight: FontWeight.w400, // Regular
+                  ),
+                  onMentionTap: onMentionTap,
+                  onLinkTap: onLinkTap,
+                  onHashtagTap: onHashtagTap,
+                );
+              } else {
+                debugPrint('📝 DeckItem using regular Text (no facets)');
+                return Text(
+                  content,
+                  style: textStyles.bodyLarge.copyWith(
+                    color: context.isLight
+                        ? const Color(0xFF000000) // 純粋な黒
+                        : const Color(0xFFF5F5F5),
+                    fontWeight: FontWeight.w400, // Regular
+                  ),
+                );
+              }
+            },
           ),
 
-          if (actionButtons != null && actionButtons!.isNotEmpty) ...[
+          // 埋め込みコンテンツ（アクションボタンの上に表示）
+          if (embedWidget != null) ...[
+            const SizedBox(height: 12),
+            embedWidget!,
+          ],
+
+          // アクションボタンまたはメニューボタンがある場合のみスペースを追加
+          if ((actionButtons != null && actionButtons!.isNotEmpty) ||
+              deck != null) ...[
             const SizedBox(height: 16),
 
-            // アクションボタン行
+            // アクションボタン行（メニューボタンを常に含む）
             Row(
               children: [
-                ...actionButtons!
-                    .expand((widget) => [widget, const SizedBox(width: 24)])
-                    .take(actionButtons!.length * 2 - 1),
+                // アクションボタンがある場合は表示
+                if (actionButtons != null && actionButtons!.isNotEmpty) ...[
+                  ...actionButtons!
+                      .expand((widget) => [widget, const SizedBox(width: 24)])
+                      .take(actionButtons!.length * 2 - 1),
+                ],
 
                 const Spacer(),
 
-                // メニュー
-                IconButton(
-                  icon: Icon(
-                    Icons.more_horiz,
-                    color: Theme.of(context).brightness == Brightness.light 
-                        ? const Color(0xFF424242) 
-                        : const Color(0xFFCCCCCC),
+                // デッキが指定されている場合はメニューボタンを表示
+                if (deck != null)
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_horiz,
+                      color: context.isLight
+                          ? const Color(0xFF424242)
+                          : const Color(0xFFCCCCCC),
+                    ),
+                    onSelected: (value) async {
+                      debugPrint(
+                        '🔽 DeckItem menu selected: $value for deck: ${deck!.title}',
+                      );
+
+                      // 現在のデッキリストから正確なインデックスを取得
+                      final decksAsync = ref.read(decksStreamProvider);
+                      final decks = decksAsync.valueOrNull ?? [];
+                      final currentIndex = decks.indexWhere(
+                        (d) => d.deckId == deck!.deckId,
+                      );
+
+                      debugPrint(
+                        '🔽 Current deck index: $currentIndex, total decks: ${decks.length}',
+                      );
+
+                      // DeckUtilsで統一された処理を使用
+                      await DeckUtils.handleDeckMenuAction(
+                        context,
+                        ref,
+                        value,
+                        deck!,
+                        currentIndex >= 0 ? currentIndex : 0,
+                        decks.length,
+                      );
+                      debugPrint('🔽 DeckItem menu action completed: $value');
+                    },
+                    itemBuilder: (context) {
+                      // メニュー構築時も正確なインデックスを使用
+                      final decksAsync = ref.read(decksStreamProvider);
+                      final decks = decksAsync.valueOrNull ?? [];
+                      final currentIndex = decks.indexWhere(
+                        (d) => d.deckId == deck!.deckId,
+                      );
+
+                      return DeckUtils.buildDeckMenuItems(
+                        context,
+                        currentIndex >= 0 ? currentIndex : 0,
+                        decks.length,
+                      );
+                    },
                   ),
-                  onPressed: () {
-                    // TODO: メニューを表示
-                  },
-                ),
               ],
             ),
           ],
@@ -141,6 +237,7 @@ class NotificationItem extends StatelessWidget {
   final String? postContent;
   final DateTime timestamp;
   final VoidCallback? onTap;
+  final Deck? deck;
 
   const NotificationItem({
     super.key,
@@ -151,6 +248,7 @@ class NotificationItem extends StatelessWidget {
     this.postContent,
     required this.timestamp,
     this.onTap,
+    this.deck,
   });
 
   @override
@@ -177,6 +275,7 @@ class NotificationItem extends StatelessWidget {
       trailing: Icon(icon, color: color, size: 16),
       onTap: onTap,
       accentColor: color,
+      deck: deck,
     );
   }
 
@@ -245,6 +344,7 @@ class ProfilePostItem extends StatelessWidget {
   final String authorHandle;
   final String? authorAvatar;
   final String content;
+  final List<bsky.Facet> facets;
   final DateTime timestamp;
   final int likeCount;
   final int repostCount;
@@ -255,6 +355,11 @@ class ProfilePostItem extends StatelessWidget {
   final VoidCallback? onRepost;
   final VoidCallback? onReply;
   final VoidCallback? onTap;
+  final Function(String)? onMentionTap;
+  final Function(String)? onLinkTap;
+  final Function(String)? onHashtagTap;
+  final Deck? deck;
+  final Widget? embedWidget;
 
   const ProfilePostItem({
     super.key,
@@ -262,6 +367,7 @@ class ProfilePostItem extends StatelessWidget {
     required this.authorHandle,
     this.authorAvatar,
     required this.content,
+    this.facets = const [],
     required this.timestamp,
     this.likeCount = 0,
     this.repostCount = 0,
@@ -272,6 +378,11 @@ class ProfilePostItem extends StatelessWidget {
     this.onRepost,
     this.onReply,
     this.onTap,
+    this.onMentionTap,
+    this.onLinkTap,
+    this.onHashtagTap,
+    this.deck,
+    this.embedWidget,
   });
 
   @override
@@ -293,6 +404,11 @@ class ProfilePostItem extends StatelessWidget {
       subtitle: '@$authorHandle',
       timestamp: _formatTimestamp(timestamp),
       content: content,
+      facets: facets,
+      onMentionTap: onMentionTap,
+      onLinkTap: onLinkTap,
+      onHashtagTap: onHashtagTap,
+      embedWidget: embedWidget,
       actionButtons: [
         _buildActionButton(
           context: context,
@@ -310,7 +426,9 @@ class ProfilePostItem extends StatelessWidget {
         ),
         _buildActionButton(
           context: context,
-          icon: isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+          icon: isLiked
+              ? Icons.favorite_rounded
+              : Icons.favorite_border_rounded,
           count: likeCount,
           isActive: isLiked,
           activeColor: Theme.of(context).colorScheme.likeColor,
@@ -318,6 +436,7 @@ class ProfilePostItem extends StatelessWidget {
         ),
       ],
       onTap: onTap,
+      deck: deck,
     );
   }
 
@@ -331,9 +450,9 @@ class ProfilePostItem extends StatelessWidget {
   }) {
     final color = isActive && activeColor != null
         ? activeColor
-        : (Theme.of(context).brightness == Brightness.light 
-            ? const Color(0xFF424242) 
-            : const Color(0xFFCCCCCC));
+        : (Theme.of(context).brightness == Brightness.light
+              ? const Color(0xFF424242)
+              : const Color(0xFFCCCCCC));
 
     return InkWell(
       onTap: onTap,
@@ -350,9 +469,11 @@ class ProfilePostItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   _formatCount(count),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: color, fontSize: 12),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -410,6 +531,7 @@ class SearchResultItem extends StatelessWidget {
   final String content;
   final String? metadata;
   final VoidCallback? onTap;
+  final Deck? deck;
 
   const SearchResultItem({
     super.key,
@@ -420,6 +542,7 @@ class SearchResultItem extends StatelessWidget {
     required this.content,
     this.metadata,
     this.onTap,
+    this.deck,
   });
 
   @override
@@ -436,6 +559,7 @@ class SearchResultItem extends StatelessWidget {
       content: content,
       onTap: onTap,
       accentColor: color,
+      deck: deck,
     );
   }
 
@@ -462,6 +586,7 @@ class ListMemberItem extends StatelessWidget {
   final bool isFollowing;
   final VoidCallback? onFollow;
   final VoidCallback? onTap;
+  final Deck? deck;
 
   const ListMemberItem({
     super.key,
@@ -472,6 +597,7 @@ class ListMemberItem extends StatelessWidget {
     this.isFollowing = false,
     this.onFollow,
     this.onTap,
+    this.deck,
   });
 
   @override
@@ -492,9 +618,14 @@ class ListMemberItem extends StatelessWidget {
       content: bio ?? AppLocalizations.of(context).noProfileInfo,
       trailing: OutlinedButton(
         onPressed: onFollow,
-        child: Text(isFollowing ? AppLocalizations.of(context).following : AppLocalizations.of(context).follow),
+        child: Text(
+          isFollowing
+              ? AppLocalizations.of(context).following
+              : AppLocalizations.of(context).follow,
+        ),
       ),
       onTap: onTap,
+      deck: deck,
     );
   }
 }

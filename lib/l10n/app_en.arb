@@ -96,6 +96,11 @@
     "description": "Text for sign in button"
   },
   
+  "signingIn": "Signing in...",
+  "@signingIn": {
+    "description": "Loading message while signing in"
+  },
+  
   "oAuthInDevelopment": "OAuth in development",
   "@oAuthInDevelopment": {
     "description": "Button text when OAuth is selected"
@@ -247,6 +252,17 @@
   "@languageDescription": {
     "description": "Description for language selection"
   },
+
+  "repostedBy": "Reposted by {name}",
+  "@repostedBy": {
+    "description": "Displayed when a post has been reposted by someone",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name or handle of the user who reposted"
+      }
+    }
+  },
   
   "selectLanguage": "Select Language",
   "@selectLanguage": {
@@ -278,14 +294,54 @@
     "description": "Label for manage accounts option"
   },
   
-  "manageAccountsDescription": "Add, remove, or switch between accounts",
+  "manageAccountsDescription": "Add and remove accounts",
   "@manageAccountsDescription": {
     "description": "Description for manage accounts option"
+  },
+  
+  "refreshProfiles": "Refresh Profiles",
+  "@refreshProfiles": {
+    "description": "Label for refresh profiles option"
+  },
+  
+  "refreshProfilesDescription": "Update profile information and avatars for all accounts",
+  "@refreshProfilesDescription": {
+    "description": "Description for refresh profiles option"
+  },
+  
+  "refreshingProfiles": "Updating profile information...",
+  "@refreshingProfiles": {
+    "description": "Message shown while refreshing profiles"
+  },
+  
+  "profilesRefreshed": "Profile information has been updated",
+  "@profilesRefreshed": {
+    "description": "Success message after profiles are refreshed"
+  },
+  
+  "refreshProfilesError": "Failed to update profiles",
+  "@refreshProfilesError": {
+    "description": "Error message when profile refresh fails"
   },
   
   "signOutAllDescription": "Sign out of all accounts and return to login screen",
   "@signOutAllDescription": {
     "description": "Description for sign out all option"
+  },
+  
+  "loginSuccess": "Login successful: {userName}",
+  "@loginSuccess": {
+    "description": "Login success notification message",
+    "placeholders": {
+      "userName": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "close": "Close",
+  "@close": {
+    "description": "Close button text"
   },
   
   "appInformation": "App Information",
@@ -721,5 +777,180 @@
   "deckTypeCustom": "Custom",
   "@deckTypeCustom": {
     "description": "Custom deck type"
+  },
+  
+  "moveDeckLeft": "Move Left",
+  "@moveDeckLeft": {
+    "description": "Menu item to move deck left"
+  },
+  
+  "moveDeckRight": "Move Right",
+  "@moveDeckRight": {
+    "description": "Menu item to move deck right"
+  },
+  
+  "deckSettings": "Deck Settings",
+  "@deckSettings": {
+    "description": "Menu item to open deck settings"
+  },
+  
+  "deleteDeck": "Delete Deck",
+  "@deleteDeck": {
+    "description": "Menu item to delete deck"
+  },
+  
+  "deckMovedLeft": "Deck moved left",
+  "@deckMovedLeft": {
+    "description": "Success message when deck is moved left"
+  },
+  
+  "deckMovedRight": "Deck moved right",
+  "@deckMovedRight": {
+    "description": "Success message when deck is moved right"
+  },
+  
+  "deckMoveError": "Failed to move deck",
+  "@deckMoveError": {
+    "description": "Error message when deck move fails"
+  },
+  
+  "deckSettingsComingSoon": "Deck settings feature is coming soon",
+  "@deckSettingsComingSoon": {
+    "description": "Message when deck settings is not yet implemented"
+  },
+  
+  "deleteDeckTitle": "Delete Deck",
+  "@deleteDeckTitle": {
+    "description": "Title for delete deck confirmation dialog"
+  },
+  
+  "deleteDeckConfirm": "Delete \"{deckTitle}\"? This action cannot be undone.",
+  "@deleteDeckConfirm": {
+    "description": "Confirmation message for deck deletion",
+    "placeholders": {
+      "deckTitle": {
+        "type": "String",
+        "description": "The title of the deck being deleted"
+      }
+    }
+  },
+  
+  "deleteButton": "Delete",
+  "@deleteButton": {
+    "description": "Delete button text"
+  },
+  
+  "deckDeletedSuccess": "\"{deckTitle}\" has been deleted",
+  "@deckDeletedSuccess": {
+    "description": "Success message when deck is deleted",
+    "placeholders": {
+      "deckTitle": {
+        "type": "String",
+        "description": "The title of the deleted deck"
+      }
+    }
+  },
+  
+  "deckDeleteError": "Failed to delete deck",
+  "@deckDeleteError": {
+    "description": "Error message when deck deletion fails"
+  },
+  
+  "richTextMentionLabel": "Mention",
+  "@richTextMentionLabel": {
+    "description": "Label for mention text elements"
+  },
+  
+  "richTextHashtagLabel": "Hashtag",
+  "@richTextHashtagLabel": {
+    "description": "Label for hashtag text elements"
+  },
+  
+  "richTextUrlLabel": "URL",
+  "@richTextUrlLabel": {
+    "description": "Label for URL text elements"
+  },
+  
+  "richTextMentionTapped": "Mention @{handle} tapped",
+  "@richTextMentionTapped": {
+    "description": "Message when mention is tapped",
+    "placeholders": {
+      "handle": {
+        "type": "String",
+        "description": "The handle that was mentioned"
+      }
+    }
+  },
+  
+  "richTextHashtagTapped": "Hashtag #{tag} tapped",
+  "@richTextHashtagTapped": {
+    "description": "Message when hashtag is tapped",
+    "placeholders": {
+      "tag": {
+        "type": "String",
+        "description": "The hashtag that was tapped"
+      }
+    }
+  },
+  
+  "richTextUrlTapped": "URL {url} tapped",
+  "@richTextUrlTapped": {
+    "description": "Message when URL is tapped",
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "description": "The URL that was tapped"
+      }
+    }
+  },
+  
+  "richTextProfileView": "View Profile",
+  "@richTextProfileView": {
+    "description": "Action to view profile when mention is tapped"
+  },
+  
+  "richTextHashtagSearch": "Search Hashtag",
+  "@richTextHashtagSearch": {
+    "description": "Action to search hashtag when hashtag is tapped"
+  },
+  
+  "richTextOpenUrl": "Open URL",
+  "@richTextOpenUrl": {
+    "description": "Action to open URL when URL is tapped"
+  },
+  
+  "richTextCopyUrl": "Copy URL",
+  "@richTextCopyUrl": {
+    "description": "Action to copy URL to clipboard"
+  },
+  
+  "richTextUrlCopied": "URL copied to clipboard",
+  "@richTextUrlCopied": {
+    "description": "Message when URL is copied"
+  },
+  
+  "richTextUrlOpenFailed": "Could not open URL",
+  "@richTextUrlOpenFailed": {
+    "description": "Error message when URL cannot be opened"
+  },
+  
+  "richTextProcessingError": "Text processing error",
+  "@richTextProcessingError": {
+    "description": "Error message when text processing fails"
+  },
+  
+  "richTextFeatureNotImplemented": "This feature is under development",
+  "@richTextFeatureNotImplemented": {
+    "description": "Message when a feature is not yet implemented"
+  },
+  
+  "loadingNewPosts": "Loading new posts...",
+  "@loadingNewPosts": {
+    "description": "Message shown when loading new posts from timeline"
+  },
+  
+  "loadingOlderPosts": "Loading older posts...",
+  "@loadingOlderPosts": {
+    "description": "Message shown when loading older posts from timeline"
   }
 }

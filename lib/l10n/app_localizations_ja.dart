@@ -66,6 +66,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get signInButton => 'サインイン';
 
   @override
+  String get signingIn => 'サインイン中...';
+
+  @override
   String get oAuthInDevelopment => 'OAuth開発中';
 
   @override
@@ -158,6 +161,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languageDescription => 'アプリの言語を選択してください';
 
   @override
+  String repostedBy(String name) {
+    return '$nameがリポストしました';
+  }
+
+  @override
   String get selectLanguage => '言語を選択';
 
   @override
@@ -176,10 +184,33 @@ class AppLocalizationsJa extends AppLocalizations {
   String get manageAccounts => 'アカウント管理';
 
   @override
-  String get manageAccountsDescription => 'アカウントの追加、削除、切り替え';
+  String get manageAccountsDescription => 'アカウントの追加・削除';
+
+  @override
+  String get refreshProfiles => 'プロフィール更新';
+
+  @override
+  String get refreshProfilesDescription => 'すべてのアカウントのプロフィール情報とアバターを更新';
+
+  @override
+  String get refreshingProfiles => 'プロフィール情報を更新中...';
+
+  @override
+  String get profilesRefreshed => 'プロフィール情報が更新されました';
+
+  @override
+  String get refreshProfilesError => 'プロフィール更新に失敗しました';
 
   @override
   String get signOutAllDescription => 'すべてのアカウントからサインアウトしてログイン画面に戻る';
+
+  @override
+  String loginSuccess(String userName) {
+    return 'ログイン成功: $userName';
+  }
+
+  @override
+  String get close => '閉じる';
 
   @override
   String get appInformation => 'アプリ情報';
@@ -432,4 +463,101 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get deckTypeCustom => 'カスタム';
+
+  @override
+  String get moveDeckLeft => '左に移動';
+
+  @override
+  String get moveDeckRight => '右に移動';
+
+  @override
+  String get deckSettings => 'デッキ設定';
+
+  @override
+  String get deleteDeck => 'デッキを削除';
+
+  @override
+  String get deckMovedLeft => 'デッキを左に移動しました';
+
+  @override
+  String get deckMovedRight => 'デッキを右に移動しました';
+
+  @override
+  String get deckMoveError => 'デッキの移動に失敗しました';
+
+  @override
+  String get deckSettingsComingSoon => 'デッキ設定機能は準備中です';
+
+  @override
+  String get deleteDeckTitle => 'デッキを削除';
+
+  @override
+  String deleteDeckConfirm(String deckTitle) {
+    return '「$deckTitle」を削除しますか？この操作は取り消せません。';
+  }
+
+  @override
+  String get deleteButton => '削除';
+
+  @override
+  String deckDeletedSuccess(String deckTitle) {
+    return '「$deckTitle」を削除しました';
+  }
+
+  @override
+  String get deckDeleteError => 'デッキの削除に失敗しました';
+
+  @override
+  String get richTextMentionLabel => 'メンション';
+
+  @override
+  String get richTextHashtagLabel => 'ハッシュタグ';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return 'メンション @$handle をタップしました';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return 'ハッシュタグ #$tag をタップしました';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url をタップしました';
+  }
+
+  @override
+  String get richTextProfileView => 'プロフィールを表示';
+
+  @override
+  String get richTextHashtagSearch => 'ハッシュタグ検索';
+
+  @override
+  String get richTextOpenUrl => 'URLを開く';
+
+  @override
+  String get richTextCopyUrl => 'URLをコピー';
+
+  @override
+  String get richTextUrlCopied => 'URLをクリップボードにコピーしました';
+
+  @override
+  String get richTextUrlOpenFailed => 'URLを開けませんでした';
+
+  @override
+  String get richTextProcessingError => 'テキスト処理エラー';
+
+  @override
+  String get richTextFeatureNotImplemented => 'この機能は準備中です';
+
+  @override
+  String get loadingNewPosts => '最新のポストを取得しています...';
+
+  @override
+  String get loadingOlderPosts => '古いポストを取得しています...';
 }

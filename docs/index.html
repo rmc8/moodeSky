@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodeSky OAuth Development</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .endpoint h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .url {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        .button {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌤️ MoodeSky OAuth Development</h1>
+        <p>Bluesky クライアント開発用 OAuth エンドポイント</p>
+    </div>
+
+    <div class="warning">
+        <strong>⚠️ 開発用限定</strong><br>
+        このエンドポイントは開発・テスト目的のみに使用してください。本番環境では使用しないでください。
+    </div>
+
+    <div class="endpoint">
+        <h3>📋 OAuth Client Metadata</h3>
+        <div class="url" id="clientMetadataUrl">Loading...</div>
+        <p>Bluesky OAuth認証で使用するクライアント情報です。</p>
+        <a href="#" id="clientMetadataLink" class="button">メタデータを表示</a>
+    </div>
+
+    <div class="endpoint">
+        <h3>🔗 OAuth Callback Endpoint</h3>
+        <div class="url" id="callbackUrl">Loading...</div>
+        <p>OAuth認証完了後のリダイレクト先です。</p>
+        <a href="#" id="callbackLink" class="button">コールバックページ</a>
+    </div>
+
+    <div class="success">
+        <h3>🚀 Flutter アプリでの使用方法</h3>
+        <p><code>lib/core/providers/auth_provider.dart</code> を以下のように更新してください：</p>
+        <div class="code" id="flutterCode">Loading...</div>
+    </div>
+
+    <div class="endpoint">
+        <h3>📖 セットアップガイド</h3>
+        <ol>
+            <li>上記のFlutterコードをコピーしてauth_provider.dartを更新</li>
+            <li>アプリでOAuth認証を実行</li>
+            <li>ブラウザが開いてBluesky認証画面が表示される</li>
+            <li>認証完了後、アプリに自動的に戻る</li>
+        </ol>
+        
+        <h4>🔧 カスタムスキーム設定確認</h4>
+        <p>以下のファイルで <code>com.rmc8.moodesky</code> が設定されていることを確認してください：</p>
+        <ul>
+            <li><code>android/app/src/main/AndroidManifest.xml</code></li>
+            <li><code>ios/Runner/Info.plist</code></li>
+            <li><code>macos/Runner/Info.plist</code></li>
+        </ul>
+    </div>
+
+    <script>
+        // 現在のページのURLを取得してエンドポイントURLを生成
+        const baseUrl = window.location.origin + window.location.pathname.replace('/index.html', '').replace(/\/$/, '');
+        
+        // URL要素を更新
+        const clientMetadataUrl = `${baseUrl}/oauth/client-metadata.json`;
+        const callbackUrl = `${baseUrl}/oauth/callback.html`;
+        
+        document.getElementById('clientMetadataUrl').textContent = clientMetadataUrl;
+        document.getElementById('callbackUrl').textContent = callbackUrl;
+        
+        // リンクを設定
+        document.getElementById('clientMetadataLink').href = clientMetadataUrl;
+        document.getElementById('callbackLink').href = callbackUrl;
+        
+        // Flutterコードを生成
+        const flutterCode = `@Riverpod(keepAlive: true)
+AuthConfig authConfig(AuthConfigRef ref) {
+  return const AuthConfig(
+    clientMetadataUrl: '${clientMetadataUrl}',
+    callbackUrlScheme: 'com.rmc8.moodesky',
+    defaultPdsHost: 'bsky.social',
+  );
+}`;
+        document.getElementById('flutterCode').textContent = flutterCode;
+        
+        // ページ読み込み完了時にメタデータをテスト
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(clientMetadataUrl);
+                if (response.ok) {
+                    console.log('✅ Client metadata is accessible');
+                } else {
+                    console.warn('⚠️ Client metadata might not be accessible');
+                }
+            } catch (error) {
+                console.warn('⚠️ Unable to test client metadata:', error);
+            }
+        });
+    </script>
+</body>
+</html>

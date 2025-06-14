@@ -4,12 +4,19 @@ version = "0.1.0"
 description = "AT Protocol repository vectorization for RAG with Qdrant MCP"
 requires-python = ">=3.12"
 dependencies = [
+    # Core vectorization
     "qdrant-client>=1.7.0",
     "fastembed>=0.2.0",
+    
+    # Core functionality
     "gitpython>=3.1.0",
     "rich>=13.0.0",
     "typer>=0.9.0",
-    "pydantic>=2.0.0"
+    "pydantic>=2.0.0",
+    
+    # Performance optimization
+    "tenacity>=8.0.0",  # Retry logic for API calls
+    "psutil>=5.9.0",    # Memory monitoring
 ]
 
 [project.optional-dependencies]

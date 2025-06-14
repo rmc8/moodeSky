@@ -66,6 +66,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get signInButton => '로그인';
 
   @override
+  String get signingIn => 'Signing in...';
+
+  @override
   String get oAuthInDevelopment => 'OAuth 개발 중';
 
   @override
@@ -157,6 +160,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get languageDescription => '앱에서 사용할 언어를 선택하세요';
 
   @override
+  String repostedBy(String name) {
+    return '$name님이 리포스트했습니다';
+  }
+
+  @override
   String get selectLanguage => '언어 선택';
 
   @override
@@ -178,7 +186,30 @@ class AppLocalizationsKo extends AppLocalizations {
   String get manageAccountsDescription => '계정 추가, 삭제, 전환';
 
   @override
+  String get refreshProfiles => '프로필 새로고침';
+
+  @override
+  String get refreshProfilesDescription => '모든 계정의 프로필 정보와 아바타 업데이트';
+
+  @override
+  String get refreshingProfiles => '프로필 정보를 업데이트하는 중...';
+
+  @override
+  String get profilesRefreshed => '프로필 정보가 업데이트되었습니다';
+
+  @override
+  String get refreshProfilesError => '프로필 업데이트에 실패했습니다';
+
+  @override
   String get signOutAllDescription => '모든 계정에서 로그아웃하고 로그인 화면으로 돌아갑니다';
+
+  @override
+  String loginSuccess(String userName) {
+    return 'Login successful: $userName';
+  }
+
+  @override
+  String get close => 'Close';
 
   @override
   String get appInformation => '앱 정보';
@@ -431,4 +462,101 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get deckTypeCustom => '커스텀';
+
+  @override
+  String get moveDeckLeft => '왼쪽으로 이동';
+
+  @override
+  String get moveDeckRight => '오른쪽으로 이동';
+
+  @override
+  String get deckSettings => '덱 설정';
+
+  @override
+  String get deleteDeck => '덱 삭제';
+
+  @override
+  String get deckMovedLeft => '덱을 왼쪽으로 이동했습니다';
+
+  @override
+  String get deckMovedRight => '덱을 오른쪽으로 이동했습니다';
+
+  @override
+  String get deckMoveError => '덱 이동에 실패했습니다';
+
+  @override
+  String get deckSettingsComingSoon => '덱 설정 기능이 곧 출시됩니다';
+
+  @override
+  String get deleteDeckTitle => '덱 삭제';
+
+  @override
+  String deleteDeckConfirm(String deckTitle) {
+    return '\"$deckTitle\"을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
+  }
+
+  @override
+  String get deleteButton => '삭제';
+
+  @override
+  String deckDeletedSuccess(String deckTitle) {
+    return '\"$deckTitle\"이(가) 삭제되었습니다';
+  }
+
+  @override
+  String get deckDeleteError => '덱 삭제에 실패했습니다';
+
+  @override
+  String get richTextMentionLabel => '멘션';
+
+  @override
+  String get richTextHashtagLabel => '해시태그';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return '멘션 @$handle을(를) 탭했습니다';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return '해시태그 #$tag을(를) 탭했습니다';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url을(를) 탭했습니다';
+  }
+
+  @override
+  String get richTextProfileView => '프로필 보기';
+
+  @override
+  String get richTextHashtagSearch => '해시태그 검색';
+
+  @override
+  String get richTextOpenUrl => 'URL 열기';
+
+  @override
+  String get richTextCopyUrl => 'URL 복사';
+
+  @override
+  String get richTextUrlCopied => 'URL이 클립보드에 복사되었습니다';
+
+  @override
+  String get richTextUrlOpenFailed => 'URL을 열 수 없습니다';
+
+  @override
+  String get richTextProcessingError => '텍스트 처리 오류';
+
+  @override
+  String get richTextFeatureNotImplemented => '이 기능은 개발 중입니다';
+
+  @override
+  String get loadingNewPosts => '새로운 포스트를 불러오는 중...';
+
+  @override
+  String get loadingOlderPosts => '이전 포스트를 불러오는 중...';
 }

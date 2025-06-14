@@ -70,6 +70,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get signInButton => 'Anmelden';
 
   @override
+  String get signingIn => 'Signing in...';
+
+  @override
   String get oAuthInDevelopment => 'OAuth in Entwicklung';
 
   @override
@@ -165,6 +168,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wählen Sie Ihre bevorzugte Sprache für die App';
 
   @override
+  String repostedBy(String name) {
+    return 'Von $name geteilt';
+  }
+
+  @override
   String get selectLanguage => 'Sprache auswählen';
 
   @override
@@ -187,8 +195,32 @@ class AppLocalizationsDe extends AppLocalizations {
       'Konten hinzufügen, entfernen oder wechseln';
 
   @override
+  String get refreshProfiles => 'Profile aktualisieren';
+
+  @override
+  String get refreshProfilesDescription =>
+      'Profilinformationen und Avatare für alle Konten aktualisieren';
+
+  @override
+  String get refreshingProfiles => 'Profilinformationen werden aktualisiert...';
+
+  @override
+  String get profilesRefreshed => 'Profilinformationen wurden aktualisiert';
+
+  @override
+  String get refreshProfilesError => 'Fehler beim Aktualisieren der Profile';
+
+  @override
   String get signOutAllDescription =>
       'Von allen Konten abmelden und zum Anmeldebildschirm zurückkehren';
+
+  @override
+  String loginSuccess(String userName) {
+    return 'Login successful: $userName';
+  }
+
+  @override
+  String get close => 'Close';
 
   @override
   String get appInformation => 'App-Informationen';
@@ -447,4 +479,102 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get deckTypeCustom => 'Benutzerdefiniert';
+
+  @override
+  String get moveDeckLeft => 'Nach Links';
+
+  @override
+  String get moveDeckRight => 'Nach Rechts';
+
+  @override
+  String get deckSettings => 'Deck-Einstellungen';
+
+  @override
+  String get deleteDeck => 'Deck Löschen';
+
+  @override
+  String get deckMovedLeft => 'Deck nach links verschoben';
+
+  @override
+  String get deckMovedRight => 'Deck nach rechts verschoben';
+
+  @override
+  String get deckMoveError => 'Fehler beim Verschieben des Decks';
+
+  @override
+  String get deckSettingsComingSoon => 'Deck-Einstellungen kommen bald';
+
+  @override
+  String get deleteDeckTitle => 'Deck Löschen';
+
+  @override
+  String deleteDeckConfirm(String deckTitle) {
+    return '\"$deckTitle\" löschen? Diese Aktion kann nicht rückgängig gemacht werden.';
+  }
+
+  @override
+  String get deleteButton => 'Löschen';
+
+  @override
+  String deckDeletedSuccess(String deckTitle) {
+    return '\"$deckTitle\" wurde gelöscht';
+  }
+
+  @override
+  String get deckDeleteError => 'Fehler beim Löschen des Decks';
+
+  @override
+  String get richTextMentionLabel => 'Erwähnung';
+
+  @override
+  String get richTextHashtagLabel => 'Hashtag';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return 'Erwähnung @$handle angeklickt';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return 'Hashtag #$tag angeklickt';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url angeklickt';
+  }
+
+  @override
+  String get richTextProfileView => 'Profil anzeigen';
+
+  @override
+  String get richTextHashtagSearch => 'Hashtag suchen';
+
+  @override
+  String get richTextOpenUrl => 'URL öffnen';
+
+  @override
+  String get richTextCopyUrl => 'URL kopieren';
+
+  @override
+  String get richTextUrlCopied => 'URL in Zwischenablage kopiert';
+
+  @override
+  String get richTextUrlOpenFailed => 'URL konnte nicht geöffnet werden';
+
+  @override
+  String get richTextProcessingError => 'Textverarbeitungsfehler';
+
+  @override
+  String get richTextFeatureNotImplemented =>
+      'Diese Funktion wird noch entwickelt';
+
+  @override
+  String get loadingNewPosts => 'Neue Beiträge werden geladen...';
+
+  @override
+  String get loadingOlderPosts => 'Ältere Beiträge werden geladen...';
 }

@@ -7,8 +7,8 @@ import 'package:moodesky/shared/models/auth_models.dart';
 void main() {
   group('AuthMethod', () {
     test('enum has correct values', () {
-      expect(AuthMethod.values, hasLength(2));
-      expect(AuthMethod.values, contains(AuthMethod.oauth));
+      expect(AuthMethod.values, hasLength(1)); // App Passwordのみ
+      // expect(AuthMethod.values, contains(AuthMethod.oauth)); // OAuth一時凍結
       expect(AuthMethod.values, contains(AuthMethod.appPassword));
     });
   });
@@ -37,14 +37,13 @@ void main() {
       );
 
       final updated = original.copyWith(
-        method: AuthMethod.oauth,
         serviceUrl: 'https://custom.server.com',
       );
 
       expect(updated.identifier, 'user@example.com'); // 変更されない
       expect(updated.password, 'password123'); // 変更されない
       expect(updated.serviceUrl, 'https://custom.server.com'); // 変更される
-      expect(updated.method, AuthMethod.oauth); // 変更される
+      expect(updated.method, AuthMethod.appPassword); // 変更されない
     });
 
     test('JSON serialization works', () {
@@ -52,7 +51,7 @@ void main() {
         identifier: 'test@example.com',
         password: 'test-password',
         serviceUrl: 'https://test.com',
-        method: AuthMethod.oauth,
+        method: AuthMethod.appPassword,
       );
 
       final json = credentials.toJson();
@@ -170,7 +169,7 @@ void main() {
       state.when(
         initial: () => fail('Should be authenticated'),
         loading: () => fail('Should be authenticated'),
-        authenticated: (activeAccountDid, accounts) {
+        authenticated: (activeAccountDid, accounts, isNewLogin) {
           expect(activeAccountDid, 'did:1');
           expect(accounts, profiles);
         },
@@ -194,7 +193,7 @@ void main() {
       state.when(
         initial: () => fail('Should be error'),
         loading: () => fail('Should be error'),
-        authenticated: (_, __) => fail('Should be error'),
+        authenticated: (_, __, ___) => fail('Should be error'),
         unauthenticated: () => fail('Should be error'),
         error: (message, errorType) {
           expect(message, 'Test error');
@@ -205,22 +204,6 @@ void main() {
   });
 
   group('LoginRequest', () {
-    test('oauth login request', () {
-      const request = LoginRequest.oauth(
-        userIdentifier: 'user@bsky.social',
-        pdsHost: 'bsky.social',
-      );
-
-      expect(request, isA<OAuthLoginRequest>());
-      request.when(
-        oauth: (userIdentifier, pdsHost) {
-          expect(userIdentifier, 'user@bsky.social');
-          expect(pdsHost, 'bsky.social');
-        },
-        appPassword: (_, __, ___) => fail('Should be OAuth request'),
-      );
-    });
-
     test('app password login request', () {
       const request = LoginRequest.appPassword(
         identifier: 'user@bsky.social',
@@ -230,7 +213,6 @@ void main() {
 
       expect(request, isA<AppPasswordLoginRequest>());
       request.when(
-        oauth: (_, __) => fail('Should be App Password request'),
         appPassword: (identifier, password, pdsHost) {
           expect(identifier, 'user@bsky.social');
           expect(password, 'app-password');
@@ -242,15 +224,13 @@ void main() {
 
   group('AuthResult', () {
     test('success result', () {
-      final sessionData = OAuthSessionData(
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
-        dpopPublicKey: 'dpop-public',
-        dpopPrivateKey: 'dpop-private',
-        dpopNonce: 'nonce',
-        tokenType: 'DPoP',
-        expiresAt: DateTime.now().add(const Duration(hours: 1)),
-        sub: 'did:plc:example',
+      final sessionData = AppPasswordSessionData(
+        accessJwt: 'access-jwt',
+        refreshJwt: 'refresh-jwt',
+        did: 'did:plc:example',
+        handle: 'user.bsky.social',
+        email: 'user@example.com',
+        sessionString: '{"test": "session"}',
       );
 
       const userProfile = UserProfile(
@@ -258,8 +238,8 @@ void main() {
         handle: 'user.bsky.social',
       );
 
-      final authSession = AuthSessionData.oauth(
-        oauthSession: sessionData,
+      final authSession = AuthSessionData.appPassword(
+        appPasswordSession: sessionData,
         profile: userProfile,
       );
 

@@ -45,15 +45,27 @@ class DocumentChunk(BaseModel):
 
 
 class VectorizationConfig(BaseModel):
-    """Configuration for vectorization process"""
-    qdrant_url: str = Field(default="http://localhost:6333")
+    """Configuration for vectorization process with Qdrant"""
+    # Qdrant configuration
+    qdrant_url: str = Field(default="http://localhost:6333", description="Qdrant server URL")
     collection_name: str = Field(default="atproto-dart")
-    embedding_model: str = Field(default="BAAI/bge-small-en-v1.5")
-    batch_size: int = Field(default=32)
+    
+    # FastEmbed configuration
+    embedding_model: str = Field(default="BAAI/bge-small-en-v1.5", description="FastEmbed model")
+    embedding_dimensions: int = Field(default=384, description="BAAI/bge-small-en-v1.5 dimensions")
+    
+    # Performance optimization settings
+    batch_size: int = Field(default=100, description="Batch size for embedding requests")
     max_doc_length: int = Field(default=1000)
     max_code_length: int = Field(default=1500)
+    
+    # Processing filters
     include_tests: bool = Field(default=False)
     include_generated: bool = Field(default=False)
+    
+    # Memory management
+    max_memory_percent: int = Field(default=75, description="Maximum memory usage percentage")
+    store_batch_size: int = Field(default=100, description="Batch size for Qdrant storage")
 
 
 class RepositoryInfo(BaseModel):

@@ -1,3 +1,5 @@
+**/untranslated.json
+
 # Miscellaneous
 *.class
 *.lock
@@ -8,6 +10,7 @@
 .history
 
 
+**/DS_Store
 
 # Flutter repo-specific
 /bin/cache/
@@ -135,6 +138,16 @@ app.*.symbols
 *.g.dart
 *.freezed.dart
 
+# OAuth related files (removed functionality)
+web/oauth/
+scripts/*oauth*
+scripts/start_local_metadata_server.*
+**/oauth_service*.dart
+**/local_oauth_server.dart
+**/client-metadata*.json
+oauth-callback.html
+oauth-success.html
+
 # Security sensitive files
 keystore.properties
 google-services.json
@@ -170,6 +183,7 @@ pubspec.lock
 # Directory created by dartdoc
 # If you don't generate documentation locally you can remove this line.
 doc/api/
+
 
 # dotenv environment variables file
 .env*
@@ -313,7 +327,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -495,4 +508,5 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,macos,linux,windows,flutter,dart
 
-CLAUDE.md
+# CLAUDE.md
+.mcp.json

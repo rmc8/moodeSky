@@ -6,7 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/core/theme/app_themes.dart';
+import 'package:moodesky/features/settings/screens/account_management_screen.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
+import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
 import 'package:moodesky/shared/widgets/language_selector.dart';
 import 'package:moodesky/shared/widgets/theme_selector.dart';
 
@@ -15,6 +18,8 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final textStyles = context.appTextStyles;
+
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.settingsTitle)),
       body: ListView(
@@ -29,17 +34,17 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.appearanceSettings,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: textStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Theme Selection
                   const ThemeSelector(),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Language Selection
                   const LanguageSelector(),
                 ],
@@ -58,7 +63,7 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.accountSettings,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: textStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -69,8 +74,8 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(
                       AppLocalizations.of(context)!.manageAccounts,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF1A1A1A) 
+                        color: context.isLight
+                            ? const Color(0xFF1A1A1A)
                             : const Color(0xFFF5F5F5),
                         fontWeight: FontWeight.w500,
                       ),
@@ -78,19 +83,17 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: Text(
                       AppLocalizations.of(context)!.manageAccountsDescription,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF333333) 
-                            : const Color(0xFFCCCCCC),
+                        color: context.isLight
+                            ? const Color(0xFF222222)
+                            : const Color(0xFFE0E0E0),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
-                      // TODO: Navigate to account management screen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            AppLocalizations.of(context)!.comingSoon,
-                          ),
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const AccountManagementScreen(),
                         ),
                       );
                     },
@@ -100,22 +103,23 @@ class SettingsScreen extends ConsumerWidget {
 
                   ListTile(
                     leading: Icon(
-                      Icons.logout,
-                      color: Theme.of(context).colorScheme.error,
+                      Icons.logout, 
+                      color: Theme.of(context).colorScheme.strongErrorColor,
                     ),
                     title: Text(
                       AppLocalizations.of(context)!.signOutAll,
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.strongErrorColor,
+                        fontWeight: FontWeight.w600, // フォントウェイトも少し上げる
                       ),
                     ),
                     subtitle: Text(
                       AppLocalizations.of(context)!.signOutAllDescription,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF333333) 
-                            : const Color(0xFFCCCCCC),
+                        color: context.isLight
+                            ? const Color(0xFF222222)
+                            : const Color(0xFFE0E0E0),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     onTap: () => _showSignOutConfirmation(context, ref),
@@ -136,7 +140,7 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.appInformation,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: textStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -147,18 +151,19 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(
                       AppLocalizations.of(context)!.aboutApp,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF1A1A1A) 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF1A1A1A)
                             : const Color(0xFFF5F5F5),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     subtitle: Text(
-                      AppLocalizations.of(context)!.appVersion('1.0.0'),
+                      AppLocalizations.of(context)!.appVersion('0.0.1'),
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF333333) 
-                            : const Color(0xFFCCCCCC),
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF222222)
+                            : const Color(0xFFE0E0E0),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     trailing: const Icon(Icons.chevron_right),
@@ -174,8 +179,8 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(
                       AppLocalizations.of(context)!.privacyPolicy,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF1A1A1A) 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF1A1A1A)
                             : const Color(0xFFF5F5F5),
                         fontWeight: FontWeight.w500,
                       ),
@@ -198,8 +203,8 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(
                       AppLocalizations.of(context)!.termsOfService,
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? const Color(0xFF1A1A1A) 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF1A1A1A)
                             : const Color(0xFFF5F5F5),
                         fontWeight: FontWeight.w500,
                       ),
@@ -241,6 +246,10 @@ class SettingsScreen extends ConsumerWidget {
               Navigator.of(context).pop();
               await ref.read(authNotifierProvider.notifier).signOutAll();
             },
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.strongErrorColor,
+              foregroundColor: Colors.white,
+            ),
             child: Text(AppLocalizations.of(context)!.signOutButton),
           ),
         ],
@@ -251,8 +260,8 @@ class SettingsScreen extends ConsumerWidget {
   void _showAboutDialog(BuildContext context) {
     showAboutDialog(
       context: context,
-      applicationName: 'MoodeSky',
-      applicationVersion: '1.0.0',
+      applicationName: 'moodeSky',
+      applicationVersion: '0.0.1',
       applicationIcon: Container(
         width: 64,
         height: 64,

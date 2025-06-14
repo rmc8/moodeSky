@@ -48,12 +48,27 @@
   "errorTitle": "Algo deu errado",
   "languageLabel": "Idioma",
   "languageDescription": "Escolha seu idioma preferido para o aplicativo",
+  "repostedBy": "Repostado por {name}",
+  "@repostedBy": {
+    "description": "Exibido quando uma postagem foi repostada por alguém",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "O nome de exibição ou handle do usuário que repostou"
+      }
+    }
+  },
   "selectLanguage": "Selecionar Idioma",
   "languageSettings": "Configurações de Idioma",
   "settingsTitle": "Configurações",
   "accountSettings": "Configurações da Conta",
   "manageAccounts": "Gerenciar Contas",
   "manageAccountsDescription": "Adicionar, remover ou alternar entre contas",
+  "refreshProfiles": "Atualizar Perfis",
+  "refreshProfilesDescription": "Atualizar informações de perfil e avatares para todas as contas",
+  "refreshingProfiles": "Atualizando informações de perfil...",
+  "profilesRefreshed": "Informações de perfil foram atualizadas",
+  "refreshProfilesError": "Falha ao atualizar perfis",
   "signOutAllDescription": "Sair de todas as contas e retornar à tela de login",
   "appInformation": "Informações do App",
   "aboutApp": "Sobre o moodeSky",
@@ -133,5 +148,37 @@
   "numberMillionSuffix": "M",
   "multiAccount": "Multi Conta",
   "deckOptions": "Opções do Deck",
-  "deckTypeCustom": "Personalizado"
+  "deckTypeCustom": "Personalizado",
+  
+  "moveDeckLeft": "Mover à Esquerda",
+  "moveDeckRight": "Mover à Direita",
+  "deckSettings": "Configurações do Deck",
+  "deleteDeck": "Excluir Deck",
+  "deckMovedLeft": "Deck movido à esquerda",
+  "deckMovedRight": "Deck movido à direita",
+  "deckMoveError": "Falha ao mover deck",
+  "deckSettingsComingSoon": "Configurações do deck em breve",
+  "deleteDeckTitle": "Excluir Deck",
+  "deleteDeckConfirm": "Excluir \"{deckTitle}\"? Esta ação não pode ser desfeita.",
+  "deleteButton": "Excluir",
+  "deckDeletedSuccess": "\"{deckTitle}\" foi excluído",
+  "deckDeleteError": "Falha ao excluir deck",
+  
+  "richTextMentionLabel": "Menção",
+  "richTextHashtagLabel": "Hashtag",
+  "richTextUrlLabel": "URL",
+  "richTextMentionTapped": "Menção @{handle} tocada",
+  "richTextHashtagTapped": "Hashtag #{tag} tocada",
+  "richTextUrlTapped": "URL {url} tocada",
+  "richTextProfileView": "Ver Perfil",
+  "richTextHashtagSearch": "Buscar Hashtag",
+  "richTextOpenUrl": "Abrir URL",
+  "richTextCopyUrl": "Copiar URL",
+  "richTextUrlCopied": "URL copiada para a área de transferência",
+  "richTextUrlOpenFailed": "Não foi possível abrir a URL",
+  "richTextProcessingError": "Erro no processamento de texto",
+  "richTextFeatureNotImplemented": "Esta funcionalidade está em desenvolvimento",
+  
+  "loadingNewPosts": "Carregando novos posts...",
+  "loadingOlderPosts": "Carregando posts antigos..."
 }

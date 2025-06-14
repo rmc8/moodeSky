@@ -1,5 +1,7 @@
-// Package imports:
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -90,12 +92,12 @@ class TestProfiles {
 
 /// テスト用のAuthCredentials作成ヘルパー
 class TestCredentials {
-  static const AuthCredentials oauthCredentials = AuthCredentials(
-    identifier: 'test@bsky.social',
-    password: '', // OAuthではパスワード不要
-    serviceUrl: 'https://bsky.social',
-    method: AuthMethod.oauth,
-  );
+  // static const AuthCredentials oauthCredentials = AuthCredentials(
+  //   identifier: 'test@bsky.social',
+  //   password: '', // OAuthではパスワード不要
+  //   serviceUrl: 'https://bsky.social',
+  //   method: AuthMethod.oauth, // TODO: AuthMethod.oauthが存在しない
+  // );
 
   static const AuthCredentials appPasswordCredentials = AuthCredentials(
     identifier: 'test@bsky.social',
@@ -121,7 +123,7 @@ class TestCredentials {
 class TestAssertions {
   /// 基本的なログインフォーム要素が存在することを確認
   static void expectLoginFormElements(WidgetTester tester) {
-    expect(find.text('MoodeSky'), findsOneWidget);
+    expect(find.text('moodeSky'), findsOneWidget);
     expect(find.text('Sign in method'), findsOneWidget);
     expect(find.byType(TextFormField), findsAtLeastNWidgets(1));
   }
@@ -217,8 +219,8 @@ class MockAuthNotifier extends Mock implements AuthNotifier {
   Future<bool> mockLogin(AuthCredentials credentials) async {
     // 成功パターン
     if (credentials.identifier.isNotEmpty &&
-        (credentials.method == AuthMethod.oauth ||
-            credentials.password.isNotEmpty)) {
+        // (credentials.method == AuthMethod.oauth || // TODO: AuthMethod.oauthが存在しない
+        credentials.password.isNotEmpty) {
       return true;
     }
 

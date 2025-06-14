@@ -4,25 +4,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'auth_models.freezed.dart';
 part 'auth_models.g.dart';
 
-// OAuth Session data model
-@freezed
-class OAuthSessionData with _$OAuthSessionData {
-  const factory OAuthSessionData({
-    required String accessToken,
-    required String refreshToken,
-    required String dpopPublicKey,
-    required String dpopPrivateKey,
-    required String dpopNonce,
-    required String tokenType,
-    required DateTime expiresAt,
-    required String sub, // Subject (user DID)
-    String? scope,
-  }) = _OAuthSessionData;
-
-  factory OAuthSessionData.fromJson(Map<String, dynamic> json) =>
-      _$OAuthSessionDataFromJson(json);
-}
-
 // App Password session data model
 @freezed
 class AppPasswordSessionData with _$AppPasswordSessionData {
@@ -56,14 +37,9 @@ class AuthResult with _$AuthResult {
   const factory AuthResult.cancelled() = AuthCancelled;
 }
 
-// Combined session data
+// Session data (App Password only)
 @freezed
 class AuthSessionData with _$AuthSessionData {
-  const factory AuthSessionData.oauth({
-    required OAuthSessionData oauthSession,
-    required UserProfile profile,
-  }) = OAuthSession;
-
   const factory AuthSessionData.appPassword({
     required AppPasswordSessionData appPasswordSession,
     required UserProfile profile,
@@ -92,8 +68,8 @@ class UserProfile with _$UserProfile {
       _$UserProfileFromJson(json);
 }
 
-// Authentication method
-enum AuthMethod { oauth, appPassword }
+// Authentication method (App Password only)
+enum AuthMethod { appPassword }
 
 // Authentication credentials
 @freezed
@@ -114,6 +90,7 @@ enum AuthErrorType {
   networkError,
   invalidCredentials,
   tokenExpired,
+  tokenVerificationFailed, // Added for "Token could not be verified" errors
   serverError,
   userCancelled,
   unknownError,
@@ -129,6 +106,7 @@ class AuthState with _$AuthState {
   const factory AuthState.authenticated({
     required String activeAccountDid,
     required List<UserProfile> accounts,
+    @Default(false) bool isNewLogin,
   }) = AuthAuthenticated;
   const factory AuthState.unauthenticated() = AuthUnauthenticated;
   const factory AuthState.error({
@@ -161,12 +139,10 @@ class MultiAccountStatus with _$MultiAccountStatus {
       _$MultiAccountStatusFromJson(json);
 }
 
-// Authentication configuration
+// Authentication configuration (App Password only)
 @freezed
 class AuthConfig with _$AuthConfig {
   const factory AuthConfig({
-    required String clientMetadataUrl,
-    required String callbackUrlScheme,
     required String defaultPdsHost,
     @Default(Duration(minutes: 5)) Duration tokenRefreshThreshold,
     @Default(true) bool enableAutoRefresh,
@@ -177,12 +153,9 @@ class AuthConfig with _$AuthConfig {
       _$AuthConfigFromJson(json);
 }
 
-// Login request
+// Login request (App Password only)
 @freezed
 class LoginRequest with _$LoginRequest {
-  const factory LoginRequest.oauth({String? userIdentifier, String? pdsHost}) =
-      OAuthLoginRequest;
-
   const factory LoginRequest.appPassword({
     required String identifier,
     required String password,
@@ -194,7 +167,7 @@ class LoginRequest with _$LoginRequest {
 @freezed
 class TokenRefreshResult with _$TokenRefreshResult {
   const factory TokenRefreshResult.success({
-    required OAuthSessionData newSession,
+    required AppPasswordSessionData newSession,
   }) = TokenRefreshSuccess;
 
   const factory TokenRefreshResult.failure({

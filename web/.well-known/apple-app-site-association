@@ -1,0 +1,26 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "TEAMID.com.example.moodesky"
+        ],
+        "components": [
+          {
+            "/": "/oauth/callback",
+            "comment": "OAuth callback for MoodeSky authentication"
+          },
+          {
+            "/": "/oauth/success",
+            "comment": "OAuth success fallback for MoodeSky authentication"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "TEAMID.com.example.moodesky"
+    ]
+  }
+}

@@ -219,6 +219,12 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get signInButton;
 
+  /// Loading message while signing in
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in...'**
+  String get signingIn;
+
   /// Button text when OAuth is selected
   ///
   /// In en, this message translates to:
@@ -387,6 +393,12 @@ abstract class AppLocalizations {
   /// **'Choose your preferred language for the app'**
   String get languageDescription;
 
+  /// Displayed when a post has been reposted by someone
+  ///
+  /// In en, this message translates to:
+  /// **'Reposted by {name}'**
+  String repostedBy(String name);
+
   /// Title for language selection dialog
   ///
   /// In en, this message translates to:
@@ -426,14 +438,56 @@ abstract class AppLocalizations {
   /// Description for manage accounts option
   ///
   /// In en, this message translates to:
-  /// **'Add, remove, or switch between accounts'**
+  /// **'Add and remove accounts'**
   String get manageAccountsDescription;
+
+  /// Label for refresh profiles option
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Profiles'**
+  String get refreshProfiles;
+
+  /// Description for refresh profiles option
+  ///
+  /// In en, this message translates to:
+  /// **'Update profile information and avatars for all accounts'**
+  String get refreshProfilesDescription;
+
+  /// Message shown while refreshing profiles
+  ///
+  /// In en, this message translates to:
+  /// **'Updating profile information...'**
+  String get refreshingProfiles;
+
+  /// Success message after profiles are refreshed
+  ///
+  /// In en, this message translates to:
+  /// **'Profile information has been updated'**
+  String get profilesRefreshed;
+
+  /// Error message when profile refresh fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update profiles'**
+  String get refreshProfilesError;
 
   /// Description for sign out all option
   ///
   /// In en, this message translates to:
   /// **'Sign out of all accounts and return to login screen'**
   String get signOutAllDescription;
+
+  /// Login success notification message
+  ///
+  /// In en, this message translates to:
+  /// **'Login successful: {userName}'**
+  String loginSuccess(String userName);
+
+  /// Close button text
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
 
   /// Title for app information section
   ///
@@ -902,6 +956,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Custom'**
   String get deckTypeCustom;
+
+  /// Menu item to move deck left
+  ///
+  /// In en, this message translates to:
+  /// **'Move Left'**
+  String get moveDeckLeft;
+
+  /// Menu item to move deck right
+  ///
+  /// In en, this message translates to:
+  /// **'Move Right'**
+  String get moveDeckRight;
+
+  /// Menu item to open deck settings
+  ///
+  /// In en, this message translates to:
+  /// **'Deck Settings'**
+  String get deckSettings;
+
+  /// Menu item to delete deck
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Deck'**
+  String get deleteDeck;
+
+  /// Success message when deck is moved left
+  ///
+  /// In en, this message translates to:
+  /// **'Deck moved left'**
+  String get deckMovedLeft;
+
+  /// Success message when deck is moved right
+  ///
+  /// In en, this message translates to:
+  /// **'Deck moved right'**
+  String get deckMovedRight;
+
+  /// Error message when deck move fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to move deck'**
+  String get deckMoveError;
+
+  /// Message when deck settings is not yet implemented
+  ///
+  /// In en, this message translates to:
+  /// **'Deck settings feature is coming soon'**
+  String get deckSettingsComingSoon;
+
+  /// Title for delete deck confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Deck'**
+  String get deleteDeckTitle;
+
+  /// Confirmation message for deck deletion
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{deckTitle}\"? This action cannot be undone.'**
+  String deleteDeckConfirm(String deckTitle);
+
+  /// Delete button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteButton;
+
+  /// Success message when deck is deleted
+  ///
+  /// In en, this message translates to:
+  /// **'\"{deckTitle}\" has been deleted'**
+  String deckDeletedSuccess(String deckTitle);
+
+  /// Error message when deck deletion fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete deck'**
+  String get deckDeleteError;
+
+  /// Label for mention text elements
+  ///
+  /// In en, this message translates to:
+  /// **'Mention'**
+  String get richTextMentionLabel;
+
+  /// Label for hashtag text elements
+  ///
+  /// In en, this message translates to:
+  /// **'Hashtag'**
+  String get richTextHashtagLabel;
+
+  /// Label for URL text elements
+  ///
+  /// In en, this message translates to:
+  /// **'URL'**
+  String get richTextUrlLabel;
+
+  /// Message when mention is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'Mention @{handle} tapped'**
+  String richTextMentionTapped(String handle);
+
+  /// Message when hashtag is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'Hashtag #{tag} tapped'**
+  String richTextHashtagTapped(String tag);
+
+  /// Message when URL is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'URL {url} tapped'**
+  String richTextUrlTapped(String url);
+
+  /// Action to view profile when mention is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'View Profile'**
+  String get richTextProfileView;
+
+  /// Action to search hashtag when hashtag is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'Search Hashtag'**
+  String get richTextHashtagSearch;
+
+  /// Action to open URL when URL is tapped
+  ///
+  /// In en, this message translates to:
+  /// **'Open URL'**
+  String get richTextOpenUrl;
+
+  /// Action to copy URL to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copy URL'**
+  String get richTextCopyUrl;
+
+  /// Message when URL is copied
+  ///
+  /// In en, this message translates to:
+  /// **'URL copied to clipboard'**
+  String get richTextUrlCopied;
+
+  /// Error message when URL cannot be opened
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open URL'**
+  String get richTextUrlOpenFailed;
+
+  /// Error message when text processing fails
+  ///
+  /// In en, this message translates to:
+  /// **'Text processing error'**
+  String get richTextProcessingError;
+
+  /// Message when a feature is not yet implemented
+  ///
+  /// In en, this message translates to:
+  /// **'This feature is under development'**
+  String get richTextFeatureNotImplemented;
+
+  /// Message shown when loading new posts from timeline
+  ///
+  /// In en, this message translates to:
+  /// **'Loading new posts...'**
+  String get loadingNewPosts;
+
+  /// Message shown when loading older posts from timeline
+  ///
+  /// In en, this message translates to:
+  /// **'Loading older posts...'**
+  String get loadingOlderPosts;
 }
 
 class _AppLocalizationsDelegate

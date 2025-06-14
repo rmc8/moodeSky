@@ -20,6 +20,7 @@
   "identifierRequired": "ハンドルまたはメールを入力してください",
   "passwordRequired": "アプリパスワードを入力してください",
   "signInButton": "サインイン",
+  "signingIn": "サインイン中...",
   "oAuthInDevelopment": "OAuth開発中",
   "addAccountButton": "アカウントを追加",
   "aboutAppPassword": "アプリパスワードについて",
@@ -48,14 +49,38 @@
   "errorTitle": "問題が発生しました",
   "languageLabel": "言語",
   "languageDescription": "アプリの言語を選択してください",
+  "repostedBy": "{name}がリポストしました",
+  "@repostedBy": {
+    "description": "Displayed when a post has been reposted by someone",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name or handle of the user who reposted"
+      }
+    }
+  },
   "selectLanguage": "言語を選択",
   "languageSettings": "言語設定",
   "appearanceSettings": "外観設定",
   "settingsTitle": "設定",
   "accountSettings": "アカウント設定",
   "manageAccounts": "アカウント管理",
-  "manageAccountsDescription": "アカウントの追加、削除、切り替え",
+  "manageAccountsDescription": "アカウントの追加・削除",
+  "refreshProfiles": "プロフィール更新",
+  "refreshProfilesDescription": "すべてのアカウントのプロフィール情報とアバターを更新",
+  "refreshingProfiles": "プロフィール情報を更新中...",
+  "profilesRefreshed": "プロフィール情報が更新されました",
+  "refreshProfilesError": "プロフィール更新に失敗しました",
   "signOutAllDescription": "すべてのアカウントからサインアウトしてログイン画面に戻る",
+  "loginSuccess": "ログイン成功: {userName}",
+  "@loginSuccess": {
+    "placeholders": {
+      "userName": {
+        "type": "String"
+      }
+    }
+  },
+  "close": "閉じる",
   "appInformation": "アプリ情報",
   "aboutApp": "moodeSkyについて",
   "appVersion": "バージョン {version}",
@@ -133,5 +158,36 @@
   "numberMillionSuffix": "M",
   "multiAccount": "マルチアカウント",
   "deckOptions": "デッキオプション",
-  "deckTypeCustom": "カスタム"
+  "deckTypeCustom": "カスタム",
+  "moveDeckLeft": "左に移動",
+  "moveDeckRight": "右に移動",
+  "deckSettings": "デッキ設定",
+  "deleteDeck": "デッキを削除",
+  "deckMovedLeft": "デッキを左に移動しました",
+  "deckMovedRight": "デッキを右に移動しました",
+  "deckMoveError": "デッキの移動に失敗しました",
+  "deckSettingsComingSoon": "デッキ設定機能は準備中です",
+  "deleteDeckTitle": "デッキを削除",
+  "deleteDeckConfirm": "「{deckTitle}」を削除しますか？この操作は取り消せません。",
+  "deleteButton": "削除",
+  "deckDeletedSuccess": "「{deckTitle}」を削除しました",
+  "deckDeleteError": "デッキの削除に失敗しました",
+  
+  "richTextMentionLabel": "メンション",
+  "richTextHashtagLabel": "ハッシュタグ",
+  "richTextUrlLabel": "URL",
+  "richTextMentionTapped": "メンション @{handle} をタップしました",
+  "richTextHashtagTapped": "ハッシュタグ #{tag} をタップしました",
+  "richTextUrlTapped": "URL {url} をタップしました",
+  "richTextProfileView": "プロフィールを表示",
+  "richTextHashtagSearch": "ハッシュタグ検索",
+  "richTextOpenUrl": "URLを開く",
+  "richTextCopyUrl": "URLをコピー",
+  "richTextUrlCopied": "URLをクリップボードにコピーしました",
+  "richTextUrlOpenFailed": "URLを開けませんでした",
+  "richTextProcessingError": "テキスト処理エラー",
+  "richTextFeatureNotImplemented": "この機能は準備中です",
+  
+  "loadingNewPosts": "最新のポストを取得しています...",
+  "loadingOlderPosts": "古いポストを取得しています..."
 }

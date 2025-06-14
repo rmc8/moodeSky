@@ -1,0 +1,134 @@
+# 🚀 ビルド時間短縮・コード生成最適化設定
+# このファイルはbuild_runnerとコード生成の最適化設定を提供します
+
+targets:
+  $default:
+    builders:
+      # Riverpod Generator 最適化設定
+      riverpod_generator:
+        enabled: true
+        options:
+          # 並列生成を有効化
+          parallel: true
+          # 増分ビルドを有効化
+          incremental: true
+          # 不要な生成ファイルをスキップ
+          skip_unnecessary_files: true
+        generate_for:
+          # プロバイダーファイルのみに限定
+          include:
+            - lib/core/providers/**
+            - lib/features/**/providers/**
+          exclude:
+            - lib/**/*.g.dart
+            - lib/**/*.freezed.dart
+            - test/**
+
+      # Drift Generator 最適化設定  
+      drift_dev:
+        enabled: true
+        options:
+          # 型安全性を最大化
+          compact_query_methods: true
+          # SQLキーワードをエスケープ
+          escape_keywords: true
+          # モジュール名を短縮
+          use_short_names: true
+          # カラム生成を最適化
+          generate_connect_constructor: false
+          # スキーマバージョニングを有効化
+          write_schema_version: true
+        generate_for:
+          include:
+            - lib/services/database/**
+          exclude:
+            - lib/**/*.g.dart
+            - test/**
+
+      # Freezed Generator 最適化設定
+      freezed:
+        enabled: true
+        options:
+          # JSON生成を無効化（不要な場合）
+          json: false
+          # when/mapメソッド生成を制限
+          map: true
+          # copyWithメソッドを最適化
+          copy_with: true
+          # 等価性チェックを最適化
+          equal: true
+          # toStringを最適化
+          to_string: true
+        generate_for:
+          include:
+            - lib/shared/models/**
+            - lib/features/**/models/**
+          exclude:
+            - lib/**/*.g.dart
+            - test/**
+
+      # JSON Serializable 最適化設定
+      json_serializable:
+        enabled: true
+        options:
+          # null安全性を強化
+          explicit_to_json: true
+          # フィールド名変換を最適化
+          field_rename: snake
+          # 型チェックを最適化
+          checked: false
+          # 例外処理を最適化
+          create_to_json: true
+          # 不要なnullチェックをスキップ
+          include_if_null: false
+        generate_for:
+          include:
+            - lib/shared/models/**
+            - lib/services/**/*.dart
+          exclude:
+            - lib/**/*.g.dart
+            - lib/**/*.freezed.dart
+            - test/**
+
+# ビルド最適化設定
+global_options:
+  # 並列ビルドワーカー数（CPUコア数に基づく）
+  workers: 4
+  
+  # キャッシュ設定
+  cache:
+    # ビルドキャッシュを有効化
+    enabled: true
+    # キャッシュディレクトリ
+    directory: .dart_tool/build_cache
+    # キャッシュ有効期限（時間）
+    ttl: 168  # 1週間
+    
+  # 監視ファイルの最適化
+  watch_filter:
+    include:
+      - "lib/**/*.dart"
+      - "pubspec.yaml"
+      - "analysis_options.yaml"
+    exclude:
+      - "lib/**/*.g.dart"
+      - "lib/**/*.freezed.dart"
+      - "test/**"
+      - ".dart_tool/**"
+      - "build/**"
+      
+  # 出力最適化
+  output:
+    # 不要なファイルを削除
+    clean_stale_outputs: true
+    # 出力ディレクトリを最適化
+    symlink_outputs: false
+    
+  # パフォーマンス監視
+  performance:
+    # ビルド時間を記録
+    track_performance: true
+    # 遅いビルダーを警告
+    warn_slow_builders: true
+    # ビルド統計を出力
+    verbose_logging: false

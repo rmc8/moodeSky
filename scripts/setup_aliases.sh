@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# MoodeSky - Development aliases setup script
+# moodeSky - Development aliases setup script
 # This script sets up convenient aliases for development with sound notifications
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,10 +21,10 @@ detect_shell_config() {
     fi
 }
 
-# MoodeSky development aliases
+# moodeSky development aliases
 ALIASES=$(cat << 'EOF'
 
-# MoodeSky Development Aliases with Sound Notifications
+# moodeSky Development Aliases with Sound Notifications
 alias moode-notify='SCRIPT_DIR/notify_sound.sh'
 alias moode-success='SCRIPT_DIR/notify_sound.sh success'
 alias moode-error='SCRIPT_DIR/notify_sound.sh error'
@@ -61,18 +61,18 @@ ALIASES="${ALIASES//SCRIPT_DIR/$SCRIPT_DIR}"
 setup_aliases() {
     local shell_config=$(detect_shell_config)
     
-    echo "🚀 Setting up MoodeSky development aliases..."
+    echo "🚀 Setting up moodeSky development aliases..."
     echo "Shell config file: $shell_config"
     
     # Check if aliases already exist
-    if grep -q "MoodeSky Development Aliases" "$shell_config" 2>/dev/null; then
-        echo "⚠️  MoodeSky aliases already exist in $shell_config"
+    if grep -q "moodeSky Development Aliases" "$shell_config" 2>/dev/null; then
+        echo "⚠️  moodeSky aliases already exist in $shell_config"
         read -p "Do you want to update them? (y/N): " -n 1 -r
         echo
         
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             # Remove existing aliases
-            sed -i.bak '/# MoodeSky Development Aliases/,/^$/d' "$shell_config"
+            sed -i.bak '/# moodeSky Development Aliases/,/^$/d' "$shell_config"
             echo "🗑️  Removed existing aliases"
         else
             echo "❌ Setup cancelled"
@@ -134,7 +134,7 @@ test_sound() {
 # Show help
 show_help() {
     cat << EOF
-🔊 MoodeSky Development Aliases Setup
+🔊 moodeSky Development Aliases Setup
 
 Usage: $0 [COMMAND]
 

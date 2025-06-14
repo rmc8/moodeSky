@@ -9,6 +9,7 @@ import 'package:moodesky/core/providers/auth_provider.dart';
 import 'package:moodesky/features/auth/models/server_config.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
+import 'package:moodesky/shared/widgets/common/index.dart';
 
 class AddAccountScreen extends ConsumerStatefulWidget {
   const AddAccountScreen({super.key});
@@ -24,7 +25,6 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
 
   bool _isLoading = false;
   bool _obscurePassword = true;
-  bool _useOAuth = false; // App Password default for add account
   ServerConfig _selectedServer = ServerPresets.blueskyOfficial;
 
   @override
@@ -32,6 +32,133 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
     _identifierController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  /// エラータイプに応じた詳細なエラーダイアログを表示
+  void _showErrorDialog(String error, AuthErrorType? errorType, String? errorDescription) {
+    String title;
+    String message;
+    List<Widget> actions = [];
+
+    switch (errorType) {
+      case AuthErrorType.tokenVerificationFailed:
+        title = 'トークン検証エラー';
+        message = 'トークンの検証に失敗しました。\n'
+            'これは以下の原因が考えられます：\n\n'
+            '• アプリパスワードが無効または期限切れ\n'
+            '• サーバーとの通信エラー\n'
+            '• アカウント設定の問題\n\n'
+            'アプリパスワードを再生成してから再試行してください。';
+        actions = [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('閉じる'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // アプリパスワード生成ページへのガイダンス
+              _showAppPasswordGuide();
+            },
+            child: const Text('アプリパスワード生成'),
+          ),
+        ];
+        break;
+        
+      case AuthErrorType.invalidCredentials:
+        title = '認証情報エラー';
+        message = 'ユーザー名またはアプリパスワードが正しくありません。\n\n'
+            '入力内容を確認してください：\n'
+            '• ユーザー名（ハンドル）が正しいか\n'
+            '• アプリパスワードが正しいか\n'
+            '• 通常のパスワードではなくアプリパスワードを使用しているか';
+        break;
+        
+      case AuthErrorType.networkError:
+        title = 'ネットワークエラー';
+        message = 'ネットワーク接続に問題があります。\n\n'
+            'インターネット接続を確認してから再試行してください。';
+        break;
+        
+      case AuthErrorType.serverError:
+        title = 'サーバーエラー';
+        message = 'Blueskyサーバーで問題が発生しています。\n\n'
+            'しばらく時間をおいてから再試行してください。';
+        break;
+        
+      default:
+        title = 'ログインエラー';
+        message = error;
+    }
+
+    // デフォルトアクションを追加
+    if (actions.isEmpty) {
+      actions = [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('閉じる'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            // 再試行
+          },
+          child: const Text('再試行'),
+        ),
+      ];
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(message),
+              if (errorDescription != null && errorDescription.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Text('詳細情報:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text(
+                  errorDescription,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: actions,
+      ),
+    );
+  }
+
+  /// アプリパスワード生成ガイドを表示
+  void _showAppPasswordGuide() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('アプリパスワードの生成'),
+        content: const Text(
+          'Blueskyアプリでアプリパスワードを生成してください：\n\n'
+          '1. Blueskyアプリを開く\n'
+          '2. 設定 → プライバシーとセキュリティ\n'
+          '3. アプリパスワード → 新しいアプリパスワードを追加\n'
+          '4. 生成されたパスワードをこのアプリで使用',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('了解'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _addAccount() async {
@@ -46,7 +173,6 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
             identifier: _identifierController.text.trim(),
             password: _passwordController.text,
             serverConfig: _selectedServer,
-            useOAuth: _useOAuth,
           );
 
       result.when(
@@ -65,14 +191,13 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
         },
         failure: (error, errorDescription, errorType) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  AppLocalizations.of(context)!.accountAddFailed(error),
-                ),
-                backgroundColor: Colors.red,
-              ),
-            );
+            debugPrint('❌ Account add failed in UI:');
+            debugPrint('   Error: $error');
+            debugPrint('   Error Type: $errorType');
+            debugPrint('   Error Description: $errorDescription');
+            
+            // エラータイプに応じたメッセージとアクションを表示
+            _showErrorDialog(error, errorType, errorDescription);
           }
         },
         cancelled: () {
@@ -131,136 +256,105 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Info card
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.info, color: Colors.blue, size: 20),
-                                const SizedBox(width: 8),
-                                Text(
-                                  AppLocalizations.of(context)!.newAccountInfo,
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        color: Colors.blue,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              AppLocalizations.of(context)!.multiAccountInfo,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
+                    CommonContainerFactories.card(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.info,
+                                color: context.appColors.info,
+                                size: 20,
                               ),
-                            ),
-                          ],
-                        ),
+                              AppSpacing.horizontalSpacerSM,
+                              Text(
+                                AppLocalizations.of(context)!.newAccountInfo,
+                                style: context.appTextStyles.titleMedium
+                                    .copyWith(
+                                      color: context.appColors.info,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          AppSpacing.verticalSpacerSM,
+                          Text(
+                            AppLocalizations.of(context)!.multiAccountInfo,
+                            style: context.appTextStyles.caption,
+                          ),
+                        ],
                       ),
                     ),
 
                     const SizedBox(height: 16),
 
-                    // Auth method toggle
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.loginMethod,
-                              style: Theme.of(context).textTheme.titleMedium,
+                    // OAuth temporarily disabled - showing info card
+                    CommonContainerFactories.card(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.key,
+                                color: context.appColors.info,
+                                size: 20,
+                              ),
+                              AppSpacing.horizontalSpacerSM,
+                              Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.authMethodAppPassword,
+                                style: context.appTextStyles.titleMedium
+                                    .copyWith(
+                                      color: context.appColors.info,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          AppSpacing.verticalSpacerSM,
+                          CommonContainer(
+                            style: CommonContainerStyle.none,
+                            padding: AppSpacing.paddingMD,
+                            color: context.appColors.infoWithOpacity,
+                            borderRadius: BorderRadius.circular(AppBorderRadius.sm),
+                            border: Border.all(
+                              color: context.appColors.info.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
-                            const SizedBox(height: 8),
-                            SegmentedButton<bool>(
-                              segments: [
-                                ButtonSegment(
-                                  value: false,
-                                  label: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.authMethodAppPassword,
-                                  ),
-                                  icon: const Icon(Icons.key),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: context.appColors.info,
+                                  size: 16,
                                 ),
-                                ButtonSegment(
-                                  value: true,
-                                  label: Text(
+                                AppSpacing.horizontalSpacerSM,
+                                Expanded(
+                                  child: Text(
                                     AppLocalizations.of(
                                       context,
-                                    )!.authMethodOAuth,
+                                    )!.appPasswordRecommended,
+                                    style: context.appTextStyles.bodySmall
+                                        .copyWith(
+                                          color: context.appColors.info,
+                                        ),
                                   ),
-                                  icon: const Icon(Icons.security),
                                 ),
                               ],
-                              selected: {_useOAuth},
-                              onSelectionChanged: (selection) {
-                                setState(() {
-                                  _useOAuth = selection.first;
-                                  _passwordController.clear();
-                                });
-                              },
                             ),
-                            const SizedBox(height: 8),
-                            // Method explanation
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: _useOAuth
-                                    ? Colors.orange.withValues(alpha: 0.1)
-                                    : Colors.blue.withValues(alpha: 0.1),
-                                border: Border.all(
-                                  color: _useOAuth
-                                      ? Colors.orange.withValues(alpha: 0.3)
-                                      : Colors.blue.withValues(alpha: 0.3),
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    _useOAuth ? Icons.info : Icons.check_circle,
-                                    color: _useOAuth
-                                        ? Colors.orange
-                                        : Colors.blue,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      _useOAuth
-                                          ? AppLocalizations.of(
-                                              context,
-                                            )!.oAuthInfo
-                                          : AppLocalizations.of(
-                                              context,
-                                            )!.appPasswordRecommended,
-                                      style: TextStyle(
-                                        color: _useOAuth
-                                            ? Colors.orange
-                                            : Colors.blue,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
 
                     const SizedBox(height: 16),
 
                     // Server selection
-                    Card(
+                    CommonContainerFactories.card(
                       child: ExpansionTile(
                         leading: Icon(
                           _selectedServer.isOfficial
@@ -334,9 +428,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                         border: const OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      textInputAction: _useOAuth
-                          ? TextInputAction.done
-                          : TextInputAction.next,
+                      textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value?.trim().isEmpty ?? true) {
                           return AppLocalizations.of(
@@ -347,190 +439,126 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                       },
                     ),
 
-                    // Password field (only for app password)
-                    if (!_useOAuth) ...[
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(
-                            context,
-                          )!.passwordLabel,
-                          hintText: AppLocalizations.of(context)!.passwordHint,
-                          prefixIcon: const Icon(Icons.lock),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                            ),
-                            onPressed: () {
-                              setState(
-                                () => _obscurePassword = !_obscurePassword,
+                    // Password field
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.passwordLabel,
+                        hintText: AppLocalizations.of(context)!.passwordHint,
+                        prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            );
+                          },
+                        ),
+                        border: const OutlineInputBorder(),
+                      ),
+                      obscureText: _obscurePassword,
+                      textInputAction: TextInputAction.done,
+                      validator: (value) {
+                        if (value?.trim().isEmpty ?? true) {
+                          return AppLocalizations.of(context)!.passwordRequired;
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // App Password help
+                    CommonContainer(
+                      style: CommonContainerStyle.none,
+                      padding: AppSpacing.paddingMD,
+                      color: context.appColors.infoWithOpacity,
+                      borderRadius: BorderRadius.circular(AppBorderRadius.sm),
+                      border: Border.all(
+                        color: context.appColors.info.withValues(alpha: 0.3),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.info,
+                                color: context.appColors.info,
+                                size: 16,
+                              ),
+                              AppSpacing.horizontalSpacerSM,
+                              Text(
+                                AppLocalizations.of(context)!.aboutAppPassword,
+                                style: context.appTextStyles.labelSmall
+                                    .copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: context.appColors.info,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          AppSpacing.verticalSpacerXS,
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.appPasswordDescription,
+                            style: context.appTextStyles.caption,
+                          ),
+                          AppSpacing.verticalSpacerSM,
+                          InkWell(
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(_selectedServer.appPasswordUrl),
+                                  action: SnackBarAction(
+                                    label: AppLocalizations.of(
+                                      context,
+                                    )!.copyButton,
+                                    onPressed: () {
+                                      // TODO: URLをクリップボードにコピー
+                                    },
+                                  ),
+                                ),
                               );
                             },
-                          ),
-                          border: const OutlineInputBorder(),
-                        ),
-                        obscureText: _obscurePassword,
-                        textInputAction: TextInputAction.done,
-                        validator: (value) {
-                          if (value?.trim().isEmpty ?? true) {
-                            return AppLocalizations.of(
-                              context,
-                            )!.passwordRequired;
-                          }
-                          return null;
-                        },
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // App Password help
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.1),
-                          border: Border.all(
-                            color: Colors.blue.withValues(alpha: 0.3),
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.info, color: Colors.blue, size: 16),
-                                const SizedBox(width: 6),
-                                Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.aboutAppPassword,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.appPasswordDescription,
-                              style: const TextStyle(fontSize: 11),
-                            ),
-                            const SizedBox(height: 6),
-                            InkWell(
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      _selectedServer.appPasswordUrl,
-                                    ),
-                                    action: SnackBarAction(
-                                      label: AppLocalizations.of(
-                                        context,
-                                      )!.copyButton,
-                                      onPressed: () {
-                                        // TODO: URLをクリップボードにコピー
-                                      },
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                AppLocalizations.of(
-                                  context,
-                                )!.generateAppPassword,
-                                style: const TextStyle(
-                                  color: Colors.blue,
-                                  fontSize: 11,
-                                  decoration: TextDecoration.underline,
-                                ),
+                            child: Text(
+                              AppLocalizations.of(context)!.generateAppPassword,
+                              style: context.appTextStyles.caption.copyWith(
+                                color: context.appColors.info,
+                                decoration: TextDecoration.underline,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
 
                     const SizedBox(height: 24),
 
                     // Add account button
-                    FilledButton(
-                      onPressed: (_isLoading || _useOAuth) ? null : _addAccount,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                _useOAuth
-                                    ? AppLocalizations.of(
-                                        context,
-                                      )!.oAuthInDevelopment
-                                    : AppLocalizations.of(
-                                        context,
-                                      )!.addAccountButton,
-                              ),
+                    CommonButtonFactories.primary(
+                      onPressed: _addAccount,
+                      isLoading: _isLoading,
+                      width: double.infinity,
+                      size: CommonButtonSize.large,
+                      child: Text(
+                        AppLocalizations.of(context)!.addAccountButton,
                       ),
                     ),
 
                     // Error display
                     if (authState is AuthError) ...[
-                      const SizedBox(height: 16),
-                      Card(
-                        color: Theme.of(context).colorScheme.errorContainer,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onErrorContainer,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.accountAddError,
-                                      style: TextStyle(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onErrorContainer,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                authState.message,
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onErrorContainer,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      AppSpacing.verticalSpacerMD,
+                      ErrorWidgets.card(
+                        title: AppLocalizations.of(context)!.accountAddError,
+                        message: authState.message,
+                        margin: EdgeInsets.zero,
                       ),
                     ],
 
@@ -539,11 +567,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                     // Help text
                     Text(
                       AppLocalizations.of(context)!.multiAccountHelpText,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
+                      style: context.appTextStyles.caption,
                       textAlign: TextAlign.center,
                     ),
                   ],

@@ -22,22 +22,20 @@ class ThemeSelector extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncThemeMode = ref.watch(themeNotifierProvider);
-    
+
     return asyncThemeMode.when(
-      data: (currentThemeMode) => isCompact 
+      data: (currentThemeMode) => isCompact
           ? _buildCompactSelector(context, ref, currentThemeMode)
           : _buildFullSelector(context, ref, currentThemeMode),
       loading: () => const CircularProgressIndicator(),
-      error: (error, stack) => Icon(
-        Icons.error,
-        color: Theme.of(context).colorScheme.error,
-      ),
+      error: (error, stack) =>
+          Icon(Icons.error, color: Theme.of(context).colorScheme.error),
     );
   }
 
   Widget _buildCompactSelector(
-    BuildContext context, 
-    WidgetRef ref, 
+    BuildContext context,
+    WidgetRef ref,
     AppThemeMode currentThemeMode,
   ) {
     return PopupMenuButton<AppThemeMode>(
@@ -75,8 +73,8 @@ class ThemeSelector extends ConsumerWidget {
   }
 
   Widget _buildFullSelector(
-    BuildContext context, 
-    WidgetRef ref, 
+    BuildContext context,
+    WidgetRef ref,
     AppThemeMode currentThemeMode,
   ) {
     return Column(
@@ -89,12 +87,10 @@ class ThemeSelector extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
         ],
-        
+
         Container(
           decoration: BoxDecoration(
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outline,
-            ),
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
             borderRadius: BorderRadius.circular(8),
           ),
           child: DropdownButtonHideUnderline(
@@ -118,15 +114,15 @@ class ThemeSelector extends ConsumerWidget {
             ),
           ),
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         Text(
           AppLocalizations.of(context)!.themeDescription,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).brightness == Brightness.light 
-                ? const Color(0xFF222222) 
-                : const Color(0xFFCCCCCC),
+            color: Theme.of(context).brightness == Brightness.light
+                ? const Color(0xFF222222)
+                : const Color(0xFFE0E0E0),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -158,7 +154,7 @@ class ThemeSelectionDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncThemeMode = ref.watch(themeNotifierProvider);
-    
+
     return asyncThemeMode.when(
       data: (currentThemeMode) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.selectTheme),
@@ -178,7 +174,9 @@ class ThemeSelectionDialog extends ConsumerWidget {
                       )
                     : null,
                 onTap: () {
-                  ref.read(themeNotifierProvider.notifier).setThemeMode(themeMode);
+                  ref
+                      .read(themeNotifierProvider.notifier)
+                      .setThemeMode(themeMode);
                   Navigator.of(context).pop();
                 },
               );
@@ -193,9 +191,7 @@ class ThemeSelectionDialog extends ConsumerWidget {
         ],
       ),
       loading: () => const AlertDialog(
-        content: Center(
-          child: CircularProgressIndicator(),
-        ),
+        content: Center(child: CircularProgressIndicator()),
       ),
       error: (error, stack) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.errorTitle),

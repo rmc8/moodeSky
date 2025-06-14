@@ -69,6 +69,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signInButton => 'Sign in';
 
   @override
+  String get signingIn => 'Signing in...';
+
+  @override
   String get oAuthInDevelopment => 'OAuth in development';
 
   @override
@@ -164,6 +167,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose your preferred language for the app';
 
   @override
+  String repostedBy(String name) {
+    return 'Reposted by $name';
+  }
+
+  @override
   String get selectLanguage => 'Select Language';
 
   @override
@@ -182,12 +190,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manageAccounts => 'Manage Accounts';
 
   @override
-  String get manageAccountsDescription =>
-      'Add, remove, or switch between accounts';
+  String get manageAccountsDescription => 'Add and remove accounts';
+
+  @override
+  String get refreshProfiles => 'Refresh Profiles';
+
+  @override
+  String get refreshProfilesDescription =>
+      'Update profile information and avatars for all accounts';
+
+  @override
+  String get refreshingProfiles => 'Updating profile information...';
+
+  @override
+  String get profilesRefreshed => 'Profile information has been updated';
+
+  @override
+  String get refreshProfilesError => 'Failed to update profiles';
 
   @override
   String get signOutAllDescription =>
       'Sign out of all accounts and return to login screen';
+
+  @override
+  String loginSuccess(String userName) {
+    return 'Login successful: $userName';
+  }
+
+  @override
+  String get close => 'Close';
 
   @override
   String get appInformation => 'App Information';
@@ -445,4 +476,102 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deckTypeCustom => 'Custom';
+
+  @override
+  String get moveDeckLeft => 'Move Left';
+
+  @override
+  String get moveDeckRight => 'Move Right';
+
+  @override
+  String get deckSettings => 'Deck Settings';
+
+  @override
+  String get deleteDeck => 'Delete Deck';
+
+  @override
+  String get deckMovedLeft => 'Deck moved left';
+
+  @override
+  String get deckMovedRight => 'Deck moved right';
+
+  @override
+  String get deckMoveError => 'Failed to move deck';
+
+  @override
+  String get deckSettingsComingSoon => 'Deck settings feature is coming soon';
+
+  @override
+  String get deleteDeckTitle => 'Delete Deck';
+
+  @override
+  String deleteDeckConfirm(String deckTitle) {
+    return 'Delete \"$deckTitle\"? This action cannot be undone.';
+  }
+
+  @override
+  String get deleteButton => 'Delete';
+
+  @override
+  String deckDeletedSuccess(String deckTitle) {
+    return '\"$deckTitle\" has been deleted';
+  }
+
+  @override
+  String get deckDeleteError => 'Failed to delete deck';
+
+  @override
+  String get richTextMentionLabel => 'Mention';
+
+  @override
+  String get richTextHashtagLabel => 'Hashtag';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return 'Mention @$handle tapped';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return 'Hashtag #$tag tapped';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url tapped';
+  }
+
+  @override
+  String get richTextProfileView => 'View Profile';
+
+  @override
+  String get richTextHashtagSearch => 'Search Hashtag';
+
+  @override
+  String get richTextOpenUrl => 'Open URL';
+
+  @override
+  String get richTextCopyUrl => 'Copy URL';
+
+  @override
+  String get richTextUrlCopied => 'URL copied to clipboard';
+
+  @override
+  String get richTextUrlOpenFailed => 'Could not open URL';
+
+  @override
+  String get richTextProcessingError => 'Text processing error';
+
+  @override
+  String get richTextFeatureNotImplemented =>
+      'This feature is under development';
+
+  @override
+  String get loadingNewPosts => 'Loading new posts...';
+
+  @override
+  String get loadingOlderPosts => 'Loading older posts...';
 }

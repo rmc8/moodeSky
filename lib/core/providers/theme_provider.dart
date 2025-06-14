@@ -12,11 +12,7 @@ import 'package:moodesky/core/theme/app_themes.dart';
 part 'theme_provider.g.dart';
 
 /// テーマモード設定
-enum AppThemeMode {
-  light,
-  dark,
-  system,
-}
+enum AppThemeMode { light, dark, system }
 
 extension AppThemeModeExtension on AppThemeMode {
   String get displayName {
@@ -29,7 +25,7 @@ extension AppThemeModeExtension on AppThemeMode {
         return 'System';
     }
   }
-  
+
   String get localizedKey {
     switch (this) {
       case AppThemeMode.light:
@@ -40,7 +36,7 @@ extension AppThemeModeExtension on AppThemeMode {
         return 'themeSystem';
     }
   }
-  
+
   IconData get icon {
     switch (this) {
       case AppThemeMode.light:
@@ -51,7 +47,7 @@ extension AppThemeModeExtension on AppThemeMode {
         return Icons.brightness_auto;
     }
   }
-  
+
   ThemeMode get flutterThemeMode {
     switch (this) {
       case AppThemeMode.light:
@@ -72,16 +68,16 @@ class ThemeNotifier extends _$ThemeNotifier {
   @override
   Future<AppThemeMode> build() async {
     final prefs = await ref.watch(sharedPreferencesProvider.future);
-    
+
     // 保存されたテーマ設定を読み込む
     final savedThemeIndex = prefs.getInt(_themeKey);
-    
-    if (savedThemeIndex != null && 
-        savedThemeIndex >= 0 && 
+
+    if (savedThemeIndex != null &&
+        savedThemeIndex >= 0 &&
         savedThemeIndex < AppThemeMode.values.length) {
       return AppThemeMode.values[savedThemeIndex];
     }
-    
+
     // デフォルトはシステム設定に従う
     return AppThemeMode.system;
   }
@@ -89,10 +85,10 @@ class ThemeNotifier extends _$ThemeNotifier {
   /// テーマモードを変更する
   Future<void> setThemeMode(AppThemeMode themeMode) async {
     final prefs = await ref.read(sharedPreferencesProvider.future);
-    
+
     // SharedPreferencesに保存
     await prefs.setInt(_themeKey, themeMode.index);
-    
+
     // 状態を更新
     state = AsyncData(themeMode);
   }
@@ -123,21 +119,21 @@ ThemeMode flutterThemeMode(AutoDisposeProviderRef<ThemeMode> ref) {
 /// ライトテーマを提供するプロバイダー（ロケールに応じたフォントを適用）
 @riverpod
 ThemeData lightTheme(AutoDisposeProviderRef<ThemeData> ref) {
-  final locale = ref.watch(currentLocaleProvider);
+  final locale = ref.watch(currentLocaleProvider) ?? const Locale('en');
   return AppThemes.lightTheme.withLocaleFonts(locale);
 }
 
 /// ダークテーマを提供するプロバイダー（ロケールに応じたフォントを適用）
 @riverpod
 ThemeData darkTheme(AutoDisposeProviderRef<ThemeData> ref) {
-  final locale = ref.watch(currentLocaleProvider);
+  final locale = ref.watch(currentLocaleProvider) ?? const Locale('en');
   return AppThemes.darkTheme.withLocaleFonts(locale);
 }
 
 /// 現在のフォントファミリーを取得するプロバイダー
 @riverpod
 String currentFontFamily(AutoDisposeProviderRef<String> ref) {
-  final locale = ref.watch(currentLocaleProvider);
+  final locale = ref.watch(currentLocaleProvider) ?? const Locale('en');
   return AppFonts.getFontFamilyForLocale(locale);
 }
 
@@ -149,16 +145,21 @@ TextStyle monospaceTextStyle(
   FontWeight fontWeight = FontWeight.w400,
   Color? color,
 }) {
-  return AppFonts.getMonospaceStyle(
+  final locale = ref.watch(currentLocaleProvider) ?? const Locale('en');
+  final baseStyle = TextStyle(
     fontSize: fontSize,
     fontWeight: fontWeight,
     color: color,
   );
+  return AppFonts.getMonospaceStyle(baseStyle, locale.languageCode);
 }
 
 /// 言語に応じて調整されたフォントウェイトを取得するプロバイダー
 @riverpod
-FontWeight adjustedFontWeight(AutoDisposeProviderRef<FontWeight> ref, FontWeight baseWeight) {
+FontWeight adjustedFontWeight(
+  AutoDisposeProviderRef<FontWeight> ref,
+  FontWeight baseWeight,
+) {
   final locale = ref.watch(currentLocaleProvider);
   final languageCode = locale?.languageCode ?? 'en';
   return AppFonts.adjustFontWeightForCJK(baseWeight, languageCode);

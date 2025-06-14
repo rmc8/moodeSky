@@ -69,6 +69,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get signInButton => 'Entrar';
 
   @override
+  String get signingIn => 'Signing in...';
+
+  @override
   String get oAuthInDevelopment => 'OAuth em desenvolvimento';
 
   @override
@@ -164,6 +167,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Escolha seu idioma preferido para o aplicativo';
 
   @override
+  String repostedBy(String name) {
+    return 'Repostado por $name';
+  }
+
+  @override
   String get selectLanguage => 'Selecionar Idioma';
 
   @override
@@ -186,8 +194,32 @@ class AppLocalizationsPt extends AppLocalizations {
       'Adicionar, remover ou alternar entre contas';
 
   @override
+  String get refreshProfiles => 'Atualizar Perfis';
+
+  @override
+  String get refreshProfilesDescription =>
+      'Atualizar informações de perfil e avatares para todas as contas';
+
+  @override
+  String get refreshingProfiles => 'Atualizando informações de perfil...';
+
+  @override
+  String get profilesRefreshed => 'Informações de perfil foram atualizadas';
+
+  @override
+  String get refreshProfilesError => 'Falha ao atualizar perfis';
+
+  @override
   String get signOutAllDescription =>
       'Sair de todas as contas e retornar à tela de login';
+
+  @override
+  String loginSuccess(String userName) {
+    return 'Login successful: $userName';
+  }
+
+  @override
+  String get close => 'Close';
 
   @override
   String get appInformation => 'Informações do App';
@@ -445,6 +477,104 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get deckTypeCustom => 'Personalizado';
+
+  @override
+  String get moveDeckLeft => 'Mover à Esquerda';
+
+  @override
+  String get moveDeckRight => 'Mover à Direita';
+
+  @override
+  String get deckSettings => 'Configurações do Deck';
+
+  @override
+  String get deleteDeck => 'Excluir Deck';
+
+  @override
+  String get deckMovedLeft => 'Deck movido à esquerda';
+
+  @override
+  String get deckMovedRight => 'Deck movido à direita';
+
+  @override
+  String get deckMoveError => 'Falha ao mover deck';
+
+  @override
+  String get deckSettingsComingSoon => 'Configurações do deck em breve';
+
+  @override
+  String get deleteDeckTitle => 'Excluir Deck';
+
+  @override
+  String deleteDeckConfirm(String deckTitle) {
+    return 'Excluir \"$deckTitle\"? Esta ação não pode ser desfeita.';
+  }
+
+  @override
+  String get deleteButton => 'Excluir';
+
+  @override
+  String deckDeletedSuccess(String deckTitle) {
+    return '\"$deckTitle\" foi excluído';
+  }
+
+  @override
+  String get deckDeleteError => 'Falha ao excluir deck';
+
+  @override
+  String get richTextMentionLabel => 'Menção';
+
+  @override
+  String get richTextHashtagLabel => 'Hashtag';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return 'Menção @$handle tocada';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return 'Hashtag #$tag tocada';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url tocada';
+  }
+
+  @override
+  String get richTextProfileView => 'Ver Perfil';
+
+  @override
+  String get richTextHashtagSearch => 'Buscar Hashtag';
+
+  @override
+  String get richTextOpenUrl => 'Abrir URL';
+
+  @override
+  String get richTextCopyUrl => 'Copiar URL';
+
+  @override
+  String get richTextUrlCopied => 'URL copiada para a área de transferência';
+
+  @override
+  String get richTextUrlOpenFailed => 'Não foi possível abrir a URL';
+
+  @override
+  String get richTextProcessingError => 'Erro no processamento de texto';
+
+  @override
+  String get richTextFeatureNotImplemented =>
+      'Esta funcionalidade está em desenvolvimento';
+
+  @override
+  String get loadingNewPosts => 'Carregando novos posts...';
+
+  @override
+  String get loadingOlderPosts => 'Carregando posts antigos...';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -607,6 +737,11 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
       'Escolha seu idioma preferido para o aplicativo';
 
   @override
+  String repostedBy(String name) {
+    return 'Repostado por $name';
+  }
+
+  @override
   String get selectLanguage => 'Selecionar Idioma';
 
   @override
@@ -627,6 +762,22 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get manageAccountsDescription =>
       'Adicionar, remover ou alternar entre contas';
+
+  @override
+  String get refreshProfiles => 'Atualizar Perfis';
+
+  @override
+  String get refreshProfilesDescription =>
+      'Atualizar informações de perfil e avatares para todas as contas';
+
+  @override
+  String get refreshingProfiles => 'Atualizando informações de perfil...';
+
+  @override
+  String get profilesRefreshed => 'Informações de perfil foram atualizadas';
+
+  @override
+  String get refreshProfilesError => 'Falha ao atualizar perfis';
 
   @override
   String get signOutAllDescription =>
@@ -888,4 +1039,102 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get deckTypeCustom => 'Personalizado';
+
+  @override
+  String get moveDeckLeft => 'Mover à Esquerda';
+
+  @override
+  String get moveDeckRight => 'Mover à Direita';
+
+  @override
+  String get deckSettings => 'Configurações do Deck';
+
+  @override
+  String get deleteDeck => 'Excluir Deck';
+
+  @override
+  String get deckMovedLeft => 'Deck movido à esquerda';
+
+  @override
+  String get deckMovedRight => 'Deck movido à direita';
+
+  @override
+  String get deckMoveError => 'Falha ao mover deck';
+
+  @override
+  String get deckSettingsComingSoon => 'Configurações do deck em breve';
+
+  @override
+  String get deleteDeckTitle => 'Excluir Deck';
+
+  @override
+  String deleteDeckConfirm(String deckTitle) {
+    return 'Excluir \"$deckTitle\"? Esta ação não pode ser desfeita.';
+  }
+
+  @override
+  String get deleteButton => 'Excluir';
+
+  @override
+  String deckDeletedSuccess(String deckTitle) {
+    return '\"$deckTitle\" foi excluído';
+  }
+
+  @override
+  String get deckDeleteError => 'Falha ao excluir deck';
+
+  @override
+  String get richTextMentionLabel => 'Menção';
+
+  @override
+  String get richTextHashtagLabel => 'Hashtag';
+
+  @override
+  String get richTextUrlLabel => 'URL';
+
+  @override
+  String richTextMentionTapped(String handle) {
+    return 'Menção @$handle tocada';
+  }
+
+  @override
+  String richTextHashtagTapped(String tag) {
+    return 'Hashtag #$tag tocada';
+  }
+
+  @override
+  String richTextUrlTapped(String url) {
+    return 'URL $url tocada';
+  }
+
+  @override
+  String get richTextProfileView => 'Ver Perfil';
+
+  @override
+  String get richTextHashtagSearch => 'Buscar Hashtag';
+
+  @override
+  String get richTextOpenUrl => 'Abrir URL';
+
+  @override
+  String get richTextCopyUrl => 'Copiar URL';
+
+  @override
+  String get richTextUrlCopied => 'URL copiada para a área de transferência';
+
+  @override
+  String get richTextUrlOpenFailed => 'Não foi possível abrir a URL';
+
+  @override
+  String get richTextProcessingError => 'Erro no processamento de texto';
+
+  @override
+  String get richTextFeatureNotImplemented =>
+      'Esta funcionalidade está em desenvolvimento';
+
+  @override
+  String get loadingNewPosts => 'Carregando novos posts...';
+
+  @override
+  String get loadingOlderPosts => 'Carregando posts antigos...';
 }

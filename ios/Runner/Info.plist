@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Moodesky</string>
+	<string>moodeSky</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -45,5 +45,39 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	
+	<!-- OAuth URL Schemes -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<!-- Custom scheme for OAuth callback -->
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>moodesky.oauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>moodesky</string>
+			</array>
+		</dict>
+		<!-- HTTPS Universal Link for OAuth callback -->
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>moodesky.app.oauth.https</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>https</string>
+			</array>
+		</dict>
+	</array>
+	
+	<!-- Associated Domains for Universal Links -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:rmc-8.com</string>
+	</array>
 </dict>
 </plist>

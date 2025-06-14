@@ -1,20 +1,28 @@
 """
-AT Protocol Dart repository vectorizer
+AT Protocol Dart repository vectorizer with Qdrant + FastEmbed
 """
 
+import asyncio
 import hashlib
 import json
+import os
 import re
 import time
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 import git
+import psutil
+import yaml
 from fastembed import TextEmbedding
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from qdrant_client.http import models
 from rich.console import Console
-from rich.progress import Progress, TaskID
+from rich.progress import Progress, TaskID, SpinnerColumn, TextColumn, BarColumn, TimeRemainingColumn
+from rich.table import Table
+from rich.panel import Panel
+from rich.live import Live
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from .models import (
     ChunkMetadata,
@@ -28,104 +36,456 @@ console = Console()
 
 
 class AtprotoVectorizer:
-    """Vectorizer for AT Protocol Dart repositories"""
+    """Vectorizer for AT Protocol Dart repositories using Qdrant + FastEmbed"""
     
     def __init__(self, config: VectorizationConfig):
         self.config = config
-        self.client = QdrantClient(url=config.qdrant_url)
-        self.embedding_model = None
         self.stats = None
         
-    def _init_embedding_model(self):
-        """Initialize embedding model lazily"""
-        if self.embedding_model is None:
-            console.print(f"[blue]Loading embedding model: {self.config.embedding_model}[/blue]")
-            self.embedding_model = TextEmbedding(model_name=self.config.embedding_model)
-    
+        # Initialize Qdrant client
+        self.client = QdrantClient(url=config.qdrant_url)
+        
+        # Initialize FastEmbed
+        console.print("[cyan]Initializing FastEmbed model...[/cyan]")
+        self.embedding_model = TextEmbedding(
+            model_name=config.embedding_model,
+            cache_dir="./.cache/fastembed"
+        )
+        console.print(f"[green]✓ FastEmbed model loaded: {config.embedding_model}[/green]")
+        
     def setup_collection(self) -> bool:
-        """Create or verify Qdrant collection"""
+        """Setup or recreate Qdrant collection"""
         try:
-            collections = [c.name for c in self.client.get_collections().collections]
+            # Check if collection exists
+            collections = self.client.get_collections().collections
+            collection_exists = any(c.name == self.config.collection_name for c in collections)
             
-            if self.config.collection_name not in collections:
-                console.print(f"[yellow]Creating collection: {self.config.collection_name}[/yellow]")
-                self.client.create_collection(
-                    collection_name=self.config.collection_name,
-                    vectors_config=VectorParams(
-                        size=384,  # BAAI/bge-small-en-v1.5 dimension
-                        distance=Distance.COSINE
+            if collection_exists:
+                console.print(f"[yellow]Collection '{self.config.collection_name}' already exists[/yellow]")
+                # Get collection info
+                collection_info = self.client.get_collection(self.config.collection_name)
+                console.print(f"[dim]Current vectors count: {collection_info.vectors_count}[/dim]")
+                return True
+            
+            # Create new collection
+            self.client.create_collection(
+                collection_name=self.config.collection_name,
+                vectors_config={
+                    "fast-bge-small-en-v1.5": models.VectorParams(
+                        size=self.config.embedding_dimensions,
+                        distance=models.Distance.COSINE,
                     )
-                )
-                console.print(f"[green]✓ Collection created: {self.config.collection_name}[/green]")
-            else:
-                console.print(f"[green]✓ Collection exists: {self.config.collection_name}[/green]")
+                },
+            )
             
+            console.print(f"[green]✓ Created collection '{self.config.collection_name}'[/green]")
+            console.print(f"[dim]Vector dimensions: {self.config.embedding_dimensions}[/dim]")
+            console.print(f"[dim]Distance metric: COSINE[/dim]")
             return True
+            
         except Exception as e:
-            console.print(f"[red]✗ Failed to setup collection: {e}[/red]")
+            console.print(f"[red]Failed to setup collection: {e}[/red]")
             return False
     
-    def clone_repository(self, repo_url: str, target_path: Path) -> Optional[RepositoryInfo]:
-        """Clone repository if not exists, or update if exists"""
-        try:
-            if target_path.exists():
-                console.print(f"[yellow]Repository exists, updating: {target_path}[/yellow]")
-                repo = git.Repo(target_path)
-                repo.remotes.origin.pull()
-            else:
-                console.print(f"[blue]Cloning repository: {repo_url}[/blue]")
-                repo = git.Repo.clone_from(repo_url, target_path)
-            
-            # Get repository info
-            commit_hash = repo.head.commit.hexsha
-            console.print(f"[green]✓ Repository ready at commit: {commit_hash[:8]}[/green]")
-            
-            return RepositoryInfo(
-                url=repo_url,
-                local_path=str(target_path),
-                commit_hash=commit_hash
-            )
-        except Exception as e:
-            console.print(f"[red]✗ Failed to clone repository: {e}[/red]")
-            return None
-    
-    def extract_dart_chunks(self, file_path: Path) -> List[DocumentChunk]:
-        """Extract meaningful chunks from Dart files"""
-        chunks = []
-        relative_path = str(file_path.relative_to(self.stats.repository.local_path))
+    async def run_full_process(self, repo_url: str, local_path: Path) -> ProcessingStats:
+        """Run the full vectorization process"""
+        start_time = time.time()
         
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-        except UnicodeDecodeError:
-            console.print(f"[yellow]Warning: Could not decode {relative_path}[/yellow]")
-            self.stats.warnings.append(f"Could not decode {relative_path}")
-            return chunks
+        # Initialize repository info
+        repo_info = RepositoryInfo(
+            url=repo_url,
+            local_path=str(local_path),
+            branch="main"
+        )
+        
+        self.stats = ProcessingStats(
+            repository=repo_info,
+            config=self.config
+        )
+        
+        # Display process header
+        console.print(Panel.fit(
+            f"[bold blue]AT Protocol Repository Vectorization[/bold blue]\n"
+            f"[cyan]Repository:[/cyan] {repo_url}\n"
+            f"[cyan]Target:[/cyan] Qdrant @ {self.config.qdrant_url}",
+            title="🚀 Starting Vectorization",
+            border_style="blue"
+        ))
+        
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            TimeRemainingColumn(),
+            console=console
+        ) as progress:
+            
+            # Clone/update repository
+            clone_task = progress.add_task("[cyan]Cloning/updating repository...", total=None)
+            repo = await self._clone_or_update_repo(repo_url, local_path)
+            progress.update(clone_task, completed=True, description="[green]✓ Repository ready")
+            
+            # Update repository info
+            repo_info.commit_hash = repo.head.commit.hexsha[:8]
+            
+            # Setup collection
+            setup_task = progress.add_task("[cyan]Setting up Qdrant collection...", total=None)
+            if not self.setup_collection():
+                self.stats.errors.append("Failed to setup Qdrant collection")
+                return self.stats
+            progress.update(setup_task, completed=True, description="[green]✓ Qdrant collection ready")
+            
+            # Extract chunks with detailed progress
+            extract_task = progress.add_task("[cyan]Extracting code chunks...", total=100)
+            chunks = await self._extract_chunks_with_progress(local_path, progress, extract_task)
+            self.stats.chunks_created = len(chunks)
+            self._extracted_chunks = chunks  # Store chunks for summary display
+            progress.update(extract_task, completed=True, description=f"[green]✓ Extracted {len(chunks)} chunks")
+            
+            # Display extraction summary
+            self._display_extraction_summary()
+            
+            # Generate embeddings and upload
+            if chunks:
+                upload_task = progress.add_task(
+                    "[cyan]Generating embeddings and uploading...", 
+                    total=len(chunks)
+                )
+                await self._vectorize_and_upload_with_details(chunks, progress, upload_task)
+        
+        self.stats.processing_time = time.time() - start_time
+        
+        # Display final summary
+        self._display_final_summary()
+        
+        return self.stats
+
+    async def run_flutter_process(self, flutter_path: Path) -> ProcessingStats:
+        """Run the Flutter project vectorization process"""
+        start_time = time.time()
+        
+        # Initialize repository info for Flutter project
+        repo_info = RepositoryInfo(
+            url=f"file://{flutter_path}",
+            local_path=str(flutter_path),
+            branch="local"
+        )
+        
+        self.stats = ProcessingStats(
+            repository=repo_info,
+            config=self.config
+        )
+        
+        # Display process header
+        console.print(Panel.fit(
+            f"[bold blue]Flutter Project Vectorization[/bold blue]\n"
+            f"[cyan]Project Path:[/cyan] {flutter_path}\n"
+            f"[cyan]Target:[/cyan] Qdrant @ {self.config.qdrant_url}",
+            title="🚀 Starting Flutter Vectorization",
+            border_style="blue"
+        ))
+        
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            TimeRemainingColumn(),
+            console=console
+        ) as progress:
+            
+            # Verify Flutter project
+            verify_task = progress.add_task("[cyan]Verifying Flutter project...", total=None)
+            pubspec_path = flutter_path / "pubspec.yaml"
+            if not pubspec_path.exists():
+                self.stats.errors.append("Not a valid Flutter project - pubspec.yaml not found")
+                return self.stats
+            progress.update(verify_task, completed=True, description="[green]✓ Flutter project verified")
+            
+            # Setup collection
+            setup_task = progress.add_task("[cyan]Setting up Qdrant collection...", total=None)
+            if not self.setup_collection():
+                self.stats.errors.append("Failed to setup Qdrant collection")
+                return self.stats
+            progress.update(setup_task, completed=True, description="[green]✓ Qdrant collection ready")
+            
+            # Extract chunks with detailed progress
+            extract_task = progress.add_task("[cyan]Extracting code chunks...", total=100)
+            chunks = await self._extract_chunks_with_progress(flutter_path, progress, extract_task)
+            self.stats.chunks_created = len(chunks)
+            self._extracted_chunks = chunks  # Store chunks for summary display
+            progress.update(extract_task, completed=True, description=f"[green]✓ Extracted {len(chunks)} chunks")
+            
+            # Display extraction summary
+            self._display_extraction_summary()
+            
+            # Generate embeddings and upload
+            if chunks:
+                upload_task = progress.add_task(
+                    "[cyan]Generating embeddings and uploading...", 
+                    total=len(chunks)
+                )
+                await self._vectorize_and_upload_with_details(chunks, progress, upload_task)
+        
+        self.stats.processing_time = time.time() - start_time
+        
+        # Display final summary
+        self._display_final_summary()
+        
+        return self.stats
+    
+    async def _clone_or_update_repo(self, repo_url: str, local_path: Path) -> git.Repo:
+        """Clone repository or update if exists"""
+        if local_path.exists() and (local_path / ".git").exists():
+            console.print(f"[yellow]Repository exists at {local_path}[/yellow]")
+            console.print("[dim]Pulling latest changes...[/dim]")
+            repo = git.Repo(local_path)
+            
+            # Show current commit
+            current_commit = repo.head.commit
+            console.print(f"[dim]Current commit: {current_commit.hexsha[:8]} - {current_commit.summary}[/dim]")
+            
+            # Pull changes
+            origin = repo.remotes.origin
+            fetch_info = origin.pull()
+            
+            if fetch_info:
+                new_commit = repo.head.commit
+                if current_commit != new_commit:
+                    console.print(f"[green]Updated to: {new_commit.hexsha[:8]} - {new_commit.summary}[/green]")
+                else:
+                    console.print("[dim]Already up to date[/dim]")
+        else:
+            console.print(f"[cyan]Cloning repository to {local_path}...[/cyan]")
+            repo = git.Repo.clone_from(repo_url, local_path, progress=GitProgress())
+            console.print("[green]✓ Repository cloned successfully[/green]")
+            
+            # Show clone info
+            commit = repo.head.commit
+            console.print(f"[dim]Cloned at: {commit.hexsha[:8]} - {commit.summary}[/dim]")
+        
+        # Show repository stats
+        total_commits = len(list(repo.iter_commits()))
+        console.print(f"[dim]Total commits: {total_commits}[/dim]")
+        
+        return repo
+    
+    async def _extract_chunks_with_progress(self, repo_path: Path, progress: Progress, task_id: TaskID) -> List[DocumentChunk]:
+        """Extract documentation and code chunks from repository with detailed progress"""
+        chunks = []
+        
+        # Count files first
+        console.print("\n[cyan]Scanning repository structure...[/cyan]")
+        dart_files = list(repo_path.glob("**/*.dart"))
+        md_files = list(repo_path.glob("**/*.md"))
+        mdx_files = list(repo_path.glob("**/*.mdx"))
+        json_files = list(repo_path.glob("**/*.json"))
+        yaml_files = list(repo_path.glob("**/*.yaml")) + list(repo_path.glob("**/*.yml"))
+        
+        # Filter files (apply filtering to all file types)
+        dart_files = [f for f in dart_files if self._should_process_file(f)]
+        json_files = [f for f in json_files if self._should_process_file(f)]
+        yaml_files = [f for f in yaml_files if self._should_process_file(f)]
+        
+        total_files = len(dart_files) + len(md_files) + len(mdx_files) + len(json_files) + len(yaml_files)
+        
+        # Display file counts
+        file_table = Table(title="Files to Process", show_header=True)
+        file_table.add_column("Type", style="cyan")
+        file_table.add_column("Count", justify="right")
+        file_table.add_column("Status", style="dim")
+        
+        file_table.add_row("Dart files", str(len(dart_files)), "✓ Ready")
+        file_table.add_row("Markdown files", str(len(md_files)), "✓ Ready")
+        file_table.add_row("MDX files", str(len(mdx_files)), "✓ Ready")
+        file_table.add_row("JSON files", str(len(json_files)), "✓ Ready")
+        file_table.add_row("YAML files", str(len(yaml_files)), "✓ Ready")
+        file_table.add_row("[bold]Total", f"[bold]{total_files}", "[bold]✓ Ready")
+        
+        console.print(file_table)
+        console.print()
+        
+        # Update progress task
+        progress.update(task_id, total=total_files)
+        
+        # Process files with sub-progress
+        processed = 0
+        
+        # Process Dart files
+        console.print("[cyan]Processing Dart files...[/cyan]")
+        for i, file_path in enumerate(dart_files):
+            try:
+                progress.update(task_id, description=f"[cyan]Processing: {file_path.name}")
+                file_chunks = await self._extract_dart_chunks(file_path, repo_path)
+                chunks.extend(file_chunks)
+                
+                if file_chunks:
+                    console.print(f"  [green]✓[/green] {file_path.relative_to(repo_path)} → {len(file_chunks)} chunks")
+                
+                processed += 1
+                progress.update(task_id, advance=1)
+                
+            except Exception as e:
+                self.stats.warnings.append(f"Failed to process {file_path}: {e}")
+                console.print(f"  [red]✗[/red] {file_path.relative_to(repo_path)} → Error: {str(e)[:50]}...")
+        
+        # Process Markdown files
+        console.print("\n[cyan]Processing Markdown files...[/cyan]")
+        for file_path in md_files:
+            try:
+                progress.update(task_id, description=f"[cyan]Processing: {file_path.name}")
+                file_chunks = await self._extract_markdown_chunks(file_path, repo_path)
+                chunks.extend(file_chunks)
+                
+                if file_chunks:
+                    console.print(f"  [green]✓[/green] {file_path.relative_to(repo_path)} → {len(file_chunks)} sections")
+                
+                processed += 1
+                progress.update(task_id, advance=1)
+                
+            except Exception as e:
+                self.stats.warnings.append(f"Failed to process {file_path}: {e}")
+                console.print(f"  [red]✗[/red] {file_path.relative_to(repo_path)} → Error: {str(e)[:50]}...")
+        
+        # Process MDX files
+        if mdx_files:
+            console.print("\n[cyan]Processing MDX files...[/cyan]")
+            for file_path in mdx_files:
+                try:
+                    progress.update(task_id, description=f"[cyan]Processing: {file_path.name}")
+                    file_chunks = await self._extract_markdown_chunks(file_path, repo_path)  # MDX can be processed as markdown
+                    chunks.extend(file_chunks)
+                    
+                    if file_chunks:
+                        console.print(f"  [green]✓[/green] {file_path.relative_to(repo_path)} → {len(file_chunks)} sections")
+                    
+                    processed += 1
+                    progress.update(task_id, advance=1)
+                    
+                except Exception as e:
+                    self.stats.warnings.append(f"Failed to process {file_path}: {e}")
+                    console.print(f"  [red]✗[/red] {file_path.relative_to(repo_path)} → Error: {str(e)[:50]}...")
+        
+        # Process JSON files
+        if json_files:
+            console.print("\n[cyan]Processing JSON files...[/cyan]")
+            for file_path in json_files:
+                try:
+                    progress.update(task_id, description=f"[cyan]Processing: {file_path.name}")
+                    file_chunks = await self._extract_json_chunks(file_path, repo_path)
+                    chunks.extend(file_chunks)
+                    
+                    if file_chunks:
+                        console.print(f"  [green]✓[/green] {file_path.relative_to(repo_path)} → {len(file_chunks)} definitions")
+                    
+                    processed += 1
+                    progress.update(task_id, advance=1)
+                    
+                except Exception as e:
+                    self.stats.warnings.append(f"Failed to process {file_path}: {e}")
+                    console.print(f"  [red]✗[/red] {file_path.relative_to(repo_path)} → Error: {str(e)[:50]}...")
+        
+        # Process YAML files
+        if yaml_files:
+            console.print("\n[cyan]Processing YAML files...[/cyan]")
+            for file_path in yaml_files:
+                try:
+                    progress.update(task_id, description=f"[cyan]Processing: {file_path.name}")
+                    file_chunks = await self._extract_yaml_chunks(file_path, repo_path)
+                    chunks.extend(file_chunks)
+                    
+                    if file_chunks:
+                        console.print(f"  [green]✓[/green] {file_path.relative_to(repo_path)} → {len(file_chunks)} sections")
+                    
+                    processed += 1
+                    progress.update(task_id, advance=1)
+                    
+                except Exception as e:
+                    self.stats.warnings.append(f"Failed to process {file_path}: {e}")
+                    console.print(f"  [red]✗[/red] {file_path.relative_to(repo_path)} → Error: {str(e)[:50]}...")
+        
+        # Update stats
+        self.stats.repository.dart_files = len(dart_files)
+        self.stats.repository.md_files = len(md_files) + len(mdx_files)  # Combined MD and MDX
+        self.stats.repository.json_files = len(json_files)
+        self.stats.repository.total_files = processed
+        
+        return chunks
+    
+    def _should_process_file(self, file_path: Path) -> bool:
+        """Check if file should be processed"""
+        # Skip test files unless explicitly included
+        if not self.config.include_tests and "test" in str(file_path):
+            return False
+            
+        # Skip generated files unless explicitly included
+        if not self.config.include_generated and file_path.suffix == ".g.dart":
+            return False
+            
+        # Skip example files if they're in example directories
+        if "example" in str(file_path) and not self.config.include_tests:
+            return False
+            
+        return True
+    
+    async def _extract_dart_chunks(self, file_path: Path, repo_path: Path) -> List[DocumentChunk]:
+        """Extract chunks from Dart files"""
+        chunks = []
+        
+        content = file_path.read_text(encoding="utf-8")
+        relative_path = str(file_path.relative_to(repo_path))
+        
+        # Count elements
+        class_count = len(re.findall(r'(?:abstract\s+)?class\s+\w+', content))
+        function_count = len(re.findall(r'(?:Future<[\w<>\?,]+>\s+|[\w<>\?]+\s+)?\w+\s*\([^)]*\)\s*(?:async\s*)?{', content))
         
         # Extract classes
-        class_pattern = r'((?:///.*\n)*)\s*(?:abstract\s+)?class\s+(\w+)(?:[^{]*)?{([^{}]*(?:{[^{}]*}[^{}]*)*)'
-        for match in re.finditer(class_pattern, content, re.MULTILINE | re.DOTALL):
-            doc_comment = match.group(1) or ""
-            class_name = match.group(2)
-            class_body = match.group(0)
+        class_pattern = r'(?:\/\/\/.*\n)*(?:@\w+\n)*(?:abstract\s+)?class\s+(\w+)(?:\s+extends\s+\w+)?(?:\s+implements\s+[\w,\s]+)?(?:\s+with\s+[\w,\s]+)?\s*{'
+        for match in re.finditer(class_pattern, content):
+            class_name = match.group(1)
+            start = match.start()
             
-            # Clean documentation
-            doc_lines = [
-                line.strip().replace('///', '').strip()
-                for line in doc_comment.split('\n')
-                if line.strip()
-            ]
-            documentation = ' '.join(doc_lines)
+            # Find class documentation
+            doc_start = start
+            while doc_start > 0 and content[doc_start-1:doc_start] != '\n':
+                doc_start -= 1
             
-            # Limit code length
-            code = class_body[:self.config.max_code_length]
+            # Extract documentation comments
+            doc_lines = []
+            for line in content[doc_start:start].split('\n'):
+                if line.strip().startswith('///'):
+                    doc_lines.append(line.strip()[3:].strip())
+            
+            documentation = '\n'.join(doc_lines)
+            
+            # Find class end
+            brace_count = 1
+            pos = match.end()
+            class_end = pos
+            
+            while brace_count > 0 and pos < len(content):
+                if content[pos] == '{':
+                    brace_count += 1
+                elif content[pos] == '}':
+                    brace_count -= 1
+                pos += 1
+                if brace_count == 0:
+                    class_end = pos
+            
+            # Get class code (limited)
+            code = content[start:min(class_end, start + self.config.max_code_length)]
+            if class_end > start + self.config.max_code_length:
+                code += "\n// ... (truncated)"
             
             metadata = ChunkMetadata(
                 type="class",
                 name=class_name,
                 file_path=relative_path,
                 signature=f"class {class_name}",
-                code=code
+                code=code,
+                line_start=content[:start].count('\n') + 1,
+                line_end=content[:class_end].count('\n') + 1
             )
             
             chunk = DocumentChunk(
@@ -137,34 +497,43 @@ class AtprotoVectorizer:
                 signature=f"class {class_name}",
                 metadata=metadata
             )
+            
             chunks.append(chunk)
         
-        # Extract functions and methods
-        function_pattern = r'((?:///.*\n)*)\s*(?:static\s+)?(?:Future<[\w\?<>]+>|[\w\?<>]+)\s+(\w+)\s*\([^)]*\)(?:\s*async)?\s*(?:{[^}]*}|=>.*?;)'
-        for match in re.finditer(function_pattern, content, re.MULTILINE | re.DOTALL):
-            doc_comment = match.group(1) or ""
-            func_name = match.group(2)
-            func_body = match.group(0)
+        # Extract functions
+        function_pattern = r'(?:\/\/\/.*\n)*(?:@\w+\n)*(?:static\s+)?(?:Future<[\w<>\?,]+>\s+|[\w<>\?]+\s+)?(\w+)\s*\([^)]*\)\s*(?:async\s*)?{'
+        for match in re.finditer(function_pattern, content):
+            func_name = match.group(1)
             
-            # Skip certain patterns
-            if func_name in ['get', 'set'] or func_name[0].isupper():
+            # Skip constructors and common methods
+            if func_name in ['build', 'initState', 'dispose', 'setState']:
                 continue
             
-            doc_lines = [
-                line.strip().replace('///', '').strip()
-                for line in doc_comment.split('\n')
-                if line.strip()
-            ]
-            documentation = ' '.join(doc_lines)
+            start = match.start()
             
-            code = func_body[:self.config.max_code_length]
+            # Extract documentation
+            doc_start = start
+            while doc_start > 0 and content[doc_start-1:doc_start] != '\n':
+                doc_start -= 1
+            
+            doc_lines = []
+            for line in content[doc_start:start].split('\n'):
+                if line.strip().startswith('///'):
+                    doc_lines.append(line.strip()[3:].strip())
+            
+            documentation = '\n'.join(doc_lines)
+            
+            # Extract signature
+            sig_match = re.search(r'[^\n]+\s+' + re.escape(func_name) + r'\s*\([^)]*\)', content[start:])
+            signature = sig_match.group(0) if sig_match else f"function {func_name}"
             
             metadata = ChunkMetadata(
                 type="function",
                 name=func_name,
                 file_path=relative_path,
-                signature=func_name,
-                code=code
+                signature=signature.strip(),
+                code="",
+                line_start=content[:start].count('\n') + 1
             )
             
             chunk = DocumentChunk(
@@ -172,383 +541,428 @@ class AtprotoVectorizer:
                 name=func_name,
                 file_path=relative_path,
                 documentation=documentation[:self.config.max_doc_length],
-                code=code,
-                signature=func_name,
+                code="",
+                signature=signature.strip(),
                 metadata=metadata
             )
+            
             chunks.append(chunk)
         
         return chunks
     
-    def extract_markdown_chunks(self, file_path: Path) -> List[DocumentChunk]:
-        """Extract sections from Markdown files"""
+    async def _extract_markdown_chunks(self, file_path: Path, repo_path: Path) -> List[DocumentChunk]:
+        """Extract chunks from Markdown files"""
         chunks = []
-        relative_path = str(file_path.relative_to(self.stats.repository.local_path))
         
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-        except UnicodeDecodeError:
-            console.print(f"[yellow]Warning: Could not decode {relative_path}[/yellow]")
-            self.stats.warnings.append(f"Could not decode {relative_path}")
-            return chunks
+        content = file_path.read_text(encoding="utf-8")
+        relative_path = str(file_path.relative_to(repo_path))
         
-        # Split by headers
-        sections = re.split(r'\n(?=#)', content)
+        # Extract sections
+        section_pattern = r'^(#{1,3})\s+(.+)$'
+        lines = content.split('\n')
         
-        for section in sections:
-            if not section.strip():
-                continue
-            
-            lines = section.strip().split('\n')
-            header_match = re.match(r'^#+\s+(.+)', lines[0])
-            
-            if header_match:
-                title = header_match.group(1)
-                content_text = '\n'.join(lines[1:]).strip()
+        for i, line in enumerate(lines):
+            match = re.match(section_pattern, line)
+            if match:
+                level = len(match.group(1))
+                title = match.group(2).strip()
                 
-                # Extract code blocks
-                code_blocks = re.findall(r'```[\w]*\n(.*?)\n```', content_text, re.DOTALL)
-                code = '\n\n'.join(code_blocks) if code_blocks else ""
+                # Find section content
+                section_lines = []
+                j = i + 1
+                while j < len(lines):
+                    next_match = re.match(section_pattern, lines[j])
+                    if next_match and len(next_match.group(1)) <= level:
+                        break
+                    section_lines.append(lines[j])
+                    j += 1
+                
+                documentation = '\n'.join(section_lines).strip()
+                
+                # Skip empty sections
+                if not documentation:
+                    continue
                 
                 metadata = ChunkMetadata(
                     type="documentation",
                     name=title,
                     file_path=relative_path,
                     signature=title,
-                    code=code[:self.config.max_code_length] if code else ""
+                    code="",
+                    line_start=i + 1,
+                    line_end=j
                 )
                 
                 chunk = DocumentChunk(
                     type="documentation",
                     name=title,
                     file_path=relative_path,
-                    documentation=content_text[:self.config.max_doc_length],
-                    code=code[:self.config.max_code_length] if code else "",
+                    documentation=documentation[:self.config.max_doc_length],
+                    code="",
                     signature=title,
                     metadata=metadata
                 )
+                
                 chunks.append(chunk)
         
         return chunks
     
-    def extract_json_chunks(self, file_path: Path) -> List[DocumentChunk]:
-        """Extract schemas from JSON files (LEXICON files)"""
+    async def _extract_json_chunks(self, file_path: Path, repo_path: Path) -> List[DocumentChunk]:
+        """Extract chunks from JSON lexicon files"""
         chunks = []
-        relative_path = str(file_path.relative_to(self.stats.repository.local_path))
         
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except (UnicodeDecodeError, json.JSONDecodeError) as e:
-            console.print(f"[yellow]Warning: Could not parse JSON {relative_path}: {e}[/yellow]")
-            self.stats.warnings.append(f"Could not parse JSON {relative_path}: {e}")
-            return chunks
-        
-        # Check if this is a LEXICON file
-        if isinstance(data, dict) and 'lexicon' in data:
-            lexicon_data = data
+            content = json.loads(file_path.read_text(encoding="utf-8"))
+            relative_path = str(file_path.relative_to(repo_path))
             
-            # Extract main definition
-            lexicon_id = lexicon_data.get('id', 'unknown')
-            description = lexicon_data.get('description', '')
+            # Extract lexicon ID and description
+            lexicon_id = content.get('id', file_path.stem)
+            description = content.get('description', '')
             
-            # Create a comprehensive description text
-            documentation_parts = [description]
-            
-            # Add type information if available
-            if 'defs' in lexicon_data:
-                for def_name, def_data in lexicon_data['defs'].items():
-                    if isinstance(def_data, dict):
-                        def_type = def_data.get('type', 'unknown')
-                        def_desc = def_data.get('description', '')
-                        
-                        documentation_parts.append(f"{def_name} ({def_type}): {def_desc}")
-                        
-                        # Add properties information for objects
-                        if def_type == 'object' and 'properties' in def_data:
-                            for prop_name, prop_data in def_data['properties'].items():
-                                if isinstance(prop_data, dict):
-                                    prop_type = prop_data.get('type', 'unknown')
-                                    prop_desc = prop_data.get('description', '')
-                                    documentation_parts.append(f"  - {prop_name} ({prop_type}): {prop_desc}")
-            
-            documentation = '\n'.join(filter(None, documentation_parts))
-            
-            # Format JSON for code field
-            code = json.dumps(data, indent=2, ensure_ascii=False)
-            
+            # Create main lexicon chunk
             metadata = ChunkMetadata(
                 type="lexicon",
                 name=lexicon_id,
                 file_path=relative_path,
-                signature=f"lexicon {lexicon_id}",
-                code=code[:self.config.max_code_length]
+                signature=f"Lexicon: {lexicon_id}",
+                code=json.dumps(content, indent=2)[:self.config.max_code_length]
             )
             
             chunk = DocumentChunk(
                 type="lexicon",
                 name=lexicon_id,
                 file_path=relative_path,
-                documentation=documentation[:self.config.max_doc_length],
-                code=code[:self.config.max_code_length],
-                signature=f"lexicon {lexicon_id}",
+                documentation=description,
+                code=json.dumps(content, indent=2)[:self.config.max_code_length],
+                signature=f"Lexicon: {lexicon_id}",
                 metadata=metadata
             )
+            
             chunks.append(chunk)
+            
+            # Extract method definitions if present
+            if 'defs' in content:
+                for def_name, def_content in content['defs'].items():
+                    if isinstance(def_content, dict) and 'description' in def_content:
+                        method_metadata = ChunkMetadata(
+                            type="lexicon",
+                            name=f"{lexicon_id}#{def_name}",
+                            file_path=relative_path,
+                            signature=f"{lexicon_id}#{def_name}",
+                            code=json.dumps(def_content, indent=2)[:self.config.max_code_length]
+                        )
+                        
+                        method_chunk = DocumentChunk(
+                            type="lexicon",
+                            name=f"{lexicon_id}#{def_name}",
+                            file_path=relative_path,
+                            documentation=def_content.get('description', ''),
+                            code=json.dumps(def_content, indent=2)[:self.config.max_code_length],
+                            signature=f"{lexicon_id}#{def_name}",
+                            metadata=method_metadata
+                        )
+                        
+                        chunks.append(method_chunk)
         
-        # Handle other JSON files (configuration, data files, etc.)
-        elif isinstance(data, dict):
-            # Extract meaningful information from general JSON files
-            file_name = file_path.stem
-            
-            # Create a description from the JSON structure
-            description_parts = []
-            
-            if 'name' in data:
-                description_parts.append(f"Name: {data['name']}")
-            if 'description' in data:
-                description_parts.append(f"Description: {data['description']}")
-            if 'version' in data:
-                description_parts.append(f"Version: {data['version']}")
-            
-            # Add key information
-            keys = list(data.keys())[:10]  # Limit to first 10 keys
-            description_parts.append(f"Keys: {', '.join(keys)}")
-            
-            documentation = '\n'.join(description_parts)
-            code = json.dumps(data, indent=2, ensure_ascii=False)
-            
-            metadata = ChunkMetadata(
-                type="json",
-                name=file_name,
-                file_path=relative_path,
-                signature=f"json {file_name}",
-                code=code[:self.config.max_code_length]
-            )
-            
-            chunk = DocumentChunk(
-                type="json",
-                name=file_name,
-                file_path=relative_path,
-                documentation=documentation[:self.config.max_doc_length],
-                code=code[:self.config.max_code_length],
-                signature=f"json {file_name}",
-                metadata=metadata
-            )
-            chunks.append(chunk)
+        except Exception as e:
+            self.stats.warnings.append(f"Failed to parse JSON {file_path}: {e}")
         
         return chunks
     
-    def generate_chunk_id(self, chunk: DocumentChunk) -> str:
-        """Generate unique ID for chunk"""
-        unique_string = f"{chunk.file_path}_{chunk.type}_{chunk.name}"
-        return hashlib.md5(unique_string.encode()).hexdigest()
+    async def _extract_yaml_chunks(self, file_path: Path, repo_path: Path) -> List[DocumentChunk]:
+        """Extract chunks from YAML configuration files"""
+        chunks = []
+        
+        try:
+            content_str = file_path.read_text(encoding="utf-8")
+            content = yaml.safe_load(content_str)
+            relative_path = str(file_path.relative_to(repo_path))
+            
+            # Get file name without extension as the main identifier
+            file_id = file_path.stem
+            
+            # Create main YAML file chunk
+            metadata = ChunkMetadata(
+                type="yaml_config",
+                name=file_id,
+                file_path=relative_path,
+                signature=f"YAML Config: {file_id}",
+                code=content_str[:self.config.max_code_length]
+            )
+            
+            chunk = DocumentChunk(
+                type="yaml_config",
+                name=file_id,
+                file_path=relative_path,
+                documentation=f"YAML configuration file: {file_path.name}",
+                code=content_str[:self.config.max_code_length],
+                signature=f"YAML Config: {file_id}",
+                metadata=metadata
+            )
+            
+            chunks.append(chunk)
+            
+            # If it's a structured YAML (like pubspec.yaml), extract sections
+            if isinstance(content, dict):
+                for section_name, section_content in content.items():
+                    if isinstance(section_content, (dict, list)) and section_content:
+                        section_metadata = ChunkMetadata(
+                            type="yaml_section",
+                            name=f"{file_id}.{section_name}",
+                            file_path=relative_path,
+                            signature=f"{file_id}.{section_name}",
+                            code=yaml.dump({section_name: section_content}, default_flow_style=False)[:self.config.max_code_length]
+                        )
+                        
+                        section_chunk = DocumentChunk(
+                            type="yaml_section",
+                            name=f"{file_id}.{section_name}",
+                            file_path=relative_path,
+                            documentation=f"Configuration section: {section_name}",
+                            code=yaml.dump({section_name: section_content}, default_flow_style=False)[:self.config.max_code_length],
+                            signature=f"{file_id}.{section_name}",
+                            metadata=section_metadata
+                        )
+                        
+                        chunks.append(section_chunk)
+        
+        except Exception as e:
+            self.stats.warnings.append(f"Failed to parse YAML {file_path}: {e}")
+        
+        return chunks
     
-    def process_repository(self, repo_path: Path) -> List[DocumentChunk]:
-        """Process entire repository and extract chunks"""
-        all_chunks = []
-        
-        # Find files
-        dart_files = list(repo_path.rglob("*.dart"))
-        md_files = list(repo_path.rglob("*.md"))
-        json_files = list(repo_path.rglob("*.json"))
-        
-        # Filter files
-        if not self.config.include_tests:
-            dart_files = [f for f in dart_files if 'test' not in str(f)]
-        
-        if not self.config.include_generated:
-            dart_files = [f for f in dart_files if not f.name.endswith('.g.dart')]
-        
-        # Filter JSON files to include only meaningful ones
-        # Keep LEXICON files, package.json, and other configuration files
-        filtered_json_files = []
-        for json_file in json_files:
-            file_name = json_file.name.lower()
-            file_path_str = str(json_file).lower()
-            
-            # Include LEXICON files (usually in lexicons directory)
-            if 'lexicon' in file_path_str or file_name.endswith('.json'):
-                # Skip common non-useful files
-                if not any(skip in file_name for skip in ['package-lock.json', 'yarn.lock', 'node_modules']):
-                    filtered_json_files.append(json_file)
-        
-        json_files = filtered_json_files
-        
-        self.stats.repository.dart_files = len(dart_files)
-        self.stats.repository.md_files = len(md_files)
-        self.stats.repository.json_files = len(json_files)
-        self.stats.repository.total_files = len(dart_files) + len(md_files) + len(json_files)
-        
-        console.print(f"[blue]Processing {len(dart_files)} Dart files, {len(md_files)} Markdown files, and {len(json_files)} JSON files[/blue]")
-        
-        with Progress() as progress:
-            task = progress.add_task("[green]Processing files...", total=len(dart_files) + len(md_files) + len(json_files))
-            
-            # Process Dart files
-            for dart_file in dart_files:
-                try:
-                    chunks = self.extract_dart_chunks(dart_file)
-                    all_chunks.extend(chunks)
-                except Exception as e:
-                    error_msg = f"Error processing {dart_file}: {e}"
-                    console.print(f"[red]✗ {error_msg}[/red]")
-                    self.stats.errors.append(error_msg)
-                
-                progress.advance(task)
-            
-            # Process Markdown files
-            for md_file in md_files:
-                try:
-                    chunks = self.extract_markdown_chunks(md_file)
-                    all_chunks.extend(chunks)
-                except Exception as e:
-                    error_msg = f"Error processing {md_file}: {e}"
-                    console.print(f"[red]✗ {error_msg}[/red]")
-                    self.stats.errors.append(error_msg)
-                
-                progress.advance(task)
-            
-            # Process JSON files
-            for json_file in json_files:
-                try:
-                    chunks = self.extract_json_chunks(json_file)
-                    all_chunks.extend(chunks)
-                except Exception as e:
-                    error_msg = f"Error processing {json_file}: {e}"
-                    console.print(f"[red]✗ {error_msg}[/red]")
-                    self.stats.errors.append(error_msg)
-                
-                progress.advance(task)
-        
-        self.stats.chunks_created = len(all_chunks)
-        console.print(f"[green]✓ Extracted {len(all_chunks)} chunks[/green]")
-        
-        return all_chunks
-    
-    def vectorize_and_store(self, chunks: List[DocumentChunk]):
-        """Vectorize chunks and store in Qdrant"""
-        self._init_embedding_model()
-        
-        points = []
+    async def _vectorize_and_upload_with_details(self, chunks: List[DocumentChunk], progress: Progress, task_id: TaskID):
+        """Generate embeddings and upload to Qdrant with detailed progress"""
+        total_uploaded = 0
         total_batches = (len(chunks) + self.config.batch_size - 1) // self.config.batch_size
         
-        console.print(f"[blue]Vectorizing {len(chunks)} chunks in {total_batches} batches[/blue]")
+        console.print(f"\n[cyan]Processing {len(chunks)} chunks in {total_batches} batches[/cyan]")
+        console.print(f"[dim]Batch size: {self.config.batch_size}[/dim]")
+        console.print(f"[dim]Embedding model: {self.config.embedding_model}[/dim]\n")
         
-        with Progress() as progress:
-            task = progress.add_task("[green]Vectorizing...", total=total_batches)
+        # Process in batches
+        for batch_idx in range(0, len(chunks), self.config.batch_size):
+            batch = chunks[batch_idx:batch_idx + self.config.batch_size]
+            batch_num = batch_idx // self.config.batch_size + 1
             
-            for i in range(0, len(chunks), self.config.batch_size):
-                batch = chunks[i:i + self.config.batch_size]
-                
-                # Prepare texts for embedding
+            # Update progress description
+            progress.update(task_id, description=f"[cyan]Batch {batch_num}/{total_batches}: Generating embeddings...")
+            
+            # Check memory usage
+            memory_percent = psutil.virtual_memory().percent
+            if memory_percent > self.config.max_memory_percent:
+                console.print(f"[yellow]⚠ Memory usage high ({memory_percent:.1f}%), waiting...[/yellow]")
+                await asyncio.sleep(5)
+            
+            try:
+                # Generate embeddings
                 texts = [chunk.get_embedding_text() for chunk in batch]
                 
-                # Generate embeddings
+                start_embed = time.time()
                 embeddings = list(self.embedding_model.embed(texts))
+                embed_time = time.time() - start_embed
                 
-                # Create points
-                for chunk, embedding in zip(batch, embeddings):
-                    point_id = self.generate_chunk_id(chunk)
-                    
-                    point = PointStruct(
-                        id=point_id,
-                        vector=embedding.tolist(),
-                        payload={
+                
+                progress.update(task_id, description=f"[cyan]Batch {batch_num}/{total_batches}: Uploading to Qdrant...")
+                
+                # Prepare points for Qdrant
+                points = []
+                for j, (chunk, embedding) in enumerate(zip(batch, embeddings)):
+                    try:
+                        point_id = hashlib.md5(
+                            f"{chunk.file_path}:{chunk.name}:{chunk.type}".encode()
+                        ).hexdigest()
+                        
+                        payload = {
+                            "document": chunk.get_embedding_text(),  # この行を追加
+                            "type": chunk.type,
+                            "name": chunk.name,
+                            "file_path": chunk.file_path,
+                            "signature": chunk.signature,
+                            "documentation": chunk.documentation,
+                            "code": chunk.code,
                             "information": chunk.get_information_text(),
                             "metadata": chunk.metadata.model_dump()
                         }
-                    )
-                    points.append(point)
+
+                        # Convert embedding to list with error handling
+                        if hasattr(embedding, 'tolist'):
+                            vector = embedding.tolist()
+                        elif hasattr(embedding, '__iter__'):
+                            vector = list(embedding)
+                        else:
+                            raise ValueError(f"Cannot convert embedding to list: type={type(embedding)}")
+                        
+                        points.append(models.PointStruct(
+                            id=point_id,
+                            vector={"fast-bge-small-en-v1.5": vector},
+                            payload=payload
+                        ))
+                    except Exception as inner_e:
+                        console.print(f"[red]Error processing chunk {j}: {inner_e}[/red]")
+                        raise
                 
-                progress.advance(task)
+                # Upload to Qdrant
+                start_upload = time.time()
+                await self._upload_batch(points)
+                upload_time = time.time() - start_upload
+                
+                total_uploaded += len(points)
+                
+                # Update progress
+                progress.update(task_id, advance=len(batch))
+                
+                # Display batch summary
+                console.print(
+                    f"  [green]✓[/green] Batch {batch_num}/{total_batches}: "
+                    f"{len(batch)} chunks | "
+                    f"Embed: {embed_time:.2f}s | "
+                    f"Upload: {upload_time:.2f}s | "
+                    f"Total: {total_uploaded}/{len(chunks)}"
+                )
+                
+            except Exception as e:
+                self.stats.errors.append(f"Failed to process batch {batch_num}: {e}")
+                console.print(f"  [red]✗ Batch {batch_num} failed: {str(e)}[/red]")
         
-        # Upload to Qdrant
-        console.print(f"[blue]Uploading {len(points)} points to Qdrant...[/blue]")
-        
-        try:
-            self.client.upsert(
-                collection_name=self.config.collection_name,
-                points=points
-            )
-            self.stats.chunks_uploaded = len(points)
-            console.print(f"[green]✓ Upload complete! {len(points)} points stored[/green]")
-        except Exception as e:
-            error_msg = f"Failed to upload to Qdrant: {e}"
-            console.print(f"[red]✗ {error_msg}[/red]")
-            self.stats.errors.append(error_msg)
-            raise
+        self.stats.chunks_uploaded = total_uploaded
+        console.print(f"\n[green]✓ Upload complete: {total_uploaded} chunks uploaded to Qdrant[/green]")
     
-    def test_search(self, query: str, limit: int = 5):
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    async def _upload_batch(self, points: List[models.PointStruct]):
+        """Upload batch of points to Qdrant with retry logic"""
+        self.client.upsert(
+            collection_name=self.config.collection_name,
+            points=points
+        )
+    
+    def _display_extraction_summary(self):
+        """Display summary of extraction phase"""
+        summary_table = Table(title="Extraction Summary", show_header=True)
+        summary_table.add_column("Type", style="cyan")
+        summary_table.add_column("Count", justify="right")
+        
+        # Count chunk types (we need access to the actual chunks, not just the count)
+        chunk_types = {}
+        if hasattr(self, '_extracted_chunks') and self._extracted_chunks:
+            for chunk in self._extracted_chunks:
+                chunk_types[chunk.type] = chunk_types.get(chunk.type, 0) + 1
+        
+        for chunk_type, count in chunk_types.items():
+            summary_table.add_row(chunk_type.capitalize(), str(count))
+        
+        if chunk_types:
+            summary_table.add_row("[bold]Total Chunks", f"[bold]{sum(chunk_types.values())}")
+        else:
+            summary_table.add_row("No chunks", "0")
+        
+        console.print(summary_table)
+    
+    def _display_final_summary(self):
+        """Display final processing summary"""
+        console.print("\n" + "=" * 80)
+        
+        # Create summary panel
+        summary_text = f"""[bold green]✓ Vectorization Complete![/bold green]
+
+[cyan]Repository:[/cyan] {self.stats.repository.url}
+[cyan]Commit:[/cyan] {self.stats.repository.commit_hash}
+[cyan]Processing Time:[/cyan] {self.stats.processing_time:.2f} seconds
+
+[bold]Files Processed:[/bold]
+  • Dart files: {self.stats.repository.dart_files}
+  • Markdown files: {self.stats.repository.md_files}
+  • JSON files: {self.stats.repository.json_files}
+  • Total: {self.stats.repository.total_files}
+
+[bold]Results:[/bold]
+  • Chunks created: {self.stats.chunks_created}
+  • Chunks uploaded: {self.stats.chunks_uploaded}
+  • Errors: {len(self.stats.errors)}
+  • Warnings: {len(self.stats.warnings)}"""
+        
+        console.print(Panel(
+            summary_text,
+            title="📊 Vectorization Summary",
+            border_style="green"
+        ))
+        
+        # Show errors if any
+        if self.stats.errors:
+            console.print("\n[bold red]Errors:[/bold red]")
+            for error in self.stats.errors[:5]:  # Show first 5 errors
+                console.print(f"  [red]• {error}[/red]")
+            if len(self.stats.errors) > 5:
+                console.print(f"  [dim]... and {len(self.stats.errors) - 5} more errors[/dim]")
+        
+        # Show warnings if any
+        if self.stats.warnings:
+            console.print("\n[bold yellow]Warnings:[/bold yellow]")
+            for warning in self.stats.warnings[:5]:  # Show first 5 warnings
+                console.print(f"  [yellow]• {warning}[/yellow]")
+            if len(self.stats.warnings) > 5:
+                console.print(f"  [dim]... and {len(self.stats.warnings) - 5} more warnings[/dim]")
+    
+    async def test_search(self, query: str, limit: int = 5):
         """Test search functionality"""
-        self._init_embedding_model()
-        
-        console.print(f"\n[blue]Testing search: '{query}'[/blue]")
-        
         try:
-            query_embedding = next(self.embedding_model.embed([query])).tolist()
+            console.print(f"\n[cyan]Searching for: '{query}'...[/cyan]")
             
+            # Generate query embedding
+            start_time = time.time()
+            query_embedding = list(self.embedding_model.embed([query]))[0]
+            embed_time = time.time() - start_time
+            
+            console.print(f"[dim]Embedding generated in {embed_time:.3f}s[/dim]")
+            
+            # Search in Qdrant
+            start_time = time.time()
             results = self.client.search(
                 collection_name=self.config.collection_name,
-                query_vector=query_embedding,
+                query_vector=query_embedding.tolist(),
                 limit=limit
             )
+            search_time = time.time() - start_time
             
-            console.print(f"[green]Found {len(results)} results:[/green]")
+            console.print(f"[dim]Search completed in {search_time:.3f}s[/dim]\n")
+            
+            # Display results
+            console.print(Panel.fit(
+                f"[bold]Search Results[/bold]\nQuery: '{query}'\nResults: {len(results)}",
+                border_style="cyan"
+            ))
             
             for i, result in enumerate(results):
-                metadata = result.payload['metadata']
-                console.print(f"\n{i+1}. [yellow]Score: {result.score:.4f}[/yellow]")
-                console.print(f"   Type: {metadata['type']}")
-                console.print(f"   Name: {metadata['name']}")
-                console.print(f"   File: {metadata['file_path']}")
-                console.print(f"   Info: {result.payload['information'][:200]}...")
-            
+                payload = result.payload
+                
+                # Create result panel
+                result_text = f"""[yellow]Type:[/yellow] {payload.get('type', 'N/A')}
+[yellow]Name:[/yellow] {payload.get('name', 'N/A')}
+[yellow]File:[/yellow] {payload.get('file_path', 'N/A')}
+[yellow]Score:[/yellow] {result.score:.4f}
+
+[yellow]Signature:[/yellow]
+{payload.get('signature', 'N/A')}"""
+                
+                if payload.get('documentation'):
+                    doc = payload['documentation']
+                    if len(doc) > 200:
+                        doc = doc[:200] + "..."
+                    result_text += f"\n\n[yellow]Documentation:[/yellow]\n{doc}"
+                
+                console.print(Panel(
+                    result_text,
+                    title=f"Result {i+1}",
+                    border_style="blue" if i == 0 else "dim"
+                ))
+        
         except Exception as e:
-            console.print(f"[red]✗ Search failed: {e}[/red]")
+            console.print(f"[red]Search failed: {e}[/red]")
+
+
+class GitProgress(git.RemoteProgress):
+    """Git progress reporter for Rich console"""
     
-    def run_full_process(self, repo_url: str, target_path: Path) -> ProcessingStats:
-        """Run the complete vectorization process"""
-        start_time = time.time()
-        
-        # Initialize stats
-        self.stats = ProcessingStats(
-            repository=RepositoryInfo(url=repo_url, local_path=str(target_path)),
-            config=self.config
-        )
-        
-        try:
-            # Setup collection
-            if not self.setup_collection():
-                raise Exception("Failed to setup Qdrant collection")
-            
-            # Clone/update repository
-            repo_info = self.clone_repository(repo_url, target_path)
-            if not repo_info:
-                raise Exception("Failed to clone repository")
-            
-            self.stats.repository = repo_info
-            
-            # Process repository
-            chunks = self.process_repository(target_path)
-            
-            # Vectorize and store
-            if chunks:
-                self.vectorize_and_store(chunks)
-            else:
-                console.print("[yellow]No chunks to process[/yellow]")
-            
-            self.stats.processing_time = time.time() - start_time
-            
-            console.print(f"\n[green]✓ Process completed in {self.stats.processing_time:.2f} seconds[/green]")
-            console.print(f"[green]✓ {self.stats.chunks_uploaded} chunks stored in collection '{self.config.collection_name}'[/green]")
-            
-            return self.stats
-            
-        except Exception as e:
-            self.stats.processing_time = time.time() - start_time
-            error_msg = f"Process failed: {e}"
-            console.print(f"[red]✗ {error_msg}[/red]")
-            self.stats.errors.append(error_msg)
-            raise
+    def update(self, op_code, cur_count, max_count=None, message=''):
+        if message:
+            console.print(f"[dim]Git: {message}[/dim]")

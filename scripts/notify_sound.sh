@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# MoodeSky - Cross-platform notification sound script
+# moodeSky - Cross-platform notification sound script
 # Supports macOS and Ubuntu/Linux
 
 # Function to detect OS
@@ -149,7 +149,7 @@ play_linux_sound() {
 # Function to show help
 show_help() {
     cat << EOF
-🔊 MoodeSky Notification Sound Script
+🔊 moodeSky Notification Sound Script
 
 Usage: $0 [SOUND_TYPE]
 

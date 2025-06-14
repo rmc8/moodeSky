@@ -1,6 +1,7 @@
-// Flutter imports:
+// Dart imports:
 import 'dart:ui' as ui;
 
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -91,7 +92,9 @@ class SupportedLocales {
 
 /// SharedPreferencesから言語設定を読み込むProvider
 @riverpod
-Future<SharedPreferences> sharedPreferences(AutoDisposeFutureProviderRef<SharedPreferences> ref) async {
+Future<SharedPreferences> sharedPreferences(
+  AutoDisposeFutureProviderRef<SharedPreferences> ref,
+) async {
   return await SharedPreferences.getInstance();
 }
 
