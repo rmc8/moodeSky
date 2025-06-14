@@ -162,7 +162,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               style: CommonContainerStyle.none,
                               padding: AppSpacing.paddingMD,
                               color: context.appColors.infoWithOpacity,
-                              borderRadius: AppBorderRadius.sm,
+                              borderRadius: AppBorderRadius.smRadius,
                               border: Border.all(
                                 color: context.appColors.info.withValues(
                                   alpha: 0.3,
@@ -353,7 +353,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: CommonContainerStyle.none,
                         padding: AppSpacing.paddingMD,
                         color: context.appColors.infoWithOpacity,
-                        borderRadius: AppBorderRadius.sm,
+                        borderRadius: AppBorderRadius.smRadius,
                         border: Border.all(
                           color: context.appColors.info.withValues(alpha: 0.3),
                         ),

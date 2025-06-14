@@ -942,5 +942,15 @@
   "richTextFeatureNotImplemented": "This feature is under development",
   "@richTextFeatureNotImplemented": {
     "description": "Message when a feature is not yet implemented"
+  },
+  
+  "loadingNewPosts": "Loading new posts...",
+  "@loadingNewPosts": {
+    "description": "Message shown when loading new posts from timeline"
+  },
+  
+  "loadingOlderPosts": "Loading older posts...",
+  "@loadingOlderPosts": {
+    "description": "Message shown when loading older posts from timeline"
   }
 }

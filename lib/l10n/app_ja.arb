@@ -186,5 +186,8 @@
   "richTextUrlCopied": "URLをクリップボードにコピーしました",
   "richTextUrlOpenFailed": "URLを開けませんでした",
   "richTextProcessingError": "テキスト処理エラー",
-  "richTextFeatureNotImplemented": "この機能は準備中です"
+  "richTextFeatureNotImplemented": "この機能は準備中です",
+  
+  "loadingNewPosts": "最新のポストを取得しています...",
+  "loadingOlderPosts": "古いポストを取得しています..."
 }

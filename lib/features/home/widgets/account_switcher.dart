@@ -6,12 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
-import 'package:moodesky/core/providers/optimized_selectors.dart';
 import 'package:moodesky/features/auth/screens/add_account_screen.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
-import 'package:moodesky/shared/widgets/common/theme_helpers.dart';
-import 'package:moodesky/shared/widgets/optimized/optimized_account_tile.dart';
 
 /// 🚀 パフォーマンス最適化済みアカウントスイッチャー
 ///
@@ -21,10 +18,8 @@ class AccountSwitcher extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 🚀 最適化: 必要な情報のみ監視して再構築を最小化
-    final activeAccountInfo = ref.watch(activeAccountDisplayInfoProvider);
-    final availableAccountsInfo = ref.watch(availableAccountBasicInfoProvider);
-    final accountCount = ref.watch(availableAccountCountProvider);
+    final activeAccount = ref.watch(activeAccountProvider);
+    final availableAccounts = ref.watch(availableAccountsProvider);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -36,8 +31,8 @@ class AccountSwitcher extends ConsumerWidget {
           Row(
             children: [
               Text(
-                AppLocalizations.of(context)!.switchAccount,
-                style: context.textStyles.titleMedium?.copyWith(
+                AppLocalizations.of(context).switchAccount,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -52,24 +47,40 @@ class AccountSwitcher extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // Current account
-          if (activeAccountInfo != null)
-            OptimizedAccountTile(
-              accountInfo: activeAccountInfo,
-              isActive: true,
-              onTap: null,
+          if (activeAccount != null)
+            ListTile(
+              leading: CircleAvatar(
+                backgroundImage: activeAccount.avatar != null 
+                    ? NetworkImage(activeAccount.avatar!) 
+                    : null,
+                child: activeAccount.avatar == null 
+                    ? Text(activeAccount.handle.substring(0, 1).toUpperCase())
+                    : null,
+              ),
+              title: Text(activeAccount.displayName ?? activeAccount.handle),
+              subtitle: Text('@${activeAccount.handle}'),
+              trailing: const Icon(Icons.check),
             ),
 
           // Other accounts
-          if (accountCount > 1) ...[
+          if (availableAccounts.length > 1) ...[
             const SizedBox(height: 8),
             const Divider(),
             const SizedBox(height: 8),
-            ...availableAccountsInfo
-                .where((account) => account.did != activeAccountInfo?.did)
+            ...availableAccounts
+                .where((account) => account.did != activeAccount?.did)
                 .map(
-                  (account) => OptimizedAccountTile(
-                    accountInfo: account,
-                    isActive: false,
+                  (account) => ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: account.avatar != null 
+                          ? NetworkImage(account.avatar!) 
+                          : null,
+                      child: account.avatar == null 
+                          ? Text(account.handle.substring(0, 1).toUpperCase())
+                          : null,
+                    ),
+                    title: Text(account.displayName ?? account.handle),
+                    subtitle: Text('@${account.handle}'),
                     onTap: () async {
                       Navigator.of(context).pop();
                       await ref
@@ -88,15 +99,15 @@ class AccountSwitcher extends ConsumerWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: context.colors.secondaryContainer,
+                color: Theme.of(context).colorScheme.secondaryContainer,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.add,
-                color: context.colors.onSecondaryContainer,
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
               ),
             ),
-            title: Text(AppLocalizations.of(context)!.addAccountButton),
+            title: Text(AppLocalizations.of(context).addAccountButton),
             onTap: () {
               Navigator.of(context).pop();
               Navigator.of(context).push(
@@ -108,22 +119,22 @@ class AccountSwitcher extends ConsumerWidget {
           ),
 
           // Sign out all button
-          if (accountCount > 0) ...[
+          if (availableAccounts.isNotEmpty) ...[
             const SizedBox(height: 8),
             ListTile(
               leading: Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: context.colors.errorContainer,
+                  color: Theme.of(context).colorScheme.errorContainer,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.logout,
-                  color: context.colors.onErrorContainer,
+                  color: Theme.of(context).colorScheme.onErrorContainer,
                 ),
               ),
-              title: Text(AppLocalizations.of(context)!.signOutAll),
+              title: Text(AppLocalizations.of(context).signOutAll),
               onTap: () {
                 _showSignOutConfirmation(context, ref);
               },

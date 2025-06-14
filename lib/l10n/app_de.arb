@@ -168,5 +168,8 @@
   "richTextUrlCopied": "URL in Zwischenablage kopiert",
   "richTextUrlOpenFailed": "URL konnte nicht geöffnet werden",
   "richTextProcessingError": "Textverarbeitungsfehler",
-  "richTextFeatureNotImplemented": "Diese Funktion wird noch entwickelt"
+  "richTextFeatureNotImplemented": "Diese Funktion wird noch entwickelt",
+  
+  "loadingNewPosts": "Neue Beiträge werden geladen...",
+  "loadingOlderPosts": "Ältere Beiträge werden geladen..."
 }

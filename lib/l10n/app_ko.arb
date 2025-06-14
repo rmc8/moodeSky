@@ -169,5 +169,8 @@
   "richTextUrlCopied": "URL이 클립보드에 복사되었습니다",
   "richTextUrlOpenFailed": "URL을 열 수 없습니다",
   "richTextProcessingError": "텍스트 처리 오류",
-  "richTextFeatureNotImplemented": "이 기능은 개발 중입니다"
+  "richTextFeatureNotImplemented": "이 기능은 개발 중입니다",
+  
+  "loadingNewPosts": "새로운 포스트를 불러오는 중...",
+  "loadingOlderPosts": "이전 포스트를 불러오는 중..."
 }

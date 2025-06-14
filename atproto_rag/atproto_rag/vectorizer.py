@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Any
 
 import git
 import psutil
+import yaml
 from fastembed import TextEmbedding
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
@@ -159,6 +160,80 @@ class AtprotoVectorizer:
         self._display_final_summary()
         
         return self.stats
+
+    async def run_flutter_process(self, flutter_path: Path) -> ProcessingStats:
+        """Run the Flutter project vectorization process"""
+        start_time = time.time()
+        
+        # Initialize repository info for Flutter project
+        repo_info = RepositoryInfo(
+            url=f"file://{flutter_path}",
+            local_path=str(flutter_path),
+            branch="local"
+        )
+        
+        self.stats = ProcessingStats(
+            repository=repo_info,
+            config=self.config
+        )
+        
+        # Display process header
+        console.print(Panel.fit(
+            f"[bold blue]Flutter Project Vectorization[/bold blue]\n"
+            f"[cyan]Project Path:[/cyan] {flutter_path}\n"
+            f"[cyan]Target:[/cyan] Qdrant @ {self.config.qdrant_url}",
+            title="🚀 Starting Flutter Vectorization",
+            border_style="blue"
+        ))
+        
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            TimeRemainingColumn(),
+            console=console
+        ) as progress:
+            
+            # Verify Flutter project
+            verify_task = progress.add_task("[cyan]Verifying Flutter project...", total=None)
+            pubspec_path = flutter_path / "pubspec.yaml"
+            if not pubspec_path.exists():
+                self.stats.errors.append("Not a valid Flutter project - pubspec.yaml not found")
+                return self.stats
+            progress.update(verify_task, completed=True, description="[green]✓ Flutter project verified")
+            
+            # Setup collection
+            setup_task = progress.add_task("[cyan]Setting up Qdrant collection...", total=None)
+            if not self.setup_collection():
+                self.stats.errors.append("Failed to setup Qdrant collection")
+                return self.stats
+            progress.update(setup_task, completed=True, description="[green]✓ Qdrant collection ready")
+            
+            # Extract chunks with detailed progress
+            extract_task = progress.add_task("[cyan]Extracting code chunks...", total=100)
+            chunks = await self._extract_chunks_with_progress(flutter_path, progress, extract_task)
+            self.stats.chunks_created = len(chunks)
+            self._extracted_chunks = chunks  # Store chunks for summary display
+            progress.update(extract_task, completed=True, description=f"[green]✓ Extracted {len(chunks)} chunks")
+            
+            # Display extraction summary
+            self._display_extraction_summary()
+            
+            # Generate embeddings and upload
+            if chunks:
+                upload_task = progress.add_task(
+                    "[cyan]Generating embeddings and uploading...", 
+                    total=len(chunks)
+                )
+                await self._vectorize_and_upload_with_details(chunks, progress, upload_task)
+        
+        self.stats.processing_time = time.time() - start_time
+        
+        # Display final summary
+        self._display_final_summary()
+        
+        return self.stats
     
     async def _clone_or_update_repo(self, repo_url: str, local_path: Path) -> git.Repo:
         """Clone repository or update if exists"""
@@ -204,12 +279,16 @@ class AtprotoVectorizer:
         console.print("\n[cyan]Scanning repository structure...[/cyan]")
         dart_files = list(repo_path.glob("**/*.dart"))
         md_files = list(repo_path.glob("**/*.md"))
-        json_files = list(repo_path.glob("**/lexicons/**/*.json"))
+        mdx_files = list(repo_path.glob("**/*.mdx"))
+        json_files = list(repo_path.glob("**/*.json"))
+        yaml_files = list(repo_path.glob("**/*.yaml")) + list(repo_path.glob("**/*.yml"))
         
-        # Filter files
+        # Filter files (apply filtering to all file types)
         dart_files = [f for f in dart_files if self._should_process_file(f)]
+        json_files = [f for f in json_files if self._should_process_file(f)]
+        yaml_files = [f for f in yaml_files if self._should_process_file(f)]
         
-        total_files = len(dart_files) + len(md_files) + len(json_files)
+        total_files = len(dart_files) + len(md_files) + len(mdx_files) + len(json_files) + len(yaml_files)
         
         # Display file counts
         file_table = Table(title="Files to Process", show_header=True)
@@ -219,7 +298,9 @@ class AtprotoVectorizer:
         
         file_table.add_row("Dart files", str(len(dart_files)), "✓ Ready")
         file_table.add_row("Markdown files", str(len(md_files)), "✓ Ready")
-        file_table.add_row("JSON lexicons", str(len(json_files)), "✓ Ready")
+        file_table.add_row("MDX files", str(len(mdx_files)), "✓ Ready")
+        file_table.add_row("JSON files", str(len(json_files)), "✓ Ready")
+        file_table.add_row("YAML files", str(len(yaml_files)), "✓ Ready")
         file_table.add_row("[bold]Total", f"[bold]{total_files}", "[bold]✓ Ready")
         
         console.print(file_table)
@@ -267,9 +348,28 @@ class AtprotoVectorizer:
                 self.stats.warnings.append(f"Failed to process {file_path}: {e}")
                 console.print(f"  [red]✗[/red] {file_path.relative_to(repo_path)} → Error: {str(e)[:50]}...")
         
+        # Process MDX files
+        if mdx_files:
+            console.print("\n[cyan]Processing MDX files...[/cyan]")
+            for file_path in mdx_files:
+                try:
+                    progress.update(task_id, description=f"[cyan]Processing: {file_path.name}")
+                    file_chunks = await self._extract_markdown_chunks(file_path, repo_path)  # MDX can be processed as markdown
+                    chunks.extend(file_chunks)
+                    
+                    if file_chunks:
+                        console.print(f"  [green]✓[/green] {file_path.relative_to(repo_path)} → {len(file_chunks)} sections")
+                    
+                    processed += 1
+                    progress.update(task_id, advance=1)
+                    
+                except Exception as e:
+                    self.stats.warnings.append(f"Failed to process {file_path}: {e}")
+                    console.print(f"  [red]✗[/red] {file_path.relative_to(repo_path)} → Error: {str(e)[:50]}...")
+        
         # Process JSON files
         if json_files:
-            console.print("\n[cyan]Processing JSON lexicon files...[/cyan]")
+            console.print("\n[cyan]Processing JSON files...[/cyan]")
             for file_path in json_files:
                 try:
                     progress.update(task_id, description=f"[cyan]Processing: {file_path.name}")
@@ -286,9 +386,28 @@ class AtprotoVectorizer:
                     self.stats.warnings.append(f"Failed to process {file_path}: {e}")
                     console.print(f"  [red]✗[/red] {file_path.relative_to(repo_path)} → Error: {str(e)[:50]}...")
         
+        # Process YAML files
+        if yaml_files:
+            console.print("\n[cyan]Processing YAML files...[/cyan]")
+            for file_path in yaml_files:
+                try:
+                    progress.update(task_id, description=f"[cyan]Processing: {file_path.name}")
+                    file_chunks = await self._extract_yaml_chunks(file_path, repo_path)
+                    chunks.extend(file_chunks)
+                    
+                    if file_chunks:
+                        console.print(f"  [green]✓[/green] {file_path.relative_to(repo_path)} → {len(file_chunks)} sections")
+                    
+                    processed += 1
+                    progress.update(task_id, advance=1)
+                    
+                except Exception as e:
+                    self.stats.warnings.append(f"Failed to process {file_path}: {e}")
+                    console.print(f"  [red]✗[/red] {file_path.relative_to(repo_path)} → Error: {str(e)[:50]}...")
+        
         # Update stats
         self.stats.repository.dart_files = len(dart_files)
-        self.stats.repository.md_files = len(md_files)
+        self.stats.repository.md_files = len(md_files) + len(mdx_files)  # Combined MD and MDX
         self.stats.repository.json_files = len(json_files)
         self.stats.repository.total_files = processed
         
@@ -547,6 +666,68 @@ class AtprotoVectorizer:
         
         except Exception as e:
             self.stats.warnings.append(f"Failed to parse JSON {file_path}: {e}")
+        
+        return chunks
+    
+    async def _extract_yaml_chunks(self, file_path: Path, repo_path: Path) -> List[DocumentChunk]:
+        """Extract chunks from YAML configuration files"""
+        chunks = []
+        
+        try:
+            content_str = file_path.read_text(encoding="utf-8")
+            content = yaml.safe_load(content_str)
+            relative_path = str(file_path.relative_to(repo_path))
+            
+            # Get file name without extension as the main identifier
+            file_id = file_path.stem
+            
+            # Create main YAML file chunk
+            metadata = ChunkMetadata(
+                type="yaml_config",
+                name=file_id,
+                file_path=relative_path,
+                signature=f"YAML Config: {file_id}",
+                code=content_str[:self.config.max_code_length]
+            )
+            
+            chunk = DocumentChunk(
+                type="yaml_config",
+                name=file_id,
+                file_path=relative_path,
+                documentation=f"YAML configuration file: {file_path.name}",
+                code=content_str[:self.config.max_code_length],
+                signature=f"YAML Config: {file_id}",
+                metadata=metadata
+            )
+            
+            chunks.append(chunk)
+            
+            # If it's a structured YAML (like pubspec.yaml), extract sections
+            if isinstance(content, dict):
+                for section_name, section_content in content.items():
+                    if isinstance(section_content, (dict, list)) and section_content:
+                        section_metadata = ChunkMetadata(
+                            type="yaml_section",
+                            name=f"{file_id}.{section_name}",
+                            file_path=relative_path,
+                            signature=f"{file_id}.{section_name}",
+                            code=yaml.dump({section_name: section_content}, default_flow_style=False)[:self.config.max_code_length]
+                        )
+                        
+                        section_chunk = DocumentChunk(
+                            type="yaml_section",
+                            name=f"{file_id}.{section_name}",
+                            file_path=relative_path,
+                            documentation=f"Configuration section: {section_name}",
+                            code=yaml.dump({section_name: section_content}, default_flow_style=False)[:self.config.max_code_length],
+                            signature=f"{file_id}.{section_name}",
+                            metadata=section_metadata
+                        )
+                        
+                        chunks.append(section_chunk)
+        
+        except Exception as e:
+            self.stats.warnings.append(f"Failed to parse YAML {file_path}: {e}")
         
         return chunks
     

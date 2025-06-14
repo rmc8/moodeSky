@@ -7,10 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:moodesky/core/providers/auth_provider.dart';
+import 'package:moodesky/core/providers/deck_provider.dart';
 import 'package:moodesky/core/providers/theme_provider.dart';
 import 'package:moodesky/core/theme/app_themes.dart';
 import 'package:moodesky/features/home/widgets/add_deck_dialog.dart';
 import 'package:moodesky/features/home/widgets/deck_layout.dart';
+import 'package:moodesky/features/home/widgets/deck_layout/timeline/bluesky_timeline_widget.dart';
+import 'package:moodesky/services/database/database.dart';
 import 'package:moodesky/features/settings/screens/settings_screen.dart';
 import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
@@ -23,6 +26,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  int _selectedTabIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -142,9 +147,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Main content area - Deck layout (no AppBar)
             Expanded(
               child: SafeArea(
-                child: DeckLayout(
-                  key: ValueKey('deck_layout_${currentTheme?.index ?? 0}'),
-                ),
+                child: _buildDeckLayout(currentTheme),
               ),
             ),
           ],
@@ -347,5 +350,481 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       }).toList(),
     );
+  }
+
+  // デッキレイアウトの構築
+  Widget _buildDeckLayout(AppThemeMode? currentTheme) {
+    final decksAsync = ref.watch(allDecksProvider);
+
+    return decksAsync.when(
+      data: (decks) {
+        if (decks.isEmpty) {
+          return _buildEmptyState();
+        }
+        final screenWidth = MediaQuery.of(context).size.width;
+        
+        if (screenWidth >= 600) {
+          // Tablet and Desktop: Show tab bar at top
+          return Column(
+            children: [
+              DeckTabBar(
+                decks: decks,
+                selectedTabIndex: _selectedTabIndex,
+                onTabSelected: _onTabSelected,
+                onDeckMoved: _onDeckMoved,
+              ),
+              Expanded(
+                child: IndexedStack(
+                  index: _selectedTabIndex,
+                  children: decks.map((deck) => _buildDeckContent(deck)).toList(),
+                ),
+              ),
+            ],
+          );
+        } else {
+          // Mobile: Use swipeable layout
+          return MobileLayout(
+            key: ValueKey('deck_layout_${currentTheme?.index ?? 0}'),
+            decks: decks,
+            selectedTabIndex: _selectedTabIndex,
+            onTabSelected: _onTabSelected,
+            onDeckMoved: _onDeckMoved,
+            buildDeckContent: _buildDeckContent,
+          );
+        }
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Error loading decks',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '$error',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () => ref.invalidate(allDecksProvider),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 空状態の表示
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.dashboard_rounded,
+            size: 80,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'デッキがありません',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '最初のデッキを作成してタイムラインを表示しましょう',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: () => _showAddDeckDialog(context),
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Add Deck'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // タブ選択時のコールバック
+  void _onTabSelected(int index) {
+    setState(() {
+      _selectedTabIndex = index;
+    });
+  }
+
+  // デッキ移動時のコールバック
+  void _onDeckMoved(int oldIndex, int newIndex, List<Deck> decks) {
+    // Immediately update UI state
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    
+    // Update selected index if needed
+    if (_selectedTabIndex == oldIndex) {
+      setState(() {
+        _selectedTabIndex = newIndex;
+      });
+    } else if (_selectedTabIndex > oldIndex && _selectedTabIndex <= newIndex) {
+      setState(() {
+        _selectedTabIndex -= 1;
+      });
+    } else if (_selectedTabIndex < oldIndex && _selectedTabIndex >= newIndex) {
+      setState(() {
+        _selectedTabIndex += 1;
+      });
+    }
+
+    // Update deck order in database
+    final updater = ref.read(deckOrderUpdaterProvider);
+    final deck = decks[oldIndex];
+    updater.updateOrder(deck.deckId, newIndex);
+  }
+
+  // デッキコンテンツの構築
+  Widget _buildDeckContent(Deck deck) {
+    switch (deck.deckType) {
+      case 'home':
+        return _buildHomeTimelineDeck(deck);
+      case 'notifications':
+        return _buildNotificationsList();
+      case 'profile':
+        return _buildProfilePostsList();
+      case 'search':
+        return _buildSearchResults();
+      default:
+        return _buildGenericDeckContent(deck);
+    }
+  }
+
+  // ホームタイムラインデッキの構築
+  Widget _buildHomeTimelineDeck(Deck deck) {
+    return BlueskyTimelineWidget(
+      deck: deck,
+      showScrollButtons: true,
+    );
+  }
+
+  // 通知リストの構築
+  Widget _buildNotificationsList() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.notifications_rounded, size: 64, color: Colors.orange),
+          SizedBox(height: 16),
+          Text('Notifications', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          SizedBox(height: 8),
+          Text('Notifications will appear here'),
+        ],
+      ),
+    );
+  }
+
+  // プロフィール投稿リストの構築
+  Widget _buildProfilePostsList() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.person_rounded, size: 64, color: Colors.green),
+          SizedBox(height: 16),
+          Text('Profile Posts', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          SizedBox(height: 8),
+          Text('Profile posts will appear here'),
+        ],
+      ),
+    );
+  }
+
+  // 検索結果の構築
+  Widget _buildSearchResults() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_rounded, size: 64, color: Colors.purple),
+          SizedBox(height: 16),
+          Text('Search Results', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          SizedBox(height: 8),
+          Text('Search results will appear here'),
+        ],
+      ),
+    );
+  }
+
+  // 汎用デッキコンテンツの構築
+  Widget _buildGenericDeckContent(Deck deck) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            _getDeckIcon(deck.deckType),
+            size: 64,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            deck.title,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Content for ${deck.deckType} deck',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  // ホームタイムラインコンテンツ
+  Widget _buildHomeTimelineContent(Deck deck) {
+    return BlueskyTimelineWidget(
+      deck: deck,
+      showScrollButtons: true,
+    );
+  }
+
+  // 通知コンテンツ（仮実装）
+  Widget _buildNotificationsContent(Deck deck) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.notifications_rounded,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Notifications',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Notifications feature is under development',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 検索コンテンツ（仮実装）
+  Widget _buildSearchContent(Deck deck) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_rounded,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Search',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Search feature is under development',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // プロフィールコンテンツ（仮実装）
+  Widget _buildProfileContent(Deck deck) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_rounded,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Profile',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Profile feature is under development',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // リストコンテンツ（仮実装）
+  Widget _buildListContent(Deck deck) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.list_rounded,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'List',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'List feature is under development',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // カスタムフィードコンテンツ（仮実装）
+  Widget _buildCustomFeedContent(Deck deck) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.tag_rounded,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Custom Feed',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Custom feed feature is under development',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // デフォルトコンテンツ
+  Widget _buildDefaultContent(Deck deck) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _getDeckIcon(deck.deckType),
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              deck.title,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'This deck type (${deck.deckType}) is not yet implemented',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // デッキアイコンの取得
+  IconData _getDeckIcon(String deckType) {
+    switch (deckType) {
+      case 'home':
+        return Icons.home_rounded;
+      case 'notifications':
+        return Icons.notifications_rounded;
+      case 'search':
+        return Icons.search_rounded;
+      case 'list':
+        return Icons.list_rounded;
+      case 'profile':
+        return Icons.person_rounded;
+      case 'thread':
+        return Icons.forum_rounded;
+      case 'custom_feed':
+        return Icons.tag_rounded;
+      case 'local':
+        return Icons.people_rounded;
+      case 'hashtag':
+        return Icons.tag_rounded;
+      case 'mentions':
+        return Icons.alternate_email_rounded;
+      default:
+        return Icons.dashboard_rounded;
+    }
   }
 }

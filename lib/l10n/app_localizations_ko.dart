@@ -553,4 +553,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get richTextFeatureNotImplemented => '이 기능은 개발 중입니다';
+
+  @override
+  String get loadingNewPosts => '새로운 포스트를 불러오는 중...';
+
+  @override
+  String get loadingOlderPosts => '이전 포스트를 불러오는 중...';
 }

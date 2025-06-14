@@ -193,7 +193,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                             style: CommonContainerStyle.none,
                             padding: AppSpacing.paddingMD,
                             color: context.appColors.infoWithOpacity,
-                            borderRadius: AppBorderRadius.sm,
+                            borderRadius: BorderRadius.circular(AppBorderRadius.sm),
                             border: Border.all(
                               color: context.appColors.info.withValues(
                                 alpha: 0.3,
@@ -352,7 +352,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                       style: CommonContainerStyle.none,
                       padding: AppSpacing.paddingMD,
                       color: context.appColors.infoWithOpacity,
-                      borderRadius: AppBorderRadius.sm,
+                      borderRadius: BorderRadius.circular(AppBorderRadius.sm),
                       border: Border.all(
                         color: context.appColors.info.withValues(alpha: 0.3),
                       ),

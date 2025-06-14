@@ -23,6 +23,12 @@ class AppThemes {
     0xFFFF5722,
   ); // Material Deep Orange 500
 
+  /// 自然をイメージした緑（セカンダリ用）
+  static const Color forestGreen = Color(0xFF4CAF50); // Material Green 500
+  static const Color oceanTeal = Color(0xFF26A69A); // Material Teal 400
+  static const Color lavenderPurple = Color(0xFF9C27B0); // Material Purple 500
+  static const Color sunflowerYellow = Color(0xFFFFC107); // Material Amber 500
+
   /// アクション用カラー
   static const Color repostGreen = Color(0xFF4CAF50); // Material Green 500
   static const Color likeRed = Color(0xFFF44336); // Material Red 500
@@ -447,21 +453,62 @@ class AppThemes {
         systemNavigationBarDividerColor: Color(0xFF3D3D3D),
       );
 
+  /// アプリのカラースキームを取得
+  static AppColorScheme getColorScheme(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return AppColorScheme(
+      primary: brightness == Brightness.light ? skyBlue : sunsetOrange,
+      secondary: brightness == Brightness.light ? skyBlueLight : sunsetOrangeLight,
+      surface: colorScheme.surface,
+      background: colorScheme.surface,
+      error: colorScheme.error,
+      onPrimary: colorScheme.onPrimary,
+      onSecondary: colorScheme.onSecondary,
+      onSurface: colorScheme.onSurface,
+      onBackground: colorScheme.onSurface,
+      onError: colorScheme.onError,
+      info: brightness == Brightness.light ? skyBlue : sunsetOrange,
+      infoWithOpacity: brightness == Brightness.light 
+          ? skyBlue.withValues(alpha: 0.1) 
+          : sunsetOrange.withValues(alpha: 0.1),
+    );
+  }
+
+  /// アプリのテキストスタイルを取得
+  static AppTextStyles getTextStyles(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    
+    return AppTextStyles(
+      headlineLarge: textTheme.headlineLarge!,
+      headlineMedium: textTheme.headlineMedium!,
+      headlineSmall: textTheme.headlineSmall!,
+      titleLarge: textTheme.titleLarge!,
+      titleMedium: textTheme.titleMedium!,
+      titleSmall: textTheme.titleSmall!,
+      bodyLarge: textTheme.bodyLarge!,
+      bodyMedium: textTheme.bodyMedium!,
+      bodySmall: textTheme.bodySmall!,
+      labelLarge: textTheme.labelLarge!,
+      labelMedium: textTheme.labelMedium!,
+      labelSmall: textTheme.labelSmall!,
+    );
+  }
+
   /// 現在のテーマに基づいてシステムUIオーバーレイスタイルを取得
   static SystemUiOverlayStyle getSystemUiOverlayStyle(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    final baseStyle = brightness == Brightness.light
-        ? lightSystemUiOverlayStyle
-        : darkSystemUiOverlayStyle;
-
-    // プラットフォーム固有の調整
-    return baseStyle.copyWith(
-      // iOS用の追加設定
-      statusBarBrightness: brightness == Brightness.light
-          ? Brightness.light
-          : Brightness.dark,
-      // 確実にアイコンの色を設定
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: brightness,
       statusBarIconBrightness: brightness == Brightness.light
+          ? Brightness.dark
+          : Brightness.light,
+      systemNavigationBarColor: colorScheme.surface,
+      systemNavigationBarIconBrightness: brightness == Brightness.light
           ? Brightness.dark
           : Brightness.light,
     );
@@ -471,6 +518,72 @@ class AppThemes {
   static void setSystemUiOverlayStyle(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(getSystemUiOverlayStyle(context));
   }
+
+}
+
+/// アプリカラースキーム
+class AppColorScheme {
+  final Color primary;
+  final Color secondary;
+  final Color surface;
+  final Color background;
+  final Color error;
+  final Color onPrimary;
+  final Color onSecondary;
+  final Color onSurface;
+  final Color onBackground;
+  final Color onError;
+  final Color info;
+  final Color infoWithOpacity;
+
+  const AppColorScheme({
+    required this.primary,
+    required this.secondary,
+    required this.surface,
+    required this.background,
+    required this.error,
+    required this.onPrimary,
+    required this.onSecondary,
+    required this.onSurface,
+    required this.onBackground,
+    required this.onError,
+    required this.info,
+    required this.infoWithOpacity,
+  });
+}
+
+/// アプリテキストスタイル
+class AppTextStyles {
+  final TextStyle headlineLarge;
+  final TextStyle headlineMedium;
+  final TextStyle headlineSmall;
+  final TextStyle titleLarge;
+  final TextStyle titleMedium;
+  final TextStyle titleSmall;
+  final TextStyle bodyLarge;
+  final TextStyle bodyMedium;
+  final TextStyle bodySmall;
+  final TextStyle labelLarge;
+  final TextStyle labelMedium;
+  final TextStyle labelSmall;
+
+  // 下位互換性のためのcaptionプロパティ
+  TextStyle get caption => labelSmall;
+
+  const AppTextStyles({
+    required this.headlineLarge,
+    required this.headlineMedium,
+    required this.headlineSmall,
+    required this.titleLarge,
+    required this.titleMedium,
+    required this.titleSmall,
+    required this.bodyLarge,
+    required this.bodyMedium,
+    required this.bodySmall,
+    required this.labelLarge,
+    required this.labelMedium,
+    required this.labelSmall,
+  });
 }
 
 /// ポストアイテム用のスタイル
@@ -614,3 +727,4 @@ extension DangerousActionColors on ColorScheme {
       ? const Color(0xFFD32F2F) // Material Red 700
       : const Color(0xFFFF5252); // Material Red 400
 }
+

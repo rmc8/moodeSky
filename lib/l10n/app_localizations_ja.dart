@@ -554,4 +554,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get richTextFeatureNotImplemented => 'この機能は準備中です';
+
+  @override
+  String get loadingNewPosts => '最新のポストを取得しています...';
+
+  @override
+  String get loadingOlderPosts => '古いポストを取得しています...';
 }

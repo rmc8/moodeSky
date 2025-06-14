@@ -568,4 +568,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get richTextFeatureNotImplemented =>
       'This feature is under development';
+
+  @override
+  String get loadingNewPosts => 'Loading new posts...';
+
+  @override
+  String get loadingOlderPosts => 'Loading older posts...';
 }

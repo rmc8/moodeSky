@@ -22,6 +22,7 @@ console = Console()
 
 # Default repository URLs
 ATPROTO_DART_URL = "https://github.com/myConsciousness/atproto.dart.git"
+FLUTTER_DOCS_URL = "https://github.com/flutter/website.git"
 DEFAULT_CLONE_DIR = Path.home() / ".cache" / "atproto-rag" / "repos"
 
 
@@ -164,6 +165,280 @@ def vectorize(
         
     except Exception as e:
         console.print(f"[bold red]✗ Vectorization failed: {e}[/bold red]")
+        raise typer.Exit(1)
+
+
+@app.command("vec-moode")
+def vectorize_flutter(
+    flutter_dir: Path = typer.Option(
+        Path.cwd().parent,
+        "--flutter-dir", "-f",
+        help="Path to Flutter project directory"
+    ),
+    qdrant_url: str = typer.Option(
+        "http://localhost:6333",
+        "--qdrant-url", "-q",
+        help="Qdrant server URL"
+    ),
+    collection_name: str = typer.Option(
+        "moodeSky",
+        "--collection", "-c",
+        help="Qdrant collection name for Flutter project"
+    ),
+    embedding_model: str = typer.Option(
+        "BAAI/bge-small-en-v1.5",
+        "--model", "-m",
+        help="FastEmbed model (BAAI/bge-small-en-v1.5, BAAI/bge-base-en-v1.5)"
+    ),
+    batch_size: int = typer.Option(
+        100,
+        "--batch-size", "-b",
+        help="Batch size for embedding requests"
+    ),
+    include_tests: bool = typer.Option(
+        False,
+        "--include-tests",
+        help="Include test files in vectorization"
+    ),
+    include_generated: bool = typer.Option(
+        False,
+        "--include-generated",
+        help="Include generated files (.g.dart) in vectorization"
+    ),
+):
+    """
+    Vectorize a local Flutter project for RAG with Qdrant.
+    
+    This command will:
+    1. Scan the Flutter project directory
+    2. Extract code chunks and documentation from Dart files
+    3. Generate embeddings using FastEmbed
+    4. Store vectors in a separate Qdrant collection for the Flutter project
+    """
+    
+    # Verify Flutter project directory exists
+    if not flutter_dir.exists():
+        console.print(f"[red]✗ Flutter directory does not exist: {flutter_dir}[/red]")
+        raise typer.Exit(1)
+    
+    # Check if it's a Flutter project (look for pubspec.yaml)
+    pubspec_path = flutter_dir / "pubspec.yaml"
+    if not pubspec_path.exists():
+        console.print(f"[red]✗ Not a Flutter project (no pubspec.yaml found): {flutter_dir}[/red]")
+        raise typer.Exit(1)
+    
+    # Create configuration
+    config = VectorizationConfig(
+        qdrant_url=qdrant_url,
+        collection_name=collection_name,
+        embedding_model=embedding_model,
+        batch_size=batch_size,
+        include_tests=include_tests,
+        include_generated=include_generated
+    )
+    
+    # Display configuration
+    console.print("[bold blue]Flutter Project Vectorization:[/bold blue]")
+    config_table = Table(show_header=False)
+    config_table.add_column("Setting", style="cyan")
+    config_table.add_column("Value", style="white")
+    
+    config_table.add_row("Flutter Directory", str(flutter_dir))
+    config_table.add_row("Qdrant URL", config.qdrant_url)
+    config_table.add_row("Collection", config.collection_name)
+    config_table.add_row("Embedding Model", config.embedding_model)
+    config_table.add_row("Batch Size", str(config.batch_size))
+    config_table.add_row("Include Tests", str(config.include_tests))
+    config_table.add_row("Include Generated", str(config.include_generated))
+    
+    console.print(config_table)
+    console.print()
+    
+    # Run vectorization on local Flutter project
+    try:
+        vectorizer = AtprotoVectorizer(config)
+        stats = asyncio.run(vectorizer.run_flutter_process(flutter_dir))
+        
+        # Display results
+        console.print("\n[bold green]Flutter Vectorization Complete![/bold green]")
+        
+        results_table = Table(title="Results")
+        results_table.add_column("Metric", style="cyan")
+        results_table.add_column("Value", style="white")
+        
+        results_table.add_row("Flutter Project", str(flutter_dir))
+        results_table.add_row("Total Files", str(stats.repository.total_files))
+        results_table.add_row("Dart Files", str(stats.repository.dart_files))
+        results_table.add_row("Markdown Files", str(stats.repository.md_files))
+        results_table.add_row("Chunks Created", str(stats.chunks_created))
+        results_table.add_row("Chunks Uploaded", str(stats.chunks_uploaded))
+        results_table.add_row("Processing Time", f"{stats.processing_time:.2f}s")
+        results_table.add_row("Errors", str(len(stats.errors)))
+        results_table.add_row("Warnings", str(len(stats.warnings)))
+        
+        console.print(results_table)
+        
+        # Show errors if any
+        if stats.errors:
+            console.print("\n[bold red]Errors:[/bold red]")
+            for error in stats.errors:
+                console.print(f"[red]• {error}[/red]")
+        
+        # Show warnings if any
+        if stats.warnings:
+            console.print("\n[bold yellow]Warnings:[/bold yellow]")
+            for warning in stats.warnings:
+                console.print(f"[yellow]• {warning}[/yellow]")
+        
+        console.print(f"\n[green]✓ Flutter project ready for use with Claude Code MCP via Qdrant![/green]")
+        
+    except Exception as e:
+        console.print(f"[bold red]✗ Flutter vectorization failed: {e}[/bold red]")
+        raise typer.Exit(1)
+
+
+@app.command("vec-flutter")
+def vectorize_flutter_docs(
+    repo_url: str = typer.Option(
+        FLUTTER_DOCS_URL,
+        "--repo-url", "-r",
+        help="Flutter documentation repository URL"
+    ),
+    clone_dir: Optional[Path] = typer.Option(
+        None,
+        "--clone-dir", "-d",
+        help="Directory to clone repository into"
+    ),
+    qdrant_url: str = typer.Option(
+        "http://localhost:6333",
+        "--qdrant-url", "-q",
+        help="Qdrant server URL"
+    ),
+    collection_name: str = typer.Option(
+        "flutter-docs",
+        "--collection", "-c",
+        help="Qdrant collection name for Flutter documentation"
+    ),
+    embedding_model: str = typer.Option(
+        "BAAI/bge-small-en-v1.5",
+        "--model", "-m",
+        help="FastEmbed model (BAAI/bge-small-en-v1.5, BAAI/bge-base-en-v1.5)"
+    ),
+    batch_size: int = typer.Option(
+        100,
+        "--batch-size", "-b",
+        help="Batch size for embedding requests"
+    ),
+    include_tests: bool = typer.Option(
+        False,
+        "--include-tests",
+        help="Include test files in vectorization"
+    ),
+    include_generated: bool = typer.Option(
+        False,
+        "--include-generated",
+        help="Include generated files (.g.dart) in vectorization"
+    ),
+    force_update: bool = typer.Option(
+        False,
+        "--force-update", "-f",
+        help="Force update even if repository exists"
+    ),
+):
+    """
+    Vectorize Flutter official documentation for RAG with Qdrant.
+    
+    This command will:
+    1. Clone or update the Flutter documentation repository (https://github.com/flutter/website.git)
+    2. Extract documentation chunks from .md, .mdx, .dart, .json, .yaml files
+    3. Generate embeddings using FastEmbed
+    4. Store vectors in Qdrant for use with MCP
+    """
+    
+    # Setup paths
+    if clone_dir is None:
+        clone_dir = DEFAULT_CLONE_DIR
+    
+    repo_name = repo_url.split('/')[-1].replace('.git', '')
+    target_path = clone_dir / repo_name
+    
+    # Create clone directory
+    clone_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create configuration for Flutter docs
+    config = VectorizationConfig(
+        qdrant_url=qdrant_url,
+        collection_name=collection_name,
+        embedding_model=embedding_model,
+        batch_size=batch_size,
+        include_tests=include_tests,
+        include_generated=include_generated
+    )
+    
+    # Display configuration
+    console.print("[bold blue]Flutter Documentation Vectorization:[/bold blue]")
+    config_table = Table(show_header=False)
+    config_table.add_column("Setting", style="cyan")
+    config_table.add_column("Value", style="white")
+    
+    config_table.add_row("Repository URL", repo_url)
+    config_table.add_row("Clone Directory", str(target_path))
+    config_table.add_row("Qdrant URL", config.qdrant_url)
+    config_table.add_row("Collection", config.collection_name)
+    config_table.add_row("Embedding Model", config.embedding_model)
+    config_table.add_row("Batch Size", str(config.batch_size))
+    config_table.add_row("Store Batch Size", str(config.store_batch_size))
+    config_table.add_row("Include Tests", str(config.include_tests))
+    config_table.add_row("Include Generated", str(config.include_generated))
+    config_table.add_row("Target File Types", ".md, .mdx, .dart, .json, .yaml/.yml")
+    
+    console.print(config_table)
+    console.print()
+    
+    # Run vectorization
+    try:
+        vectorizer = AtprotoVectorizer(config)
+        stats = asyncio.run(vectorizer.run_full_process(repo_url, target_path))
+        
+        # Display results
+        console.print("\n[bold green]Flutter Documentation Vectorization Complete![/bold green]")
+        
+        results_table = Table(title="Results")
+        results_table.add_column("Metric", style="cyan")
+        results_table.add_column("Value", style="white")
+        
+        results_table.add_row("Repository", stats.repository.url)
+        results_table.add_row("Commit Hash", stats.repository.commit_hash or "N/A")
+        results_table.add_row("Total Files", str(stats.repository.total_files))
+        results_table.add_row("Dart Files", str(stats.repository.dart_files))
+        results_table.add_row("Markdown Files", str(stats.repository.md_files))
+        results_table.add_row("Other Files", str(stats.repository.total_files - stats.repository.dart_files - stats.repository.md_files))
+        results_table.add_row("Chunks Created", str(stats.chunks_created))
+        results_table.add_row("Chunks Uploaded", str(stats.chunks_uploaded))
+        results_table.add_row("Processing Time", f"{stats.processing_time:.2f}s")
+        results_table.add_row("Errors", str(len(stats.errors)))
+        results_table.add_row("Warnings", str(len(stats.warnings)))
+        
+        console.print(results_table)
+        
+        # Show errors if any
+        if stats.errors:
+            console.print("\n[bold red]Errors:[/bold red]")
+            for error in stats.errors:
+                console.print(f"[red]• {error}[/red]")
+        
+        # Show warnings if any
+        if stats.warnings:
+            console.print("\n[bold yellow]Warnings:[/bold yellow]")
+            for warning in stats.warnings:
+                console.print(f"[yellow]• {warning}[/yellow]")
+        
+        console.print(f"\n[green]✓ Flutter documentation ready for use with Claude Code MCP via Qdrant![/green]")
+        console.print(f"[cyan]Collection: {collection_name}[/cyan]")
+        console.print(f"[cyan]Run 'atproto-rag setup-mcp --collection {collection_name}' to generate MCP configuration[/cyan]")
+        
+    except Exception as e:
+        console.print(f"[bold red]✗ Flutter documentation vectorization failed: {e}[/bold red]")
         raise typer.Exit(1)
 
 

@@ -1118,6 +1118,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This feature is under development'**
   String get richTextFeatureNotImplemented;
+
+  /// Message shown when loading new posts from timeline
+  ///
+  /// In en, this message translates to:
+  /// **'Loading new posts...'**
+  String get loadingNewPosts;
+
+  /// Message shown when loading older posts from timeline
+  ///
+  /// In en, this message translates to:
+  /// **'Loading older posts...'**
+  String get loadingOlderPosts;
 }
 
 class _AppLocalizationsDelegate

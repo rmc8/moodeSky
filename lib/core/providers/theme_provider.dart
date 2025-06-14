@@ -119,21 +119,21 @@ ThemeMode flutterThemeMode(AutoDisposeProviderRef<ThemeMode> ref) {
 /// ライトテーマを提供するプロバイダー（ロケールに応じたフォントを適用）
 @riverpod
 ThemeData lightTheme(AutoDisposeProviderRef<ThemeData> ref) {
-  final locale = ref.watch(currentLocaleProvider);
+  final locale = ref.watch(currentLocaleProvider) ?? const Locale('en');
   return AppThemes.lightTheme.withLocaleFonts(locale);
 }
 
 /// ダークテーマを提供するプロバイダー（ロケールに応じたフォントを適用）
 @riverpod
 ThemeData darkTheme(AutoDisposeProviderRef<ThemeData> ref) {
-  final locale = ref.watch(currentLocaleProvider);
+  final locale = ref.watch(currentLocaleProvider) ?? const Locale('en');
   return AppThemes.darkTheme.withLocaleFonts(locale);
 }
 
 /// 現在のフォントファミリーを取得するプロバイダー
 @riverpod
 String currentFontFamily(AutoDisposeProviderRef<String> ref) {
-  final locale = ref.watch(currentLocaleProvider);
+  final locale = ref.watch(currentLocaleProvider) ?? const Locale('en');
   return AppFonts.getFontFamilyForLocale(locale);
 }
 
@@ -145,11 +145,13 @@ TextStyle monospaceTextStyle(
   FontWeight fontWeight = FontWeight.w400,
   Color? color,
 }) {
-  return AppFonts.getMonospaceStyle(
+  final locale = ref.watch(currentLocaleProvider) ?? const Locale('en');
+  final baseStyle = TextStyle(
     fontSize: fontSize,
     fontWeight: fontWeight,
     color: color,
   );
+  return AppFonts.getMonospaceStyle(baseStyle, locale.languageCode);
 }
 
 /// 言語に応じて調整されたフォントウェイトを取得するプロバイダー

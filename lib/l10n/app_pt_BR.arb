@@ -169,6 +169,9 @@
   "richTextProcessingError": "Erro no processamento de texto",
   "richTextFeatureNotImplemented": "Esta funcionalidade está em desenvolvimento",
   
+  "loadingNewPosts": "Carregando novos posts...",
+  "loadingOlderPosts": "Carregando posts antigos...",
+  
   "repostedBy": "Repostado por {name}",
   "@repostedBy": {
     "description": "Displayed when a post has been reposted by someone",

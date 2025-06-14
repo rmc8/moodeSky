@@ -571,4 +571,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get richTextFeatureNotImplemented =>
       'Diese Funktion wird noch entwickelt';
+
+  @override
+  String get loadingNewPosts => 'Neue Beiträge werden geladen...';
+
+  @override
+  String get loadingOlderPosts => 'Ältere Beiträge werden geladen...';
 }

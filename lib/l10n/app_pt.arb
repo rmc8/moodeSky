@@ -177,5 +177,8 @@
   "richTextUrlCopied": "URL copiada para a área de transferência",
   "richTextUrlOpenFailed": "Não foi possível abrir a URL",
   "richTextProcessingError": "Erro no processamento de texto",
-  "richTextFeatureNotImplemented": "Esta funcionalidade está em desenvolvimento"
+  "richTextFeatureNotImplemented": "Esta funcionalidade está em desenvolvimento",
+  
+  "loadingNewPosts": "Carregando novos posts...",
+  "loadingOlderPosts": "Carregando posts antigos..."
 }
