@@ -14,6 +14,7 @@ import 'package:moodesky/l10n/app_localizations.dart';
 import 'package:moodesky/services/bluesky/bluesky_service_v2.dart';
 import 'package:moodesky/shared/models/auth_models.dart';
 import 'package:moodesky/shared/widgets/deck_item.dart';
+import 'package:moodesky/shared/widgets/simple_repost_widget.dart';
 import 'timeline_widget.dart';
 
 /// Bluesky-specific timeline widget
@@ -547,6 +548,24 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
     final repostCount = feedView.post.repostCount;
     final replyCount = feedView.post.replyCount;
     
+    // Check if this is a repost and extract repost information
+    Widget? repostWidget;
+    if (feedView.reason != null) {
+      debugPrint('📱 Processing feedView.reason: ${feedView.reason?.runtimeType}');
+      feedView.reason!.when(
+        repost: (repost) {
+          debugPrint('📱 Repost detected from: ${repost.by.handle}');
+          repostWidget = SimpleRepostWidget(repost: repost);
+        },
+        pin: (pin) {
+          debugPrint('📱 Pin reason detected (not displaying)');
+        },
+        unknown: (data) {
+          debugPrint('📱 Unknown reason type detected: $data');
+        },
+      );
+    }
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 6.0),
       decoration: BoxDecoration(
@@ -558,79 +577,87 @@ class _BlueskyTimelineWidgetState extends BaseTimelineWidgetState<BlueskyTimelin
           ),
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 16),
-        child: ProfilePostItem(
-          authorName: authorName,
-          authorHandle: authorHandle,
-          authorAvatar: authorAvatar,
-          content: content,
-          facets: facets,
-          timestamp: timestamp,
-          likeCount: likeCount,
-          repostCount: repostCount,
-          replyCount: replyCount,
-          isLiked: false, // TODO: Implement like state
-          isReposted: false, // TODO: Implement repost state
-          onLike: () {
-            // TODO: Implement like action
-          },
-          onRepost: () {
-            // TODO: Implement repost action
-          },
-          onReply: () {
-            // TODO: Implement reply action
-          },
-          onTap: () {
-            // TODO: Implement post tap navigation
-          },
-          onMentionTap: (did) {
-            debugPrint('📱 Mention tapped: $did');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context).richTextMentionTapped(did)),
-                action: SnackBarAction(
-                  label: AppLocalizations.of(context).richTextProfileView,
-                  onPressed: () {
-                    debugPrint('🔍 Profile view: $did');
-                    // TODO: プロフィール表示機能の実装
-                  },
-                ),
-              ),
-            );
-          },
-          onLinkTap: (url) {
-            debugPrint('📱 Link tapped: $url');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context).richTextUrlTapped(url)),
-                action: SnackBarAction(
-                  label: AppLocalizations.of(context).richTextOpenUrl,
-                  onPressed: () {
-                    debugPrint('🔗 Open URL: $url');
-                    // TODO: URLを開く機能の実装
-                  },
-                ),
-              ),
-            );
-          },
-          onHashtagTap: (tag) {
-            debugPrint('📱 Hashtag tapped: $tag');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context).richTextHashtagTapped(tag)),
-                action: SnackBarAction(
-                  label: AppLocalizations.of(context).richTextHashtagSearch,
-                  onPressed: () {
-                    debugPrint('🔍 Hashtag search: $tag');
-                    // TODO: ハッシュタグ検索機能の実装
-                  },
-                ),
-              ),
-            );
-          },
-          deck: widget.deck,
-        ),
+      child: Column(
+        children: [
+          // Repost information (if available)
+          if (repostWidget != null) repostWidget!,
+          
+          // Main post content
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 16),
+            child: ProfilePostItem(
+              authorName: authorName,
+              authorHandle: authorHandle,
+              authorAvatar: authorAvatar,
+              content: content,
+              facets: facets,
+              timestamp: timestamp,
+              likeCount: likeCount,
+              repostCount: repostCount,
+              replyCount: replyCount,
+              isLiked: false, // TODO: Implement like state
+              isReposted: false, // TODO: Implement repost state
+              onLike: () {
+                // TODO: Implement like action
+              },
+              onRepost: () {
+                // TODO: Implement repost action
+              },
+              onReply: () {
+                // TODO: Implement reply action
+              },
+              onTap: () {
+                // TODO: Implement post tap navigation
+              },
+              onMentionTap: (did) {
+                debugPrint('📱 Mention tapped: $did');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context).richTextMentionTapped(did)),
+                    action: SnackBarAction(
+                      label: AppLocalizations.of(context).richTextProfileView,
+                      onPressed: () {
+                        debugPrint('🔍 Profile view: $did');
+                        // TODO: プロフィール表示機能の実装
+                      },
+                    ),
+                  ),
+                );
+              },
+              onLinkTap: (url) {
+                debugPrint('📱 Link tapped: $url');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context).richTextUrlTapped(url)),
+                    action: SnackBarAction(
+                      label: AppLocalizations.of(context).richTextOpenUrl,
+                      onPressed: () {
+                        debugPrint('🔗 Open URL: $url');
+                        // TODO: URLを開く機能の実装
+                      },
+                    ),
+                  ),
+                );
+              },
+              onHashtagTap: (tag) {
+                debugPrint('📱 Hashtag tapped: $tag');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context).richTextHashtagTapped(tag)),
+                    action: SnackBarAction(
+                      label: AppLocalizations.of(context).richTextHashtagSearch,
+                      onPressed: () {
+                        debugPrint('🔍 Hashtag search: $tag');
+                        // TODO: ハッシュタグ検索機能の実装
+                      },
+                    ),
+                  ),
+                );
+              },
+              deck: widget.deck,
+            ),
+          ),
+        ],
       ),
     );
   }
