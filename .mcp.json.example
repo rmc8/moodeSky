@@ -1,0 +1,101 @@
+{
+    "mcpServers": {
+        "sequential-thinking": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+        },
+        "bluesky": {
+            "command": "npx",
+            "args": ["-y", "mcp-server-bluesky"],
+            "env": {
+                "BLUESKY_USERNAME": "your_handle
+                .bsky.social",
+                "BLUESKY_PASSWORD": "xxxx-xxxx-xxxx-xxxx"
+            }
+        },
+        "sveltekit-docs": {
+            "command": "uvx",
+            "args": ["mcp-server-qdrant"],
+            "env": {
+                "QDRANT_URL": "http://localhost:6333",
+                "COLLECTION_NAME": "sveltekit-docs",
+                "EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+                "EMBEDDING_DIMENSION": "384",
+                "TOP_K": "10",
+                "TOOL_STORE_DESCRIPTION": "Store SvelteKit official documentation, guides, API references, and examples.",
+                "TOOL_FIND_DESCRIPTION": "Search for SvelteKit official documentation including routing, components, APIs, tutorials, guides, best practices, and examples."
+            }
+        },
+        "svelte-docs": {
+            "command": "uvx",
+            "args": ["mcp-server-qdrant"],
+            "env": {
+                "QDRANT_URL": "http://localhost:6333",
+                "COLLECTION_NAME": "svelte-docs",
+                "EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+                "EMBEDDING_DIMENSION": "384",
+                "TOP_K": "10",
+                "TOOL_STORE_DESCRIPTION": "Store Svelte official documentation, guides, component references, and examples.",
+                "TOOL_FIND_DESCRIPTION": "Search for Svelte official documentation including components, reactivity, stores, actions, transitions, and examples."
+            }
+        },
+        "tauri-docs": {
+            "command": "uvx",
+            "args": ["mcp-server-qdrant"],
+            "env": {
+                "QDRANT_URL": "http://localhost:6333",
+                "COLLECTION_NAME": "tauri-docs",
+                "EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+                "EMBEDDING_DIMENSION": "384",
+                "TOP_K": "10",
+                "TOOL_STORE_DESCRIPTION": "Store Tauri official documentation, guides, API references, and examples.",
+                "TOOL_FIND_DESCRIPTION": "Search for Tauri official documentation including desktop/mobile development, commands, events, plugins, security, and examples."
+            }
+        },
+        "bluesky-docs": {
+            "command": "uvx",
+            "args": ["mcp-server-qdrant"],
+            "env": {
+                "QDRANT_URL": "http://localhost:6333",
+                "COLLECTION_NAME": "bluesky-docs",
+                "EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+                "EMBEDDING_DIMENSION": "384",
+                "TOP_K": "10",
+                "TOOL_STORE_DESCRIPTION": "Store Bluesky/AT Protocol official documentation, guides, and API references.",
+                "TOOL_FIND_DESCRIPTION": "Search for Bluesky and AT Protocol documentation including APIs, schemas, federation, authentication, and examples."
+            }
+        },
+        "atproto-docs": {
+            "command": "uvx",
+            "args": ["mcp-server-qdrant"],
+            "env": {
+                "QDRANT_URL": "http://localhost:6333",
+                "COLLECTION_NAME": "atproto-docs",
+                "EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+                "EMBEDDING_DIMENSION": "384",
+                "TOP_K": "10",
+                "TOOL_STORE_DESCRIPTION": "Store AT Protocol official documentation, specifications, and implementation guides.",
+                "TOOL_FIND_DESCRIPTION": "Search for AT Protocol documentation including protocol specifications, lexicons, XRPC, repositories, federation, identity, and implementation examples."
+            }
+        },
+        "tavily": {
+            "command": "npx",
+            "args": ["-y", "tavily-mcp@0.2.4"],
+            "env": {
+                "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+            }
+        },
+        "context7": {
+            "type": "stdio",
+            "command": "npx",
+            "args": ["-y", "@upstash/context7-mcp"]
+        },
+        "github": {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/",
+            "env": {
+                "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+            }
+        }
+    }
+}
