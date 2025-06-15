@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **moodeSky** は、Tauriを使用したマルチプラットフォーム対応のBlueskyクライアントアプリケーションです。
 
+URL: https://github.com/rmc8/moodeSky
+
 ### プロジェクト構成
 1. **moodeSky** - Tauri デスクトップ・モバイルアプリ (SvelteKit + Rust)
 2. **dev_rag** - 開発支援RAGツール (AT Protocol & Tauri ドキュメント vectorization)
@@ -19,6 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 技術スタック
 - **フロントエンド**: SvelteKit + TypeScript (SPA構成)
 - **バックエンド**: Rust (Tauri 2.0)
+- **データベース**: SQLite (Tauri SQL Plugin) - マルチプラットフォーム対応
 - **AT Protocol**: Bluesky API統合
 - **開発支援**: dev_rag (RAGベース ドキュメント検索)
 
@@ -357,6 +360,13 @@ Navigate to `dev_rag/` directory:
 - [ ] 全テスト通過 (`cargo test`, `npm test`)
 - [ ] リント規則準拠
 - [ ] セキュリティベストプラクティス準拠
+
+#### コーディング規約
+- **フロントエンド言語**: TypeScript必須 (.ts/.svelte)
+- **JavaScript禁止**: 新規作成時はTypeScriptのみ使用
+- **型安全性**: 完全型チェック・型定義必須
+- **インポートパス**: SvelteKitでは拡張子省略必須 (`import from './file'`)
+- **Svelte 5**: runes ($state, $derived) 積極的使用
 
 #### Bluesky/AT Protocol 特有チェック
 - [ ] API仕様準拠 (LEXICON確認)

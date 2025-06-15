@@ -6,8 +6,29 @@
   import { onMount } from 'svelte';
   import { initializeTheme } from '$lib/stores/theme.js';
   
+  // 認証管理
+  import { page } from '$app/stores';
+  import { checkAuthStatus, isAuthenticated } from '$lib/stores/auth';
+  import { goto } from '$app/navigation';
+  
   onMount(() => {
-    return initializeTheme();
+    // テーマ初期化
+    const themeCleanup = initializeTheme();
+    
+    // 認証状態確認（非同期）
+    checkAuthStatus();
+    
+    // ログインページ以外で未認証の場合はリダイレクト
+    const unsubscribe = isAuthenticated.subscribe((authenticated) => {
+      if (!authenticated && $page.route.id !== '/login') {
+        goto('/login');
+      }
+    });
+    
+    return () => {
+      if (themeCleanup) themeCleanup();
+      unsubscribe();
+    };
   });
 </script>
 

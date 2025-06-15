@@ -1,6 +1,8 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
   import { toggleDarkMode } from '$lib/stores/theme.js';
+  import { logout, currentUser, isAuthenticated } from '$lib/stores/auth';
+  import { onMount } from 'svelte';
   
   // UIコンポーネントのインポート
   import Button from '$lib/components/ui/button.svelte';
@@ -20,7 +22,8 @@
     Moon,
     Sun,
     Plus,
-    Menu
+    Menu,
+    LogOut
   } from '$lib/components/icons/index.js';
 
   let greetMsg = $state("");
@@ -30,6 +33,11 @@
   async function greet(event: Event) {
     event.preventDefault();
     greetMsg = await invoke("greet", { name });
+  }
+
+  // ログアウト処理
+  async function handleLogout() {
+    await logout();
   }
 
   // モックデータ
@@ -94,12 +102,25 @@
       </div>
       
       <div class="flex items-center gap-2">
+        <!-- ユーザー情報表示 -->
+        {#if $currentUser}
+          <span class="text-sm text-gray-600 dark:text-gray-400 hidden md:block">
+            @{$currentUser.handle}
+          </span>
+        {/if}
+        
         <Button variant="ghost" size="icon" onclick={toggleDarkMode}>
           <Moon class="w-5 h-5" />
         </Button>
+        
         <Button>
           <Plus class="w-4 h-4 mr-2" />
           投稿
+        </Button>
+        
+        <!-- ログアウトボタン -->
+        <Button variant="ghost" size="icon" onclick={handleLogout} title="ログアウト">
+          <LogOut class="w-5 h-5" />
         </Button>
       </div>
     </div>

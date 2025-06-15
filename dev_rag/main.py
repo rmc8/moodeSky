@@ -21,6 +21,7 @@ SVELTEJS_DOCS = "https://github.com/sveltejs/svelte.git"
 TAURI_DOCS = "https://github.com/tauri-apps/tauri-docs.git"
 BLUESKY_DOCS = "https://github.com/bluesky-social/bsky-docs.git"
 ATPROTO_DOCS = "https://github.com/bluesky-social/atproto.git"
+ATRIUM_DOCS = "https://github.com/atrium-rs/atrium.git"
 
 # Project Paths
 PARENT_DIR = Path(__file__).parent
@@ -65,6 +66,10 @@ class DevRagCLI:
     def vec_atproto(self, **kwargs):
         """Vectorize AT Protocol documentation"""
         return self._vectorize_repo(ATPROTO_DOCS, "atproto-docs", **kwargs)
+    
+    def vec_atrium(self, **kwargs):
+        """Vectorize Atrium-rs documentation"""
+        return self._vectorize_repo(ATRIUM_DOCS, "atrium-docs", **kwargs)
     
     def vec_moode(self, 
                  flutter_dir: Optional[str] = None,
@@ -115,6 +120,7 @@ class DevRagCLI:
                   skip_tauri: bool = False,
                   skip_bluesky: bool = False,
                   skip_atproto: bool = False,
+                  skip_atrium: bool = False,
                   skip_moode: bool = False):
         """Vectorize all development documentation repositories and local project"""
         
@@ -128,6 +134,7 @@ class DevRagCLI:
             ("Tauri", TAURI_DOCS, "tauri-docs", skip_tauri),
             ("BlueSky", BLUESKY_DOCS, "bluesky-docs", skip_bluesky),
             ("AT Protocol", ATPROTO_DOCS, "atproto-docs", skip_atproto),
+            ("Atrium", ATRIUM_DOCS, "atrium-docs", skip_atrium),
         ]
         
         # Process repositories
@@ -171,7 +178,7 @@ class DevRagCLI:
         
         # Process local project
         if not skip_moode:
-            console.print(f"[bold cyan]Step 6: Vectorizing moodeSky Local Project[/bold cyan]")
+            console.print(f"[bold cyan]Step 7: Vectorizing moodeSky Local Project[/bold cyan]")
             step_start = time.time()
             
             if MOODESKY_PROJECT.exists():
