@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* moodeSky カスタムスタイル */
+
+@layer base {
+  /* 基本スタイル - 日本語フォント対応 */
+  html {
+    font-family: 'Hiragino Sans', 'ヒラギノ角ゴシック', 'Yu Gothic UI', 'Meiryo UI', sans-serif;
+  }
+  
+  body {
+    @apply text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900;
+    @apply transition-colors duration-200;
+  }
+}
+
+@layer components {
+  /* デッキ型レイアウト用コンポーネント */
+  .deck-container {
+    @apply flex gap-deck-gutter overflow-x-auto;
+    @apply px-deck-gutter py-4;
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.400') theme('colors.gray.100');
+  }
+  
+  .deck-column {
+    @apply w-deck-column flex-shrink-0;
+    @apply bg-white dark:bg-gray-800;
+    @apply border border-deck-border dark:border-deck-border-dark;
+    @apply rounded-lg shadow-sm;
+    min-height: 400px;
+  }
+  
+  /* Bluesky投稿スタイル */
+  .post-card {
+    @apply bg-white dark:bg-gray-800;
+    @apply border border-gray-200 dark:border-gray-700;
+    @apply rounded-lg p-4 space-y-3;
+    @apply hover:bg-gray-50 dark:hover:bg-gray-750;
+    @apply transition-colors duration-150;
+  }
+  
+  .post-avatar {
+    @apply w-10 h-10 rounded-full object-cover;
+    @apply border-2 border-white dark:border-gray-600;
+  }
+  
+  .post-content {
+    @apply text-sm leading-relaxed;
+    @apply break-words whitespace-pre-wrap;
+  }
+  
+  .post-actions {
+    @apply flex items-center gap-4 pt-2;
+    @apply text-gray-500 dark:text-gray-400;
+  }
+  
+  .post-action-btn {
+    @apply flex items-center gap-1 px-2 py-1 rounded;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+    @apply transition-colors duration-150;
+  }
+  
+  /* モバイル対応 */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 z-50;
+    @apply bg-white dark:bg-gray-800;
+    @apply border-t border-gray-200 dark:border-gray-700;
+    @apply flex justify-around items-center;
+    @apply py-2 px-4;
+    @apply md:hidden;
+  }
+  
+  .mobile-nav-item {
+    @apply flex flex-col items-center gap-1;
+    @apply px-3 py-2 rounded-lg;
+    @apply text-gray-600 dark:text-gray-400;
+    @apply hover:text-bluesky-600 dark:hover:text-bluesky-400;
+    @apply hover:bg-bluesky-50 dark:hover:bg-bluesky-900;
+    @apply transition-colors duration-150;
+  }
+  
+  /* カスタムスクロールバー */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #9ca3af transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #9ca3af;
+    border-radius: 9999px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #6b7280;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #4b5563;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background-color: #6b7280;
+    }
+  }
+}
+
+@layer utilities {
+  /* ユーティリティクラス */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+  
+  /* デバッグ用（開発時のみ） */
+  .debug-outline {
+    @apply outline outline-2 outline-red-500 outline-offset-2;
+  }
+}
+
+/* ダークモード時の追加調整 */
+@media (prefers-color-scheme: dark) {
+  .deck-container {
+    scrollbar-color: #4b5563 #1f2937;
+  }
+}
+
+/* モバイル向け最適化 */
+@media (max-width: 768px) {
+  .deck-container {
+    @apply flex-col gap-4 px-4;
+  }
+  
+  .deck-column {
+    @apply w-full;
+  }
+  
+  body {
+    @apply pb-16; /* モバイルナビゲーション分の余白 */
+  }
+}
