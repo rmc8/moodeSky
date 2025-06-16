@@ -163,6 +163,7 @@
     transition: border-color 0.2s ease;
     background: white;
     width: 100%;
+    box-sizing: border-box;
   }
 
   .password-input-container input {
