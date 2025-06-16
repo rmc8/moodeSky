@@ -8,7 +8,6 @@ mod database;
 pub use models::*;
 
 use crate::auth::AtProtoAuth;
-use crate::models::SessionManager;
 use std::sync::{Arc, Mutex};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -22,7 +21,7 @@ fn greet(name: &str) -> String {
 async fn login_app_password(
     request: LoginRequest,
     auth_state: State<'_, AtProtoAuth>,
-    session_manager: State<'_, Arc<Mutex<SessionManager>>>,
+    _session_manager: State<'_, Arc<Mutex<SessionManager>>>,
 ) -> Result<LoginResponse, String> {
     // Authenticate with AT Protocol using bsky-sdk
     let login_response = auth_state.login_with_app_password(&request).await?;

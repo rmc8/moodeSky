@@ -9,6 +9,12 @@ export interface UserSettings {
   language: 'ja' | 'en' | 'pt-BR' | 'ko' | 'de';
   notifications_enabled: boolean;
   auto_refresh_interval: number; // seconds
+  pds_settings?: {
+    default_pds_url: string;
+    remember_pds: boolean;
+    pds_history: string[];
+    trusted_pds_list: string[];
+  };
   deck_settings?: {
     column_width: number;
     max_columns: number;
@@ -34,6 +40,15 @@ const DEFAULT_SETTINGS: UserSettings = {
   language: 'ja',
   notifications_enabled: true,
   auto_refresh_interval: 30,
+  pds_settings: {
+    default_pds_url: 'https://bsky.social',
+    remember_pds: true,
+    pds_history: ['https://bsky.social'],
+    trusted_pds_list: [
+      'https://bsky.social',
+      'https://staging.bsky.dev'
+    ]
+  },
   deck_settings: {
     column_width: 320,
     max_columns: 5,
@@ -87,6 +102,7 @@ export async function loadUserSettings(): Promise<{ success: boolean; error?: st
         language: dbPrefs.language,
         notifications_enabled: dbPrefs.notifications_enabled,
         auto_refresh_interval: dbPrefs.auto_refresh_interval,
+        pds_settings: additionalSettings.pds_settings || DEFAULT_SETTINGS.pds_settings,
         deck_settings: additionalSettings.deck_settings || DEFAULT_SETTINGS.deck_settings,
         privacy_settings: additionalSettings.privacy_settings || DEFAULT_SETTINGS.privacy_settings,
         accessibility: additionalSettings.accessibility || DEFAULT_SETTINGS.accessibility
@@ -125,6 +141,7 @@ export async function saveUserSettings(settings: UserSettings): Promise<{ succes
 
     // 追加設定をJSONとして保存
     const additionalSettings = {
+      pds_settings: settings.pds_settings,
       deck_settings: settings.deck_settings,
       privacy_settings: settings.privacy_settings,
       accessibility: settings.accessibility
@@ -263,4 +280,133 @@ export async function importSettings(settingsJson: string): Promise<{ success: b
     console.error('Import settings error:', error);
     return { success: false, error: `設定インポートエラー: ${error}` };
   }
+}
+
+// PDS設定専用の管理関数
+
+/**
+ * PDS URLをバリデーション
+ */
+export function validatePdsUrl(url: string): { valid: boolean; error?: string } {
+  try {
+    const pdsUrl = new URL(url);
+    
+    // HTTPSのみ許可
+    if (pdsUrl.protocol !== 'https:') {
+      return { valid: false, error: 'HTTPS URLのみ対応しています' };
+    }
+    
+    // 基本的なドメイン形式チェック
+    if (!pdsUrl.hostname.includes('.')) {
+      return { valid: false, error: '有効なドメイン名を入力してください' };
+    }
+    
+    return { valid: true };
+  } catch (error) {
+    return { valid: false, error: '有効なURLを入力してください' };
+  }
+}
+
+/**
+ * PDS設定を更新
+ */
+export async function updatePdsSettings(pdsSettings: UserSettings['pds_settings']): Promise<{ success: boolean; error?: string }> {
+  return await updateSetting('pds_settings', pdsSettings);
+}
+
+/**
+ * PDS履歴にURLを追加
+ */
+export async function addPdsToHistory(pdsUrl: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const validation = validatePdsUrl(pdsUrl);
+    if (!validation.valid) {
+      return { success: false, error: validation.error };
+    }
+
+    const currentSettings = get(userSettings);
+    const pdsSettings = currentSettings.pds_settings || DEFAULT_SETTINGS.pds_settings!;
+    
+    // 重複を除去し、新しいURLを先頭に追加
+    const newHistory = [pdsUrl, ...pdsSettings.pds_history.filter(url => url !== pdsUrl)];
+    
+    // 履歴は最大10件まで
+    if (newHistory.length > 10) {
+      newHistory.splice(10);
+    }
+    
+    const newPdsSettings = {
+      ...pdsSettings,
+      pds_history: newHistory
+    };
+    
+    return await updatePdsSettings(newPdsSettings);
+  } catch (error) {
+    console.error('Add PDS to history error:', error);
+    return { success: false, error: `PDS履歴追加エラー: ${error}` };
+  }
+}
+
+/**
+ * デフォルトPDS URLを設定
+ */
+export async function setDefaultPdsUrl(pdsUrl: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const validation = validatePdsUrl(pdsUrl);
+    if (!validation.valid) {
+      return { success: false, error: validation.error };
+    }
+
+    const currentSettings = get(userSettings);
+    const pdsSettings = currentSettings.pds_settings || DEFAULT_SETTINGS.pds_settings!;
+    
+    const newPdsSettings = {
+      ...pdsSettings,
+      default_pds_url: pdsUrl
+    };
+    
+    // 履歴にも追加
+    await addPdsToHistory(pdsUrl);
+    
+    return await updatePdsSettings(newPdsSettings);
+  } catch (error) {
+    console.error('Set default PDS URL error:', error);
+    return { success: false, error: `デフォルトPDS設定エラー: ${error}` };
+  }
+}
+
+/**
+ * PDS履歴をクリア
+ */
+export async function clearPdsHistory(): Promise<{ success: boolean; error?: string }> {
+  try {
+    const currentSettings = get(userSettings);
+    const pdsSettings = currentSettings.pds_settings || DEFAULT_SETTINGS.pds_settings!;
+    
+    const newPdsSettings = {
+      ...pdsSettings,
+      pds_history: ['https://bsky.social'] // bsky.socialのみ残す
+    };
+    
+    return await updatePdsSettings(newPdsSettings);
+  } catch (error) {
+    console.error('Clear PDS history error:', error);
+    return { success: false, error: `PDS履歴クリアエラー: ${error}` };
+  }
+}
+
+/**
+ * 現在のデフォルトPDS URLを取得
+ */
+export function getCurrentDefaultPds(): string {
+  const settings = get(userSettings);
+  return settings.pds_settings?.default_pds_url || 'https://bsky.social';
+}
+
+/**
+ * PDS履歴を取得
+ */
+export function getPdsHistory(): string[] {
+  const settings = get(userSettings);
+  return settings.pds_settings?.pds_history || ['https://bsky.social'];
 }

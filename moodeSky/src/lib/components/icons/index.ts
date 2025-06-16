@@ -35,6 +35,8 @@ export {
   Copy,
   Check,
   AlertCircle,
+  CheckCircle,
+  AlertTriangle,
   Info,
   HelpCircle,
   ExternalLink,
@@ -51,7 +53,8 @@ export {
   Globe,
   Smartphone,
   Monitor,
-  Tablet
+  Tablet,
+  Server
 } from 'lucide-svelte';
 
 // アイコンサイズの型定義

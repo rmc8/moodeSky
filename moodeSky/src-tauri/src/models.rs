@@ -73,7 +73,7 @@ pub struct UserPreferences {
 }
 
 /// Theme preference
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum Theme {
     Light,
@@ -111,7 +111,7 @@ impl Default for Theme {
 }
 
 /// Language preference
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub enum Language {
     #[serde(rename = "ja")]

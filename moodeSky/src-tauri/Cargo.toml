@@ -31,3 +31,8 @@ uuid = { version = "1", features = ["v4", "serde"] }
 sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio-rustls", "chrono", "uuid"] }
 bsky-sdk = "0.1.16"
 
+[dev-dependencies]
+tokio-test = "0.4"
+tempfile = "3.0"
+mockall = "0.13"
+

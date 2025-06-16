@@ -1,290 +1,202 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
-  import { toggleDarkMode } from '$lib/stores/theme.js';
-  import { logout, currentUser, isAuthenticated } from '$lib/stores/auth';
   import { onMount } from 'svelte';
-  
+  import { goto } from '$app/navigation';
+  import { isAuthenticated, logout, currentUser, authLoading } from '$lib/stores/auth';
+  import { toggleDarkMode } from '$lib/stores/theme.js';
+
   // UIコンポーネントのインポート
   import Button from '$lib/components/ui/button.svelte';
   import Card from '$lib/components/ui/card.svelte';
-  import Input from '$lib/components/ui/input.svelte';
-  
+  import Spinner from '$lib/components/ui/spinner.svelte';
+
   // アイコンのインポート
-  import {
-    Home,
-    Search,
-    Bell,
-    User,
-    Heart,
-    MessageCircle,
-    Repeat2,
-    Share,
-    Moon,
-    Sun,
-    Plus,
-    Menu,
-    LogOut
-  } from '$lib/components/icons/index.js';
+  import { LogOut, User, Mail, Globe, Sun, Moon } from '$lib/components/icons/index.js';
 
-  let greetMsg = $state("");
-  let name = $state("");
-  let postText = $state("");
-
-  async function greet(event: Event) {
-    event.preventDefault();
-    greetMsg = await invoke("greet", { name });
-  }
+  // 認証チェック
+  onMount(() => {
+    const unsubscribe = isAuthenticated.subscribe((authenticated) => {
+      if (!authenticated) {
+        goto('/login');
+      }
+    });
+    
+    return unsubscribe;
+  });
 
   // ログアウト処理
   async function handleLogout() {
     await logout();
-  }
-
-  // モックデータ
-  const mockPosts = [
-    {
-      id: 1,
-      author: {
-        handle: '@alice.bsky.social',
-        displayName: 'Alice',
-        avatar: '/svelte.svg'
-      },
-      text: 'これはmoodeSkyのテスト投稿です！Tailwind CSSとshadcn-svelteがうまく動作しています 🎉',
-      timestamp: new Date(Date.now() - 1000 * 60 * 5),
-      likes: 12,
-      reposts: 3,
-      replies: 1
-    },
-    {
-      id: 2,
-      author: {
-        handle: '@bob.bsky.social',
-        displayName: 'Bob',
-        avatar: '/tauri.svg'
-      },
-      text: 'Tauriアプリでのデッキ型UIを試しています。レスポンシブデザインも対応予定です。',
-      timestamp: new Date(Date.now() - 1000 * 60 * 15),
-      likes: 8,
-      reposts: 2,
-      replies: 0
-    }
-  ];
-
-  function formatRelativeTime(date: Date): string {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 1000 / 60);
-    
-    if (diffMins < 1) return '今';
-    if (diffMins < 60) return `${diffMins}分前`;
-    
-    const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}時間前`;
-    
-    const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays}日前`;
+    goto('/login');
   }
 </script>
 
 <svelte:head>
-  <title>🌙 moodeSky - デッキ型Blueskyクライアント</title>
+  <title>ホーム - moodeSky</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-  <!-- ヘッダー -->
-  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
-    <div class="flex items-center justify-between max-w-7xl mx-auto">
-      <div class="flex items-center gap-3">
-        <Menu class="w-6 h-6 text-gray-600 dark:text-gray-400 md:hidden" />
-        <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-          🌙 moodeSky
-        </h1>
-      </div>
-      
-      <div class="flex items-center gap-2">
-        <!-- ユーザー情報表示 -->
-        {#if $currentUser}
-          <span class="text-sm text-gray-600 dark:text-gray-400 hidden md:block">
-            @{$currentUser.handle}
-          </span>
-        {/if}
-        
-        <Button variant="ghost" size="icon" onclick={toggleDarkMode}>
-          <Moon class="w-5 h-5" />
-        </Button>
-        
-        <Button>
-          <Plus class="w-4 h-4 mr-2" />
-          投稿
-        </Button>
-        
-        <!-- ログアウトボタン -->
-        <Button variant="ghost" size="icon" onclick={handleLogout} title="ログアウト">
-          <LogOut class="w-5 h-5" />
-        </Button>
-      </div>
+{#if $authLoading}
+  <!-- ローディング画面 -->
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+    <div class="text-center">
+      <Spinner variant="primary" size="lg" class="mb-4" />
+      <p class="text-gray-600 dark:text-gray-400">読み込み中...</p>
     </div>
-  </header>
-
-  <!-- メインコンテンツ -->
-  <main class="max-w-7xl mx-auto p-4">
-    <!-- デッキレイアウトのデモ -->
-    <div class="deck-container">
-      <!-- ホームタイムライン -->
-      <div class="deck-column">
-        <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center gap-2">
-            <Home class="w-5 h-5 text-bluesky-600" />
-            <h2 class="font-semibold text-gray-900 dark:text-white">ホーム</h2>
-          </div>
-        </div>
-        
-        <div class="p-4 space-y-4">
-          <!-- 投稿作成 -->
-          <Card class="p-4">
-            <div class="space-y-3">
-              <Input 
-                bind:value={postText}
-                placeholder="いまどうしてる？"
-                class="min-h-[80px] resize-none"
-              />
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-500">{300 - postText.length}文字</span>
-                <Button size="sm" disabled={!postText.trim()}>投稿</Button>
-              </div>
+  </div>
+{:else if $isAuthenticated && $currentUser}
+  <!-- メイン画面 -->
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <!-- ヘッダー -->
+    <header class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <!-- ロゴ -->
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <span class="text-white text-lg">🌙</span>
             </div>
-          </Card>
+            <h1 class="ml-3 text-xl font-bold text-gray-900 dark:text-white">moodeSky</h1>
+          </div>
 
-          <!-- 投稿一覧 -->
-          {#each mockPosts as post (post.id)}
-            <Card class="post-card">
-              <div class="flex gap-3">
-                <img src={post.author.avatar} alt={post.author.displayName} class="post-avatar" />
-                
-                <div class="flex-1 space-y-2">
-                  <div class="flex items-center gap-2 text-sm">
-                    <span class="font-semibold text-gray-900 dark:text-white">
-                      {post.author.displayName}
-                    </span>
-                    <span class="text-gray-500">
-                      {post.author.handle}
-                    </span>
-                    <span class="text-gray-500">•</span>
-                    <span class="text-gray-500">
-                      {formatRelativeTime(post.timestamp)}
-                    </span>
-                  </div>
-                  
-                  <div class="post-content">
-                    {post.text}
-                  </div>
-                  
-                  <div class="post-actions">
-                    <button class="post-action-btn">
-                      <MessageCircle class="w-4 h-4" />
-                      <span class="text-xs">{post.replies}</span>
-                    </button>
-                    <button class="post-action-btn">
-                      <Repeat2 class="w-4 h-4" />
-                      <span class="text-xs">{post.reposts}</span>
-                    </button>
-                    <button class="post-action-btn">
-                      <Heart class="w-4 h-4" />
-                      <span class="text-xs">{post.likes}</span>
-                    </button>
-                    <button class="post-action-btn">
-                      <Share class="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
+          <!-- ヘッダーアクション -->
+          <div class="flex items-center space-x-3">
+            <!-- ダークモード切り替え -->
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onclick={toggleDarkMode}
+              class="rounded-full"
+            >
+              <Moon class="w-5 h-5" />
+            </Button>
+
+            <!-- ログアウト -->
+            <Button 
+              variant="outline" 
+              onclick={handleLogout}
+              class="flex items-center gap-2"
+            >
+              <LogOut class="w-4 h-4" />
+              ログアウト
+            </Button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="max-w-4xl mx-auto p-6">
+      <!-- ユーザー情報カード -->
+      <Card class="mb-8 p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+        <div class="flex items-start space-x-4">
+          <!-- アバター -->
+          <div class="flex-shrink-0">
+            {#if $currentUser.avatar_url}
+              <img 
+                src={$currentUser.avatar_url} 
+                alt="プロフィール画像"
+                class="w-16 h-16 rounded-full object-cover border-2 border-blue-500"
+              />
+            {:else}
+              <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <User class="w-8 h-8 text-white" />
               </div>
-            </Card>
-          {/each}
-        </div>
-      </div>
+            {/if}
+          </div>
 
-      <!-- 通知カラム -->
-      <div class="deck-column">
-        <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center gap-2">
-            <Bell class="w-5 h-5 text-bluesky-600" />
-            <h2 class="font-semibold text-gray-900 dark:text-white">通知</h2>
+          <!-- ユーザー詳細 -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center space-x-2 mb-2">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white truncate">
+                {$currentUser.display_name || $currentUser.handle}
+              </h2>
+              {#if $currentUser.display_name}
+                <span class="text-sm text-gray-500 dark:text-gray-400">
+                  @{$currentUser.handle}
+                </span>
+              {/if}
+            </div>
+
+            <!-- ユーザー情報 -->
+            <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <!-- Handle -->
+              <div class="flex items-center space-x-2">
+                <User class="w-4 h-4" />
+                <span class="font-mono">@{$currentUser.handle}</span>
+              </div>
+
+              <!-- DID -->
+              <div class="flex items-center space-x-2">
+                <Globe class="w-4 h-4" />
+                <span class="font-mono text-xs truncate" title={$currentUser.did}>
+                  {$currentUser.did}
+                </span>
+              </div>
+
+            </div>
+
+            <!-- 表示名 -->
+            {#if $currentUser.display_name && $currentUser.display_name !== $currentUser.handle}
+              <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  表示名: {$currentUser.display_name}
+                </p>
+              </div>
+            {/if}
           </div>
         </div>
-        
-        <div class="p-4">
-          <Card class="p-4 text-center text-gray-500">
-            <Bell class="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p>新しい通知はありません</p>
-          </Card>
-        </div>
-      </div>
+      </Card>
 
-      <!-- 検索カラム -->
-      <div class="deck-column">
-        <div class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center gap-2">
-            <Search class="w-5 h-5 text-bluesky-600" />
-            <h2 class="font-semibold text-gray-900 dark:text-white">検索</h2>
+      <!-- ログイン成功メッセージ -->
+      <Card class="p-6 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
+            <span class="text-white text-lg">✓</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-emerald-800 dark:text-emerald-300">
+              ログインに成功しました！
+            </h3>
+            <p class="text-sm text-emerald-700 dark:text-emerald-400 mt-1">
+              AT Protocolを通じてBlueskyに接続されています。
+            </p>
           </div>
         </div>
-        
-        <div class="p-4 space-y-4">
-          <Input 
-            placeholder="投稿・ユーザーを検索"
-            class="w-full"
-          />
-          
-          <Card class="p-4 text-center text-gray-500">
-            <Search class="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p>検索結果がここに表示されます</p>
-          </Card>
-        </div>
+      </Card>
+
+      <!-- 今後の機能予告 -->
+      <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card class="p-4 text-center">
+          <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg mx-auto mb-3 flex items-center justify-center">
+            <span class="text-2xl">📱</span>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white mb-1">デッキビュー</h3>
+          <p class="text-xs text-gray-600 dark:text-gray-400">複数のタイムラインを同時表示</p>
+        </Card>
+
+        <Card class="p-4 text-center">
+          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg mx-auto mb-3 flex items-center justify-center">
+            <span class="text-2xl">👥</span>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white mb-1">マルチアカウント</h3>
+          <p class="text-xs text-gray-600 dark:text-gray-400">複数アカウントの同時管理</p>
+        </Card>
+
+        <Card class="p-4 text-center">
+          <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg mx-auto mb-3 flex items-center justify-center">
+            <span class="text-2xl">🤖</span>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white mb-1">AIエージェント</h3>
+          <p class="text-xs text-gray-600 dark:text-gray-400">投稿支援・分析機能</p>
+        </Card>
       </div>
+    </main>
+  </div>
+{:else}
+  <!-- 認証が必要 -->
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+    <div class="text-center">
+      <p class="text-gray-600 dark:text-gray-400 mb-4">認証が必要です</p>
+      <Button onclick={() => goto('/login')}>ログインページへ</Button>
     </div>
-
-    <!-- Tauriテスト機能 -->
-    <Card class="mt-8 p-6">
-      <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-        Tauri動作テスト
-      </h3>
-      
-      <div class="space-y-4">
-        <form class="flex gap-2" onsubmit={greet}>
-          <Input 
-            bind:value={name}
-            placeholder="名前を入力してください"
-            class="flex-1"
-          />
-          <Button type="submit">挨拶</Button>
-        </form>
-        
-        {#if greetMsg}
-          <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
-            <p class="text-green-800 dark:text-green-200">{greetMsg}</p>
-          </div>
-        {/if}
-      </div>
-    </Card>
-  </main>
-
-  <!-- モバイルナビゲーション -->
-  <nav class="mobile-nav">
-    <button class="mobile-nav-item">
-      <Home class="w-5 h-5" />
-      <span class="text-xs">ホーム</span>
-    </button>
-    <button class="mobile-nav-item">
-      <Search class="w-5 h-5" />
-      <span class="text-xs">検索</span>
-    </button>
-    <button class="mobile-nav-item">
-      <Bell class="w-5 h-5" />
-      <span class="text-xs">通知</span>
-    </button>
-    <button class="mobile-nav-item">
-      <User class="w-5 h-5" />
-      <span class="text-xs">プロフィール</span>
-    </button>
-  </nav>
-</div>
+  </div>
+{/if}

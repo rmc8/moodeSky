@@ -1,5 +1,6 @@
-/** @type {import('tailwindcss').Config} */
-export default {
+import type { Config } from 'tailwindcss';
+
+const config: Config = {
   content: [
     './src/**/*.{html,js,svelte,ts}',
     './src/**/*.svelte'
@@ -10,43 +11,25 @@ export default {
       colors: {
         'bluesky': {
           50: '#eff6ff',
-          100: '#dbeafe',
+          100: '#dbeafe', 
           200: '#bfdbfe',
           300: '#93c5fd',
           400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554'
-        },
-        'deck': {
-          bg: '#f8fafc',
-          'bg-dark': '#0f172a',
-          border: '#e2e8f0',
-          'border-dark': '#334155'
+          500: '#0085ff', // Bluesky brand color
+          600: '#0066cc',
+          700: '#0052a3',
+          800: '#003d7a',
+          900: '#002952',
+          950: '#001429'
         }
       },
       
-      // デッキ型レイアウト用のスペーシング
-      spacing: {
-        'deck-gutter': '16px',
-        'deck-column': '320px'
-      },
-      
-      // モバイル・デスクトップ対応ブレークポイント
+      // デッキビュー最小幅
       screens: {
-        'xs': '475px',
-        'sm': '640px',
-        'md': '768px',
-        'lg': '1024px',
-        'xl': '1280px',
-        '2xl': '1536px',
-        'deck': '1200px' // デッキビュー最小幅
+        'deck': '1200px'
       },
       
-      // アニメーション（リアルタイム更新用）
+      // カスタムアニメーション
       animation: {
         'pulse-soft': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'slide-in': 'slideIn 0.3s ease-out',
@@ -68,7 +51,7 @@ export default {
   plugins: [
     require('@tailwindcss/typography')
   ],
-  
-  // ダークモード設定
   darkMode: 'class'
-}
+};
+
+export default config;

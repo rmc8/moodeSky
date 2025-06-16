@@ -252,3 +252,234 @@ impl DatabaseManager {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+
+    async fn create_test_db() -> (DatabaseManager, TempDir) {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        
+        // メモリ内SQLiteデータベースを使用
+        let database_url = "sqlite::memory:";
+        let pool = SqlitePool::connect(database_url).await.expect("Failed to connect to test database");
+        
+        // テスト用のテーブル作成（migrations代替）
+        sqlx::query(r#"
+            CREATE TABLE IF NOT EXISTS accounts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                handle TEXT NOT NULL UNIQUE,
+                did TEXT NOT NULL UNIQUE,
+                service_url TEXT NOT NULL,
+                auth_type TEXT NOT NULL,
+                display_name TEXT,
+                avatar_url TEXT,
+                is_active BOOLEAN NOT NULL DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        "#).execute(&pool).await.expect("Failed to create accounts table");
+        
+        sqlx::query(r#"
+            CREATE TABLE IF NOT EXISTS oauth_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                account_id INTEGER NOT NULL,
+                access_token_hash TEXT NOT NULL,
+                refresh_token_hash TEXT,
+                expires_at DATETIME,
+                scope TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (account_id) REFERENCES accounts (id),
+                UNIQUE(account_id)
+            )
+        "#).execute(&pool).await.expect("Failed to create oauth_sessions table");
+        
+        sqlx::query(r#"
+            CREATE TABLE IF NOT EXISTS user_preferences (
+                account_id INTEGER PRIMARY KEY,
+                theme TEXT NOT NULL DEFAULT 'system',
+                language TEXT NOT NULL DEFAULT 'ja',
+                notifications_enabled BOOLEAN NOT NULL DEFAULT 1,
+                auto_refresh_interval INTEGER NOT NULL DEFAULT 30,
+                preferences_json TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (account_id) REFERENCES accounts (id)
+            )
+        "#).execute(&pool).await.expect("Failed to create user_preferences table");
+        
+        (DatabaseManager::new(pool), temp_dir)
+    }
+
+    #[tokio::test]
+    async fn test_create_and_get_account() {
+        let (db, _temp_dir) = create_test_db().await;
+        
+        let account_req = CreateAccountRequest {
+            handle: "test.bsky.social".to_string(),
+            did: "did:plc:test123456789".to_string(),
+            service_url: "https://bsky.social".to_string(),
+            auth_type: crate::models::AuthType::AppPassword,
+            display_name: Some("Test User".to_string()),
+            avatar_url: Some("https://example.com/avatar.jpg".to_string()),
+        };
+        
+        // アカウント作成
+        let account_id = db.create_account(&account_req).await.expect("Failed to create account");
+        assert!(account_id > 0);
+        
+        // アカウント取得
+        let retrieved_account = db.get_account_by_handle("test.bsky.social").await
+            .expect("Failed to get account")
+            .expect("Account not found");
+        
+        assert_eq!(retrieved_account.handle, "test.bsky.social");
+        assert_eq!(retrieved_account.did, "did:plc:test123456789");
+        assert_eq!(retrieved_account.service_url, "https://bsky.social");
+        assert_eq!(retrieved_account.display_name, Some("Test User".to_string()));
+        assert!(retrieved_account.is_active);
+    }
+
+    #[tokio::test]
+    async fn test_deactivate_account() {
+        let (db, _temp_dir) = create_test_db().await;
+        
+        let account_req = CreateAccountRequest {
+            handle: "test.bsky.social".to_string(),
+            did: "did:plc:test123456789".to_string(),
+            service_url: "https://bsky.social".to_string(),
+            auth_type: crate::models::AuthType::AppPassword,
+            display_name: None,
+            avatar_url: None,
+        };
+        
+        let account_id = db.create_account(&account_req).await.expect("Failed to create account");
+        
+        // アカウントを無効化
+        db.deactivate_account(account_id).await.expect("Failed to deactivate account");
+        
+        // アカウントが無効化されていることを確認
+        let account = db.get_account_by_handle("test.bsky.social").await
+            .expect("Failed to get account")
+            .expect("Account not found");
+        
+        assert!(!account.is_active);
+    }
+
+    #[tokio::test]
+    async fn test_oauth_session_management() {
+        let (db, _temp_dir) = create_test_db().await;
+        
+        let account_req = CreateAccountRequest {
+            handle: "test.bsky.social".to_string(),
+            did: "did:plc:test123456789".to_string(),
+            service_url: "https://bsky.social".to_string(),
+            auth_type: crate::models::AuthType::OAuth,
+            display_name: None,
+            avatar_url: None,
+        };
+        
+        let account_id = db.create_account(&account_req).await.expect("Failed to create account");
+        
+        let session = OAuthSession {
+            id: None,
+            account_id,
+            access_token_hash: "test_access_token".to_string(),
+            refresh_token_hash: Some("test_refresh_token".to_string()),
+            expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
+            scope: Some("read write".to_string()),
+            created_at: None,
+            updated_at: None,
+        };
+        
+        // セッション作成
+        let session_id = db.upsert_oauth_session(&session).await.expect("Failed to create session");
+        assert!(session_id > 0);
+        
+        // セッション取得
+        let retrieved_session = db.get_oauth_session(account_id).await
+            .expect("Failed to get session")
+            .expect("Session not found");
+        
+        assert_eq!(retrieved_session.access_token_hash, "test_access_token");
+        assert_eq!(retrieved_session.refresh_token_hash, Some("test_refresh_token".to_string()));
+    }
+
+    #[tokio::test]
+    async fn test_user_preferences() {
+        let (db, _temp_dir) = create_test_db().await;
+        
+        let account_req = CreateAccountRequest {
+            handle: "test.bsky.social".to_string(),
+            did: "did:plc:test123456789".to_string(),
+            service_url: "https://bsky.social".to_string(),
+            auth_type: crate::models::AuthType::AppPassword,
+            display_name: None,
+            avatar_url: None,
+        };
+        
+        let account_id = db.create_account(&account_req).await.expect("Failed to create account");
+        
+        let preferences = UserPreferences {
+            account_id,
+            theme: crate::models::Theme::Dark,
+            language: crate::models::Language::Japanese,
+            notifications_enabled: true,
+            auto_refresh_interval: 60,
+            preferences_json: Some(r#"{"custom": "value"}"#.to_string()),
+            created_at: Some(chrono::Utc::now()),
+            updated_at: Some(chrono::Utc::now()),
+        };
+        
+        // 設定保存
+        db.upsert_user_preferences(&preferences).await.expect("Failed to save preferences");
+        
+        // 設定取得
+        let retrieved_prefs = db.get_user_preferences(account_id).await
+            .expect("Failed to get preferences")
+            .expect("Preferences not found");
+        
+        assert_eq!(retrieved_prefs.theme, crate::models::Theme::Dark);
+        assert_eq!(retrieved_prefs.language, crate::models::Language::Japanese);
+        assert_eq!(retrieved_prefs.auto_refresh_interval, 60);
+        assert!(retrieved_prefs.notifications_enabled);
+    }
+
+    #[tokio::test]
+    async fn test_get_all_active_accounts() {
+        let (db, _temp_dir) = create_test_db().await;
+        
+        // 複数のアカウントを作成
+        let accounts = vec![
+            CreateAccountRequest {
+                handle: "user1.bsky.social".to_string(),
+                did: "did:plc:user1".to_string(),
+                service_url: "https://bsky.social".to_string(),
+                auth_type: crate::models::AuthType::AppPassword,
+                display_name: Some("User 1".to_string()),
+                avatar_url: None,
+            },
+            CreateAccountRequest {
+                handle: "user2.bsky.social".to_string(),
+                did: "did:plc:user2".to_string(),
+                service_url: "https://bsky.social".to_string(),
+                auth_type: crate::models::AuthType::AppPassword,
+                display_name: Some("User 2".to_string()),
+                avatar_url: None,
+            },
+        ];
+        
+        for account in accounts {
+            db.create_account(&account).await.expect("Failed to create account");
+        }
+        
+        // アクティブなアカウント一覧を取得
+        let active_accounts = db.get_all_active_accounts().await.expect("Failed to get active accounts");
+        
+        assert_eq!(active_accounts.len(), 2);
+        assert!(active_accounts.iter().any(|a| a.handle == "user1.bsky.social"));
+        assert!(active_accounts.iter().any(|a| a.handle == "user2.bsky.social"));
+    }
+}
