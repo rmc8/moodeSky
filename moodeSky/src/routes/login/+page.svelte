@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { AtpAgent } from '@atproto/api';
 
   let handle = $state('');
   let password = $state('');
@@ -22,25 +23,57 @@
     errorMessage = '';
     
     try {
-      // 擬似的な通信時間（2秒）
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // AT Protocol AgentでBlueSkyにログイン
+      const agent = new AtpAgent({
+        service: `https://${host}`
+      });
       
-      // 一時的に100%失敗させる
-      const errorMessages = [
-        '認証に失敗しました。ハンドルとパスワードを確認してください。',
-        'ネットワークエラーが発生しました。しばらく後でお試しください。',
-        'アプリパスワードが正しくありません。',
-        'ハンドルが見つかりません。'
-      ];
-      const randomError = errorMessages[Math.floor(Math.random() * errorMessages.length)];
-      throw new Error(randomError);
+      // ハンドル形式の処理
+      const identifier = handle.includes('.') ? handle : `${handle}.bsky.social`;
       
-      // 成功パターン（コメントアウトで保持）
-      // console.log('ログイン情報:', { handle, password, host });
-      // await goto('/deck');
+      // ログイン実行
+      const response = await agent.login({
+        identifier: identifier,
+        password: password
+      });
       
-    } catch (error) {
-      errorMessage = error instanceof Error ? error.message : 'ログインに失敗しました。';
+      // ログイン成功 - didとハンドル、プロフィール情報を保存
+      console.log('ログイン成功:', response);
+      
+      // プロフィール情報を取得
+      const profile = await agent.getProfile({ actor: response.data.did });
+      console.log('プロフィール情報:', profile.data);
+      
+      // 認証情報をlocalStorageに保存
+      localStorage.setItem('authDid', response.data.did);
+      localStorage.setItem('authHandle', response.data.handle);
+      localStorage.setItem('authAccessJwt', response.data.accessJwt);
+      localStorage.setItem('authDisplayName', profile.data.displayName || '');
+      localStorage.setItem('authAvatar', profile.data.avatar || '');
+      
+      await goto('/deck');
+      
+    } catch (error: any) {
+      // AT Protocol固有のエラーハンドリング
+      console.error('Login error:', error);
+      
+      if (error?.status === 401) {
+        errorMessage = '認証に失敗しました。ハンドルとアプリパスワードを確認してください。';
+      } else if (error?.status === 400) {
+        errorMessage = 'ハンドルまたはパスワードの形式が正しくありません。';
+      } else if (error?.status === 429) {
+        errorMessage = 'リクエストが多すぎます。しばらく時間をおいてからお試しください。';
+      } else if (error?.message?.includes('network') || error?.code === 'ENOTFOUND') {
+        errorMessage = 'ネットワークエラーが発生しました。インターネット接続を確認してください。';
+      } else if (error?.message?.includes('timeout') || error?.code === 'ETIMEDOUT') {
+        errorMessage = '接続がタイムアウトしました。しばらく時間をおいてからお試しください。';
+      } else if (error?.message?.includes('invalid_grant')) {
+        errorMessage = 'アプリパスワードが無効です。新しいアプリパスワードを作成してください。';
+      } else if (error?.message?.includes('account_not_found')) {
+        errorMessage = 'アカウントが見つかりません。ハンドルを確認してください。';
+      } else {
+        errorMessage = error?.message || 'ログインに失敗しました。しばらく時間をおいてからお試しください。';
+      }
     } finally {
       isLoading = false;
     }
@@ -61,7 +94,7 @@
       </div>
     {/if}
 
-    <form class="login-form" on:submit={handleLogin}>
+    <form class="login-form" onsubmit={handleLogin}>
       <div class="form-group">
         <label for="handle">ハンドル</label>
         <input
@@ -94,7 +127,7 @@
           <button
             type="button"
             class="password-toggle-button"
-            on:click={() => showPassword = !showPassword}
+            onclick={() => showPassword = !showPassword}
           >
             {showPassword ? '🙈' : '👁️'}
           </button>
