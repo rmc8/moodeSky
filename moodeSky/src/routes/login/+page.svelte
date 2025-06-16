@@ -5,21 +5,45 @@
   let password = $state('');
   let host = $state('bsky.social');
   let showPassword = $state(false);
+  let errorMessage = $state('');
+  let isLoading = $state(false);
 
   async function handleLogin(event: Event) {
     event.preventDefault();
     
     // 簡単なバリデーション
     if (!handle || !password) {
-      alert('ハンドルとパスワードを入力してください');
+      errorMessage = 'ハンドルとパスワードを入力してください';
       return;
     }
     
-    // 仮のログイン処理（API通信なし）
-    console.log('ログイン情報:', { handle, password, host });
+    // ローディング開始
+    isLoading = true;
+    errorMessage = '';
     
-    // デッキページに遷移
-    await goto('/deck');
+    try {
+      // 擬似的な通信時間（2秒）
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // 一時的に100%失敗させる
+      const errorMessages = [
+        '認証に失敗しました。ハンドルとパスワードを確認してください。',
+        'ネットワークエラーが発生しました。しばらく後でお試しください。',
+        'アプリパスワードが正しくありません。',
+        'ハンドルが見つかりません。'
+      ];
+      const randomError = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+      throw new Error(randomError);
+      
+      // 成功パターン（コメントアウトで保持）
+      // console.log('ログイン情報:', { handle, password, host });
+      // await goto('/deck');
+      
+    } catch (error) {
+      errorMessage = error instanceof Error ? error.message : 'ログインに失敗しました。';
+    } finally {
+      isLoading = false;
+    }
   }
 </script>
 
@@ -29,6 +53,13 @@
       <h1>moodeSky</h1>
       <p>Blueskyアカウントでログイン</p>
     </div>
+
+    {#if errorMessage}
+      <div class="error-message">
+        <span class="error-icon">⚠️</span>
+        {errorMessage}
+      </div>
+    {/if}
 
     <form class="login-form" on:submit={handleLogin}>
       <div class="form-group">
@@ -44,6 +75,7 @@
           data-gramm="false"
           data-gramm_editor="false"
           data-enable-grammarly="false"
+          disabled={isLoading}
           required
         />
       </div>
@@ -56,6 +88,7 @@
             type={showPassword ? 'text' : 'password'}
             placeholder="アプリパスワードを入力"
             bind:value={password}
+            disabled={isLoading}
             required
           />
           <button
@@ -75,12 +108,18 @@
           type="text"
           placeholder="bsky.social"
           bind:value={host}
+          disabled={isLoading}
           required
         />
       </div>
 
-      <button type="submit" class="login-button">
-        ログイン
+      <button type="submit" class="login-button" disabled={isLoading}>
+        {#if isLoading}
+          <span class="loading-spinner"></span>
+          ログイン中...
+        {:else}
+          ログイン
+        {/if}
       </button>
     </form>
 
@@ -231,6 +270,68 @@
     text-decoration: underline;
   }
 
+  /* エラーメッセージスタイル */
+  .error-message {
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .error-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  /* ローディングスピナー */
+  .loading-spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+  }
+
+  /* 無効化状態スタイル */
+  .form-group input:disabled {
+    background-color: #f9fafb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .login-button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .login-button:disabled:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* アニメーション */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
   @media (prefers-color-scheme: dark) {
     .login-card {
       background: #1a1a1a;
@@ -257,6 +358,18 @@
 
     .password-toggle-button:hover {
       background-color: #404040;
+    }
+
+    /* ダークモードでのエラーメッセージ */
+    .error-message {
+      background-color: #450a0a;
+      border-color: #7f1d1d;
+      color: #fca5a5;
+    }
+
+    .form-group input:disabled {
+      background-color: #374151;
+      color: #6b7280;
     }
 
     .form-group input:focus {
