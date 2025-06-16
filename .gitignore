@@ -1,0 +1,135 @@
+# 機密情報・設定ファイル
+.env
+.env.local
+.env.*.local
+.mcp.json
+
+# 依存関係
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Rust ビルド成果物
+target/
+**/*.rs.bk
+Cargo.lock
+
+# SvelteKit ビルド成果物
+build/
+.svelte-kit/
+dist/
+.output/
+
+# Tauri ビルド成果物
+src-tauri/target/
+src-tauri/gen/
+*.dmg
+*.msi
+*.exe
+*.deb
+*.rpm
+*.AppImage
+
+# ログファイル
+logs/
+*.log
+
+# 一時ファイル
+.tmp/
+.temp/
+*.tmp
+*.temp
+
+# IDE・エディタ設定
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS 固有ファイル
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# キャッシュファイル
+.cache/
+.parcel-cache/
+.eslintcache
+
+# 開発用データベース
+*.sqlite
+*.sqlite3
+*.db
+
+# バックアップファイル
+*.bak
+*.backup
+
+# テスト関連
+coverage/
+.nyc_output/
+junit.xml
+
+# Python 関連 (dev_rag)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Python 仮想環境
+venv/
+ENV/
+env/
+.venv/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Qdrant データ・クローンリポジトリ
+qdrant_storage/
+atproto_vector_db/
+cloned_repos/
+
+# MCP 関連
+mcp_logs/
+
+# セキュリティ関連
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# 開発用設定
+.local/
+.config/
+
+# Docker
+.dockerignore
+
+# バンドラー関連
+.rollup.cache/
+.turbo/

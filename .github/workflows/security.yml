@@ -1,0 +1,301 @@
+name: Security - Automated Security Checks
+
+on:
+  schedule:
+    # 毎日午前2時 (UTC) に実行
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # 手動実行可能
+  push:
+    branches: [ main ]
+    paths:
+      - '**/Cargo.toml'
+      - '**/Cargo.lock'
+      - '**/package.json'
+      - '**/package-lock.json'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Rust依存関係の脆弱性チェック
+  rust-security:
+    name: Rust Security Audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./moodeSky/src-tauri
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './moodeSky/src-tauri'
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run cargo audit
+        run: |
+          cargo audit --json --output audit-results.json
+          cargo audit --format json | jq '.' > audit-report.json || echo "Some vulnerabilities found"
+
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-security-audit
+          path: |
+            moodeSky/src-tauri/audit-results.json
+            moodeSky/src-tauri/audit-report.json
+        if: always()
+
+      - name: Check for high severity vulnerabilities
+        run: |
+          if cargo audit --json | jq -e '.vulnerabilities.list[] | select(.advisory.severity == "high" or .advisory.severity == "critical")' > /dev/null; then
+            echo "⚠️ High or critical severity vulnerabilities found!"
+            echo "Please review the audit results and update dependencies."
+            exit 1
+          else
+            echo "✅ No high or critical severity vulnerabilities found."
+          fi
+
+  # Node.js依存関係の脆弱性チェック
+  nodejs-security:
+    name: Node.js Security Audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./moodeSky
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ./moodeSky/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level moderate --json > audit-results.json || echo "Some vulnerabilities found"
+          cat audit-results.json | jq '.' || echo "No JSON output"
+
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: nodejs-security-audit
+          path: moodeSky/audit-results.json
+        if: always()
+
+      - name: Check for high severity vulnerabilities
+        run: |
+          # 高・重大レベルの脆弱性をチェック
+          if npm audit --audit-level high --json | jq -e '.metadata.vulnerabilities.high > 0 or .metadata.vulnerabilities.critical > 0' > /dev/null 2>&1; then
+            echo "⚠️ High or critical severity vulnerabilities found in Node.js dependencies!"
+            echo "Please run 'npm audit fix' or update dependencies manually."
+            exit 1
+          else
+            echo "✅ No high or critical severity vulnerabilities found."
+          fi
+
+  # コードスキャニング (CodeQL)
+  codeql:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript', 'rust' ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+
+      - name: Setup Rust (for Rust analysis)
+        if: matrix.language == 'rust'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node.js (for JavaScript analysis)
+        if: matrix.language == 'javascript'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install system dependencies (for Rust build)
+        if: matrix.language == 'rust'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.0-dev \
+            build-essential \
+            curl \
+            wget \
+            libssl-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+  # Secrets scanning
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 全履歴を取得
+
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  # 依存関係の更新チェック
+  dependency-update:
+    name: Dependency Update Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'  # 定期実行時のみ
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install cargo-outdated
+        run: cargo install cargo-outdated
+
+      - name: Check Rust outdated dependencies
+        run: cargo outdated --depth 1
+        working-directory: ./moodeSky/src-tauri
+        continue-on-error: true
+
+      - name: Check Node.js outdated dependencies
+        run: npm outdated
+        working-directory: ./moodeSky
+        continue-on-error: true
+
+      - name: Create issue for outdated dependencies
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🔄 Dependency Update Needed';
+            const body = `
+            ## 依存関係更新の確認
+            
+            定期的なセキュリティチェックで、更新可能な依存関係が見つかりました。
+            
+            ### 確認事項
+            - [ ] Rust依存関係の更新確認
+            - [ ] Node.js依存関係の更新確認
+            - [ ] セキュリティ脆弱性の影響確認
+            - [ ] 互換性テストの実行
+            
+            ### 対応
+            1. 依存関係を確認し、必要な更新を実施
+            2. テストを実行して互換性を確認
+            3. セキュリティ監査を実行
+            
+            自動生成 - ${new Date().toISOString()}
+            `;
+            
+            // 既存の同様のissueが開いているかチェック
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'dependencies'
+            });
+            
+            const existingIssue = issues.data.find(issue => 
+              issue.title.includes('Dependency Update Needed')
+            );
+            
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['dependencies', 'security', 'automated']
+              });
+            }
+
+  # セキュリティ報告の統合
+  security-summary:
+    name: Security Summary
+    needs: [rust-security, nodejs-security, codeql, secret-scan]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download audit artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: security-reports
+        continue-on-error: true
+
+      - name: Generate security summary
+        run: |
+          echo "# 🔒 Security Audit Summary" > security-summary.md
+          echo "Date: $(date)" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          echo "## Job Results" >> security-summary.md
+          echo "- Rust Security: ${{ needs.rust-security.result }}" >> security-summary.md
+          echo "- Node.js Security: ${{ needs.nodejs-security.result }}" >> security-summary.md
+          echo "- CodeQL Analysis: ${{ needs.codeql.result }}" >> security-summary.md
+          echo "- Secret Scanning: ${{ needs.secret-scan.result }}" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          echo "## Recommendations" >> security-summary.md
+          if [ "${{ needs.rust-security.result }}" != "success" ] || [ "${{ needs.nodejs-security.result }}" != "success" ]; then
+            echo "⚠️ セキュリティ上の問題が検出されました。詳細な報告書を確認し、適切な対応を行ってください。" >> security-summary.md
+          else
+            echo "✅ セキュリティチェックは正常に完了しました。" >> security-summary.md
+          fi
+
+      - name: Upload security summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-summary
+          path: security-summary.md
