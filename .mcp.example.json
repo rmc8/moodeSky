@@ -8,9 +8,8 @@
             "command": "npx",
             "args": ["-y", "mcp-server-bluesky"],
             "env": {
-                "BLUESKY_USERNAME": "your_handle
-                .bsky.social",
-                "BLUESKY_PASSWORD": "xxxx-xxxx-xxxx-xxxx"
+                "BLUESKY_USERNAME": "YOUR_BLUESKY_USERNAME",
+                "BLUESKY_PASSWORD": "YOUR_BLUESKY_APP_PASSWORD"
             }
         },
         "sveltekit-docs": {
@@ -61,8 +60,8 @@
                 "EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
                 "EMBEDDING_DIMENSION": "384",
                 "TOP_K": "10",
-                "TOOL_STORE_DESCRIPTION": "Store Bluesky/AT Protocol official documentation, guides, and API references.",
-                "TOOL_FIND_DESCRIPTION": "Search for Bluesky and AT Protocol documentation including APIs, schemas, federation, authentication, and examples."
+                "TOOL_STORE_DESCRIPTION": "Store Bluesky official documentation, guides, and user interface references.",
+                "TOOL_FIND_DESCRIPTION": "Search for Bluesky documentation including UI guidelines, branding, user experience, and platform-specific features."
             }
         },
         "atproto-docs": {
@@ -78,11 +77,24 @@
                 "TOOL_FIND_DESCRIPTION": "Search for AT Protocol documentation including protocol specifications, lexicons, XRPC, repositories, federation, identity, and implementation examples."
             }
         },
+        "atrium-docs": {
+            "command": "uvx",
+            "args": ["mcp-server-qdrant"],
+            "env": {
+                "QDRANT_URL": "http://localhost:6333",
+                "COLLECTION_NAME": "atrium-docs",
+                "EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+                "EMBEDDING_DIMENSION": "384",
+                "TOP_K": "10",
+                "TOOL_STORE_DESCRIPTION": "Store Atrium-rs Rust implementation of AT Protocol including client libraries, SDK, and examples.",
+                "TOOL_FIND_DESCRIPTION": "Search for Atrium-rs documentation including Rust AT Protocol implementation, client libraries, authentication, API usage, WebSocket connections, data structures, and examples."
+            }
+        },
         "tavily": {
             "command": "npx",
             "args": ["-y", "tavily-mcp@0.2.4"],
             "env": {
-                "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+                "TAVILY_API_KEY": "YOUR_TAVILY_API_KEY"
             }
         },
         "context7": {
@@ -91,10 +103,17 @@
             "args": ["-y", "@upstash/context7-mcp"]
         },
         "github": {
-            "type": "http",
-            "url": "https://api.githubcopilot.com/mcp/",
+            "command": "docker",
+            "args": [
+                "run",
+                "-i",
+                "--rm",
+                "-e",
+                "GITHUB_PERSONAL_ACCESS_TOKEN",
+                "ghcr.io/github/github-mcp-server"
+            ],
             "env": {
-                "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+                "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"
             }
         }
     }

@@ -5,6 +5,52 @@
     <link rel="icon" href="%sveltekit.assets%/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <title>moodeSky - Bluesky クライアント</title>
+    
+    <!-- FOUC防止: テーマ初期化スクリプト -->
+    <script>
+      (function() {
+        // System theme detection
+        function detectSystemTheme() {
+          if (window.matchMedia('(prefers-contrast: high)').matches) {
+            return { theme: 'high-contrast', dataTheme: null };
+          }
+          const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          return isDark 
+            ? { theme: 'dark', dataTheme: 'sunset' }
+            : { theme: 'light', dataTheme: 'sky' };
+        }
+
+        // Apply theme immediately
+        try {
+          const detected = detectSystemTheme();
+          const html = document.documentElement;
+          
+          // Clear any existing classes
+          html.classList.remove('light', 'dark', 'high-contrast');
+          html.removeAttribute('data-theme');
+          
+          // Apply detected theme
+          if (detected.theme === 'high-contrast') {
+            html.classList.add('high-contrast');
+          } else {
+            html.classList.add(detected.theme);
+            if (detected.dataTheme) {
+              html.setAttribute('data-theme', detected.dataTheme);
+            }
+          }
+          
+          // Prevent FOUC by ensuring theme is applied before content loads
+          document.addEventListener('DOMContentLoaded', function() {
+            document.body.style.visibility = 'visible';
+          });
+        } catch (e) {
+          // Fallback: apply light theme
+          document.documentElement.classList.add('light');
+          document.documentElement.setAttribute('data-theme', 'sky');
+        }
+      })();
+    </script>
+    
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover">

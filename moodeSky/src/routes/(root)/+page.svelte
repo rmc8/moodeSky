@@ -99,17 +99,17 @@
   });
 </script>
 
-<main class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-  <div class="text-center text-white max-w-md mx-auto px-6">
+<main class="min-h-screen flex items-center justify-center bg-gradient-primary">
+  <div class="text-center text-themed max-w-md mx-auto px-6">
     <h1 class="text-5xl font-bold mb-8">moodeSky</h1>
     
     {#if isLoading}
       <div class="space-y-4">
         <!-- メインステータス表示 -->
-        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+        <div class="bg-card/10 backdrop-blur-sm rounded-lg p-6 border border-themed/20">
           <div class="flex items-center justify-center space-x-3 mb-4">
-            <div class="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
-            <span class="text-lg font-medium">{statusMessage}</span>
+            <div class="animate-spin h-6 w-6 border-2 border-themed border-t-transparent rounded-full"></div>
+            <span class="text-lg font-medium text-themed">{statusMessage}</span>
           </div>
           
           <!-- 移行状態詳細 -->
@@ -153,16 +153,16 @@
         </div>
         
         <!-- 進行状況インジケーター -->
-        <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
-          <div class="bg-gradient-to-r from-blue-400 to-purple-400 h-full transition-all duration-1000 ease-out animate-pulse" 
+        <div class="w-full bg-card/10 rounded-full h-2 overflow-hidden">
+          <div class="bg-gradient-accent h-full transition-all duration-1000 ease-out animate-pulse" 
                style="width: {migrationStatus.completed ? '100%' : migrationStatus.inProgress ? '60%' : '30%'}">
           </div>
         </div>
       </div>
     {:else}
       <!-- 初期化完了状態 -->
-      <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-        <p class="text-xl opacity-90">{statusMessage}</p>
+      <div class="bg-card/10 backdrop-blur-sm rounded-lg p-6 border border-themed/20">
+        <p class="text-xl text-themed opacity-90">{statusMessage}</p>
       </div>
     {/if}
   </div>
