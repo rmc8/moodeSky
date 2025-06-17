@@ -1,23 +1,446 @@
 @import "tailwindcss";
 
-/* TailwindCSSを使った基本設定 */
+/* 🎨 TailwindCSS v4対応テーマシステム: @layer base + @theme inline */
+
 @layer base {
+  /* Primitive Tokens - 基本色定義 (RGB space-separated values) */
+  
+  /* デフォルト（システム・フォールバック） */
+  :root {
+    --background: 255 255 255;
+    --foreground: 15 23 42;
+    --primary: 59 130 246;
+    --secondary: 99 102 241;
+    --accent: 59 130 246;
+    --muted: 248 250 252;
+    --border: 229 231 235;
+    --input: 229 231 235;
+    --card: 255 255 255;
+    --ring: 59 130 246;
+    --success: 34 197 94;
+    --warning: 251 191 36;
+    --error: 239 68 68;
+  }
+
+  /* Sky Theme - ライト + 空色アクセント */
+  [data-theme="sky"] {
+    --background: 255 255 255;      /* white */
+    --foreground: 15 23 42;         /* slate-900 */
+    --primary: 59 130 246;          /* sky blue - blue-500 */
+    --secondary: 37 99 235;         /* blue-600 */
+    --accent: 56 189 248;           /* sky-400 */
+    --muted: 248 250 252;           /* slate-50 */
+    --border: 229 231 235;          /* gray-200 */
+    --input: 229 231 235;           /* gray-200 */
+    --card: 255 255 255;            /* white */
+    --ring: 59 130 246;             /* blue-500 */
+    --success: 34 197 94;           /* green-500 */
+    --warning: 251 191 36;          /* amber-400 */
+    --error: 239 68 68;             /* red-500 */
+  }
+
+  /* Sunset Theme - ダーク + 夕焼けオレンジアクセント */
+  [data-theme="sunset"] {
+    --background: 15 23 42;         /* slate-900 */
+    --foreground: 248 250 252;      /* slate-100 */
+    --primary: 251 146 60;          /* sunset orange - orange-400 */
+    --secondary: 249 115 22;        /* orange-500 */
+    --accent: 254 215 170;          /* orange-200 */
+    --muted: 226 232 240;           /* slate-200 (最高レベル視認性) */
+    --border: 100 116 139;          /* slate-500 (コントラスト改善) */
+    --input: 100 116 139;           /* slate-500 (コントラスト改善) */
+    --card: 51 65 85;               /* slate-600 (読みやすさ改善) */
+    --ring: 251 146 60;             /* orange-400 */
+    --success: 74 222 128;          /* green-400 */
+    --warning: 251 191 36;          /* amber-400 */
+    --error: 248 113 113;           /* red-400 */
+  }
+
+  /* High Contrast Theme */
+  .high-contrast {
+    --background: 0 0 0;            /* black */
+    --foreground: 255 255 255;      /* white */
+    --primary: 255 255 255;         /* white */
+    --secondary: 255 255 255;       /* white */
+    --accent: 255 255 0;            /* yellow */
+    --muted: 128 128 128;           /* gray */
+    --border: 255 255 255;          /* white */
+    --input: 255 255 255;           /* white */
+    --card: 0 0 0;                  /* black */
+    --ring: 255 255 0;              /* yellow */
+    --success: 0 255 0;             /* green */
+    --warning: 255 255 0;           /* yellow */
+    --error: 255 0 0;               /* red */
+  }
+
+  /* Legacy Class Support - 互換性維持 */
+  .dark {
+    --background: 15 23 42;
+    --foreground: 248 250 252;
+    --border: 71 85 105;
+    --input: 71 85 105;
+    --card: 30 41 59;
+    --muted: 51 65 85;
+  }
+
+  .light {
+    --background: 255 255 255;
+    --foreground: 15 23 42;
+    --border: 229 231 235;
+    --input: 229 231 235;
+    --card: 255 255 255;
+    --muted: 248 250 252;
+  }
+
+  /* Base Styles */
   * {
     box-sizing: border-box;
   }
 
   html, body {
-    @apply m-0 p-0 h-full;
+    margin: 0;
+    padding: 0;
+    height: 100%;
   }
 
   body {
-    @apply font-sans leading-relaxed text-gray-900 bg-gray-50;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* ダークモード対応 */
-  @media (prefers-color-scheme: dark) {
-    body {
-      @apply text-slate-100 bg-slate-900;
-    }
+  /* High Contrast Specific Styles */
+  .high-contrast body {
+    border: 2px solid rgb(var(--foreground));
+  }
+
+  .high-contrast button,
+  .high-contrast input,
+  .high-contrast select,
+  .high-contrast textarea {
+    border: 2px solid rgb(var(--border)) !important;
+    background-color: rgb(var(--background)) !important;
+    color: rgb(var(--foreground)) !important;
+  }
+
+  .high-contrast button:hover,
+  .high-contrast button:focus,
+  .high-contrast input:focus,
+  .high-contrast select:focus,
+  .high-contrast textarea:focus {
+    background-color: rgb(var(--foreground)) !important;
+    color: rgb(var(--background)) !important;
+    outline: 2px solid rgb(var(--accent)) !important;
+  }
+
+  .high-contrast a {
+    color: rgb(var(--accent)) !important;
+    text-decoration: underline;
+  }
+
+  .high-contrast a:hover,
+  .high-contrast a:focus {
+    background-color: rgb(var(--accent)) !important;
+    color: rgb(var(--background)) !important;
+    outline: 2px solid rgb(var(--foreground)) !important;
+  }
+
+  /* フォーカス・選択状態の詳細度強化 */
+  .high-contrast button[class*="bg-blue"],
+  .high-contrast [class*="bg-blue"][class*="text-blue"] {
+    background-color: rgb(var(--foreground)) !important;
+    color: rgb(var(--background)) !important;
+    border: 2px solid rgb(var(--background)) !important;
+  }
+
+  .high-contrast button[class*="bg-blue"]:hover,
+  .high-contrast button[class*="bg-blue"]:focus,
+  .high-contrast [class*="bg-blue"]:hover,
+  .high-contrast [class*="bg-blue"]:focus {
+    background-color: rgb(var(--background)) !important;
+    color: rgb(var(--foreground)) !important;
+    border: 2px solid rgb(var(--foreground)) !important;
+  }
+}
+
+/* Semantic Tokens - Runtime CSS Variable Resolution */
+@theme inline {
+  --color-background: rgb(var(--background));
+  --color-foreground: rgb(var(--foreground));
+  --color-primary: rgb(var(--primary));
+  --color-secondary: rgb(var(--secondary));
+  --color-accent: rgb(var(--accent));
+  --color-muted: rgb(var(--muted));
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
+  --color-card: rgb(var(--card));
+  --color-ring: rgb(var(--ring));
+  --color-success: rgb(var(--success));
+  --color-warning: rgb(var(--warning));
+  --color-error: rgb(var(--error));
+
+  /* Alpha variations */
+  --color-primary-50: rgb(var(--primary) / 0.05);
+  --color-primary-100: rgb(var(--primary) / 0.1);
+  --color-primary-200: rgb(var(--primary) / 0.2);
+  --color-primary-500: rgb(var(--primary) / 0.5);
+  --color-primary-600: rgb(var(--primary) / 0.6);
+  --color-primary-700: rgb(var(--primary) / 0.7);
+  --color-primary-800: rgb(var(--primary) / 0.8);
+  --color-primary-900: rgb(var(--primary) / 0.9);
+
+  --color-accent-50: rgb(var(--accent) / 0.05);
+  --color-accent-100: rgb(var(--accent) / 0.1);
+  --color-accent-200: rgb(var(--accent) / 0.2);
+  --color-accent-500: rgb(var(--accent) / 0.5);
+
+  --color-border-50: rgb(var(--border) / 0.05);
+  --color-border-100: rgb(var(--border) / 0.1);
+  --color-border-200: rgb(var(--border) / 0.2);
+  --color-border-300: rgb(var(--border) / 0.3);
+}
+
+/* Component Layer */
+@layer components {
+  /* Theme Transitions */
+  .theme-transitions {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  .theme-transitions * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .no-transitions,
+  .no-transitions * {
+    transition: none !important;
+  }
+
+  /* Theme-aware Components */
+  .card-themed {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 var(--color-border-200), 0 1px 2px 0 var(--color-border-100);
+  }
+
+  .button-primary {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border: 1px solid var(--color-primary);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .button-primary:hover {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--primary) / 0.3);
+  }
+
+  .button-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-ring);
+  }
+
+  .button-primary:disabled {
+    background-color: var(--color-muted);
+    border-color: var(--color-muted);
+    color: var(--color-muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .input-themed {
+    background-color: var(--color-background);
+    border: 2px solid var(--color-input);
+    color: var(--color-foreground);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    width: 100%;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .input-themed:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--primary) / 0.1);
+  }
+
+  .input-themed:disabled {
+    background-color: var(--color-muted);
+    color: var(--color-muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  /* Gradient Backgrounds */
+  .bg-gradient-themed {
+    background: linear-gradient(
+      135deg,
+      var(--color-background) 0%,
+      var(--color-muted) 100%
+    );
+  }
+
+  .bg-gradient-primary {
+    background: linear-gradient(
+      135deg,
+      var(--color-primary) 0%,
+      var(--color-secondary) 100%
+    );
+  }
+
+  .bg-gradient-accent {
+    background: linear-gradient(
+      135deg,
+      var(--color-accent) 0%,
+      var(--color-primary) 100%
+    );
+  }
+}
+
+/* Utility Layer */
+@layer utilities {
+  /* Text Colors */
+  .text-themed {
+    color: var(--color-foreground);
+  }
+
+  .text-muted {
+    color: var(--color-muted);
+  }
+
+  .text-label {
+    color: var(--color-foreground);
+    opacity: 0.85;
+  }
+
+  .text-primary {
+    color: var(--color-primary);
+  }
+
+  .text-accent {
+    color: var(--color-accent);
+  }
+
+  /* Background Colors */
+  .bg-themed {
+    background-color: var(--color-background);
+  }
+
+  .bg-card {
+    background-color: var(--color-card);
+  }
+
+  .bg-muted {
+    background-color: var(--color-muted);
+  }
+
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+
+  /* Border Colors */
+  .border-themed {
+    border-color: var(--color-border);
+  }
+
+  .border-primary {
+    border-color: var(--color-primary);
+  }
+
+  .border-accent {
+    border-color: var(--color-accent);
+  }
+
+  /* Focus Styles */
+  .focus-themed {
+    outline: none;
+  }
+
+  .focus-themed:focus {
+    box-shadow: 0 0 0 2px var(--color-ring);
+  }
+
+  .focus-themed:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-ring);
+  }
+
+  /* Status Colors */
+  .text-success {
+    color: var(--color-success);
+  }
+
+  .text-warning {
+    color: var(--color-warning);
+  }
+
+  .text-error {
+    color: var(--color-error);
+  }
+
+  .bg-success {
+    background-color: var(--color-success);
+  }
+
+  .bg-warning {
+    background-color: var(--color-warning);
+  }
+
+  .bg-error {
+    background-color: var(--color-error);
+  }
+}
+
+/* System Theme Preference Support */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]):not(.light):not(.dark):not(.high-contrast) {
+    --background: 15 23 42;
+    --foreground: 248 250 252;
+    --border: 71 85 105;
+    --input: 71 85 105;
+    --card: 30 41 59;
+    --muted: 51 65 85;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .theme-transitions,
+  .theme-transitions * {
+    transition: none !important;
+  }
+}
+
+/* High Contrast Media Query Support */
+@media (prefers-contrast: high) {
+  :root:not([data-theme]):not(.light):not(.dark):not(.high-contrast) {
+    --background: 0 0 0;
+    --foreground: 255 255 255;
+    --primary: 255 255 255;
+    --secondary: 255 255 255;
+    --accent: 255 255 0;
+    --border: 255 255 255;
+    --input: 255 255 255;
+    --card: 0 0 0;
+    --ring: 255 255 0;
   }
 }
