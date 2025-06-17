@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { AtpAgent } from '@atproto/api';
   import { authService } from '$lib/services/authStore.js';
+  import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 
   let handle = $state('');
   let password = $state('');
@@ -98,15 +99,19 @@
   }
 </script>
 
-<main class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
-  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-md">
+<main class="min-h-screen flex items-center justify-center bg-themed p-4">
+  <div class="relative bg-card rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <!-- テーマ切り替えボタン（右上） -->
+    <div class="absolute top-4 right-4">
+      <ThemeToggle variant="compact" size="sm" showLabel={false} />
+    </div>
     <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">moodeSky</h1>
-      <p class="text-gray-600 dark:text-gray-400 text-sm">Blueskyアカウントでログイン</p>
+      <h1 class="text-3xl font-bold text-themed mb-2">moodeSky</h1>
+      <p class="text-label text-sm">Blueskyアカウントでログイン</p>
     </div>
 
     {#if errorMessage}
-      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-6 flex items-center gap-2 text-sm animate-in fade-in duration-300">
+      <div class="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg mb-6 flex items-center gap-2 text-sm animate-in fade-in duration-300">
         <span class="text-lg flex-shrink-0">⚠️</span>
         {errorMessage}
       </div>
@@ -114,7 +119,7 @@
 
     <form class="flex flex-col gap-6" onsubmit={handleLogin}>
       <div class="flex flex-col gap-2">
-        <label for="handle" class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">ハンドル</label>
+        <label for="handle" class="text-sm font-semibold text-label uppercase tracking-wide">ハンドル</label>
         <input
           id="handle"
           type="text"
@@ -128,12 +133,12 @@
           data-enable-grammarly="false"
           disabled={isLoading}
           required
-          class="w-full px-3 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-100 dark:focus:ring-blue-900/50 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
+          class="input-themed"
         />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="password" class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">アプリパスワード</label>
+        <label for="password" class="text-sm font-semibold text-label uppercase tracking-wide">アプリパスワード</label>
         <div class="relative flex items-center">
           <input
             id="password"
@@ -142,12 +147,12 @@
             bind:value={password}
             disabled={isLoading}
             required
-            class="w-full px-3 py-3 pr-12 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-100 dark:focus:ring-blue-900/50 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
+            class="input-themed pr-12"
           />
           <button
             type="button"
             onclick={() => showPassword = !showPassword}
-            class="absolute right-3 p-1 rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center justify-center text-lg"
+            class="absolute right-3 p-1 rounded-md transition-colors hover:bg-muted/20 flex items-center justify-center text-lg text-muted"
           >
             {showPassword ? '🙈' : '👁️'}
           </button>
@@ -155,7 +160,7 @@
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="host" class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">ホスト</label>
+        <label for="host" class="text-sm font-semibold text-label uppercase tracking-wide">ホスト</label>
         <input
           id="host"
           type="text"
@@ -163,11 +168,11 @@
           bind:value={host}
           disabled={isLoading}
           required
-          class="w-full px-3 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-100 dark:focus:ring-blue-900/50 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
+          class="input-themed"
         />
       </div>
 
-      <button type="submit" disabled={isLoading} class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:hover:translate-y-0 disabled:hover:shadow-none">
+      <button type="submit" disabled={isLoading} class="button-primary w-full py-3 px-4 font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60">
         {#if isLoading}
           <div class="flex items-center justify-center gap-2">
             <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -181,7 +186,7 @@
 
     <div class="mt-6 text-center">
       <p>
-        <a href="https://bsky.app/settings/app-passwords" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+        <a href="https://bsky.app/settings/app-passwords" target="_blank" class="text-primary hover:underline text-sm">
           アプリパスワードの作成方法
         </a>
       </p>
