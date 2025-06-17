@@ -18,7 +18,12 @@
     "password": "パスワード",
     "loginButton": "サインイン",
     "loginError": "ログインに失敗しました",
-    "loginSuccess": "ログインしました"
+    "loginSuccess": "ログイン成功",
+    "loginSuccessMessage": "Blueskyへの認証が完了しました",
+    "authDataFetchFailed": "認証情報の取得に失敗しました。",
+    "authStatusCheckFailed": "認証状態の確認中にエラーが発生しました。",
+    "logoutFailed": "ログアウト処理に失敗しました。",
+    "logoutError": "ログアウト中にエラーが発生しました。"
   },
   "theme": {
     "light": "ライト",
@@ -47,6 +52,57 @@
     "close": "閉じる",
     "back": "戻る",
     "next": "次へ",
-    "previous": "前へ"
+    "previous": "前へ",
+    "retry": "再試行",
+    "error": "エラー",
+    "active": "選択中"
+  },
+  "profile": {
+    "displayName": "表示名",
+    "handle": "ハンドル",
+    "did": "DID",
+    "service": "サービス",
+    "lastAccess": "最終アクセス"
+  },
+  "login": {
+    "title": "Blueskyアカウントでログイン",
+    "handleLabel": "ハンドル",
+    "handlePlaceholder": "例: alice.bsky.social",
+    "passwordLabel": "アプリパスワード",
+    "passwordPlaceholder": "アプリパスワードを入力",
+    "hostLabel": "ホスト",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを非表示",
+    "appPasswordGuide": "アプリパスワードの作成方法"
+  },
+  "validation": {
+    "requiredFields": "ハンドルとパスワードを入力してください",
+    "authSaveFailed": "認証情報の保存に失敗しました。もう一度お試しください。",
+    "authFailed": "認証に失敗しました。ハンドルとアプリパスワードを確認してください。",
+    "invalidFormat": "ハンドルまたはパスワードの形式が正しくありません。",
+    "rateLimited": "リクエストが多すぎます。しばらく時間をおいてからお試しください。",
+    "networkError": "ネットワークエラーが発生しました。インターネット接続を確認してください。",
+    "timeoutError": "接続がタイムアウトしました。しばらく時間をおいてからお試しください。",
+    "invalidPassword": "アプリパスワードが無効です。新しいアプリパスワードを作成してください。",
+    "accountNotFound": "アカウントが見つかりません。ハンドルを確認してください。",
+    "genericError": "ログインに失敗しました。しばらく時間をおいてからお試しください。"
+  },
+  "root": {
+    "checkingAuth": "認証状態を確認中...",
+    "migrating": "アカウント情報を移行中...",
+    "migrationComplete": "移行が完了しました！",
+    "migrationError": "移行処理でエラーが発生しました。ログインページに移動します...",
+    "checkingAccount": "アカウントを確認中...",
+    "redirectingToDeck": "ログイン済みです。デッキページに移動中...",
+    "redirectingToLogin": "ログインページに移動中...",
+    "error": "エラーが発生しました。ログインページに移動中...",
+    "migrationInProgress": "データ移行処理中",
+    "migrationDescription": "従来のデータを新しいセキュアストレージに移行しています...",
+    "migrationCompleted": "移行完了",
+    "legacyDataDetected": "データ検出",
+    "legacyDataDescription": "従来のアカウントデータが見つかりました"
+  },
+  "misc": {
+    "languageSelection": "言語選択"
   }
 }

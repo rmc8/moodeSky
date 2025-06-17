@@ -32,8 +32,8 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageInfo> = {
   },
   'pt-BR': {
     code: 'pt-BR',
-    nativeName: 'Português (Brasil)',
-    englishName: 'Portuguese (Brazil)',
+    nativeName: 'Português',
+    englishName: 'Portuguese',
     region: 'BR',
     isRTL: false
   },
@@ -279,6 +279,13 @@ export class I18nService {
    */
   setAutoDetect(enabled: boolean): void {
     this.config.autoDetect = enabled;
+  }
+  
+  /**
+   * サポート言語一覧を取得
+   */
+  getSupportedLanguages(): Record<SupportedLanguage, LanguageInfo> {
+    return SUPPORTED_LANGUAGES;
   }
 }
 

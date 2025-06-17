@@ -55,5 +55,20 @@
   </head>
   <body data-sveltekit-preload-data="hover">
     <div style="display: contents">%sveltekit.body%</div>
+    
+    <!-- i18n初期化スクリプト -->
+    <script type="module">
+      // i18nストアの初期化
+      import { i18nStore } from '/src/lib/stores/i18n.svelte.js';
+      
+      (async () => {
+        try {
+          await i18nStore.initialize();
+          console.log('i18n system initialized successfully');
+        } catch (error) {
+          console.error('Failed to initialize i18n system:', error);
+        }
+      })();
+    </script>
   </body>
 </html>

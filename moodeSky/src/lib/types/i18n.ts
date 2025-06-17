@@ -51,6 +51,18 @@ export interface LanguageInfo {
 }
 
 /**
+ * Tauri Storeに保存される言語設定
+ */
+export interface StoredLanguagePreference {
+  /** 保存された言語コード */
+  current: SupportedLanguage;
+  /** ユーザーが手動選択したかどうか */
+  userSelected: boolean;
+  /** 保存日時（ISO 8601形式） */
+  timestamp: string;
+}
+
+/**
  * 翻訳キーの型定義（Paraglide-JS統合用）
  */
 export interface TranslationKey {

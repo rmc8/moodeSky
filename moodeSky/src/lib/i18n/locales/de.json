@@ -18,7 +18,12 @@
     "password": "Passwort",
     "loginButton": "Anmelden",
     "loginError": "Anmeldung fehlgeschlagen",
-    "loginSuccess": "Erfolgreich angemeldet"
+    "loginSuccess": "Anmeldung erfolgreich",
+    "loginSuccessMessage": "Bluesky-Authentifizierung abgeschlossen",
+    "authDataFetchFailed": "Fehler beim Abrufen der Authentifizierungsdaten.",
+    "authStatusCheckFailed": "Fehler bei der Überprüfung des Authentifizierungsstatus.",
+    "logoutFailed": "Abmeldung fehlgeschlagen.",
+    "logoutError": "Fehler beim Abmelden."
   },
   "theme": {
     "light": "Hell",
@@ -47,6 +52,57 @@
     "close": "Schließen",
     "back": "Zurück",
     "next": "Weiter",
-    "previous": "Vorherige"
+    "previous": "Vorherige",
+    "retry": "Wiederholen",
+    "error": "Fehler",
+    "active": "Aktiv"
+  },
+  "profile": {
+    "displayName": "Anzeigename",
+    "handle": "Handle",
+    "did": "DID",
+    "service": "Dienst",
+    "lastAccess": "Letzter Zugriff"
+  },
+  "login": {
+    "title": "Mit Ihrem Bluesky-Konto anmelden",
+    "handleLabel": "Handle",
+    "handlePlaceholder": "z.B. alice.bsky.social",
+    "passwordLabel": "App-Passwort",
+    "passwordPlaceholder": "App-Passwort eingeben",
+    "hostLabel": "Host",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen",
+    "appPasswordGuide": "Wie man ein App-Passwort erstellt"
+  },
+  "validation": {
+    "requiredFields": "Bitte geben Sie Handle und Passwort ein",
+    "authSaveFailed": "Fehler beim Speichern der Authentifizierungsdaten. Bitte versuchen Sie es erneut.",
+    "authFailed": "Authentifizierung fehlgeschlagen. Bitte überprüfen Sie Ihr Handle und App-Passwort.",
+    "invalidFormat": "Handle- oder Passwort-Format ist falsch.",
+    "rateLimited": "Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
+    "networkError": "Netzwerkfehler aufgetreten. Bitte überprüfen Sie Ihre Internetverbindung.",
+    "timeoutError": "Verbindung unterbrochen. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
+    "invalidPassword": "App-Passwort ist ungültig. Bitte erstellen Sie ein neues App-Passwort.",
+    "accountNotFound": "Konto nicht gefunden. Bitte überprüfen Sie Ihr Handle.",
+    "genericError": "Anmeldung fehlgeschlagen. Bitte warten Sie einen Moment und versuchen Sie es erneut."
+  },
+  "root": {
+    "checkingAuth": "Authentifizierungsstatus wird überprüft...",
+    "migrating": "Kontoinformationen werden migriert...",
+    "migrationComplete": "Migration abgeschlossen!",
+    "migrationError": "Fehler bei der Migration. Weiterleitung zur Anmeldeseite...",
+    "checkingAccount": "Konto wird überprüft...",
+    "redirectingToDeck": "Bereits angemeldet. Weiterleitung zur Deck-Seite...",
+    "redirectingToLogin": "Weiterleitung zur Anmeldeseite...",
+    "error": "Ein Fehler ist aufgetreten. Weiterleitung zur Anmeldeseite...",
+    "migrationInProgress": "Datenmigration läuft",
+    "migrationDescription": "Legacy-Daten werden zu neuem sicherem Speicher migriert...",
+    "migrationCompleted": "Migration abgeschlossen",
+    "legacyDataDetected": "Daten erkannt",
+    "legacyDataDescription": "Legacy-Kontodaten gefunden"
+  },
+  "misc": {
+    "languageSelection": "Sprachauswahl"
   }
 }

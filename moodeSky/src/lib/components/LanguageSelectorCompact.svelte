@@ -71,7 +71,7 @@
       icon={ICONS.TRANSLATE}
       size="lg"
       color="themed"
-      ariaLabel="言語選択"
+      ariaLabel={m['misc.languageSelection']()}
     />
     <span class="current-language">{currentLanguageInfo?.code.toUpperCase()}</span>
   </button>
@@ -96,7 +96,7 @@
               icon={ICONS.CHECK}
               size="sm"
               color="primary"
-              ariaLabel="選択中"
+              ariaLabel={m['common.active']()}
             />
           {/if}
         </button>
@@ -117,7 +117,7 @@
           icon={ICONS.COMPUTER}
           size="sm"
           color="themed"
-          ariaLabel="システム設定"
+          ariaLabel={m['language.system']()}
         />
         <span>{m['language.system']()}</span>
       </button>
@@ -166,6 +166,8 @@
   .current-language {
     font-size: 0.625rem;
     line-height: 1;
+    color: var(--color-foreground);
+    opacity: 0.8;
   }
 
   .dropdown-menu {
@@ -233,7 +235,8 @@
   .language-code {
     font-weight: 600;
     font-size: 0.75rem;
-    color: var(--color-muted);
+    color: var(--color-foreground);
+    opacity: 0.7;
     min-width: 2rem;
   }
 

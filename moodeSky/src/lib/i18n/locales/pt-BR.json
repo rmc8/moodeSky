@@ -18,7 +18,12 @@
     "password": "Senha",
     "loginButton": "Entrar",
     "loginError": "Falha no login",
-    "loginSuccess": "Login realizado com sucesso"
+    "loginSuccess": "Login bem-sucedido",
+    "loginSuccessMessage": "Autenticação no Bluesky concluída",
+    "authDataFetchFailed": "Falha ao obter informações de autenticação.",
+    "authStatusCheckFailed": "Erro ao verificar status de autenticação.",
+    "logoutFailed": "Falha no processo de logout.",
+    "logoutError": "Erro durante o logout."
   },
   "theme": {
     "light": "Claro",
@@ -47,6 +52,57 @@
     "close": "Fechar",
     "back": "Voltar",
     "next": "Próximo",
-    "previous": "Anterior"
+    "previous": "Anterior",
+    "retry": "Tentar novamente",
+    "error": "Erro",
+    "active": "Ativo"
+  },
+  "profile": {
+    "displayName": "Nome de exibição",
+    "handle": "Identificador",
+    "did": "DID",
+    "service": "Serviço",
+    "lastAccess": "Último acesso"
+  },
+  "login": {
+    "title": "Entre com sua conta Bluesky",
+    "handleLabel": "Identificador",
+    "handlePlaceholder": "ex: alice.bsky.social",
+    "passwordLabel": "Senha do App",
+    "passwordPlaceholder": "Digite a senha do app",
+    "hostLabel": "Servidor",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha",
+    "appPasswordGuide": "Como criar uma senha de app"
+  },
+  "validation": {
+    "requiredFields": "Por favor, insira o identificador e a senha",
+    "authSaveFailed": "Falha ao salvar informações de autenticação. Tente novamente.",
+    "authFailed": "Autenticação falhou. Verifique seu identificador e senha do app.",
+    "invalidFormat": "Formato do identificador ou senha está incorreto.",
+    "rateLimited": "Muitas solicitações. Aguarde um momento e tente novamente.",
+    "networkError": "Erro de rede. Verifique sua conexão com a internet.",
+    "timeoutError": "Conexão expirou. Aguarde um momento e tente novamente.",
+    "invalidPassword": "Senha do app é inválida. Crie uma nova senha de app.",
+    "accountNotFound": "Conta não encontrada. Verifique seu identificador.",
+    "genericError": "Login falhou. Aguarde um momento e tente novamente."
+  },
+  "root": {
+    "checkingAuth": "Verificando status de autenticação...",
+    "migrating": "Migrando informações da conta...",
+    "migrationComplete": "Migração concluída!",
+    "migrationError": "Erro durante a migração. Redirecionando para a página de login...",
+    "checkingAccount": "Verificando conta...",
+    "redirectingToDeck": "Já logado. Redirecionando para o painel...",
+    "redirectingToLogin": "Redirecionando para a página de login...",
+    "error": "Ocorreu um erro. Redirecionando para a página de login...",
+    "migrationInProgress": "Migração de dados em andamento",
+    "migrationDescription": "Migrando dados legados para o novo armazenamento seguro...",
+    "migrationCompleted": "Migração concluída",
+    "legacyDataDetected": "Dados detectados",
+    "legacyDataDescription": "Dados de conta legados encontrados"
+  },
+  "misc": {
+    "languageSelection": "Seleção de idioma"
   }
 }

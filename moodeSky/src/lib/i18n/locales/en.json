@@ -18,7 +18,12 @@
     "password": "Password",
     "loginButton": "Sign In",
     "loginError": "Login failed",
-    "loginSuccess": "Successfully logged in"
+    "loginSuccess": "Login successful",
+    "loginSuccessMessage": "Bluesky authentication completed",
+    "authDataFetchFailed": "Failed to retrieve authentication information.",
+    "authStatusCheckFailed": "An error occurred while checking authentication status.",
+    "logoutFailed": "Logout process failed.",
+    "logoutError": "An error occurred during logout."
   },
   "theme": {
     "light": "Light",
@@ -47,6 +52,57 @@
     "close": "Close",
     "back": "Back",
     "next": "Next",
-    "previous": "Previous"
+    "previous": "Previous",
+    "retry": "Retry",
+    "error": "Error",
+    "active": "Active"
+  },
+  "profile": {
+    "displayName": "Display Name",
+    "handle": "Handle",
+    "did": "DID",
+    "service": "Service",
+    "lastAccess": "Last Access"
+  },
+  "login": {
+    "title": "Sign in with your Bluesky account",
+    "handleLabel": "Handle",
+    "handlePlaceholder": "e.g. alice.bsky.social",
+    "passwordLabel": "App Password",
+    "passwordPlaceholder": "Enter app password",
+    "hostLabel": "Host",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "appPasswordGuide": "How to create an app password"
+  },
+  "validation": {
+    "requiredFields": "Please enter handle and password",
+    "authSaveFailed": "Failed to save authentication information. Please try again.",
+    "authFailed": "Authentication failed. Please check your handle and app password.",
+    "invalidFormat": "Handle or password format is incorrect.",
+    "rateLimited": "Too many requests. Please wait a moment and try again.",
+    "networkError": "Network error occurred. Please check your internet connection.",
+    "timeoutError": "Connection timed out. Please wait a moment and try again.",
+    "invalidPassword": "App password is invalid. Please create a new app password.",
+    "accountNotFound": "Account not found. Please check your handle.",
+    "genericError": "Login failed. Please wait a moment and try again."
+  },
+  "root": {
+    "checkingAuth": "Checking authentication status...",
+    "migrating": "Migrating account information...",
+    "migrationComplete": "Migration completed!",
+    "migrationError": "Error occurred during migration. Redirecting to login page...",
+    "checkingAccount": "Checking account...",
+    "redirectingToDeck": "Already logged in. Redirecting to deck page...",
+    "redirectingToLogin": "Redirecting to login page...",
+    "error": "An error occurred. Redirecting to login page...",
+    "migrationInProgress": "Data migration in progress",
+    "migrationDescription": "Migrating legacy data to new secure storage...",
+    "migrationCompleted": "Migration completed",
+    "legacyDataDetected": "Data detected",
+    "legacyDataDescription": "Legacy account data found"
+  },
+  "misc": {
+    "languageSelection": "Language selection"
   }
 }

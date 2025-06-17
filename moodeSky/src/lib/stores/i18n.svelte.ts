@@ -8,7 +8,8 @@ import { overwriteGetLocale, overwriteSetLocale, setLocale as paraglidSetLocale 
 import type { 
   SupportedLanguage, 
   LanguageDetectionResult, 
-  I18nConfig 
+  I18nConfig,
+  StoredLanguagePreference
 } from '../types/i18n.js';
 
 /**
@@ -102,18 +103,38 @@ class I18nStore {
       // Paraglide-JSランタイムを設定
       this.setupParaglideRuntime();
 
-      // i18nサービスを初期化
-      const config = await i18nService.initialize();
-      const detectionResult = i18nService.getDetectionResult();
+      // 言語の優先順位検出: Stored → OS → Fallback
+      let finalLanguage: SupportedLanguage = 'en';
+      let detectionResult: LanguageDetectionResult;
+
+      // 1. 保存された言語設定を確認
+      const storedLanguage = await this.loadLanguagePreference();
+      if (storedLanguage) {
+        finalLanguage = storedLanguage;
+        detectionResult = {
+          language: storedLanguage,
+          source: 'stored',
+          originalLocale: undefined
+        };
+        console.log('Using stored language preference:', storedLanguage);
+      } else {
+        // 2. システム言語検出
+        const systemDetection = await detectSystemLanguage();
+        finalLanguage = systemDetection.language;
+        detectionResult = systemDetection;
+        console.log('Using system language detection:', systemDetection);
+      }
 
       // 状態を更新
-      this.state.currentLanguage = config.currentLanguage;
-      this.state.systemLanguage = config.systemLanguage;
+      this.state.currentLanguage = finalLanguage;
+      this.state.systemLanguage = detectionResult.source === 'stored' 
+        ? (await detectSystemLanguage()).language 
+        : finalLanguage;
       this.state.detectionResult = detectionResult;
       this.state.isInitialized = true;
 
       // Paraglide-JSの言語設定
-      paraglidSetLocale(config.currentLanguage, { reload: false });
+      paraglidSetLocale(finalLanguage, { reload: false });
 
       console.log('i18n store initialized:', {
         currentLanguage: this.state.currentLanguage,
@@ -241,13 +262,22 @@ class I18nStore {
    */
   private async saveLanguagePreference(language: SupportedLanguage): Promise<void> {
     try {
-      // TODO: Tauri Store統合実装
-      // const { Store } = await import('@tauri-apps/plugin-store');
-      // const store = await Store.load('settings.json');
-      // await store.set('language', language);
-      console.log('Language preference saved (placeholder):', language);
+      const { Store } = await import('@tauri-apps/plugin-store');
+      const store = await Store.load('settings.json');
+      
+      const languageData: StoredLanguagePreference = {
+        current: language,
+        userSelected: true,
+        timestamp: new Date().toISOString()
+      };
+      
+      await store.set('language', languageData);
+      await store.save();
+      
+      console.log('Language preference saved successfully:', languageData);
     } catch (error) {
       console.warn('Failed to save language preference:', error);
+      // Store失敗時もアプリケーションは継続動作
     }
   }
 
@@ -256,11 +286,23 @@ class I18nStore {
    */
   private async loadLanguagePreference(): Promise<SupportedLanguage | null> {
     try {
-      // TODO: Tauri Store統合実装
-      // const { Store } = await import('@tauri-apps/plugin-store');
-      // const store = await Store.load('settings.json');
-      // return await store.get<SupportedLanguage>('language');
-      console.log('Language preference loaded (placeholder)');
+      const { Store } = await import('@tauri-apps/plugin-store');
+      const store = await Store.load('settings.json');
+      
+      const languageData = await store.get<StoredLanguagePreference>('language');
+      
+      if (languageData && languageData.current && languageData.userSelected) {
+        console.log('Language preference loaded successfully:', languageData);
+        
+        // 言語の有効性を検証
+        if (languageData.current in i18nService.getSupportedLanguages()) {
+          return languageData.current;
+        } else {
+          console.warn('Stored language is not supported:', languageData.current);
+        }
+      }
+      
+      console.log('No valid stored language preference found');
       return null;
     } catch (error) {
       console.warn('Failed to load language preference:', error);
@@ -282,7 +324,11 @@ class I18nStore {
     return {
       state: { ...this.state },
       config: i18nService.getConfig(),
-      serviceDetectionResult: i18nService.getDetectionResult()
+      serviceDetectionResult: i18nService.getDetectionResult(),
+      storeStatus: {
+        hasStore: typeof window !== 'undefined' && !!(window as any).__TAURI_INTERNALS__,
+        detectionPriority: 'stored → os → browser → fallback'
+      }
     };
   }
 }
