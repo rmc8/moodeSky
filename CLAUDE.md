@@ -151,14 +151,14 @@ Navigate to `dev_rag/` directory:
 4. **プラットフォーム最適化** - レスポンシブデザイン調整
 
 **Primary Development:**
-1. メイン開発: `cd moodeSky && npm run tauri dev` (フルアプリ開発)
-2. フロントエンドのみ: `npm run dev` (Tauri機能不要時)
-3. 型チェック: `npm run check` (定期実行推奨)
+1. メイン開発: `cd moodeSky && pnpm run tauri dev` (フルアプリ開発)
+2. フロントエンドのみ: `pnpm run dev` (Tauri機能不要時)
+3. 型チェック: `pnpm run check` (定期実行推奨)
 
 **Mobile Development (Tauri Alpha):**
-1. Android初期化: `npm run tauri android init`
-2. iOS初期化: `npm run tauri ios init` (macOS のみ)
-3. モバイル開発: `npm run tauri [android|ios] dev`
+1. Android初期化: `pnpm run tauri android init`
+2. iOS初期化: `pnpm run tauri ios init` (macOS のみ)
+3. モバイル開発: `pnpm run tauri [android|ios] dev`
 
 **RAG Setup (Optional):**
 1. Qdrant起動: `docker run -p 6333:6333 qdrant/qdrant`
@@ -208,6 +208,43 @@ Navigate to `dev_rag/` directory:
 - **認証情報**: Tauri Store Plugin (セキュアストレージ)
 - **API Keys**: 環境変数管理、ログ出力禁止
 - **CSP設定**: Tauri セキュリティ設定準拠
+
+### 🎨 スタイリング規則 (TailwindCSS)
+
+**このプロジェクトは TailwindCSS v4 を使用したユーティリティファーストスタイリングを採用しています。**
+
+#### 📋 必須ルール
+1. **カスタムCSSの禁止**: `<style>` タグでのカスタムCSS記述は原則禁止
+2. **TailwindCSSユーティリティクラス使用**: 全てのスタイリングはTailwindユーティリティクラスで実装
+3. **一貫性の維持**: デザインシステムに基づいた統一されたスタイリング
+
+#### 🛠 実装ガイドライン
+- **コンポーネント設計**: 再利用可能なTailwindクラスパターンを活用
+- **レスポンシブ対応**: `sm:`, `md:`, `lg:`, `xl:` プレフィックスを適切に使用
+- **ダークモード**: `dark:` プレフィックスで自動ダークモード対応実装
+- **状態管理**: `hover:`, `focus:`, `active:`, `disabled:` 等の状態バリアント活用
+
+#### 🎯 推奨パターン
+- **カラーパレット**: `gray-`, `slate-`, `blue-`, `indigo-`, `purple-`, `green-`, `red-` 系統
+- **アニメーション**: `transition-`, `animate-`, `hover:-translate-y-` 等のビルトインアニメーション
+- **レイアウト**: Flexbox (`flex`, `items-center`, `justify-center`) とGrid (`grid`, `grid-cols-`) を積極活用
+- **スペーシング**: 一貫した`p-`, `m-`, `gap-`, `space-` システム使用
+
+#### ❌ 避けるべきパターン
+- `<style>` タグでのカスタムCSS記述
+- インラインスタイル (`style=""`) の使用
+- TailwindCSSで表現可能なスタイルのカスタム実装
+- 独自のCSS変数やカスタムプロパティの追加
+
+#### 📝 例外規則
+- **TailwindCSS設定**: `app.css` での `@layer base` を使ったグローバル設定のみ許可
+- **サードパーティライブラリ**: 外部ライブラリが要求する場合のみカスタムCSS使用可能
+
+#### 🔧 開発フロー
+1. **デザイン設計**: TailwindCSSユーティリティクラスでのスタイリング計画
+2. **実装**: コンポーネント単位でのTailwindクラス適用
+3. **レビュー**: カスタムCSSが含まれていないかチェック
+4. **最適化**: 重複クラスの整理と再利用パターンの抽出
 
 ## MCP (Model Context Protocol) 使用ルール
 
@@ -337,9 +374,9 @@ Navigate to `dev_rag/` directory:
    - 段階的な機能追加
 
 9. **品質チェック**
-   - TypeScript/Rust型チェック: `npm run check`, `cargo check`
+   - TypeScript/Rust型チェック: `pnpm run check`, `cargo check`
    - リント実行: `cargo clippy`, ESLint
-   - テスト実行: `cargo test`, `npm test`
+   - テスト実行: `cargo test`, `pnpm test`
    - E2Eテスト (必要時)
 
 10. **デバッグ・改善**
@@ -370,9 +407,9 @@ Navigate to `dev_rag/` directory:
 ### 🎯 品質保証基準
 
 #### 必須チェック項目
-- [ ] TypeScript型エラーゼロ (`npm run check`)
+- [ ] TypeScript型エラーゼロ (`pnpm run check`)
 - [ ] Rust警告ゼロ (`cargo check`, `cargo clippy`)
-- [ ] 全テスト通過 (`cargo test`, `npm test`)
+- [ ] 全テスト通過 (`cargo test`, `pnpm test`)
 - [ ] リント規則準拠
 - [ ] セキュリティベストプラクティス準拠
 
