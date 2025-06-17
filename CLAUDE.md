@@ -18,8 +18,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 技術スタック
 - **フロントエンド**: SvelteKit + TypeScript (SPA構成)
+  - **Svelte 5**: 最新版のSvelteフレームワーク (runes使用)
+  - **TailwindCSS v4**: 最新のユーティリティファーストCSS
 - **バックエンド**: Rust (Tauri 2.0)
-- **AT Protocol**: Bluesky API統合
+- **データベース**: SQLite (Tauri SQL Plugin必須)
+  - **Tauri SQL Plugin**: ローカルデータベース操作
+  - **セキュアストレージ**: 認証情報等の暗号化保存
+- **状態管理**:
+  - **Tauri Store Plugin**: 永続化が必要な設定・状態管理
+  - **Svelte $state**: シンプルなコンポーネント状態管理
+- **AT Protocol**: Bluesky API統合 (@atproto/api使用)
 - **開発支援**: dev_rag (RAGベース ドキュメント検索)
 
 ## Development Commands
@@ -27,24 +35,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Main Project (moodeSky)
 Navigate to `moodeSky/` directory for all commands:
 
+**Package Manager:** このプロジェクトは **pnpm** で管理されています。
+- パッケージ追加: `pnpm add <package>`
+- 依存関係インストール: `pnpm install`
+- **npm ではなく pnpm を使用してください**
+
 **Development:**
-- `npm run tauri dev` - **メイン開発コマンド** (フロントエンド + バックエンド)
-- `npm run dev` - SvelteKit開発サーバーのみ (Tauri機能不要時)
-- `npm run check` - TypeScript/Svelte型チェック
-- `npm run check:watch` - 型チェック (watch モード)
+- `pnpm run tauri dev` - **メイン開発コマンド** (フロントエンド + バックエンド)
+- `pnpm run dev` - SvelteKit開発サーバーのみ (Tauri機能不要時)
+- `pnpm run check` - TypeScript/Svelte型チェック
+- `pnpm run check:watch` - 型チェック (watch モード)
 
 **Building:**
-- `npm run build` - フロントエンド本番用ビルド
-- `npm run tauri build` - デスクトップアプリ完全ビルド
-- `npm run preview` - 本番ビルドプレビュー
+- `pnpm run build` - フロントエンド本番用ビルド
+- `pnpm run tauri build` - デスクトップアプリ完全ビルド
+- `pnpm run preview` - 本番ビルドプレビュー
 
 **Mobile (Tauri Mobile Alpha):**
-- `npm run tauri android init` - Android プロジェクト初期化
-- `npm run tauri android dev` - Android 開発 (エミュレータ)
-- `npm run tauri android build` - Android APK/AAB生成
-- `npm run tauri ios init` - iOS プロジェクト初期化 (macOS のみ)
-- `npm run tauri ios dev` - iOS 開発 (シミュレータ)
-- `npm run tauri ios build` - iOS IPA生成
+- `pnpm run tauri android init` - Android プロジェクト初期化
+- `pnpm run tauri android dev` - Android 開発 (エミュレータ)
+- `pnpm run tauri android build` - Android APK/AAB生成
+- `pnpm run tauri ios init` - iOS プロジェクト初期化 (macOS のみ)
+- `pnpm run tauri ios dev` - iOS 開発 (シミュレータ)
+- `pnpm run tauri ios build` - iOS IPA生成
 
 **Backend (Rust) - from src-tauri/ directory:**
 - `cargo check` - Rust コードエラーチェック
@@ -97,10 +110,10 @@ Navigate to `dev_rag/` directory:
 - シリアライゼーション: serde使用
 
 **AT Protocol統合:**
-- Bluesky API: atrium-api クレート使用
-- 認証管理: セキュアストレージ (キーリング)
+- Bluesky API: @atproto/api パッケージ使用
+- 認証管理: Tauri Store Plugin (セキュアストレージ)
 - リアルタイム更新: WebSocket接続
-- データキャッシュ: ローカルストレージ + メモリキャッシュ
+- データキャッシュ: Tauri SQL Plugin (SQLite) + メモリキャッシュ
 
 **Key Configuration:**
 - `tauri.conf.json` - Tauri設定 (セキュリティ、ビルド、モバイル対応)
@@ -138,14 +151,14 @@ Navigate to `dev_rag/` directory:
 4. **プラットフォーム最適化** - レスポンシブデザイン調整
 
 **Primary Development:**
-1. メイン開発: `cd moodeSky && npm run tauri dev` (フルアプリ開発)
-2. フロントエンドのみ: `npm run dev` (Tauri機能不要時)
-3. 型チェック: `npm run check` (定期実行推奨)
+1. メイン開発: `cd moodeSky && pnpm run tauri dev` (フルアプリ開発)
+2. フロントエンドのみ: `pnpm run dev` (Tauri機能不要時)
+3. 型チェック: `pnpm run check` (定期実行推奨)
 
 **Mobile Development (Tauri Alpha):**
-1. Android初期化: `npm run tauri android init`
-2. iOS初期化: `npm run tauri ios init` (macOS のみ)
-3. モバイル開発: `npm run tauri [android|ios] dev`
+1. Android初期化: `pnpm run tauri android init`
+2. iOS初期化: `pnpm run tauri ios init` (macOS のみ)
+3. モバイル開発: `pnpm run tauri [android|ios] dev`
 
 **RAG Setup (Optional):**
 1. Qdrant起動: `docker run -p 6333:6333 qdrant/qdrant`
@@ -154,7 +167,7 @@ Navigate to `dev_rag/` directory:
 
 ## Package Managers
 
-- **moodeSky**: npm (package.json) - Tauri設定はpnpm想定だがnpmでも動作
+- **moodeSky**: pnpm (package.json) - **pnpmを使用してください**
 - **dev_rag**: uv (推奨) or pip (pyproject.toml)
 
 ## Communication Patterns
@@ -165,9 +178,14 @@ Navigate to `dev_rag/` directory:
 - データ通信: serde JSON シリアライゼーション
 
 **AT Protocol統合:**
-- atrium-api クレート使用
+- @atproto/api パッケージ使用
 - 認証: App Password推奨
 - リアルタイム: WebSocket + CAR ファイル処理
+
+**データ永続化:**
+- **SQLデータベース**: Tauri SQL Plugin必須 (SQLite)
+- **設定・状態管理**: Tauri Store Plugin推奨
+- **シンプルな状態**: Svelte $state runes使用
 
 **RAG Integration:**
 - MCP (Model Context Protocol) でClaude Code統合
@@ -182,14 +200,51 @@ Navigate to `dev_rag/` directory:
 - `docs/BLUESKY_INTEGRATION.md` - AT Protocol統合ガイド
 
 ### 品質管理
-- **TypeScript**: `npm run check` (型チェック必須)
+- **TypeScript**: `pnpm run check` (型チェック必須)
 - **Rust**: `cargo check`, `cargo test`, `cargo clippy` (コードチェック必須)
 - **コミット前チェック**: 型チェック・テスト実行必須
 
 ### セキュリティ
-- **認証情報**: セキュアストレージ使用 (キーリング)
+- **認証情報**: Tauri Store Plugin (セキュアストレージ)
 - **API Keys**: 環境変数管理、ログ出力禁止
 - **CSP設定**: Tauri セキュリティ設定準拠
+
+### 🎨 スタイリング規則 (TailwindCSS)
+
+**このプロジェクトは TailwindCSS v4 を使用したユーティリティファーストスタイリングを採用しています。**
+
+#### 📋 必須ルール
+1. **カスタムCSSの禁止**: `<style>` タグでのカスタムCSS記述は原則禁止
+2. **TailwindCSSユーティリティクラス使用**: 全てのスタイリングはTailwindユーティリティクラスで実装
+3. **一貫性の維持**: デザインシステムに基づいた統一されたスタイリング
+
+#### 🛠 実装ガイドライン
+- **コンポーネント設計**: 再利用可能なTailwindクラスパターンを活用
+- **レスポンシブ対応**: `sm:`, `md:`, `lg:`, `xl:` プレフィックスを適切に使用
+- **ダークモード**: `dark:` プレフィックスで自動ダークモード対応実装
+- **状態管理**: `hover:`, `focus:`, `active:`, `disabled:` 等の状態バリアント活用
+
+#### 🎯 推奨パターン
+- **カラーパレット**: `gray-`, `slate-`, `blue-`, `indigo-`, `purple-`, `green-`, `red-` 系統
+- **アニメーション**: `transition-`, `animate-`, `hover:-translate-y-` 等のビルトインアニメーション
+- **レイアウト**: Flexbox (`flex`, `items-center`, `justify-center`) とGrid (`grid`, `grid-cols-`) を積極活用
+- **スペーシング**: 一貫した`p-`, `m-`, `gap-`, `space-` システム使用
+
+#### ❌ 避けるべきパターン
+- `<style>` タグでのカスタムCSS記述
+- インラインスタイル (`style=""`) の使用
+- TailwindCSSで表現可能なスタイルのカスタム実装
+- 独自のCSS変数やカスタムプロパティの追加
+
+#### 📝 例外規則
+- **TailwindCSS設定**: `app.css` での `@layer base` を使ったグローバル設定のみ許可
+- **サードパーティライブラリ**: 外部ライブラリが要求する場合のみカスタムCSS使用可能
+
+#### 🔧 開発フロー
+1. **デザイン設計**: TailwindCSSユーティリティクラスでのスタイリング計画
+2. **実装**: コンポーネント単位でのTailwindクラス適用
+3. **レビュー**: カスタムCSSが含まれていないかチェック
+4. **最適化**: 重複クラスの整理と再利用パターンの抽出
 
 ## MCP (Model Context Protocol) 使用ルール
 
@@ -319,9 +374,9 @@ Navigate to `dev_rag/` directory:
    - 段階的な機能追加
 
 9. **品質チェック**
-   - TypeScript/Rust型チェック: `npm run check`, `cargo check`
+   - TypeScript/Rust型チェック: `pnpm run check`, `cargo check`
    - リント実行: `cargo clippy`, ESLint
-   - テスト実行: `cargo test`, `npm test`
+   - テスト実行: `cargo test`, `pnpm test`
    - E2Eテスト (必要時)
 
 10. **デバッグ・改善**
@@ -352,9 +407,9 @@ Navigate to `dev_rag/` directory:
 ### 🎯 品質保証基準
 
 #### 必須チェック項目
-- [ ] TypeScript型エラーゼロ (`npm run check`)
+- [ ] TypeScript型エラーゼロ (`pnpm run check`)
 - [ ] Rust警告ゼロ (`cargo check`, `cargo clippy`)
-- [ ] 全テスト通過 (`cargo test`, `npm test`)
+- [ ] 全テスト通過 (`cargo test`, `pnpm test`)
 - [ ] リント規則準拠
 - [ ] セキュリティベストプラクティス準拠
 
@@ -591,3 +646,53 @@ Navigate to `dev_rag/` directory:
 - **AIエージェント**: 次世代のSNS管理支援
 - **プライバシー重視**: ユーザーデータ保護
 - **オープンソース**: 透明性とコミュニティ
+
+## 🧠 重要な開発ノウハウ・パターン
+
+### 🔍 Context7による型定義調査の重要性
+
+**問題**: 外部ライブラリ（特に@atproto/api）の型定義が不明で、自前で型定義を作ろうとする
+
+**解決パターン**: 
+1. **必ずContext7で調査**: `use context7` で既存の型定義ライブラリを確認
+2. **公式ライブラリ活用**: @atproto/api には `AtpSessionData`, `AtpSessionEvent` など豊富な型定義が存在
+3. **実装例参照**: bluesky-social/atproto リポジトリで実際の使用例をContext7で確認
+
+**具体例（Store Plugin実装時）**:
+```typescript
+// ❌ Bad: 自前で型定義を作成
+interface MySessionData {
+  accessToken: string;
+  // ...
+}
+
+// ✅ Good: @atproto/api の公式型定義を活用
+import type { AtpSessionData, AtpSessionEvent } from '@atproto/api';
+
+interface Account {
+  session: AtpSessionData; // 公式型定義を使用
+}
+```
+
+**メリット**:
+- **型安全性**: 公式ライブラリとの完全互換性
+- **将来性**: ライブラリ更新時の自動型アップデート
+- **メンテナンス性**: 自前型定義の保守コスト削減
+- **開発効率**: 実装例から学習して開発スピード向上
+
+**教訓**: 
+> ライブラリの型定義を自作する前に、必ずContext7で既存の型定義とベストプラクティスを調査する。
+> 時間とコード品質の両方で大幅な改善が期待できる。
+
+### 🔐 Tauri Store Plugin認証パターン
+
+**セキュア認証管理の基本パターン**:
+1. **型定義**: @atproto/api の AtpSessionData を活用
+2. **データ構造**: tokimekibluesky の Account interface パターンを参考
+3. **ストレージ**: Tauri Store Plugin で暗号化永続化
+4. **移行**: localStorage → Store Plugin のマイグレーション機能
+
+**実装済みファイル**:
+- `src/lib/types/auth.ts` - 型定義（公式型活用）
+- `src/lib/services/authStore.ts` - Store API ラッパー
+- マルチアカウント対応・セッション管理・エラーハンドリング完備

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { AtpAgent } from '@atproto/api';
+  import { authService } from '$lib/services/authStore.js';
 
   let handle = $state('');
   let password = $state('');
@@ -44,13 +45,30 @@
       const profile = await agent.getProfile({ actor: response.data.did });
       console.log('プロフィール情報:', profile.data);
       
-      // 認証情報をlocalStorageに保存
-      localStorage.setItem('authDid', response.data.did);
-      localStorage.setItem('authHandle', response.data.handle);
-      localStorage.setItem('authAccessJwt', response.data.accessJwt);
-      localStorage.setItem('authDisplayName', profile.data.displayName || '');
-      localStorage.setItem('authAvatar', profile.data.avatar || '');
+      // Store API に認証情報を保存
+      const sessionData = {
+        ...response.data,
+        active: response.data.active ?? true  // activeがundefinedの場合はtrueを設定
+      };
       
+      const saveResult = await authService.saveAccount(
+        `https://${host}`,
+        sessionData,
+        {
+          did: response.data.did,
+          handle: response.data.handle,
+          displayName: profile.data.displayName,
+          avatar: profile.data.avatar,
+        }
+      );
+      
+      if (!saveResult.success) {
+        console.error('認証情報の保存に失敗:', saveResult.error);
+        errorMessage = '認証情報の保存に失敗しました。もう一度お試しください。';
+        return;
+      }
+      
+      console.log('認証情報を正常に保存:', saveResult.data);
       await goto('/deck');
       
     } catch (error: any) {
@@ -80,23 +98,23 @@
   }
 </script>
 
-<main class="login-container">
-  <div class="login-card">
-    <div class="login-header">
-      <h1>moodeSky</h1>
-      <p>Blueskyアカウントでログイン</p>
+<main class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">moodeSky</h1>
+      <p class="text-gray-600 dark:text-gray-400 text-sm">Blueskyアカウントでログイン</p>
     </div>
 
     {#if errorMessage}
-      <div class="error-message">
-        <span class="error-icon">⚠️</span>
+      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-6 flex items-center gap-2 text-sm animate-in fade-in duration-300">
+        <span class="text-lg flex-shrink-0">⚠️</span>
         {errorMessage}
       </div>
     {/if}
 
-    <form class="login-form" onsubmit={handleLogin}>
-      <div class="form-group">
-        <label for="handle">ハンドル</label>
+    <form class="flex flex-col gap-6" onsubmit={handleLogin}>
+      <div class="flex flex-col gap-2">
+        <label for="handle" class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">ハンドル</label>
         <input
           id="handle"
           type="text"
@@ -110,12 +128,13 @@
           data-enable-grammarly="false"
           disabled={isLoading}
           required
+          class="w-full px-3 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-100 dark:focus:ring-blue-900/50 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
         />
       </div>
 
-      <div class="form-group">
-        <label for="password">アプリパスワード</label>
-        <div class="password-input-container">
+      <div class="flex flex-col gap-2">
+        <label for="password" class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">アプリパスワード</label>
+        <div class="relative flex items-center">
           <input
             id="password"
             type={showPassword ? 'text' : 'password'}
@@ -123,19 +142,20 @@
             bind:value={password}
             disabled={isLoading}
             required
+            class="w-full px-3 py-3 pr-12 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-100 dark:focus:ring-blue-900/50 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
           />
           <button
             type="button"
-            class="password-toggle-button"
             onclick={() => showPassword = !showPassword}
+            class="absolute right-3 p-1 rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center justify-center text-lg"
           >
             {showPassword ? '🙈' : '👁️'}
           </button>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="host">ホスト</label>
+      <div class="flex flex-col gap-2">
+        <label for="host" class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">ホスト</label>
         <input
           id="host"
           type="text"
@@ -143,22 +163,25 @@
           bind:value={host}
           disabled={isLoading}
           required
+          class="w-full px-3 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-100 dark:focus:ring-blue-900/50 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
         />
       </div>
 
-      <button type="submit" class="login-button" disabled={isLoading}>
+      <button type="submit" disabled={isLoading} class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:hover:translate-y-0 disabled:hover:shadow-none">
         {#if isLoading}
-          <span class="loading-spinner"></span>
-          ログイン中...
+          <div class="flex items-center justify-center gap-2">
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ログイン中...
+          </div>
         {:else}
           ログイン
         {/if}
       </button>
     </form>
 
-    <div class="login-footer">
+    <div class="mt-6 text-center">
       <p>
-        <a href="https://bsky.app/settings/app-passwords" target="_blank">
+        <a href="https://bsky.app/settings/app-passwords" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
           アプリパスワードの作成方法
         </a>
       </p>
@@ -166,247 +189,3 @@
   </div>
 </main>
 
-<style>
-  .login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
-    padding: 1rem;
-  }
-
-  .login-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
-    width: 100%;
-    max-width: 400px;
-  }
-
-  .login-header {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-
-  .login-header h1 {
-    color: #333;
-    font-size: 2rem;
-    margin: 0 0 0.5rem 0;
-    font-weight: 700;
-  }
-
-  .login-header p {
-    color: #666;
-    margin: 0;
-    font-size: 0.9rem;
-  }
-
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .form-group label {
-    font-weight: 600;
-    color: #333;
-    font-size: 0.9rem;
-  }
-
-  .password-input-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-
-  .form-group input {
-    padding: 0.75rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.2s ease;
-    background: white;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .password-input-container input {
-    padding-right: 3rem;
-  }
-
-  .password-toggle-button {
-    position: absolute;
-    right: 0.75rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2rem;
-    padding: 0.25rem;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .password-toggle-button:hover {
-    background-color: #f1f5f9;
-  }
-
-  .form-group input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  }
-
-  .login-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 0.875rem;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .login-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-  }
-
-  .login-button:active {
-    transform: translateY(0);
-  }
-
-  .login-footer {
-    margin-top: 1.5rem;
-    text-align: center;
-  }
-
-  .login-footer a {
-    color: #667eea;
-    text-decoration: none;
-    font-size: 0.85rem;
-  }
-
-  .login-footer a:hover {
-    text-decoration: underline;
-  }
-
-  /* エラーメッセージスタイル */
-  .error-message {
-    background-color: #fee2e2;
-    border: 1px solid #fecaca;
-    color: #dc2626;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    animation: fadeIn 0.3s ease-in-out;
-  }
-
-  .error-icon {
-    font-size: 1.1rem;
-    flex-shrink: 0;
-  }
-
-  /* ローディングスピナー */
-  .loading-spinner {
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top: 2px solid white;
-    border-radius: 50%;
-    margin-right: 0.5rem;
-    animation: spin 1s linear infinite;
-    display: inline-block;
-  }
-
-  /* 無効化状態スタイル */
-  .form-group input:disabled {
-    background-color: #f9fafb;
-    color: #9ca3af;
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-
-  .login-button:disabled {
-    background: #9ca3af;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .login-button:disabled:hover {
-    transform: none;
-    box-shadow: none;
-  }
-
-  /* アニメーション */
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  @keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(-10px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .login-card {
-      background: #1a1a1a;
-      color: #f6f6f6;
-    }
-
-    .login-header h1 {
-      color: #f6f6f6;
-    }
-
-    .login-header p {
-      color: #a0a0a0;
-    }
-
-    .form-group label {
-      color: #f6f6f6;
-    }
-
-    .form-group input {
-      background: #2a2a2a;
-      border-color: #404040;
-      color: #f6f6f6;
-    }
-
-    .password-toggle-button:hover {
-      background-color: #404040;
-    }
-
-    /* ダークモードでのエラーメッセージ */
-    .error-message {
-      background-color: #450a0a;
-      border-color: #7f1d1d;
-      color: #fca5a5;
-    }
-
-    .form-group input:disabled {
-      background-color: #374151;
-      color: #6b7280;
-    }
-
-    .form-group input:focus {
-      border-color: #667eea;
-    }
-  }
-</style>
