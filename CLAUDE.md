@@ -4,6 +4,52 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Repository Information
+
+**Repository Name:** `rmc8/moodeSky`  
+**GitHub URL:** https://github.com/rmc8/moodeSky  
+**Repository Type:** Public  
+**License:** MIT License
+
+### Repository Structure
+```
+moodeSky/
+├── moodeSky/                      # メインアプリケーション (SvelteKit + Tauri)
+│   ├── src/                       # SvelteKit フロントエンド
+│   │   ├── app.css               # TailwindCSS v4 + テーマシステム
+│   │   ├── app.html              # HTML テンプレート
+│   │   ├── lib/                  # 共通ライブラリ
+│   │   │   ├── components/       # Svelte コンポーネント
+│   │   │   │   ├── ThemeProvider.svelte
+│   │   │   │   ├── ThemeToggle.svelte
+│   │   │   │   └── Avatar.svelte
+│   │   │   ├── stores/           # Svelte 5 ストア (runes)
+│   │   │   │   └── theme.svelte.ts
+│   │   │   ├── services/         # サービス層
+│   │   │   │   ├── authStore.ts  # 認証管理 (Tauri Store)
+│   │   │   │   └── themeStore.ts # テーマ管理
+│   │   │   └── types/            # TypeScript 型定義
+│   │   │       ├── auth.ts       # AT Protocol 型定義
+│   │   │       └── theme.ts      # テーマシステム型定義
+│   │   └── routes/               # SvelteKit ルーティング
+│   │       ├── (root)/           # ルートページ群
+│   │       ├── login/            # ログインページ
+│   │       └── deck/             # デッキページ
+│   ├── src-tauri/                # Tauri Rustバックエンド
+│   │   ├── src/
+│   │   │   ├── main.rs          # Tauri アプリエントリーポイント
+│   │   │   └── lib.rs           # コアロジック
+│   │   ├── Cargo.toml           # Rust 依存関係
+│   │   └── tauri.conf.json      # Tauri 設定
+│   ├── package.json             # pnpm 設定
+│   └── svelte.config.js         # SvelteKit SPA設定
+├── dev_rag/                     # 開発支援RAGツール (Python)
+├── docs/                        # プロジェクトドキュメント
+├── .mcp.example.json           # MCP設定テンプレート
+├── CLAUDE.md                   # 本ファイル - Claude Code指示書
+└── README.md                   # プロジェクト概要
+```
+
 ## Project Overview
 
 **moodeSky** は、Tauriを使用したマルチプラットフォーム対応のBlueskyクライアントアプリケーションです。
@@ -209,42 +255,163 @@ Navigate to `dev_rag/` directory:
 - **API Keys**: 環境変数管理、ログ出力禁止
 - **CSP設定**: Tauri セキュリティ設定準拠
 
-### 🎨 スタイリング規則 (TailwindCSS)
+### 🎨 スタイリング規則 (TailwindCSS v4 + テーマシステム)
 
-**このプロジェクトは TailwindCSS v4 を使用したユーティリティファーストスタイリングを採用しています。**
+**このプロジェクトは TailwindCSS v4 + 統合テーマシステムによるユーティリティファーストスタイリングを採用しています。**
 
 #### 📋 必須ルール
 1. **カスタムCSSの禁止**: `<style>` タグでのカスタムCSS記述は原則禁止
-2. **TailwindCSSユーティリティクラス使用**: 全てのスタイリングはTailwindユーティリティクラスで実装
+2. **統合テーマクラス使用**: `dark:` プレフィックスは使用禁止、テーマクラス必須
 3. **一貫性の維持**: デザインシステムに基づいた統一されたスタイリング
+4. **アクセシビリティ準拠**: WCAG AA基準以上のコントラスト比必須
 
-#### 🛠 実装ガイドライン
-- **コンポーネント設計**: 再利用可能なTailwindクラスパターンを活用
-- **レスポンシブ対応**: `sm:`, `md:`, `lg:`, `xl:` プレフィックスを適切に使用
-- **ダークモード**: `dark:` プレフィックスで自動ダークモード対応実装
-- **状態管理**: `hover:`, `focus:`, `active:`, `disabled:` 等の状態バリアント活用
+#### 🌈 テーマシステム (TailwindCSS v4対応)
 
-#### 🎯 推奨パターン
-- **カラーパレット**: `gray-`, `slate-`, `blue-`, `indigo-`, `purple-`, `green-`, `red-` 系統
-- **アニメーション**: `transition-`, `animate-`, `hover:-translate-y-` 等のビルトインアニメーション
-- **レイアウト**: Flexbox (`flex`, `items-center`, `justify-center`) とGrid (`grid`, `grid-cols-`) を積極活用
-- **スペーシング**: 一貫した`p-`, `m-`, `gap-`, `space-` システム使用
+##### **アーキテクチャ**
+- **data-theme属性**: HTML要素に `data-theme="sky|sunset"` で制御
+- **CSS Variables**: `@layer base` での原始トークン定義
+- **@theme inline**: セマンティックトークンの動的解決
+- **レガシー互換**: `.light`, `.dark`, `.high-contrast` クラス併用
 
-#### ❌ 避けるべきパターン
-- `<style>` タグでのカスタムCSS記述
-- インラインスタイル (`style=""`) の使用
-- TailwindCSSで表現可能なスタイルのカスタム実装
-- 独自のCSS変数やカスタムプロパティの追加
+##### **利用可能テーマ**
+1. **Sky Theme** (`data-theme="sky"`)
+   - **対象**: ライトモード
+   - **アクセント**: 空色 (blue-500)
+   - **背景**: 白ベース
+   
+2. **Sunset Theme** (`data-theme="sunset"`)
+   - **対象**: ダークモード  
+   - **アクセント**: 夕焼けオレンジ (orange-400)
+   - **背景**: slate-900ベース
+   
+3. **High Contrast Theme** (`.high-contrast`)
+   - **対象**: アクセシビリティ
+   - **配色**: 純白黒 + 黄色アクセント
 
-#### 📝 例外規則
-- **TailwindCSS設定**: `app.css` での `@layer base` を使ったグローバル設定のみ許可
-- **サードパーティライブラリ**: 外部ライブラリが要求する場合のみカスタムCSS使用可能
+##### **統合テーマクラス (必須使用)**
+
+**背景色:**
+```css
+.bg-themed     /* メイン背景色 (--color-background) */
+.bg-card       /* カード背景色 (--color-card) */
+.bg-muted      /* ミュート背景色 (--color-muted) */
+.bg-primary    /* プライマリ背景色 (--color-primary) */
+```
+
+**文字色:**
+```css
+.text-themed   /* メイン文字色 (--color-foreground) */
+.text-muted    /* ミュート文字色 (--color-muted) */
+.text-label    /* ラベル文字色 (foreground 85%, 高視認性) */
+.text-primary  /* プライマリ文字色 (--color-primary) */
+.text-success  /* 成功色 (--color-success) */
+.text-error    /* エラー色 (--color-error) */
+```
+
+**コンポーネントクラス:**
+```css
+.button-primary  /* プライマリボタン (背景+文字色自動最適化) */
+.input-themed    /* フォーム入力 (背景+枠線+文字色) */
+.card-themed     /* カードコンテナ (背景+枠線+影) */
+```
+
+**グラデーション:**
+```css
+.bg-gradient-primary   /* プライマリグラデーション */
+.bg-gradient-themed    /* テーマ調和グラデーション */
+```
+
+#### 🚫 禁止パターン
+
+**❌ レガシーdark:プレフィックス:**
+```css
+/* 禁止: レガシーTailwindCSS */
+.bg-white.dark:bg-slate-800
+.text-gray-900.dark:text-gray-100
+.border-gray-200.dark:border-gray-600
+```
+
+**✅ 正しい統合テーマクラス:**
+```css
+/* 推奨: 統合テーマシステム */
+.bg-card
+.text-themed  
+.border-themed
+```
+
+#### 🎯 実装ガイドライン
+
+##### **新規コンポーネント開発**
+1. **背景**: `bg-themed` または `bg-card` から選択
+2. **文字**: `text-themed` または `text-label` から選択  
+3. **ボタン**: `button-primary` クラス使用
+4. **フォーム**: `input-themed` クラス使用
+
+##### **既存コンポーネント移行**
+1. **調査**: `dark:` プレフィックス検索・特定
+2. **置換**: 統合テーマクラスに一括変換
+3. **テスト**: 全テーマでの表示確認
+4. **最適化**: 冗長クラスの削除
+
+#### 📐 アクセシビリティ基準
+
+**WCAG準拠:**
+- **AA基準**: コントラスト比 4.5:1以上 (通常テキスト)
+- **AAA基準**: コントラスト比 7:1以上 (推奨)
+- **科学的検証**: 輝度計算による客観的評価
+
+**実装済み保証:**
+- `.text-label`: foreground色85%で確実な視認性
+- `.button-primary`: 背景色に応じた文字色自動最適化
+- Sunset テーマ: 全要素でAA基準以上達成
 
 #### 🔧 開発フロー
-1. **デザイン設計**: TailwindCSSユーティリティクラスでのスタイリング計画
-2. **実装**: コンポーネント単位でのTailwindクラス適用
-3. **レビュー**: カスタムCSSが含まれていないかチェック
-4. **最適化**: 重複クラスの整理と再利用パターンの抽出
+
+##### **設計段階**
+1. **テーマ選択**: 対象テーマでのデザイン確認
+2. **クラス選定**: 統合テーマクラスから適切なもの選択
+3. **コントラスト検証**: デベロッパーツールでの視認性確認
+
+##### **実装段階**  
+1. **コンポーネント作成**: 統一テーマクラスのみ使用
+2. **全テーマテスト**: Sky/Sunset/ハイコントラスト確認
+3. **レビュー**: `dark:` プレフィックス残存チェック
+
+##### **品質保証**
+1. **自動検証**: CSS lintによるレガシークラス検出
+2. **手動確認**: 実機での視認性テスト
+3. **アクセシビリティ**: スクリーンリーダー対応確認
+
+#### 📝 CSS Variables詳細
+
+**原始トークン (app.css @layer base):**
+```css
+/* Sky Theme 例 */
+[data-theme="sky"] {
+  --background: 255 255 255;    /* RGB space-separated */
+  --foreground: 15 23 42;
+  --primary: 59 130 246;
+  --muted: 248 250 252;
+  /* ... */
+}
+```
+
+**セマンティックトークン (@theme inline):**
+```css
+--color-background: rgb(var(--background));
+--color-foreground: rgb(var(--foreground));
+--color-primary: rgb(var(--primary));
+/* Alpha variations */
+--color-primary-100: rgb(var(--primary) / 0.1);
+```
+
+#### 🛠 カスタマイゼーション
+
+**新テーマ追加手順:**
+1. **原始トークン定義**: app.css の `[data-theme="new"]` セクション
+2. **視認性検証**: 全クラスでのコントラスト比測定  
+3. **統合テスト**: 既存コンポーネントでの表示確認
+4. **ドキュメント更新**: CLAUDE.md への追記
 
 ## MCP (Model Context Protocol) 使用ルール
 
@@ -412,6 +579,9 @@ Navigate to `dev_rag/` directory:
 - [ ] 全テスト通過 (`cargo test`, `pnpm test`)
 - [ ] リント規則準拠
 - [ ] セキュリティベストプラクティス準拠
+- [ ] **テーマ統合チェック**: `dark:` プレフィックス残存なし
+- [ ] **視認性チェック**: 全テーマでWCAG AA基準以上
+- [ ] **統合クラス使用**: `.bg-themed`, `.text-themed` 等のみ使用
 
 #### Bluesky/AT Protocol 特有チェック
 - [ ] API仕様準拠 (LEXICON確認)
@@ -446,6 +616,24 @@ Navigate to `dev_rag/` directory:
 - パフォーマンス要件を満たせない
 - セキュリティリスクの懸念
 - アーキテクチャの大幅変更が必要
+- **テーマシステムの破壊的変更**: 既存クラス体系への影響
+- **アクセシビリティ基準**: WCAG基準を満たせない場合
+
+### 📚 重要なファイル・設定
+
+#### **必須監視ファイル**
+- `src/app.css` - **テーマシステムの中核**、変更時は慎重に
+- `src/lib/stores/theme.svelte.ts` - テーマ状態管理、Svelte 5 runes使用
+- `src/lib/components/ThemeProvider.svelte` - アプリ全体のテーマ制御
+- `tauri.conf.json` - Tauri設定、セキュリティ・プラグイン管理
+- `package.json` - **pnpm管理**、新パッケージ追加時は影響確認
+
+#### **開発時の注意事項**
+1. **テーマクラス**: `dark:` プレフィックス使用は **絶対禁止**
+2. **パッケージ管理**: npmではなく **pnpm必須**
+3. **型定義**: @atproto/apiの公式型を**必ず活用**
+4. **視認性**: 新しい色の組み合わせは**コントラスト比測定必須**
+5. **コミット**: テーマ関連変更は**全テーマでの動作確認必須**
 
 ## 🎨 moodeSky プロダクト仕様
 
@@ -596,32 +784,32 @@ Navigate to `dev_rag/` directory:
 
 ### 🎯 開発ロードマップ
 
-#### Phase 1: コア機能 (3-4ヶ月)
-- [ ] AT Protocol認証システム
-- [ ] 基本UI・テーマシステム
-- [ ] シングルアカウント対応
-- [ ] 基本的なタイムライン表示
-- [ ] 投稿作成・削除機能
+#### Phase 1: コア機能（3-4か月） - **進行中**
+- [x] **AT Protocol認証システム** - ✅ 完了（Tauri Store Plugin + @atproto/api）
+- [x] **基本UI・テーマシステム** - ✅ 完了（TailwindCSS v4 + 統合テーマ）
+- [x] **シングルアカウント対応** - ✅ 完了（Store Plugin セキュア管理）
+- [ ] 基本的なタイムライン表示 - 🚧 次期実装
+- [ ] 投稿作成・削除機能 - 🚧 次期実装
 
-#### Phase 2: マルチアカウント・デッキ (2-3ヶ月)
+#### Phase 2: マルチアカウント・デッキ（2-3か月）
 - [ ] マルチアカウント認証管理
 - [ ] デッキシステム実装
 - [ ] カラム管理機能
 - [ ] クロスアカウント操作
 
-#### Phase 3: 多言語・外部連携 (2-3ヶ月)
+#### Phase 3: 多言語・外部連携（2-3か月）
 - [ ] i18n実装・翻訳
 - [ ] 外部ツール連携API
 - [ ] プラグインシステム
 - [ ] 高度なフィルタリング
 
-#### Phase 4: AIエージェント・高度機能 (3-4ヶ月)
+#### Phase 4: AIエージェント・高度機能（3-4か月）
 - [ ] AIエージェント統合
 - [ ] 課金システム
 - [ ] 高度な分析機能
 - [ ] 自動化ワークフロー
 
-#### Phase 5: モバイル最適化・配布 (2-3ヶ月)
+#### Phase 5: モバイル最適化・配布（2-3か月）
 - [ ] Tauri Mobile完全対応
 - [ ] モバイルUI最適化
 - [ ] アプリストア申請・配布
@@ -696,3 +884,85 @@ interface Account {
 - `src/lib/types/auth.ts` - 型定義（公式型活用）
 - `src/lib/services/authStore.ts` - Store API ラッパー
 - マルチアカウント対応・セッション管理・エラーハンドリング完備
+
+### 🎨 TailwindCSS v4 テーマシステム実装パターン
+
+**統合テーマシステムの設計思想**:
+1. **data-theme属性**: HTML要素での統一制御
+2. **CSS Variables**: 原始トークン→セマンティックトークン変換
+3. **レガシー排除**: `dark:`プレフィックス完全禁止
+4. **アクセシビリティ**: WCAG AA基準以上保証
+
+**実装アーキテクチャ**:
+```typescript
+// テーマ管理（Svelte 5 runes）
+class ThemeStore {
+  currentTheme = $state<'light' | 'dark' | 'high-contrast'>('light');
+  
+  private applyThemeToDOM(): void {
+    const html = document.documentElement;
+    html.removeAttribute('data-theme');
+    html.classList.remove('light', 'dark', 'high-contrast');
+    
+    switch (this.currentTheme) {
+      case 'light':
+        html.setAttribute('data-theme', 'sky');
+        break;
+      case 'dark':
+        html.setAttribute('data-theme', 'sunset');
+        break;
+      case 'high-contrast':
+        html.classList.add('high-contrast');
+        break;
+    }
+  }
+}
+```
+
+**CSS Variables設計**:
+```css
+/* 原始トークン（app.css @layer base） */
+[data-theme="sunset"] {
+  --background: 15 23 42;        /* RGB space-separated */
+  --foreground: 248 250 252;
+  --primary: 251 146 60;         /* sunset orange */
+  --muted: 226 232 240;          /* 視認性最適化済み */
+}
+
+/* セマンティックトークン（@theme inline） */
+--color-background: rgb(var(--background));
+--color-muted: rgb(var(--muted));
+--color-primary-100: rgb(var(--primary) / 0.1);
+```
+
+**コンポーネント実装パターン**:
+```svelte
+<!-- ❌ Bad: レガシーdark:プレフィックス -->
+<div class="bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100">
+
+<!-- ✅ Good: 統合テーマクラス -->
+<div class="bg-card text-themed">
+  <label class="text-label">高視認性ラベル</label>
+  <button class="button-primary">自動最適化ボタン</button>
+  <input class="input-themed" />
+</div>
+```
+
+**視認性最適化のノウハウ**:
+1. **コントラスト比計算**: 相対輝度の科学的測定
+2. **WCAG基準適用**: AA（4.5:1）以上を保証
+3. **テーマ別調整**: 背景色に応じた文字色自動最適化
+4. **ユーザーテスト**: 実際のデバイスでの視認性確認
+
+**具体例 - Sunsetテーマ視認性改善**:
+```css
+/* 問題: コントラスト比4.08:1（AA基準未満） */
+--muted: 148 163 184;           /* slate-400 */
+
+/* 解決: コントラスト比7:1以上（AAA基準達成） */
+--muted: 226 232 240;           /* slate-200 */
+```
+
+**教訓**: 
+> テーマシステムは技術的実装だけでなく、アクセシビリティとユーザビリティの科学的基準に基づいて設計する。
+> レガシーなアプローチを排除し、保守性と拡張性を重視した統合システムを構築する。
