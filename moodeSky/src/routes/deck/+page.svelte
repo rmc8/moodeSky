@@ -2,8 +2,10 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import Avatar from '$lib/components/Avatar.svelte';
+  import Icon from '$lib/components/Icon.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
+  import { ICONS } from '$lib/types/icon.js';
 
   let activeAccount = $state<Account | null>(null);
   let isLoading = $state(true);
@@ -91,7 +93,15 @@
     </div>
   {:else if errorMessage}
     <div class="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl shadow-xl p-12 w-full max-w-md text-center">
-      <div class="text-5xl mb-4">⚠️</div>
+      <div class="mb-4">
+        <Icon 
+          icon={ICONS.ERROR}
+          size="xl"
+          color="error"
+          ariaLabel="エラー"
+          class="mx-auto text-5xl"
+        />
+      </div>
       <h2 class="text-red-600 dark:text-red-400 text-2xl font-semibold mb-4">エラー</h2>
       <p class="text-red-700 dark:text-red-300 mb-8">{errorMessage}</p>
       <button 

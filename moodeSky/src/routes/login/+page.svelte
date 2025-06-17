@@ -2,6 +2,8 @@
   import { goto } from '$app/navigation';
   import { AtpAgent } from '@atproto/api';
   import { authService } from '$lib/services/authStore.js';
+  import Icon from '$lib/components/Icon.svelte';
+  import { ICONS } from '$lib/types/icon.js';
 
   let handle = $state('');
   let password = $state('');
@@ -107,7 +109,13 @@
 
     {#if errorMessage}
       <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-6 flex items-center gap-2 text-sm animate-in fade-in duration-300">
-        <span class="text-lg flex-shrink-0">⚠️</span>
+        <Icon 
+          icon={ICONS.WARNING}
+          size="lg"
+          color="error"
+          ariaLabel="エラー"
+          class="flex-shrink-0"
+        />
         {errorMessage}
       </div>
     {/if}
@@ -147,9 +155,15 @@
           <button
             type="button"
             onclick={() => showPassword = !showPassword}
-            class="absolute right-3 p-1 rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center justify-center text-lg"
+            class="absolute right-3 p-1 rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center justify-center"
+            aria-label={showPassword ? 'パスワードを非表示' : 'パスワードを表示'}
           >
-            {showPassword ? '🙈' : '👁️'}
+            <Icon 
+              icon={showPassword ? ICONS.VISIBILITY_OFF : ICONS.VISIBILITY}
+              size="lg"
+              color="muted"
+              ariaLabel={showPassword ? 'パスワードを非表示' : 'パスワードを表示'}
+            />
           </button>
         </div>
       </div>

@@ -1,7 +1,59 @@
 @import "tailwindcss";
 
-/* TailwindCSSを使った基本設定 */
+/* TailwindCSS v4 統一テーマシステム + Material Icons統合 */
 @layer base {
+  @theme {
+    /* Sky テーマ (ライト) - 青空をイメージ */
+    --color-primary: 14 165 233;           /* sky-500 */
+    --color-secondary: 2 132 199;          /* sky-600 */
+    --color-accent: 56 189 248;            /* sky-400 */
+    --color-background: 248 250 252;       /* slate-50 */
+    --color-foreground: 15 23 42;          /* slate-900 */
+    --color-card: 255 255 255;             /* white */
+    --color-muted: 100 116 139;            /* slate-500 */
+    --color-border: 226 232 240;           /* slate-200 */
+    
+    /* エラー・成功・警告色 */
+    --color-error: 239 68 68;              /* red-500 */
+    --color-success: 34 197 94;            /* green-500 */
+    --color-warning: 245 158 11;           /* amber-500 */
+  }
+
+  /* Sunset テーマ (ダーク) - 夕焼けをイメージ */
+  [data-theme="sunset"] {
+    --color-primary: 249 115 22;           /* orange-500 */
+    --color-secondary: 234 88 12;          /* orange-600 */
+    --color-accent: 251 146 60;            /* orange-400 */
+    --color-background: 15 23 42;          /* slate-900 */
+    --color-foreground: 241 245 249;       /* slate-100 */
+    --color-card: 51 65 85;                /* slate-700 */
+    --color-muted: 226 232 240;            /* slate-200 - 視認性最適化 */
+    --color-border: 71 85 105;             /* slate-600 */
+    
+    /* エラー・成功・警告色 (ダーク調整) */
+    --color-error: 248 113 113;            /* red-400 */
+    --color-success: 74 222 128;           /* green-400 */
+    --color-warning: 251 191 36;           /* amber-400 */
+  }
+
+  /* ハイコントラストテーマ */
+  [data-theme="high-contrast"] {
+    --color-primary: 0 0 0;                /* black */
+    --color-secondary: 55 65 81;           /* gray-700 */
+    --color-accent: 79 70 229;             /* indigo-600 */
+    --color-background: 255 255 255;       /* white */
+    --color-foreground: 0 0 0;             /* black */
+    --color-card: 249 250 251;             /* gray-50 */
+    --color-muted: 0 0 0;                  /* black */
+    --color-border: 0 0 0;                 /* black */
+    
+    /* エラー・成功・警告色 (高コントラスト) */
+    --color-error: 153 27 27;              /* red-800 */
+    --color-success: 20 83 45;             /* green-800 */
+    --color-warning: 146 64 14;            /* amber-800 */
+  }
+
+  /* 基本要素のスタイリング */
   * {
     box-sizing: border-box;
   }
@@ -11,13 +63,64 @@
   }
 
   body {
-    @apply font-sans leading-relaxed text-gray-900 bg-gray-50;
+    @apply font-sans leading-relaxed;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
   }
 
-  /* ダークモード対応 */
-  @media (prefers-color-scheme: dark) {
-    body {
-      @apply text-slate-100 bg-slate-900;
-    }
+  /* 統一クラス体系 */
+  .bg-themed { background-color: rgb(var(--color-background)); }
+  .bg-card { background-color: rgb(var(--color-card)); }
+  .bg-muted { background-color: rgb(var(--color-muted) / 0.1); }
+  
+  .text-themed { color: rgb(var(--color-foreground)); }
+  .text-primary { color: rgb(var(--color-primary)); }
+  .text-muted { color: rgb(var(--color-muted)); }
+  .text-label { color: rgb(var(--color-foreground)); opacity: 0.85; }
+  
+  .border-themed { border-color: rgb(var(--color-border)); }
+  
+  .button-primary { 
+    background: rgb(var(--color-primary)); 
+    color: rgb(var(--color-background));
+  }
+  
+  /* フォーム要素のテーマ統合 */
+  .input-themed {
+    background-color: rgb(var(--color-card));
+    border-color: rgb(var(--color-border));
+    color: rgb(var(--color-foreground));
+  }
+  
+  .input-themed:focus {
+    border-color: rgb(var(--color-primary));
+    box-shadow: 0 0 0 3px rgb(var(--color-primary) / 0.1);
+  }
+
+  /* アイコン専用スタイル */
+  .icon-themed { color: rgb(var(--color-foreground)); }
+  .icon-primary { color: rgb(var(--color-primary)); }
+  .icon-muted { color: rgb(var(--color-muted)); }
+  .icon-error { color: rgb(var(--color-error)); }
+  .icon-success { color: rgb(var(--color-success)); }
+  .icon-warning { color: rgb(var(--color-warning)); }
+  
+  /* アイコンサイズ（Tailwindクラスと重複するが明示的に定義） */
+  .icon-sm { width: 16px; height: 16px; }
+  .icon-md { width: 20px; height: 20px; }
+  .icon-lg { width: 24px; height: 24px; }
+  .icon-xl { width: 32px; height: 32px; }
+  
+  /* アイコンのインタラクション */
+  .icon-interactive {
+    @apply transition-colors duration-200 cursor-pointer;
+  }
+  
+  .icon-interactive:hover {
+    opacity: 0.7;
+  }
+  
+  .icon-interactive:active {
+    transform: scale(0.95);
   }
 }

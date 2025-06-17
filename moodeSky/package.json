@@ -14,6 +14,8 @@
   "license": "MIT",
   "dependencies": {
     "@atproto/api": "^0.15.15",
+    "@iconify-json/material-symbols": "^1.2.26",
+    "@iconify/svelte": "^5.0.0",
     "@tailwindcss/vite": "^4.1.10",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
