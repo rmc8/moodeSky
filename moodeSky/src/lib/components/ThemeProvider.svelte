@@ -1,3 +1,9 @@
+<!--
+  テーマプロバイダーコンポーネント
+  テーマストア統合によるリアクティブなテーマ管理
+  Tauri Store Plugin永続化対応
+-->
+
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { themeStore } from '../stores/theme.svelte.js';

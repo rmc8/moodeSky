@@ -147,6 +147,38 @@
     outline: 2px solid rgb(var(--foreground)) !important;
   }
 
+  /* アイコンボタンのハイコントラスト対応 */
+  .high-contrast button {
+    border: 2px solid rgb(var(--border)) !important;
+    background-color: rgb(var(--background)) !important;
+    color: rgb(var(--foreground)) !important;
+  }
+
+  .high-contrast button:hover,
+  .high-contrast button:focus {
+    background-color: rgb(var(--foreground)) !important;
+    color: rgb(var(--background)) !important;
+    outline: 2px solid rgb(var(--accent)) !important;
+  }
+
+  /* ハイコントラスト時のhover/focus状態での全子要素色修正 */
+  .high-contrast button:hover *,
+  .high-contrast button:focus *,
+  .high-contrast button:hover svg,
+  .high-contrast button:focus svg {
+    color: rgb(var(--background)) !important;
+    fill: rgb(var(--background)) !important;
+  }
+
+  /* テキスト系クラスの個別対応 */
+  .high-contrast button:hover .text-label,
+  .high-contrast button:focus .text-label,
+  .high-contrast button:hover .text-muted,
+  .high-contrast button:focus .text-muted {
+    color: rgb(var(--background)) !important;
+  }
+
+
   /* フォーカス・選択状態の詳細度強化 */
   .high-contrast button[class*="bg-blue"],
   .high-contrast [class*="bg-blue"][class*="text-blue"] {
@@ -217,6 +249,7 @@
   .no-transitions * {
     transition: none !important;
   }
+
 
   /* Theme-aware Components */
   .card-themed {

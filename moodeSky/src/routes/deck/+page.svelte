@@ -2,9 +2,11 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import Avatar from '$lib/components/Avatar.svelte';
+  import Icon from '$lib/components/Icon.svelte';
   import ThemeToggle from '$lib/components/ThemeToggle.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
+  import { ICONS } from '$lib/types/icon.js';
 
   let activeAccount = $state<Account | null>(null);
   let isLoading = $state(true);
@@ -92,7 +94,15 @@
     </div>
   {:else if errorMessage}
     <div class="bg-error/10 border-2 border-error/20 rounded-2xl shadow-xl p-12 w-full max-w-md text-center">
-      <div class="text-5xl mb-4">⚠️</div>
+      <div class="mb-4">
+        <Icon 
+          icon={ICONS.ERROR}
+          size="xl"
+          color="error"
+          ariaLabel="エラー"
+          class="mx-auto text-5xl"
+        />
+      </div>
       <h2 class="text-error text-2xl font-semibold mb-4">エラー</h2>
       <p class="text-error mb-8">{errorMessage}</p>
       <button 
@@ -108,7 +118,6 @@
       <div class="absolute top-4 right-4">
         <ThemeToggle variant="menu" size="sm" />
       </div>
-      
       <div class="mb-10">
         <div class="mb-6">
           <Avatar 

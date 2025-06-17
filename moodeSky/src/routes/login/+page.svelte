@@ -2,7 +2,9 @@
   import { goto } from '$app/navigation';
   import { AtpAgent } from '@atproto/api';
   import { authService } from '$lib/services/authStore.js';
+  import Icon from '$lib/components/Icon.svelte';
   import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+  import { ICONS } from '$lib/types/icon.js';
 
   let handle = $state('');
   let password = $state('');
@@ -112,7 +114,13 @@
 
     {#if errorMessage}
       <div class="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg mb-6 flex items-center gap-2 text-sm animate-in fade-in duration-300">
-        <span class="text-lg flex-shrink-0">⚠️</span>
+        <Icon 
+          icon={ICONS.WARNING}
+          size="lg"
+          color="error"
+          ariaLabel="エラー"
+          class="flex-shrink-0"
+        />
         {errorMessage}
       </div>
     {/if}
@@ -152,9 +160,17 @@
           <button
             type="button"
             onclick={() => showPassword = !showPassword}
-            class="absolute right-3 p-1 rounded-md transition-colors hover:bg-muted/20 flex items-center justify-center text-lg text-muted"
+            class="group absolute right-3 p-2 rounded-md border-2 border-transparent bg-muted/20 hover:bg-primary hover:text-white focus:bg-primary focus:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 high-contrast:border-themed high-contrast:bg-background high-contrast:hover:bg-foreground high-contrast:focus:bg-foreground high-contrast:hover:text-black high-contrast:focus:text-black"
+            aria-label={showPassword ? 'パスワードを非表示' : 'パスワードを表示'}
+            title={showPassword ? 'パスワードを非表示にする' : 'パスワードを表示する'}
           >
-            {showPassword ? '🙈' : '👁️'}
+            <Icon 
+              icon={showPassword ? ICONS.VISIBILITY_OFF : ICONS.VISIBILITY}
+              size="lg"
+              color="themed"
+              ariaLabel={showPassword ? 'パスワードを非表示' : 'パスワードを表示'}
+              class="high-contrast:group-hover:![color:rgb(0_0_0)] high-contrast:group-focus:![color:rgb(0_0_0)]"
+            />
           </button>
         </div>
       </div>

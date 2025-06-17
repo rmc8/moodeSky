@@ -1,5 +1,7 @@
 <script lang="ts">
   import { themeStore } from '../stores/theme.svelte.js';
+  import Icon from './Icon.svelte';
+  import { ICONS } from '../types/icon.js';
   import type { ThemeMode } from '../types/theme.js';
 
   interface Props {
@@ -17,7 +19,7 @@
     showLabel = true 
   }: Props = $props();
 
-  // テーマオプション定義
+  // テーマオプション定義 (Material Icons使用)
   const themeOptions: Array<{
     mode: ThemeMode;
     label: string;
@@ -27,25 +29,25 @@
     {
       mode: 'system',
       label: 'システム',
-      icon: '🖥️',
+      icon: ICONS.COMPUTER,
       description: 'システム設定に従います'
     },
     {
       mode: 'light',
       label: 'ライト',
-      icon: '☀️',
+      icon: ICONS.LIGHT_MODE,
       description: 'ライトテーマ'
     },
     {
       mode: 'dark',
       label: 'ダーク',
-      icon: '🌙',
+      icon: ICONS.DARK_MODE,
       description: 'ダークテーマ'
     },
     {
       mode: 'high-contrast',
       label: 'ハイコントラスト',
-      icon: '🔳',
+      icon: ICONS.CONTRAST,
       description: 'ハイコントラストテーマ'
     }
   ];
@@ -60,13 +62,6 @@
     sm: 'px-2 py-1 text-xs',
     md: 'px-3 py-2 text-sm',
     lg: 'px-4 py-3 text-base'
-  };
-
-  // アイコンサイズクラス
-  const iconSizeClasses = {
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-lg'
   };
 
   // テーマ切り替えハンドラー
@@ -106,14 +101,18 @@
       const nextIndex = (currentIndex + 1) % themeOptions.length;
       handleThemeChange(themeOptions[nextIndex].mode);
     }}
-    class="inline-flex items-center justify-center rounded-lg border border-themed bg-card hover:bg-muted/20 text-themed transition-colors focus-themed disabled:opacity-50 {sizeClasses[size]}"
+    class="group inline-flex items-center justify-center rounded-lg border border-themed bg-card hover:bg-muted/20 text-themed transition-colors focus-themed disabled:opacity-50 high-contrast:hover:text-black high-contrast:focus:text-black {sizeClasses[size]}"
     disabled={themeStore.isLoading}
     title={`現在: ${currentOption.label} (クリックで切り替え)`}
     aria-label="テーマを切り替え"
   >
-    <span class="{iconSizeClasses[size]}" aria-hidden="true">
-      {currentOption.icon}
-    </span>
+    <Icon 
+      icon={currentOption.icon}
+      size={size}
+      color="themed"
+      decorative
+      class="high-contrast:group-hover:![color:rgb(0_0_0)] high-contrast:group-focus:![color:rgb(0_0_0)]"
+    />
   </button>
 
 {:else if variant === 'menu'}
@@ -121,22 +120,30 @@
   <div class="relative" bind:this={dropdownRef}>
     <button
       onclick={() => isDropdownOpen = !isDropdownOpen}
-      class="inline-flex items-center justify-between w-full rounded-lg border border-themed bg-card hover:bg-muted/20 text-themed transition-colors focus-themed disabled:opacity-50 {sizeClasses[size]}"
+      class="group inline-flex items-center justify-between w-full rounded-lg border border-themed bg-card hover:bg-muted/20 text-themed transition-colors focus-themed disabled:opacity-50 high-contrast:hover:text-black high-contrast:focus:text-black {sizeClasses[size]}"
       disabled={themeStore.isLoading}
       aria-haspopup="true"
       aria-expanded={isDropdownOpen}
     >
       <div class="flex items-center gap-2">
-        <span class="{iconSizeClasses[size]}" aria-hidden="true">
-          {currentOption.icon}
-        </span>
+        <Icon 
+          icon={currentOption.icon}
+          size={size}
+          color="themed"
+          decorative
+          class="high-contrast:group-hover:![color:rgb(0_0_0)] high-contrast:group-focus:![color:rgb(0_0_0)]"
+        />
         {#if showLabel}
           <span>{currentOption.label}</span>
         {/if}
       </div>
-      <svg class="w-4 h-4 transition-transform {isDropdownOpen ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-      </svg>
+      <Icon 
+        icon={ICONS.EXPAND_MORE}
+        size="sm"
+        color="themed"
+        class="transition-transform {isDropdownOpen ? 'rotate-180' : ''} high-contrast:group-hover:![color:rgb(0_0_0)] high-contrast:group-focus:![color:rgb(0_0_0)]"
+        decorative
+      />
     </button>
 
     {#if isDropdownOpen}
@@ -148,17 +155,27 @@
                 handleThemeChange(option.mode);
                 isDropdownOpen = false;
               }}
-              class="w-full text-left px-4 py-2 text-sm text-themed hover:bg-muted/20 flex items-center gap-3 {themeStore.settings.mode === option.mode ? 'bg-primary/10 text-primary' : ''}"
+              class="group w-full text-left px-4 py-2 text-sm text-themed hover:bg-muted/20 flex items-center gap-3 high-contrast:hover:text-black high-contrast:focus:text-black {themeStore.settings.mode === option.mode ? 'bg-primary/10 text-primary' : ''}"
             >
-              <span class="text-base" aria-hidden="true">{option.icon}</span>
+              <Icon 
+                icon={option.icon}
+                size="md"
+                color={themeStore.settings.mode === option.mode ? 'primary' : 'themed'}
+                decorative
+                class="high-contrast:group-hover:![color:rgb(0_0_0)] high-contrast:group-focus:![color:rgb(0_0_0)]"
+              />
               <div>
                 <div class="font-medium">{option.label}</div>
                 <div class="text-xs text-label">{option.description}</div>
               </div>
               {#if themeStore.settings.mode === option.mode}
-                <svg class="w-4 h-4 ml-auto text-primary" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                </svg>
+                <Icon 
+                  icon={ICONS.CHECK}
+                  size="sm"
+                  color="primary"
+                  class="ml-auto high-contrast:group-hover:![color:rgb(0_0_0)] high-contrast:group-focus:![color:rgb(0_0_0)]"
+                  ariaLabel="選択中"
+                />
               {/if}
             </button>
           {/each}
@@ -176,13 +193,17 @@
       const nextIndex = (currentIndex + 1) % themeOptions.length;
       handleThemeChange(themeOptions[nextIndex].mode);
     }}
-    class="inline-flex items-center gap-2 rounded-lg border border-themed bg-card hover:bg-muted/20 text-themed transition-colors focus-themed disabled:opacity-50 {sizeClasses[size]}"
+    class="group inline-flex items-center gap-2 rounded-lg border border-themed bg-card hover:bg-muted/20 text-themed transition-colors focus-themed disabled:opacity-50 high-contrast:hover:text-black high-contrast:focus:text-black {sizeClasses[size]}"
     disabled={themeStore.isLoading}
     title={currentOption.description}
   >
-    <span class="{iconSizeClasses[size]}" aria-hidden="true">
-      {currentOption.icon}
-    </span>
+    <Icon 
+      icon={currentOption.icon}
+      size={size}
+      color="themed"
+      decorative
+      class="high-contrast:group-hover:![color:rgb(0_0_0)] high-contrast:group-focus:![color:rgb(0_0_0)]"
+    />
     {#if showLabel}
       <span>{currentOption.label}</span>
     {/if}
