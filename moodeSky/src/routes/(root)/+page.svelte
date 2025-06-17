@@ -28,36 +28,9 @@
   });
 </script>
 
-<main class="container">
-  <div class="loading">
-    <h1>moodeSky</h1>
-    <p>ログインページに移動中...</p>
+<main class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+  <div class="text-center text-white">
+    <h1 class="text-5xl font-bold mb-4">moodeSky</h1>
+    <p class="text-xl opacity-80">ログインページに移動中...</p>
   </div>
 </main>
-
-<style>
-.container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.loading {
-  text-align: center;
-  color: white;
-}
-
-.loading h1 {
-  font-size: 3rem;
-  font-weight: 700;
-  margin: 0 0 1rem 0;
-}
-
-.loading p {
-  font-size: 1.2rem;
-  opacity: 0.8;
-  margin: 0;
-}
-</style>

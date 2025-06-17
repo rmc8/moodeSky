@@ -4,13 +4,6 @@
 </script>
 
 <!-- メインアプリケーションのレイアウト -->
-<main>
+<main class="min-h-screen w-full">
   <slot />
 </main>
-
-<style>
-  main {
-    min-height: 100vh;
-    width: 100%;
-  }
-</style>

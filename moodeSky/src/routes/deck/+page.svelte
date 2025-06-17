@@ -83,286 +83,85 @@
   }
 </script>
 
-<main class="success-container">
+<main class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
   {#if isLoading}
-    <div class="loading-card">
-      <div class="loading-spinner"></div>
-      <p>認証情報を読み込み中...</p>
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-12 w-full max-w-md text-center flex flex-col items-center gap-4">
+      <div class="w-8 h-8 border-3 border-indigo-300 border-t-indigo-600 rounded-full animate-spin"></div>
+      <p class="text-gray-600 dark:text-gray-300">認証情報を読み込み中...</p>
     </div>
   {:else if errorMessage}
-    <div class="error-card">
-      <div class="error-icon">⚠️</div>
-      <h2>エラー</h2>
-      <p>{errorMessage}</p>
-      <button class="retry-button" onclick={() => location.reload()}>
+    <div class="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl shadow-xl p-12 w-full max-w-md text-center">
+      <div class="text-5xl mb-4">⚠️</div>
+      <h2 class="text-red-600 dark:text-red-400 text-2xl font-semibold mb-4">エラー</h2>
+      <p class="text-red-700 dark:text-red-300 mb-8">{errorMessage}</p>
+      <button 
+        class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+        onclick={() => location.reload()}
+      >
         再試行
       </button>
     </div>
   {:else if activeAccount}
-    <div class="success-card">
-      <div class="success-header">
-        <Avatar 
-          src={activeAccount.profile.avatar || ''} 
-          displayName={activeAccount.profile.displayName || ''} 
-          handle={activeAccount.profile.handle}
-          size="xl"
-          class="profile-avatar"
-        />
-        <h1>🎉 ログイン成功</h1>
-        <p>Blueskyへの認証が完了しました</p>
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-12 w-full max-w-lg text-center">
+      <div class="mb-10">
+        <div class="mb-6">
+          <Avatar 
+            src={activeAccount.profile.avatar || ''} 
+            displayName={activeAccount.profile.displayName || ''} 
+            handle={activeAccount.profile.handle}
+            size="xl"
+          />
+        </div>
+        <h1 class="text-green-500 text-4xl sm:text-5xl font-bold mb-4">🎉 ログイン成功</h1>
+        <p class="text-slate-600 dark:text-slate-400 text-lg">Blueskyへの認証が完了しました</p>
       </div>
 
-      <div class="auth-info">
+      <div class="flex flex-col gap-6 mb-10 text-left">
         {#if activeAccount.profile.displayName}
-          <div class="info-group">
-            <div class="info-label">表示名</div>
-            <div class="info-value">{activeAccount.profile.displayName}</div>
+          <div class="flex flex-col gap-2">
+            <div class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">表示名</div>
+            <div class="bg-gray-50 dark:bg-slate-700 border-2 border-gray-200 dark:border-slate-600 rounded-lg p-3.5 font-mono text-sm text-slate-800 dark:text-slate-200 break-all">
+              {activeAccount.profile.displayName}
+            </div>
           </div>
         {/if}
         
-        <div class="info-group">
-          <div class="info-label">ハンドル</div>
-          <div class="info-value">{activeAccount.profile.handle}</div>
+        <div class="flex flex-col gap-2">
+          <div class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">ハンドル</div>
+          <div class="bg-gray-50 dark:bg-slate-700 border-2 border-gray-200 dark:border-slate-600 rounded-lg p-3.5 font-mono text-sm text-slate-800 dark:text-slate-200 break-all">
+            {activeAccount.profile.handle}
+          </div>
         </div>
         
-        <div class="info-group">
-          <div class="info-label">DID</div>
-          <div class="info-value did-value">{activeAccount.profile.did}</div>
+        <div class="flex flex-col gap-2">
+          <div class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">DID</div>
+          <div class="bg-gray-50 dark:bg-slate-700 border-2 border-gray-200 dark:border-slate-600 rounded-lg p-3.5 font-mono text-xs leading-relaxed text-slate-800 dark:text-slate-200 break-all">
+            {activeAccount.profile.did}
+          </div>
         </div>
 
-        <div class="info-group">
-          <div class="info-label">サービス</div>
-          <div class="info-value">{activeAccount.service}</div>
+        <div class="flex flex-col gap-2">
+          <div class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">サービス</div>
+          <div class="bg-gray-50 dark:bg-slate-700 border-2 border-gray-200 dark:border-slate-600 rounded-lg p-3.5 font-mono text-sm text-slate-800 dark:text-slate-200 break-all">
+            {activeAccount.service}
+          </div>
         </div>
 
-        <div class="info-group">
-          <div class="info-label">最終アクセス</div>
-          <div class="info-value">{new Date(activeAccount.lastAccessAt).toLocaleString('ja-JP')}</div>
+        <div class="flex flex-col gap-2">
+          <div class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">最終アクセス</div>
+          <div class="bg-gray-50 dark:bg-slate-700 border-2 border-gray-200 dark:border-slate-600 rounded-lg p-3.5 font-mono text-sm text-slate-800 dark:text-slate-200 break-all">
+            {new Date(activeAccount.lastAccessAt).toLocaleString('ja-JP')}
+          </div>
         </div>
       </div>
 
-      <button class="logout-button" onclick={logout}>
+      <button 
+        class="w-full bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/25 active:translate-y-0"
+        onclick={logout}
+      >
         ログアウト
       </button>
     </div>
   {/if}
 </main>
 
-<style>
-  .success-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f8fafc;
-    padding: 1rem;
-  }
-
-  .success-card, .loading-card, .error-card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    padding: 3rem;
-    width: 100%;
-    max-width: 500px;
-    text-align: center;
-  }
-
-  .loading-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .loading-spinner {
-    width: 2rem;
-    height: 2rem;
-    border: 3px solid rgba(102, 126, 234, 0.3);
-    border-top: 3px solid #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  .error-card {
-    border: 2px solid #fecaca;
-    background: #fef2f2;
-  }
-
-  .error-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
-
-  .error-card h2 {
-    color: #dc2626;
-    margin: 0 0 1rem 0;
-    font-size: 1.5rem;
-  }
-
-  .error-card p {
-    color: #991b1b;
-    margin: 0 0 2rem 0;
-  }
-
-  .retry-button {
-    background: #dc2626;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-  }
-
-  .retry-button:hover {
-    background: #b91c1c;
-  }
-
-  .success-header {
-    margin-bottom: 2.5rem;
-  }
-
-  .success-header :global(.profile-avatar) {
-    margin-bottom: 1.5rem;
-  }
-
-  .success-header h1 {
-    color: #22c55e;
-    font-size: 2.5rem;
-    margin: 0 0 1rem 0;
-    font-weight: 700;
-  }
-
-  .success-header p {
-    color: #64748b;
-    margin: 0;
-    font-size: 1.1rem;
-  }
-
-  .auth-info {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-    text-align: left;
-  }
-
-  .info-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .info-group .info-label {
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
-  }
-
-  .info-value {
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 0.875rem;
-    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
-    font-size: 0.9rem;
-    color: #1e293b;
-    word-break: break-all;
-  }
-
-  .did-value {
-    font-size: 0.8rem;
-    line-height: 1.4;
-  }
-
-  .logout-button {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    width: 100%;
-  }
-
-  .logout-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
-  }
-
-  .logout-button:active {
-    transform: translateY(0);
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .success-container {
-      background: #0f172a;
-    }
-
-    .success-card, .loading-card {
-      background: #1e293b;
-      color: #f1f5f9;
-    }
-
-    .error-card {
-      background: #450a0a;
-      border-color: #7f1d1d;
-      color: #fca5a5;
-    }
-
-    .error-card h2 {
-      color: #fca5a5;
-    }
-
-    .error-card p {
-      color: #fecaca;
-    }
-
-    .retry-button {
-      background: #7f1d1d;
-    }
-
-    .retry-button:hover {
-      background: #991b1b;
-    }
-
-    .success-header p {
-      color: #94a3b8;
-    }
-
-    .info-group .info-label {
-      color: #cbd5e1;
-    }
-
-    .info-value {
-      background: #334155;
-      border-color: #475569;
-      color: #e2e8f0;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .success-card {
-      padding: 2rem;
-    }
-
-    .success-header h1 {
-      font-size: 2rem;
-    }
-
-    .auth-info {
-      gap: 1.25rem;
-    }
-  }
-</style>
