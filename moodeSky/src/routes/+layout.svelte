@@ -1,9 +1,16 @@
 <script lang="ts">
   // グローバルスタイルをインポート
   import '../app.css';
+  // テーマプロバイダーをインポート
+  import ThemeProvider from '../lib/components/ThemeProvider.svelte';
 </script>
 
-<!-- メインアプリケーションのレイアウト -->
-<main class="min-h-screen w-full">
-  <slot />
-</main>
+<!-- テーマプロバイダーでアプリ全体をラップ -->
+<ThemeProvider>
+  {#snippet children()}
+    <!-- メインアプリケーションのレイアウト -->
+    <main class="min-h-screen w-full">
+      <slot />
+    </main>
+  {/snippet}
+</ThemeProvider>
