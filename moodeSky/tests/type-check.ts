@@ -21,21 +21,35 @@ const testProfile = {
 
 // AuthService基本メソッドの型チェック
 async function basicTypeCheck() {
-  // ストア読み込み
+  console.log('=== Store Plugin 基本動作確認 ===');
+  
+  // 1. ストア初期化
   const loadResult = await authService.loadStore();
-  console.log('Load result:', loadResult);
+  console.log('1. Store load result:', loadResult);
 
-  // 認証ストア読み込み
+  // 2. 認証ストア読み込み
   const authStoreResult = await authService.loadAuthStore();
-  console.log('Auth store result:', authStoreResult);
+  console.log('2. Auth store result:', authStoreResult);
 
-  // アカウント保存（型チェックのみ）
+  // 3. 既存アカウント確認
+  const existingAccounts = await authService.getAllAccounts();
+  console.log('3. Existing accounts:', existingAccounts);
+
+  // 4. アカウント保存テスト
   const saveResult = await authService.saveAccount(
     'https://bsky.social',
     testSessionData,
     testProfile
   );
-  console.log('Save result:', saveResult);
+  console.log('4. Save result:', saveResult);
+  
+  // 5. アクティブアカウント取得
+  const activeAccount = await authService.getActiveAccount();
+  console.log('5. Active account:', activeAccount);
+  
+  // 6. localStorage移行テスト
+  const migrationResult = await authService.migrateFromLocalStorage();
+  console.log('6. Migration result:', migrationResult);
 }
 
 export { basicTypeCheck };

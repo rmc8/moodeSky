@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { Store } from '@tauri-apps/plugin-store';
 import type { AtpSessionData } from '@atproto/api';
 import type {
   Account,
@@ -10,11 +10,6 @@ import type {
   STORE_KEYS
 } from '../types/auth.js';
 
-// Tauri Store Plugin用の型定義
-interface StoreValue {
-  [key: string]: any;
-}
-
 /**
  * Tauri Store Plugin AuthService
  * 認証情報のセキュアなストレージ管理を提供
@@ -23,9 +18,20 @@ interface StoreValue {
 export class AuthService {
   private readonly STORE_NAME = 'auth.json';
   private sessionEventHandler?: SessionEventHandler;
+  private store?: Store;
 
   constructor(sessionEventHandler?: SessionEventHandler) {
     this.sessionEventHandler = sessionEventHandler;
+  }
+
+  /**
+   * Store インスタンスを取得・初期化
+   */
+  private async getStore(): Promise<Store> {
+    if (!this.store) {
+      this.store = await Store.load(this.STORE_NAME);
+    }
+    return this.store;
   }
 
   /**
@@ -33,10 +39,8 @@ export class AuthService {
    */
   private async loadFromStore<T>(key: string): Promise<AuthResult<T | null>> {
     try {
-      const value = await invoke<T | null>('plugin:store|get', {
-        path: this.STORE_NAME,
-        key,
-      });
+      const store = await this.getStore();
+      const value = await store.get<T>(key);
       return { success: true, data: value };
     } catch (error) {
       return {
@@ -54,14 +58,9 @@ export class AuthService {
    */
   private async saveToStore<T>(key: string, value: T): Promise<AuthResult> {
     try {
-      await invoke('plugin:store|set', {
-        path: this.STORE_NAME,
-        key,
-        value,
-      });
-      await invoke('plugin:store|save', {
-        path: this.STORE_NAME,
-      });
+      const store = await this.getStore();
+      await store.set(key, value);
+      await store.save();
       return { success: true };
     } catch (error) {
       return {
@@ -79,13 +78,9 @@ export class AuthService {
    */
   private async deleteFromStore(key: string): Promise<AuthResult> {
     try {
-      await invoke('plugin:store|delete', {
-        path: this.STORE_NAME,
-        key,
-      });
-      await invoke('plugin:store|save', {
-        path: this.STORE_NAME,
-      });
+      const store = await this.getStore();
+      await store.delete(key);
+      await store.save();
       return { success: true };
     } catch (error) {
       return {
@@ -406,9 +401,7 @@ export class AuthService {
    */
   async loadStore(): Promise<AuthResult> {
     try {
-      await invoke('plugin:store|load', {
-        path: this.STORE_NAME,
-      });
+      await this.getStore(); // Store インスタンスを初期化
       return { success: true };
     } catch (error) {
       return {
@@ -426,9 +419,8 @@ export class AuthService {
    */
   async saveStore(): Promise<AuthResult> {
     try {
-      await invoke('plugin:store|save', {
-        path: this.STORE_NAME,
-      });
+      const store = await this.getStore();
+      await store.save();
       return { success: true };
     } catch (error) {
       return {

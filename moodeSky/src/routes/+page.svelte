@@ -1,10 +1,30 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
+  import { authService } from '$lib/services/authStore.js';
 
-  onMount(() => {
-    // アプリ起動時にログインページにリダイレクト
-    goto('/login');
+  onMount(async () => {
+    try {
+      // localStorage からの移行を試行
+      const migrationResult = await authService.migrateFromLocalStorage();
+      if (migrationResult.success && migrationResult.data) {
+        console.log('localStorage からの移行が完了:', migrationResult.data);
+      }
+
+      // アクティブアカウントの確認
+      const activeAccount = await authService.getActiveAccount();
+      if (activeAccount.success && activeAccount.data) {
+        console.log('アクティブアカウント発見:', activeAccount.data);
+        await goto('/deck');
+        return;
+      }
+
+      // ログインが必要
+      await goto('/login');
+    } catch (error) {
+      console.error('認証状態確認エラー:', error);
+      await goto('/login');
+    }
   });
 </script>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { AtpAgent } from '@atproto/api';
+  import { authService } from '$lib/services/authStore.js';
 
   let handle = $state('');
   let password = $state('');
@@ -44,13 +45,30 @@
       const profile = await agent.getProfile({ actor: response.data.did });
       console.log('プロフィール情報:', profile.data);
       
-      // 認証情報をlocalStorageに保存
-      localStorage.setItem('authDid', response.data.did);
-      localStorage.setItem('authHandle', response.data.handle);
-      localStorage.setItem('authAccessJwt', response.data.accessJwt);
-      localStorage.setItem('authDisplayName', profile.data.displayName || '');
-      localStorage.setItem('authAvatar', profile.data.avatar || '');
+      // Store API に認証情報を保存
+      const sessionData = {
+        ...response.data,
+        active: response.data.active ?? true  // activeがundefinedの場合はtrueを設定
+      };
       
+      const saveResult = await authService.saveAccount(
+        `https://${host}`,
+        sessionData,
+        {
+          did: response.data.did,
+          handle: response.data.handle,
+          displayName: profile.data.displayName,
+          avatar: profile.data.avatar,
+        }
+      );
+      
+      if (!saveResult.success) {
+        console.error('認証情報の保存に失敗:', saveResult.error);
+        errorMessage = '認証情報の保存に失敗しました。もう一度お試しください。';
+        return;
+      }
+      
+      console.log('認証情報を正常に保存:', saveResult.data);
       await goto('/deck');
       
     } catch (error: any) {
