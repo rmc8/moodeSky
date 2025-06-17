@@ -609,3 +609,53 @@ Navigate to `dev_rag/` directory:
 - **AIエージェント**: 次世代のSNS管理支援
 - **プライバシー重視**: ユーザーデータ保護
 - **オープンソース**: 透明性とコミュニティ
+
+## 🧠 重要な開発ノウハウ・パターン
+
+### 🔍 Context7による型定義調査の重要性
+
+**問題**: 外部ライブラリ（特に@atproto/api）の型定義が不明で、自前で型定義を作ろうとする
+
+**解決パターン**: 
+1. **必ずContext7で調査**: `use context7` で既存の型定義ライブラリを確認
+2. **公式ライブラリ活用**: @atproto/api には `AtpSessionData`, `AtpSessionEvent` など豊富な型定義が存在
+3. **実装例参照**: bluesky-social/atproto リポジトリで実際の使用例をContext7で確認
+
+**具体例（Store Plugin実装時）**:
+```typescript
+// ❌ Bad: 自前で型定義を作成
+interface MySessionData {
+  accessToken: string;
+  // ...
+}
+
+// ✅ Good: @atproto/api の公式型定義を活用
+import type { AtpSessionData, AtpSessionEvent } from '@atproto/api';
+
+interface Account {
+  session: AtpSessionData; // 公式型定義を使用
+}
+```
+
+**メリット**:
+- **型安全性**: 公式ライブラリとの完全互換性
+- **将来性**: ライブラリ更新時の自動型アップデート
+- **メンテナンス性**: 自前型定義の保守コスト削減
+- **開発効率**: 実装例から学習して開発スピード向上
+
+**教訓**: 
+> ライブラリの型定義を自作する前に、必ずContext7で既存の型定義とベストプラクティスを調査する。
+> 時間とコード品質の両方で大幅な改善が期待できる。
+
+### 🔐 Tauri Store Plugin認証パターン
+
+**セキュア認証管理の基本パターン**:
+1. **型定義**: @atproto/api の AtpSessionData を活用
+2. **データ構造**: tokimekibluesky の Account interface パターンを参考
+3. **ストレージ**: Tauri Store Plugin で暗号化永続化
+4. **移行**: localStorage → Store Plugin のマイグレーション機能
+
+**実装済みファイル**:
+- `src/lib/types/auth.ts` - 型定義（公式型活用）
+- `src/lib/services/authStore.ts` - Store API ラッパー
+- マルチアカウント対応・セッション管理・エラーハンドリング完備
