@@ -334,10 +334,35 @@ export class AuthService {
   }
 
   /**
-   * localStorage からのデータ移行
+   * localStorage からのデータ移行（最適化版）
+   * 移行回数制限・完了フラグ管理・データ検証機能付き
    */
   async migrateFromLocalStorage(): Promise<AuthResult<Account | null>> {
     try {
+      // 移行完了フラグをチェック
+      const migrationStatusResult = await this.loadFromStore<{ completed: boolean; completedAt: string }>('migration_status');
+      
+      if (migrationStatusResult.success && migrationStatusResult.data?.completed) {
+        // 既に移行完了済み
+        return { success: true, data: null };
+      }
+
+      // 移行試行回数をチェック
+      const migrationAttemptsResult = await this.loadFromStore<{ count: number; lastAttempt: string }>('migration_attempts');
+      const currentAttempts = migrationAttemptsResult.data?.count || 0;
+      const MAX_MIGRATION_ATTEMPTS = 3;
+
+      if (currentAttempts >= MAX_MIGRATION_ATTEMPTS) {
+        console.warn(`Migration attempts exceeded maximum (${MAX_MIGRATION_ATTEMPTS}). Skipping migration.`);
+        return { success: true, data: null };
+      }
+
+      // 移行試行回数を記録
+      await this.saveToStore('migration_attempts', {
+        count: currentAttempts + 1,
+        lastAttempt: new Date().toISOString()
+      });
+
       // localStorageからレガシーデータを取得
       const legacyData: LegacyAuthData = {
         authDid: localStorage.getItem('authDid') || undefined,
@@ -349,7 +374,35 @@ export class AuthService {
 
       // 必要なデータが存在するかチェック
       if (!legacyData.authDid || !legacyData.authHandle || !legacyData.authAccessJwt) {
+        // データが存在しない場合も移行完了とマークして重複処理を防ぐ
+        await this.saveToStore('migration_status', {
+          completed: true,
+          completedAt: new Date().toISOString(),
+          reason: 'no_legacy_data'
+        });
         return { success: true, data: null };
+      }
+
+      // レガシーデータの検証
+      const validationResult = this.validateLegacyData(legacyData);
+      if (!validationResult.isValid) {
+        console.warn('Legacy data validation failed:', validationResult.errors);
+        
+        // 検証失敗でも移行完了とマークして無限ループを防ぐ
+        await this.saveToStore('migration_status', {
+          completed: true,
+          completedAt: new Date().toISOString(),
+          reason: 'validation_failed',
+          errors: validationResult.errors
+        });
+        
+        return {
+          success: false,
+          error: {
+            type: 'MIGRATION_FAILED',
+            message: `Legacy data validation failed: ${validationResult.errors.join(', ')}`
+          }
+        };
       }
 
       // AtpSessionData 形式に変換
@@ -382,15 +435,143 @@ export class AuthService {
         localStorage.removeItem('authAccessJwt');
         localStorage.removeItem('authDisplayName');
         localStorage.removeItem('authAvatar');
+
+        // 移行完了フラグを設定
+        await this.saveToStore('migration_status', {
+          completed: true,
+          completedAt: new Date().toISOString(),
+          reason: 'success',
+          migratedAccount: {
+            did: legacyData.authDid,
+            handle: legacyData.authHandle
+          }
+        });
+
+        console.log('localStorage migration completed successfully:', {
+          did: legacyData.authDid,
+          handle: legacyData.authHandle
+        });
       }
 
       return saveResult;
     } catch (error) {
+      console.error('Migration error:', error);
+      
+      // エラー時も移行完了フラグを設定して無限ループを防ぐ
+      try {
+        await this.saveToStore('migration_status', {
+          completed: true,
+          completedAt: new Date().toISOString(),
+          reason: 'error',
+          error: String(error)
+        });
+      } catch (flagError) {
+        console.error('Failed to set migration completion flag:', flagError);
+      }
+
       return {
         success: false,
         error: {
           type: 'MIGRATION_FAILED',
           message: `Failed to migrate from localStorage: ${error}`,
+        },
+      };
+    }
+  }
+
+  /**
+   * レガシーデータの検証
+   */
+  private validateLegacyData(data: LegacyAuthData): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    // DID検証
+    if (data.authDid && !data.authDid.startsWith('did:')) {
+      errors.push('Invalid DID format');
+    }
+
+    // ハンドル検証
+    if (data.authHandle && (!data.authHandle.includes('.') || data.authHandle.length < 3)) {
+      errors.push('Invalid handle format');
+    }
+
+    // アクセストークン検証（基本的な長さチェック）
+    if (data.authAccessJwt && data.authAccessJwt.length < 10) {
+      errors.push('Invalid access token format');
+    }
+
+    // 文字列の安全性チェック（XSSやインジェクション対策）
+    const dangerousPatterns = ['<script', 'javascript:', 'data:text/html'];
+    const allValues = Object.values(data).filter(v => v) as string[];
+    
+    for (const value of allValues) {
+      for (const pattern of dangerousPatterns) {
+        if (value.toLowerCase().includes(pattern)) {
+          errors.push('Potentially malicious content detected');
+          break;
+        }
+      }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
+   * 移行状態を確認
+   */
+  async getMigrationStatus(): Promise<AuthResult<{
+    completed: boolean;
+    completedAt?: string;
+    reason?: string;
+    attempts?: number;
+    lastAttempt?: string;
+    migratedAccount?: { did: string; handle: string };
+    errors?: string[];
+  }>> {
+    try {
+      const statusResult = await this.loadFromStore<any>('migration_status');
+      const attemptsResult = await this.loadFromStore<any>('migration_attempts');
+
+      return {
+        success: true,
+        data: {
+          completed: statusResult.data?.completed || false,
+          completedAt: statusResult.data?.completedAt,
+          reason: statusResult.data?.reason,
+          attempts: attemptsResult.data?.count || 0,
+          lastAttempt: attemptsResult.data?.lastAttempt,
+          migratedAccount: statusResult.data?.migratedAccount,
+          errors: statusResult.data?.errors
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          type: 'STORE_LOAD_FAILED',
+          message: `Failed to get migration status: ${error}`,
+        },
+      };
+    }
+  }
+
+  /**
+   * 移行状態をリセット（開発・テスト用）
+   */
+  async resetMigrationStatus(): Promise<AuthResult> {
+    try {
+      await this.deleteFromStore('migration_status');
+      await this.deleteFromStore('migration_attempts');
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          type: 'STORE_SAVE_FAILED',
+          message: `Failed to reset migration status: ${error}`,
         },
       };
     }
