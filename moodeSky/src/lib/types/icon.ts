@@ -63,10 +63,14 @@ export const ICONS = {
   CHECK_CIRCLE: 'material-symbols:check-circle',
   INFO: 'material-symbols:info',
   
-  // テーマ関連
+  // テーマ関連 (replaces emojis 🖥️, ☀️, 🌙, 🔳)
   LIGHT_MODE: 'material-symbols:light-mode',
   DARK_MODE: 'material-symbols:dark-mode',
   COMPUTER: 'material-symbols:computer',
+  CONTRAST: 'material-symbols:contrast',
+  PALETTE: 'material-symbols:palette',
+  EXPAND_MORE: 'material-symbols:expand-more',
+  CHECK: 'material-symbols:check',
   SETTINGS: 'material-symbols:settings',
   
   // Bluesky/ソーシャルメディア機能

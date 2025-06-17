@@ -1,105 +1,110 @@
 <!--
   テーマプロバイダーコンポーネント
-  data-theme属性によるグローバルテーマ管理
-  システムテーマ検出とTauri Store Plugin統合
+  テーマストア統合によるリアクティブなテーマ管理
+  Tauri Store Plugin永続化対応
 -->
 
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
+  import { themeStore } from '../stores/theme.svelte.js';
   
   interface Props {
-    children: any;
+    children?: import('svelte').Snippet;
   }
   
   let { children }: Props = $props();
-  
-  // テーマ状態管理
-  let currentTheme = $state<'sky' | 'sunset' | 'high-contrast'>('sky');
-  let systemTheme = $state<'light' | 'dark'>('light');
-  
-  // システムテーマの検出
-  function detectSystemTheme(): 'light' | 'dark' {
-    if (typeof window !== 'undefined') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return 'light';
-  }
-  
-  // テーマ適用
-  function applyTheme(theme: 'sky' | 'sunset' | 'high-contrast') {
-    if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', theme);
-    }
-  }
-  
-  // システムテーマ変更の監視
-  function watchSystemTheme() {
-    if (typeof window !== 'undefined') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+  // テーマストアの初期化フラグ
+  let initializationPromise: Promise<void> | null = null;
+
+  /**
+   * コンポーネント初期化時の処理
+   */
+  onMount(async () => {
+    try {
+      // テーマストアを初期化（重複実行防止）
+      if (!initializationPromise) {
+        initializationPromise = themeStore.initialize();
+      }
+      await initializationPromise;
       
-      const handler = (e: MediaQueryListEvent) => {
-        systemTheme = e.matches ? 'dark' : 'light';
-        // 将来的にシステム連動テーマが実装された場合の処理
-      };
-      
-      mediaQuery.addEventListener('change', handler);
-      
-      return () => mediaQuery.removeEventListener('change', handler);
+      console.log('ThemeProvider initialized successfully');
+    } catch (error) {
+      console.error('ThemeProvider initialization failed:', error);
     }
-    
-    return () => {};
-  }
-  
-  // 初期化処理
-  onMount(() => {
-    // システムテーマの初期検出
-    systemTheme = detectSystemTheme();
-    
-    // デフォルトテーマの適用（将来的にはStore Pluginから読み込み）
-    const defaultTheme = systemTheme === 'dark' ? 'sunset' : 'sky';
-    currentTheme = defaultTheme;
-    applyTheme(currentTheme);
-    
-    // システムテーマ変更の監視開始
-    const cleanup = watchSystemTheme();
-    
-    return cleanup;
   });
-  
-  // テーマ切り替え関数（将来のThemeToggleコンポーネント用）
-  export function switchTheme(theme: 'sky' | 'sunset' | 'high-contrast') {
-    currentTheme = theme;
-    applyTheme(theme);
-    
-    // 将来的にはStore Pluginに保存
-    // await themeService.saveTheme(theme);
-  }
+
+  /**
+   * コンポーネントクリーンアップ
+   */
+  onDestroy(() => {
+    themeStore.destroy();
+  });
+
+  // リアクティブな現在テーマの監視
+  $effect(() => {
+    // 現在のテーマが変更されたときにログ出力（開発用）
+    if (themeStore.isInitialized) {
+      console.log('Theme changed to:', themeStore.currentTheme);
+    }
+  });
+
+  // エラー状態の監視と自動クリア
+  $effect(() => {
+    if (themeStore.error) {
+      console.error('Theme store error:', themeStore.error);
+      
+      // 5秒後に自動でエラーをクリア
+      const timeoutId = setTimeout(() => {
+        themeStore.clearError();
+      }, 5000);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  });
 </script>
 
-<!-- 
-  テーマプロバイダーでアプリ全体をラップ
-  data-theme属性が<html>に適用される
--->
-{@render children()}
-
-<!--
-  使用方法:
-  
-  レイアウトファイルで:
-  <ThemeProvider>
-    {#snippet children()}
-      <slot />
-    {/snippet}
-  </ThemeProvider>
-  
-  任意のコンポーネントで:
-  <!-- data-theme属性により自動的にテーマが適用される -->
-  <div class="bg-themed text-themed">
-    コンテンツ
+<!-- テーマプロバイダー -->
+<!-- 初期化完了後にコンテンツを表示 -->
+{#if themeStore.isInitialized}
+  {@render children?.()}
+{:else if themeStore.isLoading}
+  <!-- ローディング状態 -->
+  <div class="min-h-screen w-full flex items-center justify-center bg-themed">
+    <div class="text-center">
+      <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-primary rounded-full mb-4" role="status" aria-label="テーマ読み込み中">
+        <span class="sr-only">テーマ読み込み中...</span>
+      </div>
+      <p class="text-sm text-muted">テーマを読み込んでいます...</p>
+    </div>
   </div>
-  
-  将来のテーマ切り替え:
-  <button onclick={() => switchTheme('sunset')}>
-    ダークテーマに切り替え
-  </button>
--->
+{:else if themeStore.error}
+  <!-- エラー状態 -->
+  <div class="min-h-screen w-full flex items-center justify-center bg-themed">
+    <div class="text-center max-w-md mx-auto p-6">
+      <div class="bg-error/10 border border-error/20 text-error p-4 rounded-lg mb-4">
+        <h2 class="font-semibold mb-2">テーマ読み込みエラー</h2>
+        <p class="text-sm">{themeStore.error}</p>
+      </div>
+      <button 
+        onclick={() => {
+          themeStore.clearError();
+          themeStore.initialize();
+        }}
+        class="button-primary"
+      >
+        再試行
+      </button>
+    </div>
+  </div>
+{:else}
+  <!-- フォールバック: 初期化前のデフォルト表示 -->
+  <div class="min-h-screen w-full bg-themed">
+    {@render children?.()}
+  </div>
+{/if}
+
+<style>
+  /* ハイコントラストテーマの設定は app.css で管理し、ThemeProviderからは削除 */
+  /* このスタイルブロックは将来のコンポーネント固有スタイル用に保持 */
+</style>

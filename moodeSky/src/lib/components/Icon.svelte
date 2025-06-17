@@ -33,15 +33,15 @@
     }
   });
   
-  // カラークラスの動的生成 (既存テーマシステムと統合)
+  // カラークラスの動的生成 (TailwindCSSユーティリティのみ)
   const colorClass = $derived(() => {
     switch (color) {
       case 'themed': return 'text-themed';
       case 'primary': return 'text-primary';  
       case 'muted': return 'text-muted';
-      case 'error': return 'text-red-500';
-      case 'success': return 'text-green-500';
-      case 'warning': return 'text-orange-500';
+      case 'error': return 'text-error';
+      case 'success': return 'text-success';
+      case 'warning': return 'text-warning';
       default: return 'text-themed';
     }
   });
