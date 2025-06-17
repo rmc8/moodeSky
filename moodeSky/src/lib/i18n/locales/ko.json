@@ -1,0 +1,52 @@
+{
+  "app": {
+    "name": "moodeSky",
+    "description": "멀티플랫폼 Bluesky 클라이언트",
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다"
+  },
+  "navigation": {
+    "home": "홈",
+    "deck": "덱",
+    "settings": "설정",
+    "profile": "프로필"
+  },
+  "auth": {
+    "login": "로그인",
+    "logout": "로그아웃",
+    "username": "사용자명",
+    "password": "비밀번호",
+    "loginButton": "로그인",
+    "loginError": "로그인 실패",
+    "loginSuccess": "로그인 성공"
+  },
+  "theme": {
+    "light": "라이트",
+    "dark": "다크",
+    "highContrast": "고대비",
+    "system": "시스템",
+    "themeToggle": "테마 전환"
+  },
+  "language": {
+    "current": "현재 언어",
+    "system": "시스템 언어",
+    "changeLanguage": "언어 변경",
+    "detectedFrom": "{source}에서 감지됨",
+    "sources": {
+      "os": "운영체제",
+      "browser": "브라우저",
+      "stored": "저장된 설정",
+      "fallback": "기본값"
+    }
+  },
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "close": "닫기",
+    "back": "뒤로",
+    "next": "다음",
+    "previous": "이전"
+  }
+}

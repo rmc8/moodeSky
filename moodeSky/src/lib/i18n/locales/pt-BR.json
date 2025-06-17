@@ -1,0 +1,52 @@
+{
+  "app": {
+    "name": "moodeSky",
+    "description": "Um cliente Bluesky multiplataforma",
+    "loading": "Carregando...",
+    "error": "Ocorreu um erro"
+  },
+  "navigation": {
+    "home": "Início",
+    "deck": "Painel",
+    "settings": "Configurações",
+    "profile": "Perfil"
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "username": "Nome de usuário",
+    "password": "Senha",
+    "loginButton": "Entrar",
+    "loginError": "Falha no login",
+    "loginSuccess": "Login realizado com sucesso"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Escuro",
+    "highContrast": "Alto Contraste",
+    "system": "Sistema",
+    "themeToggle": "Alternar tema"
+  },
+  "language": {
+    "current": "Idioma atual",
+    "system": "Idioma do sistema",
+    "changeLanguage": "Alterar idioma",
+    "detectedFrom": "Detectado de {source}",
+    "sources": {
+      "os": "sistema operacional",
+      "browser": "navegador",
+      "stored": "configurações salvas",
+      "fallback": "padrão"
+    }
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior"
+  }
+}

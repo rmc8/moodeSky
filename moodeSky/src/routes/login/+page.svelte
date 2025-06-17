@@ -4,6 +4,7 @@
   import { authService } from '$lib/services/authStore.js';
   import Icon from '$lib/components/Icon.svelte';
   import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+  import LanguageSelectorCompact from '$lib/components/LanguageSelectorCompact.svelte';
   import { ICONS } from '$lib/types/icon.js';
 
   let handle = $state('');
@@ -103,9 +104,14 @@
 
 <main class="min-h-screen flex items-center justify-center bg-themed p-4">
   <div class="relative bg-card rounded-2xl shadow-xl p-8 w-full max-w-md">
-    <!-- テーマ切り替えボタン（右上） -->
-    <div class="absolute top-4 right-4">
+    <!-- 設定パネル（右上） -->
+    <div class="absolute top-4 right-4 flex flex-col gap-2">
       <ThemeToggle variant="compact" size="sm" showLabel={false} />
+    </div>
+    
+    <!-- 言語セレクター（左上） -->
+    <div class="absolute top-4 left-4">
+      <LanguageSelectorCompact />
     </div>
     <div class="text-center mb-8">
       <h1 class="text-3xl font-bold text-themed mb-2">moodeSky</h1>

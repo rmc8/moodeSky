@@ -1,0 +1,52 @@
+{
+  "app": {
+    "name": "moodeSky",
+    "description": "マルチプラットフォーム対応のBlueskyクライアント",
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました"
+  },
+  "navigation": {
+    "home": "ホーム",
+    "deck": "デッキ",
+    "settings": "設定",
+    "profile": "プロフィール"
+  },
+  "auth": {
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "loginButton": "サインイン",
+    "loginError": "ログインに失敗しました",
+    "loginSuccess": "ログインしました"
+  },
+  "theme": {
+    "light": "ライト",
+    "dark": "ダーク",
+    "highContrast": "ハイコントラスト",
+    "system": "システム",
+    "themeToggle": "テーマ切り替え"
+  },
+  "language": {
+    "current": "現在の言語",
+    "system": "システム言語",
+    "changeLanguage": "言語変更",
+    "detectedFrom": "{source}から検出",
+    "sources": {
+      "os": "OS",
+      "browser": "ブラウザ",
+      "stored": "保存された設定",
+      "fallback": "デフォルト"
+    }
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ"
+  }
+}
