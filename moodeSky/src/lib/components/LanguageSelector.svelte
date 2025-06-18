@@ -5,7 +5,7 @@
 <script lang="ts">
   import { i18nStore, type SupportedLanguage } from '../stores/i18n.svelte.js';
   import { SUPPORTED_LANGUAGES } from '../services/i18nService.js';
-  import * as m from '../i18n/paraglide/messages.js';
+  import { language, app } from '../i18n/paraglide/messages.js';
 
   // 言語選択の処理
   async function handleLanguageChange(event: Event) {
@@ -25,10 +25,10 @@
 
 <div class="language-selector">
   <div class="selector-header">
-    <h3 class="text-label">{m['language.current']()}</h3>
+    <h3 class="text-label">{language.current()}</h3>
     {#if i18nStore.detectionResult}
       <p class="text-muted text-sm">
-        {m['language.detectedFrom']({ source: m['language.sources.os']() })}
+        {language.detectedFrom()} {language.sources.os()}
         {#if i18nStore.detectionResult.originalLocale}
           ({i18nStore.detectionResult.originalLocale})
         {/if}
@@ -51,7 +51,7 @@
       on:click={resetToSystemLanguage}
       disabled={i18nStore.isLoading || i18nStore.currentLanguage === i18nStore.systemLanguage}
     >
-      {m['language.system']()}
+      {language.system()}
     </button>
   </div>
 
@@ -63,7 +63,7 @@
 
   {#if i18nStore.isLoading}
     <div class="loading-indicator">
-      <p>{m['app.loading']()}</p>
+      <p>{app.loading()}</p>
     </div>
   {/if}
 

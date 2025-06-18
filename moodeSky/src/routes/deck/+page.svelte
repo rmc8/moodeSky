@@ -1,81 +1,119 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import Avatar from '$lib/components/Avatar.svelte';
-  import Icon from '$lib/components/Icon.svelte';
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
+  import Navigation from '$lib/components/Navigation.svelte';
   import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+  import Avatar from '$lib/components/Avatar.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
-  import { ICONS } from '$lib/types/icon.js';
-  import * as m from '$lib/i18n/paraglide/messages';
-  import { i18nStore } from '$lib/stores/i18n.svelte.js';
-
+  import { auth, navigation, app, common } from '$lib/i18n/paraglide/messages.js';
+  
+  
   let activeAccount = $state<Account | null>(null);
   let isLoading = $state(true);
   let errorMessage = $state('');
-
-  // 認証情報をStore APIから取得
+  
+  // デバッグ用の状態監視
+  $effect(() => {
+    console.log('🔍 [DEBUG] State change - isLoading:', isLoading);
+  });
+  
+  $effect(() => {
+    console.log('🔍 [DEBUG] State change - errorMessage:', errorMessage);
+  });
+  
+  $effect(() => {
+    console.log('🔍 [DEBUG] State change - activeAccount:', activeAccount);
+  });
+  let currentPath = $state($page.url.pathname);
+  
+  // 現在のパスを監視
+  $effect(() => {
+    currentPath = $page.url.pathname;
+  });
+  
+  // 認証状態確認
   onMount(() => {
     let cleanupFunction: (() => void) | undefined;
 
     (async () => {
       try {
+        console.log('🔍 [DEBUG] Deck page onMount started');
+        console.log('🔍 [DEBUG] User agent:', navigator.userAgent);
+        console.log('🔍 [DEBUG] Platform:', navigator.platform);
+        
+        // 🚨 ネットワーク接続テスト
+        try {
+          const response = await fetch('/');
+          console.log('🔍 [DEBUG] Network test successful:', response.status);
+        } catch (networkError) {
+          console.error('🚨 [NETWORK] Network connection failed:', networkError);
+        }
+        
+        console.log('🔍 [DEBUG] authService:', authService);
+        console.log('🔍 [DEBUG] About to call getActiveAccount...');
+        
         // アクティブアカウントを取得
         const result = await authService.getActiveAccount();
+        console.log('🔍 [DEBUG] getActiveAccount result:', result);
         
         if (!result.success) {
-          console.error('認証情報の取得に失敗:', result.error);
-          errorMessage = m['auth.authDataFetchFailed']();
+          console.error('🔍 [DEBUG] 認証情報の取得に失敗:', result.error);
+          console.log('🔍 [DEBUG] Setting error message and redirecting to login');
+          
+          errorMessage = auth.authDataFetchFailed();
           await goto('/login');
           return;
         }
         
         if (!result.data) {
-          console.log('アクティブアカウントが見つかりません');
+          console.log('🔍 [DEBUG] アクティブアカウントが見つかりません');
+          console.log('🔍 [DEBUG] Redirecting to login...');
           await goto('/login');
           return;
         }
         
+        console.log('🔍 [DEBUG] Setting activeAccount:', result.data);
         activeAccount = result.data;
-        console.log('アクティブアカウント:', activeAccount);
+        console.log('🔍 [DEBUG] activeAccount set successfully:', activeAccount);
         
-        // 現在のURLを履歴に追加（戻るボタンを無効化）
+        // ブラウザバック防止
         history.pushState(null, '', window.location.href);
         
-        // popstateイベントをリッスンして戻る操作を防ぐ
         const handlePopState = () => {
           history.pushState(null, '', window.location.href);
         };
         
         window.addEventListener('popstate', handlePopState);
         
-        // クリーンアップ関数を保存
         cleanupFunction = () => {
           window.removeEventListener('popstate', handlePopState);
         };
       } catch (error) {
-        console.error('認証状態の確認中にエラー:', error);
-        errorMessage = m['auth.authStatusCheckFailed']();
+        console.error('🔍 [DEBUG] 認証状態の確認中にエラー:', error);
+        console.log('🔍 [DEBUG] Error type:', typeof error, error);
+        errorMessage = auth.authStatusCheckFailed();
         await goto('/login');
       } finally {
+        console.log('🔍 [DEBUG] Setting isLoading = false');
         isLoading = false;
+        console.log('🔍 [DEBUG] onMount finally block completed');
       }
     })();
 
-    // onMountのクリーンアップ関数を返す
     return () => {
       cleanupFunction?.();
     };
   });
-
+  
   async function logout() {
     try {
-      // Store API から認証データをクリア
       const result = await authService.clearAll();
       
       if (!result.success) {
         console.error('ログアウト処理に失敗:', result.error);
-        errorMessage = m['auth.logoutFailed']();
+        errorMessage = auth.logoutFailed();
         return;
       }
       
@@ -83,102 +121,136 @@
       await goto('/login');
     } catch (error) {
       console.error('ログアウト中にエラー:', error);
-      errorMessage = m['auth.logoutError']();
+      errorMessage = auth.logoutError();
     }
   }
 </script>
 
-<main class="min-h-screen flex items-center justify-center bg-themed p-4">
-  {#if isLoading}
+{#if isLoading}
+  <!-- ローディング画面 -->
+  {console.log('🔍 [DEBUG] Rendering loading screen')}
+  <div class="min-h-screen flex items-center justify-center bg-themed">
     <div class="bg-card rounded-2xl shadow-xl p-12 w-full max-w-md text-center flex flex-col items-center gap-4">
       <div class="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-      <p class="text-muted">{m['app.loading']()}</p>
+      <p class="text-themed opacity-80">{app.loading()}</p>
     </div>
-  {:else if errorMessage}
+  </div>
+{:else if errorMessage}
+  <!-- エラー画面 -->
+  {console.log('🔍 [DEBUG] Rendering error screen with message:', errorMessage)}
+  <div class="min-h-screen flex items-center justify-center bg-themed p-4">
     <div class="bg-error/10 border-2 border-error/20 rounded-2xl shadow-xl p-12 w-full max-w-md text-center">
-      <div class="mb-4">
-        <Icon 
-          icon={ICONS.ERROR}
-          size="xl"
-          color="error"
-          ariaLabel={m['common.error']()}
-          class="mx-auto text-5xl"
-        />
-      </div>
-      <h2 class="text-error text-2xl font-semibold mb-4">{m['common.error']()}</h2>
+      <h2 class="text-error text-2xl font-semibold mb-4">{common.error()}</h2>
       <p class="text-error mb-8">{errorMessage}</p>
       <button 
         class="bg-error hover:bg-error/80 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
         onclick={() => location.reload()}
       >
-        {m['common.retry']()}
+        {common.retry()}
       </button>
     </div>
-  {:else if activeAccount}
-    <div class="relative bg-card rounded-2xl shadow-xl p-12 w-full max-w-lg text-center">
-      <!-- テーマ切り替えボタン（右上） -->
-      <div class="absolute top-4 right-4">
-        <ThemeToggle variant="menu" size="sm" />
-      </div>
-      <div class="mb-10">
-        <div class="mb-6">
-          <Avatar 
-            src={activeAccount.profile.avatar || ''} 
-            displayName={activeAccount.profile.displayName || ''} 
-            handle={activeAccount.profile.handle}
-            size="xl"
-          />
+  </div>
+{:else if activeAccount}
+  <!-- メインデッキレイアウト -->
+  {console.log('🔍 [DEBUG] Rendering main deck layout with account:', activeAccount)}
+  <div class="min-h-screen bg-themed">
+    <!-- ナビゲーション -->
+    <Navigation {currentPath} />
+    
+    <!-- メインコンテンツエリア -->
+    <main class="md:ml-64 min-h-screen pb-20 md:pb-0">
+      <!-- ヘッダー -->
+      <header class="bg-card border-b-2 border-themed shadow-sm p-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <h1 class="text-themed text-2xl font-bold">
+            {app.name()}
+          </h1>
         </div>
-        <h1 class="text-success text-4xl sm:text-5xl font-bold mb-4">🎉 {m['auth.loginSuccess']()}</h1>
-        <p class="text-label text-lg">{m['auth.loginSuccessMessage']()}</p>
-      </div>
-
-      <div class="flex flex-col gap-6 mb-10 text-left">
-        {#if activeAccount.profile.displayName}
-          <div class="flex flex-col gap-2">
-            <div class="text-sm font-semibold text-label uppercase tracking-wide">{m['profile.displayName']()}</div>
-            <div class="bg-muted/20 border-2 border-themed rounded-lg p-3.5 font-mono text-sm text-themed break-all">
-              {activeAccount.profile.displayName}
+        
+        <div class="flex items-center gap-4">
+          <!-- ユーザー情報 -->
+          <div class="flex items-center gap-3">
+            <Avatar 
+              src={activeAccount.profile.avatar || ''} 
+              displayName={activeAccount.profile.displayName || ''} 
+              handle={activeAccount.profile.handle}
+              size="sm"
+            />
+            <div class="hidden md:block">
+              <p class="text-themed font-medium text-sm">
+                {activeAccount.profile.displayName || activeAccount.profile.handle}
+              </p>
+              <p class="text-themed opacity-70 text-xs">
+                @{activeAccount.profile.handle}
+              </p>
             </div>
           </div>
-        {/if}
-        
-        <div class="flex flex-col gap-2">
-          <div class="text-sm font-semibold text-label uppercase tracking-wide">{m['profile.handle']()}</div>
-          <div class="bg-muted/20 border-2 border-themed rounded-lg p-3.5 font-mono text-sm text-themed break-all">
-            {activeAccount.profile.handle}
-          </div>
+          
+          <!-- テーマ切り替え -->
+          <ThemeToggle variant="menu" size="sm" />
+          
+          <!-- ログアウトボタン -->
+          <button 
+            class="text-themed opacity-70 hover:text-error transition-colors p-2 rounded-lg hover:bg-error/10"
+            onclick={logout}
+            title={auth.logout()}
+            aria-label={auth.logout()}
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+          </button>
         </div>
-        
-        <div class="flex flex-col gap-2">
-          <div class="text-sm font-semibold text-label uppercase tracking-wide">{m['profile.did']()}</div>
-          <div class="bg-muted/20 border-2 border-themed rounded-lg p-3.5 font-mono text-xs leading-relaxed text-themed break-all">
-            {activeAccount.profile.did}
-          </div>
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <div class="text-sm font-semibold text-label uppercase tracking-wide">{m['profile.service']()}</div>
-          <div class="bg-muted/20 border-2 border-themed rounded-lg p-3.5 font-mono text-sm text-themed break-all">
-            {activeAccount.service}
-          </div>
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <div class="text-sm font-semibold text-label uppercase tracking-wide">{m['profile.lastAccess']()}</div>
-          <div class="bg-muted/20 border-2 border-themed rounded-lg p-3.5 font-mono text-sm text-themed break-all">
-            {new Date(activeAccount.lastAccessAt).toLocaleString('ja-JP')}
+      </header>
+      
+      <!-- デッキコンテンツエリア -->
+      <div class="p-4">
+        <!-- 暫定的なウェルカムメッセージ -->
+        <div class="bg-card rounded-xl shadow-lg p-8 text-center">
+          <h2 class="text-themed text-3xl font-bold mb-4">
+            🎉 {navigation.home()}
+          </h2>
+          <p class="text-themed opacity-80 text-lg mb-6">
+            moodeSky デッキシステムへようこそ！<br>
+            ここにタイムラインとカラム機能が実装される予定です。
+          </p>
+          
+          <!-- 開発状況 -->
+          <div class="bg-muted/10 border-2 border-themed rounded-lg p-6 text-left">
+            <h3 class="text-themed font-semibold text-lg mb-3">🚧 開発予定機能</h3>
+            <ul class="text-themed opacity-80 space-y-2">
+              <li>• ホームタイムライン表示</li>
+              <li>• マルチカラム デッキシステム</li>
+              <li>• 投稿作成・操作機能</li>
+              <li>• 検索・フィルタリング機能</li>
+              <li>• リアルタイム更新</li>
+            </ul>
           </div>
         </div>
       </div>
-
+    </main>
+  </div>
+{:else}
+  <!-- フォールバック画面 - 条件に当てはまらない場合 -->
+  {console.log('🔍 [DEBUG] Rendering fallback screen - no conditions matched')}
+  {console.log('🔍 [DEBUG] Current state - isLoading:', isLoading, 'errorMessage:', errorMessage, 'activeAccount:', activeAccount)}
+  <div class="min-h-screen flex items-center justify-center bg-themed p-4">
+    <div class="bg-card rounded-2xl shadow-xl p-12 w-full max-w-md text-center">
+      <h2 class="text-themed text-2xl font-semibold mb-4">⚠️ 予期しない状態</h2>
+      <p class="text-themed opacity-80 mb-4">
+        アプリケーションが予期しない状態になりました。
+      </p>
+      <div class="text-left bg-themed/5 rounded-lg p-4 mb-4 text-sm">
+        <p><strong>isLoading:</strong> {isLoading}</p>
+        <p><strong>errorMessage:</strong> '{errorMessage}'</p>
+        <p><strong>activeAccount:</strong> {activeAccount ? 'present' : 'null'}</p>
+      </div>
       <button 
-        class="w-full bg-error hover:bg-error/80 text-white font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
-        onclick={logout}
+        class="bg-primary hover:bg-primary/80 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+        onclick={() => location.reload()}
       >
-        {m['auth.logout']()}
+        ページを再読み込み
       </button>
     </div>
-  {/if}
-</main>
-
+  </div>
+{/if}
