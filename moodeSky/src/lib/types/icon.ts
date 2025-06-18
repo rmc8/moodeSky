@@ -96,6 +96,11 @@ export const ICONS = {
   MENU: 'material-symbols:menu',
   REFRESH: 'material-symbols:refresh',
   
+  // 国際化・言語
+  TRANSLATE: 'material-symbols:translate',
+  LANGUAGE: 'material-symbols:language',
+  PUBLIC: 'material-symbols:public',
+  
   // ファイル・メディア
   IMAGE: 'material-symbols:image',
   ATTACH_FILE: 'material-symbols:attach-file',

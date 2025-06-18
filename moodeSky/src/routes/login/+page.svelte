@@ -4,7 +4,9 @@
   import { authService } from '$lib/services/authStore.js';
   import Icon from '$lib/components/Icon.svelte';
   import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+  import LanguageSelectorCompact from '$lib/components/LanguageSelectorCompact.svelte';
   import { ICONS } from '$lib/types/icon.js';
+  import * as m from '$lib/i18n/paraglide/messages.js';
 
   let handle = $state('');
   let password = $state('');
@@ -18,7 +20,7 @@
     
     // 簡単なバリデーション
     if (!handle || !password) {
-      errorMessage = 'ハンドルとパスワードを入力してください';
+      errorMessage = m['validation.requiredFields']();
       return;
     }
     
@@ -67,7 +69,7 @@
       
       if (!saveResult.success) {
         console.error('認証情報の保存に失敗:', saveResult.error);
-        errorMessage = '認証情報の保存に失敗しました。もう一度お試しください。';
+        errorMessage = m['validation.authSaveFailed']();
         return;
       }
       
@@ -79,21 +81,21 @@
       console.error('Login error:', error);
       
       if (error?.status === 401) {
-        errorMessage = '認証に失敗しました。ハンドルとアプリパスワードを確認してください。';
+        errorMessage = m['validation.authFailed']();
       } else if (error?.status === 400) {
-        errorMessage = 'ハンドルまたはパスワードの形式が正しくありません。';
+        errorMessage = m['validation.invalidFormat']();
       } else if (error?.status === 429) {
-        errorMessage = 'リクエストが多すぎます。しばらく時間をおいてからお試しください。';
+        errorMessage = m['validation.rateLimited']();
       } else if (error?.message?.includes('network') || error?.code === 'ENOTFOUND') {
-        errorMessage = 'ネットワークエラーが発生しました。インターネット接続を確認してください。';
+        errorMessage = m['validation.networkError']();
       } else if (error?.message?.includes('timeout') || error?.code === 'ETIMEDOUT') {
-        errorMessage = '接続がタイムアウトしました。しばらく時間をおいてからお試しください。';
+        errorMessage = m['validation.timeoutError']();
       } else if (error?.message?.includes('invalid_grant')) {
-        errorMessage = 'アプリパスワードが無効です。新しいアプリパスワードを作成してください。';
+        errorMessage = m['validation.invalidPassword']();
       } else if (error?.message?.includes('account_not_found')) {
-        errorMessage = 'アカウントが見つかりません。ハンドルを確認してください。';
+        errorMessage = m['validation.accountNotFound']();
       } else {
-        errorMessage = error?.message || 'ログインに失敗しました。しばらく時間をおいてからお試しください。';
+        errorMessage = error?.message || m['validation.genericError']();
       }
     } finally {
       isLoading = false;
@@ -103,13 +105,18 @@
 
 <main class="min-h-screen flex items-center justify-center bg-themed p-4">
   <div class="relative bg-card rounded-2xl shadow-xl p-8 w-full max-w-md">
-    <!-- テーマ切り替えボタン（右上） -->
-    <div class="absolute top-4 right-4">
+    <!-- 設定パネル（右上） -->
+    <div class="absolute top-4 right-4 flex flex-col gap-2">
       <ThemeToggle variant="compact" size="sm" showLabel={false} />
+    </div>
+    
+    <!-- 言語セレクター（左上） -->
+    <div class="absolute top-4 left-4">
+      <LanguageSelectorCompact />
     </div>
     <div class="text-center mb-8">
       <h1 class="text-3xl font-bold text-themed mb-2">moodeSky</h1>
-      <p class="text-label text-sm">Blueskyアカウントでログイン</p>
+      <p class="text-label text-sm">{m['login.title']()}</p>
     </div>
 
     {#if errorMessage}
@@ -118,7 +125,7 @@
           icon={ICONS.WARNING}
           size="lg"
           color="error"
-          ariaLabel="エラー"
+          ariaLabel={m['common.error']()}
           class="flex-shrink-0"
         />
         {errorMessage}
@@ -127,11 +134,11 @@
 
     <form class="flex flex-col gap-6" onsubmit={handleLogin}>
       <div class="flex flex-col gap-2">
-        <label for="handle" class="text-sm font-semibold text-label uppercase tracking-wide">ハンドル</label>
+        <label for="handle" class="text-sm font-semibold text-label uppercase tracking-wide">{m['login.handleLabel']()}</label>
         <input
           id="handle"
           type="text"
-          placeholder="例: alice.bsky.social"
+          placeholder={m['login.handlePlaceholder']()}
           bind:value={handle}
           autocapitalize="off"
           autocorrect="off"
@@ -146,12 +153,12 @@
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="password" class="text-sm font-semibold text-label uppercase tracking-wide">アプリパスワード</label>
+        <label for="password" class="text-sm font-semibold text-label uppercase tracking-wide">{m['login.passwordLabel']()}</label>
         <div class="relative flex items-center">
           <input
             id="password"
             type={showPassword ? 'text' : 'password'}
-            placeholder="アプリパスワードを入力"
+            placeholder={m['login.passwordPlaceholder']()}
             bind:value={password}
             disabled={isLoading}
             required
@@ -161,14 +168,14 @@
             type="button"
             onclick={() => showPassword = !showPassword}
             class="group absolute right-3 p-2 rounded-md border-2 border-transparent bg-muted/20 hover:bg-primary hover:text-white focus:bg-primary focus:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 high-contrast:border-themed high-contrast:bg-background high-contrast:hover:bg-foreground high-contrast:focus:bg-foreground high-contrast:hover:text-black high-contrast:focus:text-black"
-            aria-label={showPassword ? 'パスワードを非表示' : 'パスワードを表示'}
-            title={showPassword ? 'パスワードを非表示にする' : 'パスワードを表示する'}
+            aria-label={showPassword ? m['login.hidePassword']() : m['login.showPassword']()}
+            title={showPassword ? m['login.hidePassword']() : m['login.showPassword']()}
           >
             <Icon 
               icon={showPassword ? ICONS.VISIBILITY_OFF : ICONS.VISIBILITY}
               size="lg"
               color="themed"
-              ariaLabel={showPassword ? 'パスワードを非表示' : 'パスワードを表示'}
+              ariaLabel={showPassword ? m['login.hidePassword']() : m['login.showPassword']()}
               class="high-contrast:group-hover:![color:rgb(0_0_0)] high-contrast:group-focus:![color:rgb(0_0_0)]"
             />
           </button>
@@ -176,7 +183,7 @@
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="host" class="text-sm font-semibold text-label uppercase tracking-wide">ホスト</label>
+        <label for="host" class="text-sm font-semibold text-label uppercase tracking-wide">{m['login.hostLabel']()}</label>
         <input
           id="host"
           type="text"
@@ -192,10 +199,10 @@
         {#if isLoading}
           <div class="flex items-center justify-center gap-2">
             <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ログイン中...
+            {m['app.loading']()}
           </div>
         {:else}
-          ログイン
+          {m['auth.login']()}
         {/if}
       </button>
     </form>
@@ -203,7 +210,7 @@
     <div class="mt-6 text-center">
       <p>
         <a href="https://bsky.app/settings/app-passwords" target="_blank" class="text-primary hover:underline text-sm">
-          アプリパスワードの作成方法
+          {m['login.appPasswordGuide']()}
         </a>
       </p>
     </div>

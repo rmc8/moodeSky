@@ -1,0 +1,108 @@
+{
+  "app": {
+    "name": "moodeSky",
+    "description": "멀티플랫폼 Bluesky 클라이언트",
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다"
+  },
+  "navigation": {
+    "home": "홈",
+    "deck": "덱",
+    "settings": "설정",
+    "profile": "프로필"
+  },
+  "auth": {
+    "login": "로그인",
+    "logout": "로그아웃",
+    "username": "사용자명",
+    "password": "비밀번호",
+    "loginButton": "로그인",
+    "loginError": "로그인 실패",
+    "loginSuccess": "로그인 성공",
+    "loginSuccessMessage": "Bluesky 인증이 완료되었습니다",
+    "authDataFetchFailed": "인증 정보 가져오기에 실패했습니다.",
+    "authStatusCheckFailed": "인증 상태 확인 중 오류가 발생했습니다.",
+    "logoutFailed": "로그아웃 처리에 실패했습니다.",
+    "logoutError": "로그아웃 중 오류가 발생했습니다."
+  },
+  "theme": {
+    "light": "라이트",
+    "dark": "다크",
+    "highContrast": "고대비",
+    "system": "시스템",
+    "themeToggle": "테마 전환"
+  },
+  "language": {
+    "current": "현재 언어",
+    "system": "시스템 언어",
+    "changeLanguage": "언어 변경",
+    "detectedFrom": "{source}에서 감지됨",
+    "sources": {
+      "os": "운영체제",
+      "browser": "브라우저",
+      "stored": "저장된 설정",
+      "fallback": "기본값"
+    }
+  },
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "close": "닫기",
+    "back": "뒤로",
+    "next": "다음",
+    "previous": "이전",
+    "retry": "재시도",
+    "error": "오류",
+    "active": "선택됨"
+  },
+  "profile": {
+    "displayName": "표시 이름",
+    "handle": "핸들",
+    "did": "DID",
+    "service": "서비스",
+    "lastAccess": "마지막 접속"
+  },
+  "login": {
+    "title": "Bluesky 계정으로 로그인",
+    "handleLabel": "핸들",
+    "handlePlaceholder": "예: alice.bsky.social",
+    "passwordLabel": "앱 비밀번호",
+    "passwordPlaceholder": "앱 비밀번호를 입력하세요",
+    "hostLabel": "호스트",
+    "showPassword": "비밀번호 보기",
+    "hidePassword": "비밀번호 숨기기",
+    "appPasswordGuide": "앱 비밀번호 생성 방법"
+  },
+  "validation": {
+    "requiredFields": "핸들과 비밀번호를 입력해주세요",
+    "authSaveFailed": "인증 정보 저장에 실패했습니다. 다시 시도해주세요.",
+    "authFailed": "인증에 실패했습니다. 핸들과 앱 비밀번호를 확인해주세요.",
+    "invalidFormat": "핸들 또는 비밀번호 형식이 올바르지 않습니다.",
+    "rateLimited": "요청이 너무 많습니다. 잠시 기다린 후 다시 시도해주세요.",
+    "networkError": "네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.",
+    "timeoutError": "연결이 시간 초과되었습니다. 잠시 기다린 후 다시 시도해주세요.",
+    "invalidPassword": "앱 비밀번호가 잘못되었습니다. 새로운 앱 비밀번호를 생성해주세요.",
+    "accountNotFound": "계정을 찾을 수 없습니다. 핸들을 확인해주세요.",
+    "genericError": "로그인에 실패했습니다. 잠시 기다린 후 다시 시도해주세요."
+  },
+  "root": {
+    "checkingAuth": "인증 상태 확인 중...",
+    "migrating": "계정 정보 마이그레이션 중...",
+    "migrationComplete": "마이그레이션이 완료되었습니다!",
+    "migrationError": "마이그레이션 중 오류가 발생했습니다. 로그인 페이지로 이동중...",
+    "checkingAccount": "계정 확인 중...",
+    "redirectingToDeck": "이미 로그인되었습니다. 데크 페이지로 이동중...",
+    "redirectingToLogin": "로그인 페이지로 이동중...",
+    "error": "오류가 발생했습니다. 로그인 페이지로 이동중...",
+    "migrationInProgress": "데이터 마이그레이션 진행 중",
+    "migrationDescription": "기존 데이터를 새로운 보안 스토리지로 마이그레이션하고 있습니다...",
+    "migrationCompleted": "마이그레이션 완료",
+    "legacyDataDetected": "데이터 감지",
+    "legacyDataDescription": "기존 계정 데이터를 찾았습니다"
+  },
+  "misc": {
+    "languageSelection": "언어 선택"
+  }
+}

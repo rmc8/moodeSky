@@ -7,6 +7,8 @@
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import { ICONS } from '$lib/types/icon.js';
+  import * as m from '$lib/i18n/paraglide/messages';
+  import { i18nStore } from '$lib/stores/i18n.svelte.js';
 
   let activeAccount = $state<Account | null>(null);
   let isLoading = $state(true);
@@ -23,7 +25,7 @@
         
         if (!result.success) {
           console.error('認証情報の取得に失敗:', result.error);
-          errorMessage = '認証情報の取得に失敗しました。';
+          errorMessage = m['auth.authDataFetchFailed']();
           await goto('/login');
           return;
         }
@@ -53,7 +55,7 @@
         };
       } catch (error) {
         console.error('認証状態の確認中にエラー:', error);
-        errorMessage = '認証状態の確認中にエラーが発生しました。';
+        errorMessage = m['auth.authStatusCheckFailed']();
         await goto('/login');
       } finally {
         isLoading = false;
@@ -73,7 +75,7 @@
       
       if (!result.success) {
         console.error('ログアウト処理に失敗:', result.error);
-        errorMessage = 'ログアウト処理に失敗しました。';
+        errorMessage = m['auth.logoutFailed']();
         return;
       }
       
@@ -81,7 +83,7 @@
       await goto('/login');
     } catch (error) {
       console.error('ログアウト中にエラー:', error);
-      errorMessage = 'ログアウト中にエラーが発生しました。';
+      errorMessage = m['auth.logoutError']();
     }
   }
 </script>
@@ -90,7 +92,7 @@
   {#if isLoading}
     <div class="bg-card rounded-2xl shadow-xl p-12 w-full max-w-md text-center flex flex-col items-center gap-4">
       <div class="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-      <p class="text-muted">認証情報を読み込み中...</p>
+      <p class="text-muted">{m['app.loading']()}</p>
     </div>
   {:else if errorMessage}
     <div class="bg-error/10 border-2 border-error/20 rounded-2xl shadow-xl p-12 w-full max-w-md text-center">
@@ -99,17 +101,17 @@
           icon={ICONS.ERROR}
           size="xl"
           color="error"
-          ariaLabel="エラー"
+          ariaLabel={m['common.error']()}
           class="mx-auto text-5xl"
         />
       </div>
-      <h2 class="text-error text-2xl font-semibold mb-4">エラー</h2>
+      <h2 class="text-error text-2xl font-semibold mb-4">{m['common.error']()}</h2>
       <p class="text-error mb-8">{errorMessage}</p>
       <button 
         class="bg-error hover:bg-error/80 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
         onclick={() => location.reload()}
       >
-        再試行
+        {m['common.retry']()}
       </button>
     </div>
   {:else if activeAccount}
@@ -127,14 +129,14 @@
             size="xl"
           />
         </div>
-        <h1 class="text-success text-4xl sm:text-5xl font-bold mb-4">🎉 ログイン成功</h1>
-        <p class="text-label text-lg">Blueskyへの認証が完了しました</p>
+        <h1 class="text-success text-4xl sm:text-5xl font-bold mb-4">🎉 {m['auth.loginSuccess']()}</h1>
+        <p class="text-label text-lg">{m['auth.loginSuccessMessage']()}</p>
       </div>
 
       <div class="flex flex-col gap-6 mb-10 text-left">
         {#if activeAccount.profile.displayName}
           <div class="flex flex-col gap-2">
-            <div class="text-sm font-semibold text-label uppercase tracking-wide">表示名</div>
+            <div class="text-sm font-semibold text-label uppercase tracking-wide">{m['profile.displayName']()}</div>
             <div class="bg-muted/20 border-2 border-themed rounded-lg p-3.5 font-mono text-sm text-themed break-all">
               {activeAccount.profile.displayName}
             </div>
@@ -142,28 +144,28 @@
         {/if}
         
         <div class="flex flex-col gap-2">
-          <div class="text-sm font-semibold text-label uppercase tracking-wide">ハンドル</div>
+          <div class="text-sm font-semibold text-label uppercase tracking-wide">{m['profile.handle']()}</div>
           <div class="bg-muted/20 border-2 border-themed rounded-lg p-3.5 font-mono text-sm text-themed break-all">
             {activeAccount.profile.handle}
           </div>
         </div>
         
         <div class="flex flex-col gap-2">
-          <div class="text-sm font-semibold text-label uppercase tracking-wide">DID</div>
+          <div class="text-sm font-semibold text-label uppercase tracking-wide">{m['profile.did']()}</div>
           <div class="bg-muted/20 border-2 border-themed rounded-lg p-3.5 font-mono text-xs leading-relaxed text-themed break-all">
             {activeAccount.profile.did}
           </div>
         </div>
 
         <div class="flex flex-col gap-2">
-          <div class="text-sm font-semibold text-label uppercase tracking-wide">サービス</div>
+          <div class="text-sm font-semibold text-label uppercase tracking-wide">{m['profile.service']()}</div>
           <div class="bg-muted/20 border-2 border-themed rounded-lg p-3.5 font-mono text-sm text-themed break-all">
             {activeAccount.service}
           </div>
         </div>
 
         <div class="flex flex-col gap-2">
-          <div class="text-sm font-semibold text-label uppercase tracking-wide">最終アクセス</div>
+          <div class="text-sm font-semibold text-label uppercase tracking-wide">{m['profile.lastAccess']()}</div>
           <div class="bg-muted/20 border-2 border-themed rounded-lg p-3.5 font-mono text-sm text-themed break-all">
             {new Date(activeAccount.lastAccessAt).toLocaleString('ja-JP')}
           </div>
@@ -174,7 +176,7 @@
         class="w-full bg-error hover:bg-error/80 text-white font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
         onclick={logout}
       >
-        ログアウト
+        {m['auth.logout']()}
       </button>
     </div>
   {/if}
