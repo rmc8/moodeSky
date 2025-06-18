@@ -107,6 +107,7 @@
     margin: 0;
     padding: 0;
     height: 100%;
+    overflow-y: hidden; /* ページ全体の縦スクロールバー無効 - デッキ内スクロール専用 */
   }
 
   body {
@@ -486,7 +487,7 @@
   /* Research-Based Hybrid CSS Variables */
   :root {
     /* Light Theme Scrollbar Colors */
-    --scrollbar-track-bg-light: #f1f1f1;
+    --scrollbar-track-bg-light: #f8f9fa;
     --scrollbar-thumb-bg-light: #c1c1c1;
     --scrollbar-thumb-hover-bg-light: #a8a8a8;
 
