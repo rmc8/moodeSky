@@ -62,7 +62,6 @@
 <!-- サイドナビゲーションバー -->
 <nav 
   class="fixed left-0 top-0 bottom-0 z-40 w-64 bg-card border-r-2 border-themed shadow-lg flex flex-col"
-  role="navigation"
   aria-label={navigation.home()}
 >
   <!-- 上部: 投稿ボタン -->

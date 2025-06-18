@@ -8,8 +8,11 @@
   "navigation": {
     "home": "ホーム",
     "deck": "デッキ",
+    "deckAdd": "デッキ追加",
     "settings": "設定",
-    "profile": "プロフィール"
+    "profile": "プロフィール",
+    "compose": "投稿作成",
+    "post": "投稿"
   },
   "auth": {
     "login": "ログイン",

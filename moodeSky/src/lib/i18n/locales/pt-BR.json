@@ -8,8 +8,11 @@
   "navigation": {
     "home": "Início",
     "deck": "Painel",
+    "deckAdd": "Adicionar Painel",
     "settings": "Configurações",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "compose": "Compor",
+    "post": "Publicar"
   },
   "auth": {
     "login": "Entrar",

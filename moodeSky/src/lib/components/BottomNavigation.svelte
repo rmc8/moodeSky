@@ -56,7 +56,6 @@
 <!-- ボトムナビゲーションバー -->
 <nav 
   class="fixed bottom-0 left-0 right-0 z-50 bg-card border-t-2 border-themed shadow-lg"
-  role="navigation"
   aria-label={navigation.home()}
 >
   <div class="flex justify-around items-center py-0.5 px-2">

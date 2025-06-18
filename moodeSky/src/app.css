@@ -26,10 +26,12 @@
   [data-theme="sky"] {
     --background: 255 255 255;      /* white */
     --foreground: 15 23 42;         /* slate-900 */
+    --text-secondary: 71 85 105;    /* slate-600 - セカンダリテキスト用 */
+    --text-inactive: 148 163 184;   /* slate-400 - 非アクティブ状態用 */
     --primary: 59 130 246;          /* sky blue - blue-500 */
     --secondary: 37 99 235;         /* blue-600 */
     --accent: 56 189 248;           /* sky-400 */
-    --muted: 248 250 252;           /* slate-50 */
+    --muted: 248 250 252;           /* slate-50 - 背景専用 */
     --border: 229 231 235;          /* gray-200 */
     --input: 229 231 235;           /* gray-200 */
     --card: 255 255 255;            /* white */
@@ -43,10 +45,12 @@
   [data-theme="sunset"] {
     --background: 15 23 42;         /* slate-900 */
     --foreground: 248 250 252;      /* slate-100 */
+    --text-secondary: 203 213 225;  /* slate-300 - セカンダリテキスト用 */
+    --text-inactive: 148 163 184;   /* slate-400 - 非アクティブ状態用 */
     --primary: 251 146 60;          /* sunset orange - orange-400 */
     --secondary: 249 115 22;        /* orange-500 */
     --accent: 254 215 170;          /* orange-200 */
-    --muted: 226 232 240;           /* slate-200 (最高レベル視認性) */
+    --muted: 226 232 240;           /* slate-200 - 背景専用 */
     --border: 100 116 139;          /* slate-500 (コントラスト改善) */
     --input: 100 116 139;           /* slate-500 (コントラスト改善) */
     --card: 51 65 85;               /* slate-600 (読みやすさ改善) */
@@ -60,10 +64,12 @@
   .high-contrast {
     --background: 0 0 0;            /* black */
     --foreground: 255 255 255;      /* white */
+    --text-secondary: 192 192 192;  /* light gray - セカンダリテキスト用 */
+    --text-inactive: 128 128 128;   /* gray - 非アクティブ状態用 */
     --primary: 255 255 255;         /* white */
     --secondary: 255 255 255;       /* white */
     --accent: 255 255 0;            /* yellow */
-    --muted: 128 128 128;           /* gray */
+    --muted: 128 128 128;           /* gray - 背景専用 */
     --border: 255 255 255;          /* white */
     --input: 255 255 255;           /* white */
     --card: 0 0 0;                  /* black */
@@ -213,6 +219,10 @@
   --color-warning: rgb(var(--warning));
   --color-error: rgb(var(--error));
 
+  /* 専用テキスト色トークン */
+  --color-text-secondary: rgb(var(--text-secondary));
+  --color-text-inactive: rgb(var(--text-inactive));
+
   /* Alpha variations */
   --color-primary-50: rgb(var(--primary) / 0.05);
   --color-primary-100: rgb(var(--primary) / 0.1);
@@ -353,8 +363,19 @@
     color: var(--color-foreground);
   }
 
+  /* 🚫 DEPRECATED: 背景色を文字色として使用 - 使用禁止 */
   .text-muted {
     color: var(--color-muted);
+  }
+
+  /* ✅ 推奨: 専用セカンダリテキスト色 */
+  .text-secondary {
+    color: rgb(var(--text-secondary));
+  }
+
+  /* ✅ 推奨: 非アクティブ状態テキスト色 */
+  .text-inactive {
+    color: rgb(var(--text-inactive));
   }
 
   .text-label {

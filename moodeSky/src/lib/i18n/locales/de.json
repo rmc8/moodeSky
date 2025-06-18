@@ -8,8 +8,11 @@
   "navigation": {
     "home": "Startseite",
     "deck": "Deck",
+    "deckAdd": "Deck hinzufügen",
     "settings": "Einstellungen",
-    "profile": "Profil"
+    "profile": "Profil",
+    "compose": "Erstellen",
+    "post": "Posten"
   },
   "auth": {
     "login": "Anmelden",
