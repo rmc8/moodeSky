@@ -9,6 +9,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import Icon from './Icon.svelte';
+  import DeckTabBar from './deck/DeckTabBar.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { navigation } from '$lib/i18n/paraglide/messages.js';
   
@@ -83,8 +84,8 @@
     </button>
   </div>
   
-  <!-- 中央部: 空きスペース -->
-  <div class="flex-1"></div>
+  <!-- 中央部: デッキタブエリア -->
+  <DeckTabBar />
   
   <!-- 下部: ナビゲーション項目 -->
   <div class="p-4 space-y-2">

@@ -12,7 +12,9 @@
     "settings": "Einstellungen",
     "profile": "Profil",
     "compose": "Erstellen",
-    "post": "Posten"
+    "post": "Posten",
+    "notifications": "Benachrichtigungen",
+    "search": "Suchen"
   },
   "auth": {
     "login": "Anmelden",

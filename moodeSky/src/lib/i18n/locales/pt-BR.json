@@ -12,7 +12,9 @@
     "settings": "Configurações",
     "profile": "Perfil",
     "compose": "Compor",
-    "post": "Publicar"
+    "post": "Publicar",
+    "notifications": "Notificações",
+    "search": "Pesquisar"
   },
   "auth": {
     "login": "Entrar",

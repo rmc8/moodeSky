@@ -8,12 +8,17 @@
 <script lang="ts">
   import BottomNavigation from './BottomNavigation.svelte';
   import SideNavigation from './SideNavigation.svelte';
+  import MobileDeckTabs from './deck/MobileDeckTabs.svelte';
   
   export let currentPath: string = '';
 </script>
 
-<!-- モバイル用ボトムナビゲーション (768px未満) -->
+<!-- モバイル用ナビゲーション (768px未満) -->
 <div class="md:hidden">
+  <!-- モバイル用デッキタブ (画面最上部) -->
+  <MobileDeckTabs />
+  
+  <!-- モバイル用ボトムナビゲーション -->
   <BottomNavigation {currentPath} />
 </div>
 
