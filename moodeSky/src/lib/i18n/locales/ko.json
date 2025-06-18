@@ -12,7 +12,9 @@
     "settings": "설정",
     "profile": "프로필",
     "compose": "작성",
-    "post": "게시"
+    "post": "게시",
+    "notifications": "알림",
+    "search": "검색"
   },
   "auth": {
     "login": "로그인",

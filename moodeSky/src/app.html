@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <title>moodeSky - Bluesky クライアント</title>
     
-    <!-- FOUC防止: テーマ初期化スクリプト -->
+    <!-- FOUC防止: テーマ・プラットフォーム初期化スクリプト -->
     <script>
       (function() {
         // System theme detection
@@ -20,9 +20,35 @@
             : { theme: 'light', dataTheme: 'sky' };
         }
 
-        // Apply theme immediately
+        // Platform detection (simplified for immediate application)
+        function detectPlatform() {
+          const platform = navigator.platform.toLowerCase();
+          const userAgent = navigator.userAgent.toLowerCase();
+          
+          if (platform.includes('mac') || userAgent.includes('macintosh')) return 'macos';
+          if (platform.includes('win') || userAgent.includes('windows')) return 'windows';
+          if (platform.includes('linux')) return 'linux';
+          if (userAgent.includes('iphone') || userAgent.includes('ipad')) return 'ios';
+          if (userAgent.includes('android')) return 'android';
+          return 'web';
+        }
+
+        // Tauri environment detection
+        function detectTauriEnvironment() {
+          try {
+            return typeof window !== 'undefined' && 
+                   '__TAURI__' in window &&
+                   window.__TAURI__ !== undefined;
+          } catch {
+            return false;
+          }
+        }
+
+        // Apply theme and platform classes immediately
         try {
           const detected = detectSystemTheme();
+          const platform = detectPlatform();
+          const isTauri = detectTauriEnvironment();
           const html = document.documentElement;
           
           // Clear any existing classes
@@ -39,14 +65,23 @@
             }
           }
           
+          // Apply platform classes
+          html.classList.add(`platform-${platform}`);
+          if (isTauri) {
+            html.classList.add('env-tauri');
+          } else {
+            html.classList.add('env-web');
+          }
+          
           // Prevent FOUC by ensuring theme is applied before content loads
           document.addEventListener('DOMContentLoaded', function() {
             document.body.style.visibility = 'visible';
           });
         } catch (e) {
-          // Fallback: apply light theme
-          document.documentElement.classList.add('light');
-          document.documentElement.setAttribute('data-theme', 'sky');
+          // Fallback: apply light theme and web platform
+          const html = document.documentElement;
+          html.classList.add('light', 'platform-web', 'env-web');
+          html.setAttribute('data-theme', 'sky');
         }
       })();
     </script>
