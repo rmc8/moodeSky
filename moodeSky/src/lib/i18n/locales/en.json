@@ -8,8 +8,11 @@
   "navigation": {
     "home": "Home",
     "deck": "Deck",
+    "deckAdd": "Add Deck",
     "settings": "Settings",
-    "profile": "Profile"
+    "profile": "Profile",
+    "compose": "Compose",
+    "post": "Post"
   },
   "auth": {
     "login": "Login",

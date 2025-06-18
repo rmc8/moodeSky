@@ -38,7 +38,9 @@
     switch (color) {
       case 'themed': return 'text-themed';
       case 'primary': return 'text-primary';  
-      case 'muted': return 'text-muted';
+      case 'muted': return 'text-muted';           // 🚫 DEPRECATED: 使用禁止
+      case 'secondary': return 'text-secondary';   // ✅ セカンダリテキスト用
+      case 'inactive': return 'text-inactive';     // ✅ 非アクティブ状態用
       case 'error': return 'text-error';
       case 'success': return 'text-success';
       case 'warning': return 'text-warning';

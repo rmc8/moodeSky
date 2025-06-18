@@ -8,8 +8,11 @@
   "navigation": {
     "home": "홈",
     "deck": "덱",
+    "deckAdd": "덱 추가",
     "settings": "설정",
-    "profile": "프로필"
+    "profile": "프로필",
+    "compose": "작성",
+    "post": "게시"
   },
   "auth": {
     "login": "로그인",

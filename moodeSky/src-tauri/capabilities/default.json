@@ -9,6 +9,8 @@
     "core:default",
     "opener:default",
     "store:default",
-    "sql:default"
+    "sql:default",
+    "os:default",
+    "os:allow-locale"
   ]
 }

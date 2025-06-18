@@ -5,6 +5,7 @@
 
 import { i18nService, detectSystemLanguage } from '../services/i18nService.js';
 import { overwriteGetLocale, overwriteSetLocale, setLocale as paraglidSetLocale } from '../i18n/paraglide/runtime.js';
+import { setCurrentLanguage } from '../utils/i18nHelper.js';
 import type { 
   SupportedLanguage, 
   LanguageDetectionResult, 
@@ -133,6 +134,9 @@ class I18nStore {
       this.state.detectionResult = detectionResult;
       this.state.isInitialized = true;
 
+      // i18nHelper の現在言語を同期
+      setCurrentLanguage(finalLanguage);
+
       // Paraglide-JSの言語設定
       paraglidSetLocale(finalLanguage, { reload: false });
 
@@ -152,6 +156,7 @@ class I18nStore {
       // エラー時はフォールバック言語を使用
       this.state.currentLanguage = 'en';
       this.state.systemLanguage = 'en';
+      setCurrentLanguage('en');
       paraglidSetLocale('en', { reload: false });
       this.updateHtmlLangAttribute();
       
@@ -170,7 +175,7 @@ class I18nStore {
     });
 
     // setLocale()をカスタマイズして、ストアの状態を更新
-    overwriteSetLocale((newLocale) => {
+    overwriteSetLocale((newLocale: string) => {
       this.state.currentLanguage = newLocale as SupportedLanguage;
       this.updateHtmlLangAttribute();
       
@@ -196,6 +201,9 @@ class I18nStore {
       // 状態を更新
       this.state.currentLanguage = language;
       this.state.error = null;
+
+      // i18nHelper の現在言語を同期
+      setCurrentLanguage(language);
 
       // Paraglide-JSの言語設定（リロードなし）
       paraglidSetLocale(language, { reload: false });

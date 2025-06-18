@@ -75,7 +75,7 @@
       <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-primary rounded-full mb-4" role="status" aria-label="テーマ読み込み中">
         <span class="sr-only">テーマ読み込み中...</span>
       </div>
-      <p class="text-sm text-muted">テーマを読み込んでいます...</p>
+      <p class="text-sm text-themed opacity-70">テーマを読み込んでいます...</p>
     </div>
   </div>
 {:else if themeStore.error}

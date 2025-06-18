@@ -12,7 +12,15 @@ export type IconSize = 'sm' | 'md' | 'lg' | 'xl';
  * アイコンカラーバリアント  
  * 既存のテーマシステム（TailwindCSS v4 + data-theme）と統合
  */
-export type IconColor = 'themed' | 'primary' | 'muted' | 'error' | 'success' | 'warning';
+export type IconColor = 
+  | 'themed'     // メインテキスト色
+  | 'primary'    // プライマリアクセント色
+  | 'muted'      // 🚫 DEPRECATED: 背景色流用（使用禁止）
+  | 'secondary'  // ✅ セカンダリテキスト専用色
+  | 'inactive'   // ✅ 非アクティブ状態専用色
+  | 'error'      // エラー状態色
+  | 'success'    // 成功状態色
+  | 'warning';   // 警告状態色
 
 /**
  * アイコンコンポーネントのプロパティ
@@ -95,6 +103,14 @@ export const ICONS = {
   CLOSE: 'material-symbols:close',
   MENU: 'material-symbols:menu',
   REFRESH: 'material-symbols:refresh',
+  ADD: 'material-symbols:add',
+  ADD_CIRCLE: 'material-symbols:add-circle',
+  CREATE: 'material-symbols:create',
+  
+  // デッキ・カラム管理
+  DASHBOARD: 'material-symbols:dashboard',
+  VIEW_COLUMN: 'material-symbols:view-column',
+  GRID_VIEW: 'material-symbols:grid-view',
   
   // 国際化・言語
   TRANSLATE: 'material-symbols:translate',
