@@ -22,12 +22,19 @@ moodeSky/
 │   │   │   ├── components/       # Svelte コンポーネント
 │   │   │   │   ├── ThemeProvider.svelte
 │   │   │   │   ├── ThemeToggle.svelte
+│   │   │   │   ├── LanguageSelectorCompact.svelte
 │   │   │   │   └── Avatar.svelte
+│   │   │   ├── i18n/             # 多言語化システム
+│   │   │   │   ├── locales/      # 翻訳ファイル（5言語対応）
+│   │   │   │   ├── paraglide/    # Paraglide-JS生成ファイル
+│   │   │   │   └── project.inlang # Inlang設定
 │   │   │   ├── stores/           # Svelte 5 ストア (runes)
-│   │   │   │   └── theme.svelte.ts
+│   │   │   │   ├── theme.svelte.ts
+│   │   │   │   └── i18n.svelte.ts # 多言語化ストア
 │   │   │   ├── services/         # サービス層
 │   │   │   │   ├── authStore.ts  # 認証管理 (Tauri Store)
-│   │   │   │   └── themeStore.ts # テーマ管理
+│   │   │   │   ├── themeStore.ts # テーマ管理
+│   │   │   │   └── i18nService.ts # 多言語化サービス
 │   │   │   └── types/            # TypeScript 型定義
 │   │   │       ├── auth.ts       # AT Protocol 型定義
 │   │   │       └── theme.ts      # テーマシステム型定義
@@ -73,6 +80,10 @@ moodeSky/
 - **状態管理**:
   - **Tauri Store Plugin**: 永続化が必要な設定・状態管理
   - **Svelte $state**: シンプルなコンポーネント状態管理
+- **多言語化**: Paraglide-JS v2 + Tauri OS Plugin
+  - **Paraglide-JS v2**: 型安全な翻訳システム
+  - **Tauri OS Plugin**: ネイティブシステム言語検出
+  - **多層言語検出**: 保存設定→OS→ブラウザ→フォールバック
 - **AT Protocol**: Bluesky API統合 (@atproto/api使用)
 - **開発支援**: dev_rag (RAGベース ドキュメント検索)
 
@@ -91,6 +102,10 @@ Navigate to `moodeSky/` directory for all commands:
 - `pnpm run dev` - SvelteKit開発サーバーのみ (Tauri機能不要時)
 - `pnpm run check` - TypeScript/Svelte型チェック
 - `pnpm run check:watch` - 型チェック (watch モード)
+
+**Internationalization:**
+- `npx @inlang/paraglide-js compile --project ./project.inlang` - 翻訳ファイル再コンパイル
+- `pnpm run check` - TypeScript型チェック（翻訳関数含む）
 
 **Building:**
 - `pnpm run build` - フロントエンド本番用ビルド
@@ -237,6 +252,75 @@ Navigate to `dev_rag/` directory:
 - MCP (Model Context Protocol) でClaude Code統合
 - Qdrant ベクトルDB で類似検索
 - FastEmbed で効率的 embedding 生成
+
+## 🌍 多言語化システム (i18n)
+
+### 📋 実装完了状況
+- [x] **Paraglide-JS v2統合** - 型安全な翻訳システム
+- [x] **Tauri OS Plugin統合** - ネイティブシステム言語検出  
+- [x] **多層言語検出システム** - 保存設定→OS→ブラウザ→フォールバック
+- [x] **Tauri Store Plugin統合** - 言語設定永続化
+- [x] **Svelte 5 Reactive Store** - リアクティブ言語切り替え
+- [x] **完全翻訳適用** - 全ページ・コンポーネント対応
+
+### 🌐 対応言語詳細
+1. **日本語 (ja)** - プライマリ言語、最高品質
+2. **英語 (en)** - グローバル標準、フォールバック言語
+3. **ポルトガル語 (pt-BR)** - ブラジル市場向け
+4. **ドイツ語 (de)** - ヨーロッパ市場向け  
+5. **韓国語 (ko)** - 東アジア市場向け
+
+### 🔧 技術仕様
+- **翻訳ファイル**: `src/lib/i18n/locales/*.json` 
+- **型安全性**: 翻訳キー自動補完・型チェック
+- **リアクティブ**: Svelte 5 runesによる動的言語切り替え
+- **永続化**: Tauri Store Pluginで設定保存
+- **フォールバック**: 英語への自動フォールバック機能
+
+### 🎯 使用方法
+```typescript
+import * as m from '$lib/i18n/paraglide/messages.js';
+
+// 翻訳関数の使用（型安全）
+const title = m['login.title']();
+const error = m['validation.requiredFields']();
+```
+
+### 🔄 言語検出フロー
+1. **Tauri Store Plugin** → 保存された言語設定
+2. **Tauri OS Plugin** → システム言語検出
+3. **Navigator API** → ブラウザ言語
+4. **Fallback** → 英語 (en)
+
+### 📁 ファイル構造
+```
+src/lib/i18n/
+├── locales/                    # 翻訳ファイル（5言語）
+│   ├── ja.json                # 日本語（プライマリ）
+│   ├── en.json                # 英語（フォールバック）
+│   ├── pt-BR.json             # ポルトガル語（ブラジル）
+│   ├── de.json                # ドイツ語
+│   └── ko.json                # 韓国語
+├── paraglide/                 # Paraglide-JS生成ファイル
+│   ├── messages.js            # 翻訳関数エクスポート
+│   └── runtime.js             # 実行時ロジック
+└── project.inlang             # Inlang設定ファイル
+```
+
+### 🛠 開発コマンド
+```bash
+# 翻訳ファイル再コンパイル
+npx @inlang/paraglide-js compile --project ./project.inlang
+
+# 型チェック（翻訳関数含む）
+pnpm run check
+```
+
+### 🎨 UI言語選択
+- **LanguageSelectorCompact.svelte** - コンパクト言語選択器
+- **アイコン + 言語コード** - 直感的なUI
+- **ドロップダウンメニュー** - 全言語選択可能
+- **システム言語復帰** - ワンクリックでOS設定に戻す
 
 ## 開発ルール・ドキュメント
 
@@ -624,7 +708,10 @@ Navigate to `dev_rag/` directory:
 #### **必須監視ファイル**
 - `src/app.css` - **テーマシステムの中核**、変更時は慎重に
 - `src/lib/stores/theme.svelte.ts` - テーマ状態管理、Svelte 5 runes使用
+- `src/lib/stores/i18n.svelte.ts` - **多言語化状態管理**、言語切り替え制御
 - `src/lib/components/ThemeProvider.svelte` - アプリ全体のテーマ制御
+- `src/lib/i18n/locales/*.json` - **翻訳ファイル**、文言変更時に更新
+- `src/lib/i18n/project.inlang` - **多言語化設定**、言語追加時に修正必要
 - `tauri.conf.json` - Tauri設定、セキュリティ・プラグイン管理
 - `package.json` - **pnpm管理**、新パッケージ追加時は影響確認
 
@@ -634,6 +721,9 @@ Navigate to `dev_rag/` directory:
 3. **型定義**: @atproto/apiの公式型を**必ず活用**
 4. **視認性**: 新しい色の組み合わせは**コントラスト比測定必須**
 5. **コミット**: テーマ関連変更は**全テーマでの動作確認必須**
+6. **多言語化**: ハードコードされた文字列は**必ず翻訳関数に置換**
+7. **翻訳更新**: 新しい翻訳キー追加後は**Paraglideコンパイル必須**
+8. **言語テスト**: UI変更時は**全5言語での表示確認必須**
 
 ## 🎨 moodeSky プロダクト仕様
 
@@ -675,6 +765,14 @@ Navigate to `dev_rag/` directory:
 - 日付・時間・数値の地域化
 - 文字密度に対応したレスポンシブデザイン
 - RTL言語は対象外（LTR言語のみ）
+
+#### 実装ステータス（✅ 完了）
+- [x] **Paraglide-JS v2統合** - 型安全な翻訳システム
+- [x] **Tauri OS Plugin統合** - ネイティブシステム言語検出
+- [x] **多層言語検出システム** - 保存設定→OS→ブラウザ→フォールバック
+- [x] **Tauri Store Plugin統合** - 言語設定永続化
+- [x] **Svelte 5 Reactive Store** - リアクティブ言語切り替え
+- [x] **完全翻訳適用** - 全ページ・コンポーネント対応
 
 ### 🎨 テーマシステム
 
@@ -788,6 +886,7 @@ Navigate to `dev_rag/` directory:
 - [x] **AT Protocol認証システム** - ✅ 完了（Tauri Store Plugin + @atproto/api）
 - [x] **基本UI・テーマシステム** - ✅ 完了（TailwindCSS v4 + 統合テーマ）
 - [x] **シングルアカウント対応** - ✅ 完了（Store Plugin セキュア管理）
+- [x] **多言語化システム** - ✅ 完了（Paraglide-JS v2 + 5言語対応）
 - [ ] 基本的なタイムライン表示 - 🚧 次期実装
 - [ ] 投稿作成・削除機能 - 🚧 次期実装
 
@@ -797,8 +896,9 @@ Navigate to `dev_rag/` directory:
 - [ ] カラム管理機能
 - [ ] クロスアカウント操作
 
-#### Phase 3: 多言語・外部連携（2-3か月）
-- [ ] i18n実装・翻訳
+#### Phase 3: マルチアカウント・外部連携（2-3か月）
+- [x] **i18n実装・翻訳** - ✅ 完了（5言語完全対応）
+- [ ] マルチアカウント認証管理 - 🚧 移行
 - [ ] 外部ツール連携API
 - [ ] プラグインシステム
 - [ ] 高度なフィルタリング
@@ -966,3 +1066,46 @@ class ThemeStore {
 **教訓**: 
 > テーマシステムは技術的実装だけでなく、アクセシビリティとユーザビリティの科学的基準に基づいて設計する。
 > レガシーなアプローチを排除し、保守性と拡張性を重視した統合システムを構築する。
+
+### 🌍 Paraglide-JS v2 多言語化パターン
+
+**完全型安全i18nシステムの実装アーキテクチャ**:
+1. **Tauri OS Plugin**: ネイティブシステム言語検出
+2. **多層検出**: 保存設定 → OS言語 → ブラウザ → 英語フォールバック
+3. **Svelte 5 Stores**: リアクティブな言語状態管理
+4. **型安全翻訳**: 翻訳キー自動補完・コンパイル時検証
+
+**実装済みファイル**:
+- `src/lib/i18n/locales/` - 5言語翻訳ファイル
+- `src/lib/stores/i18n.svelte.ts` - 言語状態管理（Svelte 5 runes）
+- `src/lib/services/i18nService.ts` - 言語検出・設定サービス
+- `src/lib/components/LanguageSelectorCompact.svelte` - UI言語選択
+
+**使用方法パターン**:
+```typescript
+import * as m from '$lib/i18n/paraglide/messages.js';
+
+// 翻訳関数の使用（型安全）
+const title = m['login.title']();
+const error = m['validation.requiredFields']();
+```
+
+**言語検出フロー**:
+```typescript
+// 多層言語検出システム
+1. Tauri Store Plugin → 保存された言語設定
+2. Tauri OS Plugin → システム言語検出
+3. Navigator API → ブラウザ言語
+4. Fallback → 英語 (en)
+```
+
+**メリット**:
+- **型安全性**: 翻訳キーの存在保証・自動補完
+- **クロスプラットフォーム**: Tauriネイティブ統合
+- **パフォーマンス**: 最小バンドルサイズ
+- **保守性**: 翻訳ファイル自動同期・検証
+
+**教訓**:
+> Paraglide-JS v2の型安全性とTauri OS Pluginのネイティブ統合により、
+> 真のクロスプラットフォーム多言語化が実現。レガシーなi18nライブラリとは
+> 一線を画す開発体験とユーザー体験を提供。
