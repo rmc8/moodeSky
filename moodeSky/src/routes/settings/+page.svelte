@@ -125,7 +125,7 @@
     <Navigation {currentPath} />
     
     <!-- メインコンテンツエリア -->
-    <main class="md:ml-64 min-h-screen pb-20 md:pb-0">
+    <main class="md:ml-64 h-screen pb-20 md:pb-0 overflow-hidden flex flex-col">
       <!-- ヘッダー -->
       <header class="bg-card border-b-2 border-themed shadow-sm p-4 flex items-center justify-between">
         <div class="flex items-center gap-4">
@@ -164,8 +164,8 @@
         </div>
       </header>
 
-      <!-- メインコンテンツ -->
-      <div class="p-6">
+      <!-- スクロール可能なメインコンテンツ -->
+      <div class="flex-1 overflow-y-auto scrollbar-professional p-6">
         <!-- 設定ナビゲーション -->
         <div class="max-w-4xl mx-auto mb-6">
           <div class="flex flex-wrap gap-2 p-2 bg-card rounded-lg border border-themed">
@@ -227,6 +227,9 @@
             </div>
           {/if}
         </div>
+        
+        <!-- 底部スペース（モバイルナビゲーション用） -->
+        <div class="h-16 md:h-0"></div>
       </div>
     </main>
   </div>
