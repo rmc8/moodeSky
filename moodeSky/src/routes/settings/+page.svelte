@@ -1,0 +1,239 @@
+<!--
+  Settings Page - 設定画面（基本実装）
+  
+  シンプルな空の設定ページ
+  ナビゲーション統合とレスポンシブ対応済み
+-->
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+  import Navigation from '$lib/components/Navigation.svelte';
+  import { authService } from '$lib/services/authStore.js';
+  import type { Account } from '$lib/types/auth.js';
+  import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
+  import { page } from '$app/stores';
+  
+  // 設定コンポーネント
+  import ThemeSettings from './components/ThemeSettings.svelte';
+  import LanguageSettings from './components/LanguageSettings.svelte';
+  
+  // ===================================================================
+  // 状態管理
+  // ===================================================================
+
+  // リアクティブ翻訳システム
+  const { t, currentLanguage } = useTranslation();
+
+  let activeAccount = $state<Account | null>(null);
+  let isLoading = $state(true);
+  let errorMessage = $state('');
+  let currentPath = $state($page.url.pathname);
+  let activeSection = $state<'theme' | 'language' | 'account' | 'notifications'>('theme');
+
+  // 現在のパスを監視
+  $effect(() => {
+    currentPath = $page.url.pathname;
+  });
+
+  // ===================================================================
+  // ライフサイクル・初期化
+  // ===================================================================
+
+  onMount(() => {
+    (async () => {
+      try {
+        console.log('🛠️ [Settings] 設定画面初期化開始');
+        
+        // 認証状態確認
+        const result = await authService.getActiveAccount();
+        
+        if (!result.success || !result.data) {
+          console.log('🛠️ [Settings] 認証失敗 - ログインページにリダイレクト');
+          errorMessage = t('settings.authRequired');
+          await goto('/login');
+          return;
+        }
+        
+        activeAccount = result.data;
+        console.log('🛠️ [Settings] 設定画面初期化完了');
+        
+      } catch (error) {
+        console.error('🛠️ [Settings] 初期化エラー:', error);
+        errorMessage = t('settings.initializationFailed');
+      } finally {
+        isLoading = false;
+      }
+    })();
+  });
+
+  // ===================================================================
+  // イベントハンドラー
+  // ===================================================================
+
+  /**
+   * ログアウト処理
+   */
+  async function logout() {
+    try {
+      const result = await authService.clearAll();
+      
+      if (!result.success) {
+        console.error('ログアウト処理に失敗:', result.error);
+        errorMessage = t('auth.logoutFailed');
+        return;
+      }
+      
+      console.log('正常にログアウトしました');
+      await goto('/login');
+    } catch (error) {
+      console.error('ログアウト中にエラー:', error);
+      errorMessage = t('auth.logoutError');
+    }
+  }
+
+  /**
+   * 設定セクション切り替え
+   */
+  function switchSection(section: typeof activeSection) {
+    activeSection = section;
+  }
+</script>
+
+<!-- メインレイアウト -->
+{#if isLoading}
+  <!-- ローディング画面 -->
+  <div class="min-h-screen flex items-center justify-center bg-themed">
+    <div class="bg-card rounded-2xl shadow-xl p-12 w-full max-w-md text-center flex flex-col items-center gap-4">
+      <div class="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+      <p class="text-themed opacity-80">{t('settings.loading')}</p>
+    </div>
+  </div>
+{:else if errorMessage}
+  <!-- エラー画面 -->
+  <div class="min-h-screen flex items-center justify-center bg-themed p-4">
+    <div class="bg-error/10 border-2 border-error/20 rounded-2xl shadow-xl p-12 w-full max-w-md text-center">
+      <h2 class="text-error text-2xl font-semibold mb-4">{t('common.error')}</h2>
+      <p class="text-error mb-8">{errorMessage}</p>
+      <button 
+        class="bg-error hover:bg-error/80 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+        onclick={() => location.reload()}
+      >
+        {t('common.retry')}
+      </button>
+    </div>
+  </div>
+{:else}
+  <!-- メイン設定画面 -->
+  <div class="min-h-screen bg-themed">
+    <!-- ナビゲーション -->
+    <Navigation {currentPath} />
+    
+    <!-- メインコンテンツエリア -->
+    <main class="md:ml-64 h-screen pb-20 md:pb-0 overflow-hidden flex flex-col">
+      <!-- ヘッダー -->
+      <header class="bg-card border-b-2 border-themed shadow-sm p-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <h1 class="text-themed text-2xl font-bold flex items-center gap-2">
+            <span class="text-2xl">⚙️</span>
+            {t('settings.title')}
+          </h1>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <!-- アカウント情報（デスクトップのみ） -->
+          {#if activeAccount}
+            <div class="hidden md:flex items-center gap-3">
+              <div class="text-right">
+                <p class="text-themed font-medium text-sm">
+                  {activeAccount.profile.displayName || activeAccount.profile.handle}
+                </p>
+                <p class="text-themed opacity-70 text-xs">
+                  @{activeAccount.profile.handle}
+                </p>
+              </div>
+            </div>
+          {/if}
+          
+          <!-- ログアウトボタン -->
+          <button 
+            class="text-themed opacity-70 hover:text-error transition-colors p-2 rounded-lg hover:bg-error/10"
+            onclick={logout}
+            title={t('auth.logout')}
+            aria-label={t('auth.logout')}
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- スクロール可能なメインコンテンツ -->
+      <div class="flex-1 overflow-y-auto scrollbar-professional p-6">
+        <!-- 設定ナビゲーション -->
+        <div class="max-w-4xl mx-auto mb-6">
+          <div class="flex flex-wrap gap-2 p-2 bg-card rounded-lg border border-themed">
+            <button
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class:bg-primary={activeSection === 'theme'}
+              class:text-white={activeSection === 'theme'}
+              class:text-themed={activeSection !== 'theme'}
+              class:hover:bg-muted={activeSection !== 'theme'}
+              onclick={() => switchSection('theme')}
+            >
+              🎨 {t('settings.tabs.theme')}
+            </button>
+            <button
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class:bg-primary={activeSection === 'language'}
+              class:text-white={activeSection === 'language'}
+              class:text-themed={activeSection !== 'language'}
+              class:hover:bg-muted={activeSection !== 'language'}
+              onclick={() => switchSection('language')}
+            >
+              🌍 {t('settings.tabs.language')}
+            </button>
+            <button
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed"
+              disabled
+            >
+              👤 {t('settings.tabs.account')}（{t('settings.comingSoon')}）
+            </button>
+            <button
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed"
+              disabled
+            >
+              🔔 {t('settings.tabs.notifications')}（{t('settings.comingSoon')}）
+            </button>
+          </div>
+        </div>
+
+        <!-- 設定コンテンツ -->
+        <div class="transition-all duration-300">
+          {#if activeSection === 'theme'}
+            <ThemeSettings />
+          {:else if activeSection === 'language'}
+            <LanguageSettings />
+          {:else if activeSection === 'account'}
+            <!-- アカウント設定（準備中） -->
+            <div class="max-w-4xl mx-auto text-center py-12">
+              <div class="text-6xl mb-4">👤</div>
+              <h3 class="text-themed text-xl font-semibold mb-2">{t('settings.account.title')}</h3>
+              <p class="text-themed opacity-70">{t('settings.account.description')}</p>
+            </div>
+          {:else if activeSection === 'notifications'}
+            <!-- 通知設定（準備中） -->
+            <div class="max-w-4xl mx-auto text-center py-12">
+              <div class="text-6xl mb-4">🔔</div>
+              <h3 class="text-themed text-xl font-semibold mb-2">{t('settings.notifications.title')}</h3>
+              <p class="text-themed opacity-70">{t('settings.notifications.description')}</p>
+            </div>
+          {/if}
+        </div>
+        
+        <!-- 底部スペース（モバイルナビゲーション用） -->
+        <div class="h-16 md:h-0"></div>
+      </div>
+    </main>
+  </div>
+{/if}

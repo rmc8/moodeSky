@@ -5,7 +5,10 @@
 <script lang="ts">
   import { i18nStore, type SupportedLanguage } from '../stores/i18n.svelte.js';
   import { SUPPORTED_LANGUAGES } from '../services/i18nService.js';
-  import { language, app } from '../i18n/paraglide/messages.js';
+  import { useTranslation } from '../utils/reactiveTranslation.svelte.js';
+  
+  // リアクティブ翻訳システム
+  const { t } = useTranslation();
 
   // 言語選択の処理
   async function handleLanguageChange(event: Event) {
@@ -25,10 +28,10 @@
 
 <div class="language-selector">
   <div class="selector-header">
-    <h3 class="text-label">{language.current()}</h3>
+    <h3 class="text-label">{t('language.current')}</h3>
     {#if i18nStore.detectionResult}
-      <p class="text-muted text-sm">
-        {language.detectedFrom()} {language.sources.os()}
+      <p class="text-secondary text-sm">
+        {t('language.detectedFrom')} {t('language.sources.os')}
         {#if i18nStore.detectionResult.originalLocale}
           ({i18nStore.detectionResult.originalLocale})
         {/if}
@@ -51,7 +54,7 @@
       on:click={resetToSystemLanguage}
       disabled={i18nStore.isLoading || i18nStore.currentLanguage === i18nStore.systemLanguage}
     >
-      {language.system()}
+      {t('language.system')}
     </button>
   </div>
 
@@ -63,7 +66,7 @@
 
   {#if i18nStore.isLoading}
     <div class="loading-indicator">
-      <p>{app.loading()}</p>
+      <p>{t('app.loading')}</p>
     </div>
   {/if}
 
@@ -178,7 +181,8 @@
   }
 
   .loading-indicator p {
-    color: var(--color-muted);
+    color: var(--color-foreground);
+    opacity: 0.7;
     font-size: 0.875rem;
     margin: 0;
   }
@@ -190,14 +194,16 @@
   }
 
   .debug-info summary {
-    color: var(--color-muted);
+    color: var(--color-foreground);
+    opacity: 0.6;
     font-size: 0.75rem;
     cursor: pointer;
   }
 
   .debug-info pre {
     font-size: 0.75rem;
-    color: var(--color-muted);
+    color: var(--color-foreground);
+    opacity: 0.8;
     background-color: var(--color-muted);
     padding: 0.5rem;
     border-radius: 0.25rem;
@@ -212,8 +218,9 @@
     opacity: 0.85;
   }
 
-  .text-muted {
-    color: var(--color-muted);
+  .text-secondary {
+    color: var(--color-foreground);
+    opacity: 0.7;
   }
 
   .text-error {

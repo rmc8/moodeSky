@@ -60,7 +60,22 @@
     "previous": "Anterior",
     "retry": "Tentar novamente",
     "error": "Erro",
-    "active": "Ativo"
+    "active": "Ativo",
+    "reload": "Recarregar página"
+  },
+  "deck": {
+    "welcome": "Bem-vindo ao sistema de painéis moodeSky!",
+    "welcomeDescription": "Recursos de timeline e colunas serão implementados aqui.",
+    "developmentFeatures": "Recursos planejados",
+    "unexpectedState": "Estado inesperado",
+    "unexpectedStateDescription": "O aplicativo está em um estado inesperado.",
+    "plannedFeatures": {
+      "homeTimeline": "Exibição da timeline inicial",
+      "multiColumn": "Sistema de painéis multi-colunas",
+      "postCompose": "Recursos de criação e gerenciamento de posts",
+      "searchFilter": "Recursos de pesquisa e filtragem",
+      "realTimeUpdate": "Atualizações em tempo real"
+    }
   },
   "profile": {
     "displayName": "Nome de exibição",
@@ -109,5 +124,150 @@
   },
   "misc": {
     "languageSelection": "Seleção de idioma"
+  },
+  "settings": {
+    "title": "Configurações",
+    "loading": "Carregando configurações...",
+    "initializationFailed": "Falha ao inicializar a página de configurações.",
+    "changingSettings": "Alterando configurações...",
+    "tabs": {
+      "theme": "Tema e Aparência",
+      "language": "Configurações de Idioma",
+      "account": "Conta",
+      "notifications": "Notificações"
+    },
+    "comingSoon": "Em Breve",
+    "theme": {
+      "title": "Configurações de Tema e Aparência",
+      "description": "Configure a aparência e tema da aplicação",
+      "mode": "Modo do Tema",
+      "animation": "Efeitos de Animação",
+      "animationDescription": "Transições de tema e animações de elementos da UI",
+      "animationNote": "Desabilitar animações melhora a performance",
+      "autoSchedule": "Agendamento Automático",
+      "autoScheduleDescription": "Mudança automática de tema baseada no horário",
+      "autoScheduleNote": "Alterna automaticamente entre temas claro/escuro em horários especificados",
+      "lightStart": "Início do Tema Claro",
+      "darkStart": "Início do Tema Escuro",
+      "currentInfo": "Informações do Tema Atual",
+      "settingMode": "Modo Definido",
+      "appliedTheme": "Tema Aplicado",
+      "animations": "Animações",
+      "enabled": "Habilitado",
+      "disabled": "Desabilitado",
+      "selected": "Selecionado",
+      "systemTheme": "Sistema",
+      "lightTheme": "Claro",
+      "darkTheme": "Escuro",
+      "highContrastTheme": "Alto Contraste",
+      "systemDescription": "Alterna automaticamente o tema de acordo com as configurações do sistema",
+      "lightDescription": "Tema claro e limpo com fundo brilhante",
+      "darkDescription": "Tema escuro que é mais suave para os olhos",
+      "highContrastDescription": "Tema de alto contraste focado na acessibilidade",
+      "changedTo": "Tema alterado para \"{theme}\"",
+      "animationToggled": "Efeitos de animação {state}",
+      "scheduleToggled": "Agendamento automático {state}",
+      "changeError": "Falha ao alterar tema",
+      "animationError": "Falha ao alterar configurações de animação",
+      "scheduleError": "Falha ao alterar configurações de agendamento automático",
+      "scheduleTimeError": "Falha ao alterar horário do agendamento",
+      "sampleText": "Texto de Exemplo"
+    },
+    "language": {
+      "title": "Configurações de Idioma e Localização",
+      "description": "Configure o idioma de exibição e localização da aplicação",
+      "displayLanguage": "Idioma de Exibição",
+      "systemIntegration": "Integração com Sistema",
+      "useSystemLanguage": "Usar Idioma do Sistema",
+      "useSystemLanguageDescription": "Usar idioma do SO \"{language}\"",
+      "resetToSystem": "Redefinir para Idioma do Sistema",
+      "redetectLanguage": "Re-detectar Idioma do Sistema",
+      "redetectDescription": "Re-detectar idioma quando as configurações do SO mudarem",
+      "redetect": "Re-detectar",
+      "currentInfo": "Informações do Idioma Atual",
+      "currentLanguage": "Idioma Atual",
+      "systemLanguage": "Idioma do Sistema",
+      "detectionMethod": "Método de Detecção",
+      "initializationStatus": "Status de Inicialização",
+      "completed": "Concluído",
+      "initializing": "Inicializando...",
+      "features": "Recursos de Localização",
+      "implementedFeatures": "Recursos Implementados",
+      "supportedLanguages": "Idiomas Suportados ({count} idiomas)",
+      "changedTo": "Idioma alterado para \"{language}\"",
+      "resetToSystemSuccess": "Redefinido para idioma do sistema \"{language}\"",
+      "redetectedSuccess": "Idioma do sistema re-detectado",
+      "changeError": "Falha ao alterar idioma",
+      "resetError": "Falha ao redefinir para idioma do sistema",
+      "redetectError": "Falha ao re-detectar idioma",
+      "unknown": "Desconhecido",
+      "direction": "Direção",
+      "region": "Região",
+      "primaryLanguage": "Idioma principal - tradução de mais alta qualidade",
+      "globalStandard": "Padrão global - idioma de fallback",
+      "brazilMarket": "Brasil - mercado sul-americano",
+      "europeanMarket": "Alemão - mercado europeu",
+      "eastAsianMarket": "Coreano - mercado do leste asiático",
+      "detectionSources": {
+        "stored": "Configurações Salvas",
+        "os": "Configurações do Sistema",
+        "browser": "Configurações do Navegador",
+        "fallback": "Fallback"
+      }
+    },
+    "account": {
+      "title": "Configurações da Conta",
+      "description": "O recurso de configurações da conta está chegando em breve"
+    },
+    "notifications": {
+      "title": "Configurações de Notificação",
+      "description": "O recurso de configurações de notificação está chegando em breve"
+    },
+    "authRequired": "Autenticação necessária",
+    "closeMessage": "Fechar mensagem"
+  },
+  "deck": {
+    "welcome": "Bem-vindo ao sistema de painel moodeSky!",
+    "welcomeDescription": "Recursos de linha do tempo e coluna serão implementados aqui.",
+    "developmentFeatures": "Recursos planejados",
+    "unexpectedState": "Estado inesperado",
+    "unexpectedStateDescription": "A aplicação está em um estado inesperado.",
+    "plannedFeatures": {
+      "homeTimeline": "Exibição da linha do tempo inicial",
+      "multiColumn": "Sistema de painel multi-coluna",
+      "postCompose": "Recursos de criação e gestão de posts",
+      "searchFilter": "Recursos de busca e filtragem",
+      "realTimeUpdate": "Atualizações em tempo real"
+    },
+    "tabs": {
+      "timeline": "Linha do Tempo",
+      "mentions": "Menções",
+      "bookmarks": "Favoritos",
+      "lists": "Listas",
+      "analytics": "Análises",
+      "following": "Seguindo",
+      "followers": "Seguidores",
+      "trending": "Tendências",
+      "discover": "Descobrir",
+      "saved": "Salvos",
+      "drafts": "Rascunhos",
+      "archive": "Arquivo",
+      "scheduled": "Agendados",
+      "custom": "Personalizado",
+      "addTab": "Adicionar Aba",
+      "addTabDescription": "Adicionar Aba (Em Breve)",
+      "tabArea": "Área de Exibição de Abas"
+    },
+    "development": {
+      "phase1Complete": "Fase 1: Configuração da área de exibição de abas concluída",
+      "phase2Planned": "Funcionalidade de abas será implementada na Fase 2",
+      "placeholder": "Exibição de marcador"
+    }
+  },
+  "theme": {
+    "loading": "Carregando tema...",
+    "loadingShort": "Carregando tema...",
+    "error": "Erro ao carregar tema",
+    "retry": "Tentar novamente"
   }
 }

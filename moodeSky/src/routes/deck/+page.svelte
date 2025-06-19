@@ -3,12 +3,14 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import Navigation from '$lib/components/Navigation.svelte';
-  import ThemeToggle from '$lib/components/ThemeToggle.svelte';
   import Avatar from '$lib/components/Avatar.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
-  import { auth, navigation, app, common } from '$lib/i18n/paraglide/messages.js';
+  import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
   
+  
+  // リアクティブ翻訳システム
+  const { t, currentLanguage } = useTranslation();
   
   let activeAccount = $state<Account | null>(null);
   let isLoading = $state(true);
@@ -62,7 +64,7 @@
           console.error('🔍 [DEBUG] 認証情報の取得に失敗:', result.error);
           console.log('🔍 [DEBUG] Setting error message and redirecting to login');
           
-          errorMessage = auth.authDataFetchFailed();
+          errorMessage = t('auth.authDataFetchFailed');
           await goto('/login');
           return;
         }
@@ -93,7 +95,7 @@
       } catch (error) {
         console.error('🔍 [DEBUG] 認証状態の確認中にエラー:', error);
         console.log('🔍 [DEBUG] Error type:', typeof error, error);
-        errorMessage = auth.authStatusCheckFailed();
+        errorMessage = t('auth.authStatusCheckFailed');
         await goto('/login');
       } finally {
         console.log('🔍 [DEBUG] Setting isLoading = false');
@@ -107,23 +109,6 @@
     };
   });
   
-  async function logout() {
-    try {
-      const result = await authService.clearAll();
-      
-      if (!result.success) {
-        console.error('ログアウト処理に失敗:', result.error);
-        errorMessage = auth.logoutFailed();
-        return;
-      }
-      
-      console.log('正常にログアウトしました');
-      await goto('/login');
-    } catch (error) {
-      console.error('ログアウト中にエラー:', error);
-      errorMessage = auth.logoutError();
-    }
-  }
 </script>
 
 {#if isLoading}
@@ -132,7 +117,7 @@
   <div class="min-h-screen flex items-center justify-center bg-themed">
     <div class="bg-card rounded-2xl shadow-xl p-12 w-full max-w-md text-center flex flex-col items-center gap-4">
       <div class="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-      <p class="text-themed opacity-80">{app.loading()}</p>
+      <p class="text-themed opacity-80">{t('app.loading')}</p>
     </div>
   </div>
 {:else if errorMessage}
@@ -140,13 +125,13 @@
   {console.log('🔍 [DEBUG] Rendering error screen with message:', errorMessage)}
   <div class="min-h-screen flex items-center justify-center bg-themed p-4">
     <div class="bg-error/10 border-2 border-error/20 rounded-2xl shadow-xl p-12 w-full max-w-md text-center">
-      <h2 class="text-error text-2xl font-semibold mb-4">{common.error()}</h2>
+      <h2 class="text-error text-2xl font-semibold mb-4">{t('common.error')}</h2>
       <p class="text-error mb-8">{errorMessage}</p>
       <button 
         class="bg-error hover:bg-error/80 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
         onclick={() => location.reload()}
       >
-        {common.retry()}
+        {t('common.retry')}
       </button>
     </div>
   </div>
@@ -163,43 +148,26 @@
       <header class="bg-card border-b-2 border-themed shadow-sm p-4 flex items-center justify-between">
         <div class="flex items-center gap-4">
           <h1 class="text-themed text-2xl font-bold">
-            {app.name()}
+            {t('app.name')}
           </h1>
         </div>
         
-        <div class="flex items-center gap-4">
-          <!-- ユーザー情報 -->
-          <div class="flex items-center gap-3">
-            <Avatar 
-              src={activeAccount.profile.avatar || ''} 
-              displayName={activeAccount.profile.displayName || ''} 
-              handle={activeAccount.profile.handle}
-              size="sm"
-            />
-            <div class="hidden md:block">
-              <p class="text-themed font-medium text-sm">
-                {activeAccount.profile.displayName || activeAccount.profile.handle}
-              </p>
-              <p class="text-themed opacity-70 text-xs">
-                @{activeAccount.profile.handle}
-              </p>
-            </div>
+        <!-- ユーザー情報 -->
+        <div class="flex items-center gap-3">
+          <Avatar 
+            src={activeAccount.profile.avatar || ''} 
+            displayName={activeAccount.profile.displayName || ''} 
+            handle={activeAccount.profile.handle}
+            size="sm"
+          />
+          <div class="hidden md:block">
+            <p class="text-themed font-medium text-sm">
+              {activeAccount.profile.displayName || activeAccount.profile.handle}
+            </p>
+            <p class="text-themed opacity-70 text-xs">
+              @{activeAccount.profile.handle}
+            </p>
           </div>
-          
-          <!-- テーマ切り替え -->
-          <ThemeToggle variant="menu" size="sm" />
-          
-          <!-- ログアウトボタン -->
-          <button 
-            class="text-themed opacity-70 hover:text-error transition-colors p-2 rounded-lg hover:bg-error/10"
-            onclick={logout}
-            title={auth.logout()}
-            aria-label={auth.logout()}
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-            </svg>
-          </button>
         </div>
       </header>
       
@@ -208,22 +176,22 @@
         <!-- 暫定的なウェルカムメッセージ -->
         <div class="bg-card rounded-xl shadow-lg p-8 text-center">
           <h2 class="text-themed text-3xl font-bold mb-4">
-            🎉 {navigation.home()}
+            🎉 {t('navigation.home')}
           </h2>
           <p class="text-themed opacity-80 text-lg mb-6">
-            moodeSky デッキシステムへようこそ！<br>
-            ここにタイムラインとカラム機能が実装される予定です。
+            {t('deck.welcome')}<br>
+            {t('deck.welcomeDescription')}
           </p>
           
           <!-- 開発状況 -->
           <div class="bg-muted/10 border-2 border-themed rounded-lg p-6 text-left">
-            <h3 class="text-themed font-semibold text-lg mb-3">🚧 開発予定機能</h3>
+            <h3 class="text-themed font-semibold text-lg mb-3">🚧 {t('deck.developmentFeatures')}</h3>
             <ul class="text-themed opacity-80 space-y-2">
-              <li>• ホームタイムライン表示</li>
-              <li>• マルチカラム デッキシステム</li>
-              <li>• 投稿作成・操作機能</li>
-              <li>• 検索・フィルタリング機能</li>
-              <li>• リアルタイム更新</li>
+              <li>• {t('deck.plannedFeatures.homeTimeline')}</li>
+              <li>• {t('deck.plannedFeatures.multiColumn')}</li>
+              <li>• {t('deck.plannedFeatures.postCompose')}</li>
+              <li>• {t('deck.plannedFeatures.searchFilter')}</li>
+              <li>• {t('deck.plannedFeatures.realTimeUpdate')}</li>
             </ul>
           </div>
         </div>
@@ -236,9 +204,9 @@
   {console.log('🔍 [DEBUG] Current state - isLoading:', isLoading, 'errorMessage:', errorMessage, 'activeAccount:', activeAccount)}
   <div class="min-h-screen flex items-center justify-center bg-themed p-4">
     <div class="bg-card rounded-2xl shadow-xl p-12 w-full max-w-md text-center">
-      <h2 class="text-themed text-2xl font-semibold mb-4">⚠️ 予期しない状態</h2>
+      <h2 class="text-themed text-2xl font-semibold mb-4">⚠️ {t('deck.unexpectedState')}</h2>
       <p class="text-themed opacity-80 mb-4">
-        アプリケーションが予期しない状態になりました。
+        {t('deck.unexpectedStateDescription')}
       </p>
       <div class="text-left bg-themed/5 rounded-lg p-4 mb-4 text-sm">
         <p><strong>isLoading:</strong> {isLoading}</p>
@@ -249,7 +217,7 @@
         class="bg-primary hover:bg-primary/80 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
         onclick={() => location.reload()}
       >
-        ページを再読み込み
+        {t('common.reload')}
       </button>
     </div>
   </div>

@@ -4,7 +4,7 @@
  */
 
 import { i18nService, detectSystemLanguage } from '../services/i18nService.js';
-import { overwriteGetLocale, overwriteSetLocale, setLocale as paraglidSetLocale } from '../i18n/paraglide/runtime.js';
+import { overwriteGetLocale, overwriteSetLocale, setLocale as paraglidSetLocale } from '../../paraglide/runtime.js';
 import { setCurrentLanguage } from '../utils/i18nHelper.js';
 import type { 
   SupportedLanguage, 
@@ -185,7 +185,7 @@ class I18nStore {
   }
 
   /**
-   * 言語を変更
+   * 言語を変更（リアクティブ更新保証）
    */
   async setLanguage(language: SupportedLanguage): Promise<void> {
     if (language === this.state.currentLanguage) {
@@ -193,32 +193,62 @@ class I18nStore {
     }
 
     try {
-      console.log('Changing language to:', language);
+      console.log('🌍 [i18n] Changing language to:', language);
 
-      // i18nサービスに反映
+      // 1. i18nサービスに反映
       i18nService.setLanguage(language);
 
-      // 状態を更新
+      // 2. Paraglide-JSの言語設定を即座に適用
+      paraglidSetLocale(language, { reload: false });
+
+      // 3. 状態を更新（これによりリアクティブな更新がトリガーされる）
       this.state.currentLanguage = language;
       this.state.error = null;
 
-      // i18nHelper の現在言語を同期
+      // 4. i18nHelper の現在言語を同期
       setCurrentLanguage(language);
 
-      // Paraglide-JSの言語設定（リロードなし）
-      paraglidSetLocale(language, { reload: false });
-
-      // HTML lang属性を更新
+      // 5. HTML lang属性を更新
       this.updateHtmlLangAttribute();
 
-      // TODO: Tauri Storeに設定を保存
+      // 6. Tauri Storeに設定を保存
       await this.saveLanguagePreference(language);
 
-      console.log('Language changed successfully to:', language);
+      // 7. リアクティブ翻訳システムに変更を通知
+      this.notifyLanguageChange();
+
+      console.log('🌍 [i18n] Language changed successfully to:', language);
+      console.log('🌍 [i18n] Current state:', {
+        currentLanguage: this.state.currentLanguage,
+        isInitialized: this.state.isInitialized,
+        htmlLang: typeof document !== 'undefined' ? document.documentElement.lang : 'N/A'
+      });
 
     } catch (error) {
-      console.error('Failed to change language:', error);
+      console.error('🌍 [i18n] Failed to change language:', error);
       this.state.error = error instanceof Error ? error.message : 'Failed to change language';
+    }
+  }
+
+  /**
+   * 言語変更をリアクティブシステムに通知
+   */
+  private notifyLanguageChange(): void {
+    // グローバルイベントとして言語変更を通知
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('languageChanged', {
+        detail: { language: this.state.currentLanguage }
+      }));
+    }
+
+    // リアクティブ翻訳システムへの通知
+    try {
+      // 動的インポートでリアクティブ翻訳システムに通知
+      import('../utils/reactiveTranslation.svelte.js').then(({ forceTranslationUpdate }) => {
+        forceTranslationUpdate();
+      });
+    } catch (error) {
+      console.warn('🌍 [i18n] Could not notify reactive translation system:', error);
     }
   }
 

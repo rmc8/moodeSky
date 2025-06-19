@@ -34,13 +34,13 @@
   });
   
   // カラークラスの動的生成 (TailwindCSSユーティリティのみ)
+  // 🚫 注意: 'muted' は型定義から削除済み（視認性問題のため使用禁止）
   const colorClass = $derived(() => {
     switch (color) {
       case 'themed': return 'text-themed';
       case 'primary': return 'text-primary';  
-      case 'muted': return 'text-muted';           // 🚫 DEPRECATED: 使用禁止
-      case 'secondary': return 'text-secondary';   // ✅ セカンダリテキスト用
-      case 'inactive': return 'text-inactive';     // ✅ 非アクティブ状態用
+      case 'secondary': return 'text-secondary';   // ✅ セカンダリテキスト用（推奨）
+      case 'inactive': return 'text-inactive';     // ✅ 非アクティブ状態用（推奨）
       case 'error': return 'text-error';
       case 'success': return 'text-success';
       case 'warning': return 'text-warning';
@@ -94,7 +94,7 @@
   <Icon 
     icon={showPassword ? ICONS.VISIBILITY_OFF : ICONS.VISIBILITY}
     size="lg"
-    color="muted" 
+    color="secondary" 
     ariaLabel={showPassword ? 'パスワードを非表示' : 'パスワードを表示'}
   />
   

@@ -10,7 +10,7 @@
     "pathPattern": "./src/lib/i18n/locales/{languageTag}.json"
   },
   "plugin.inlang.paraglideJs": {
-    "outdir": "./src/lib/i18n/paraglide",
+    "outdir": "./src/paraglide",
     "project": "./project.inlang"
   }
 }

@@ -4,7 +4,7 @@
  */
 
 // Paraglide-JS生成メッセージ関数
-import * as m from './paraglide/messages.js';
+import * as m from '../../paraglide/messages.js';
 export { m };
 
 // ストアとサービス
@@ -15,7 +15,7 @@ export { i18nService, detectSystemLanguage, isSupportedLanguage, getLanguageInfo
 export type { SupportedLanguage, LanguageDetectionResult, I18nConfig, LanguageInfo } from '../types/i18n.js';
 
 // Paraglide-JS ランタイム関数
-export { setLocale, getLocale, locales, baseLocale } from './paraglide/runtime.js';
+export { setLocale, getLocale, locales, baseLocale } from '../../paraglide/runtime.js';
 
 /**
  * 便利関数: メッセージのパラメータ付き取得

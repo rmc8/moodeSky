@@ -9,9 +9,13 @@
   import { goto } from '$app/navigation';
   import Icon from './Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
-  import { navigation } from '$lib/i18n/paraglide/messages.js';
+  import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
   
-  export let currentPath: string = '';
+  // リアクティブ翻訳システム
+  const { t } = useTranslation();
+  
+  // $propsを使用してプロップを受け取る（Svelte 5 runes mode）
+  const { currentPath = '' } = $props<{ currentPath?: string }>();
   
   interface NavItem {
     id: string;
@@ -20,26 +24,27 @@
     path: string;
   }
   
-  const navItems: NavItem[] = [
+  // $derivedを使用してリアクティブに言語切り替えに対応
+  const navItems = $derived<NavItem[]>([
     {
       id: 'home',
-      label: navigation.home(),
+      label: t('navigation.home'),
       icon: ICONS.HOME,
       path: '/deck'
     },
     {
       id: 'deck-add',
-      label: navigation.deckAdd(),
+      label: t('navigation.deckAdd'),
       icon: ICONS.ADD_CIRCLE,
       path: '/deck/add'
     },
     {
       id: 'settings',
-      label: navigation.settings(),
+      label: t('navigation.settings'),
       icon: ICONS.SETTINGS,
       path: '/settings'
     }
-  ];
+  ]);
   
   function isActive(path: string): boolean {
     if (path === '/deck' && (currentPath === '/deck' || currentPath === '/')) {
@@ -56,7 +61,7 @@
 <!-- ボトムナビゲーションバー -->
 <nav 
   class="fixed bottom-0 left-0 right-0 z-50 bg-card border-t-2 border-themed shadow-lg"
-  aria-label={navigation.home()}
+  aria-label={t('navigation.home')}
 >
   <div class="flex justify-around items-center py-0.5 px-2">
     {#each navItems as item}

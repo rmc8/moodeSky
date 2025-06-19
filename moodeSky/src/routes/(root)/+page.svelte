@@ -2,10 +2,13 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { authService } from '$lib/services/authStore.js';
-  import { root } from '$lib/i18n/paraglide/messages.js';
+  import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
+
+  // リアクティブ翻訳システム
+  const { t } = useTranslation();
 
   let isLoading = $state(true);
-  let statusMessage = $state(root.checkingAuth());
+  let statusMessage = $state(t('root.checkingAuth'));
   let migrationStatus = $state<{
     inProgress: boolean;
     completed: boolean;
@@ -43,13 +46,13 @@
       // 移行が必要で未完了の場合
       if (hasLegacyData && !migrationStatus.completed) {
         migrationStatus.inProgress = true;
-        statusMessage = root.migrating();
+        statusMessage = t('root.migrating');
         
         // localStorage からの移行を実行
         const migrationResult = await authService.migrateFromLocalStorage();
         if (migrationResult.success && migrationResult.data) {
           console.log('localStorage からの移行が完了:', migrationResult.data);
-          statusMessage = root.migrationComplete();
+          statusMessage = t('root.migrationComplete');
           migrationStatus.completed = true;
           migrationStatus.accountInfo = {
             handle: migrationResult.data.profile.handle
@@ -62,7 +65,7 @@
           return;
         } else if (!migrationResult.success) {
           console.warn('Migration failed:', migrationResult.error);
-          statusMessage = root.migrationError();
+          statusMessage = t('root.migrationError');
           setTimeout(async () => {
             await goto('/login');
           }, 2000);
@@ -70,13 +73,13 @@
         }
       }
 
-      statusMessage = root.checkingAccount();
+      statusMessage = t('root.checkingAccount');
 
       // アクティブアカウントの確認
       const activeAccount = await authService.getActiveAccount();
       if (activeAccount.success && activeAccount.data) {
         console.log('アクティブアカウント発見:', activeAccount.data);
-        statusMessage = root.redirectingToDeck();
+        statusMessage = t('root.redirectingToDeck');
         setTimeout(async () => {
           await goto('/deck');
         }, 800);
@@ -84,13 +87,13 @@
       }
 
       // ログインが必要
-      statusMessage = root.redirectingToLogin();
+      statusMessage = t('root.redirectingToLogin');
       setTimeout(async () => {
         await goto('/login');
       }, 800);
     } catch (error) {
       console.error('認証状態確認エラー:', error);
-      statusMessage = root.error();
+      statusMessage = t('root.error');
       setTimeout(async () => {
         await goto('/login');
       }, 1500);
@@ -118,10 +121,10 @@
             <div class="mt-4 p-4 bg-primary/20 rounded-lg border border-primary/30">
               <div class="flex items-center space-x-2 mb-2">
                 <div class="h-2 w-2 bg-primary rounded-full animate-pulse"></div>
-                <span class="text-sm font-medium text-themed">{root.migrationInProgress()}</span>
+                <span class="text-sm font-medium text-themed">{t('root.migrationInProgress')}</span>
               </div>
               <p class="text-xs text-label opacity-80">
-                {root.migrationDescription()}
+                {t('root.migrationDescription')}
               </p>
             </div>
           {/if}
@@ -130,7 +133,7 @@
             <div class="mt-4 p-4 bg-success/20 rounded-lg border border-success/30">
               <div class="flex items-center space-x-2 mb-2">
                 <div class="h-2 w-2 bg-success rounded-full"></div>
-                <span class="text-sm font-medium text-themed">{root.migrationCompleted()}</span>
+                <span class="text-sm font-medium text-themed">{t('root.migrationCompleted')}</span>
               </div>
               {#if migrationStatus.accountInfo}
                 <p class="text-xs text-label opacity-80">
@@ -144,10 +147,10 @@
             <div class="mt-4 p-4 bg-warning/20 rounded-lg border border-warning/30">
               <div class="flex items-center space-x-2 mb-2">
                 <div class="h-2 w-2 bg-warning rounded-full"></div>
-                <span class="text-sm font-medium text-themed">{root.legacyDataDetected()}</span>
+                <span class="text-sm font-medium text-themed">{t('root.legacyDataDetected')}</span>
               </div>
               <p class="text-xs text-label opacity-80">
-                {root.legacyDataDescription()}
+                {t('root.legacyDataDescription')}
               </p>
             </div>
           {/if}

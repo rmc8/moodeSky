@@ -60,7 +60,46 @@
     "previous": "前へ",
     "retry": "再試行",
     "error": "エラー",
-    "active": "選択中"
+    "active": "選択中",
+    "reload": "ページを再読み込み"
+  },
+  "deck": {
+    "welcome": "moodeSky デッキシステムへようこそ！",
+    "welcomeDescription": "ここにタイムラインとカラム機能が実装される予定です。",
+    "developmentFeatures": "開発予定機能",
+    "unexpectedState": "予期しない状態",
+    "unexpectedStateDescription": "アプリケーションが予期しない状態になりました。",
+    "plannedFeatures": {
+      "homeTimeline": "ホームタイムライン表示",
+      "multiColumn": "マルチカラム デッキシステム",
+      "postCompose": "投稿作成・操作機能",
+      "searchFilter": "検索・フィルタリング機能",
+      "realTimeUpdate": "リアルタイム更新"
+    },
+    "tabs": {
+      "timeline": "タイムライン",
+      "mentions": "メンション",
+      "bookmarks": "ブックマーク",
+      "lists": "リスト",
+      "analytics": "分析",
+      "following": "フォロー中",
+      "followers": "フォロワー",
+      "trending": "トレンド",
+      "discover": "発見",
+      "saved": "保存済み",
+      "drafts": "下書き",
+      "archive": "アーカイブ",
+      "scheduled": "予約投稿",
+      "custom": "カスタム",
+      "addTab": "タブを追加",
+      "addTabDescription": "タブを追加（準備中）",
+      "tabArea": "タブ表示エリア"
+    },
+    "development": {
+      "phase1Complete": "Phase 1: タブ表示エリア確保完了",
+      "phase2Planned": "Phase 2でタブ機能を実装予定",
+      "placeholder": "プレースホルダー表示中"
+    }
   },
   "profile": {
     "displayName": "表示名",
@@ -109,5 +148,112 @@
   },
   "misc": {
     "languageSelection": "言語選択"
+  },
+  "settings": {
+    "title": "設定",
+    "loading": "設定を読み込み中...",
+    "initializationFailed": "設定画面の初期化に失敗しました。",
+    "changingSettings": "設定を変更中...",
+    "tabs": {
+      "theme": "テーマ・外観",
+      "language": "言語設定",
+      "account": "アカウント",
+      "notifications": "通知"
+    },
+    "comingSoon": "準備中",
+    "theme": {
+      "title": "テーマ・外観設定",
+      "description": "アプリケーションの外観とテーマを設定します",
+      "mode": "テーマモード",
+      "animation": "アニメーション効果",
+      "animationDescription": "テーマ切り替えやUI要素のアニメーション効果",
+      "animationNote": "アニメーションを無効にするとパフォーマンスが向上します",
+      "autoSchedule": "自動スケジュール",
+      "autoScheduleDescription": "時間帯に応じた自動テーマ切り替え",
+      "autoScheduleNote": "指定した時刻に自動的にライト/ダークテーマを切り替えます",
+      "lightStart": "ライトテーマ開始",
+      "darkStart": "ダークテーマ開始",
+      "currentInfo": "現在のテーマ情報",
+      "settingMode": "設定中のモード",
+      "appliedTheme": "適用中のテーマ",
+      "animations": "アニメーション",
+      "enabled": "有効",
+      "disabled": "無効",
+      "selected": "選択中",
+      "systemTheme": "システム",
+      "lightTheme": "ライト",
+      "darkTheme": "ダーク",
+      "highContrastTheme": "ハイコントラスト",
+      "systemDescription": "システム設定に従って自動的にテーマを切り替えます",
+      "lightDescription": "明るい背景の軽やかなテーマです",
+      "darkDescription": "暗い背景で目に優しいテーマです",
+      "highContrastDescription": "アクセシビリティを重視した高コントラストテーマです",
+      "changedTo": "テーマを「{theme}」に変更しました",
+      "animationToggled": "アニメーション効果を{state}にしました",
+      "scheduleToggled": "自動スケジュールを{state}にしました",
+      "changeError": "テーマの変更に失敗しました",
+      "animationError": "アニメーション設定の変更に失敗しました",
+      "scheduleError": "自動スケジュール設定の変更に失敗しました",
+      "scheduleTimeError": "スケジュール時刻の変更に失敗しました",
+      "sampleText": "サンプルテキスト"
+    },
+    "language": {
+      "title": "言語・多言語化設定",
+      "description": "アプリケーションの表示言語とローカライゼーション設定",
+      "displayLanguage": "表示言語",
+      "systemIntegration": "システム連携",
+      "useSystemLanguage": "システム言語を使用",
+      "useSystemLanguageDescription": "OS設定の言語「{language}」を使用",
+      "resetToSystem": "システム言語に戻す",
+      "redetectLanguage": "システム言語を再検出",
+      "redetectDescription": "OS設定が変更された場合に言語を再取得",
+      "redetect": "再検出",
+      "currentInfo": "現在の言語情報",
+      "currentLanguage": "現在の言語",
+      "systemLanguage": "システム言語",
+      "detectionMethod": "検出方法",
+      "initializationStatus": "初期化状態",
+      "completed": "完了",
+      "initializing": "初期化中...",
+      "features": "多言語化機能",
+      "implementedFeatures": "実装済み機能",
+      "supportedLanguages": "対応言語（{count}言語）",
+      "changedTo": "言語を「{language}」に変更しました",
+      "resetToSystemSuccess": "システム言語「{language}」に戻しました",
+      "redetectedSuccess": "システム言語を再検出しました",
+      "changeError": "言語の変更に失敗しました",
+      "resetError": "システム言語への復帰に失敗しました",
+      "redetectError": "言語再検出に失敗しました",
+      "unknown": "不明",
+      "direction": "方向",
+      "region": "地域",
+      "primaryLanguage": "プライマリ言語・最高品質の翻訳",
+      "globalStandard": "グローバル標準・フォールバック言語",
+      "brazilMarket": "ブラジル・南米市場向け",
+      "europeanMarket": "ドイツ語・ヨーロッパ市場向け",
+      "eastAsianMarket": "韓国語・東アジア市場向け",
+      "detectionSources": {
+        "stored": "保存された設定",
+        "os": "システム設定",
+        "browser": "ブラウザ設定",
+        "fallback": "フォールバック"
+      }
+    },
+    "account": {
+      "title": "アカウント設定",
+      "description": "アカウント設定機能は準備中です"
+    },
+    "notifications": {
+      "title": "通知設定", 
+      "description": "通知設定機能は準備中です"
+    },
+    "authRequired": "認証が必要です",
+    "closeMessage": "メッセージを閉じる"
+  },
+  "theme": {
+    "loading": "テーマを読み込んでいます...",
+    "loadingShort": "テーマ読み込み中...",
+    "error": "テーマ読み込みエラー",
+    "retry": "再試行"
   }
 }

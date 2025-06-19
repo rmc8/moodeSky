@@ -60,7 +60,46 @@
     "previous": "이전",
     "retry": "재시도",
     "error": "오류",
-    "active": "선택됨"
+    "active": "선택됨",
+    "reload": "페이지 새로고침"
+  },
+  "deck": {
+    "welcome": "moodeSky 덱 시스템에 오신 것을 환영합니다!",
+    "welcomeDescription": "타임라인과 컬럼 기능이 여기에 구현될 예정입니다.",
+    "developmentFeatures": "개발 예정 기능",
+    "unexpectedState": "예상치 못한 상태",
+    "unexpectedStateDescription": "애플리케이션이 예상치 못한 상태에 있습니다.",
+    "plannedFeatures": {
+      "homeTimeline": "홈 타임라인 표시",
+      "multiColumn": "멀티컬럼 덱 시스템",
+      "postCompose": "게시글 작성 및 관리 기능",
+      "searchFilter": "검색 및 필터링 기능",
+      "realTimeUpdate": "실시간 업데이트"
+    },
+    "tabs": {
+      "timeline": "타임라인",
+      "mentions": "멘션",
+      "bookmarks": "북마크",
+      "lists": "리스트",
+      "analytics": "분석",
+      "following": "팔로잉",
+      "followers": "팔로워",
+      "trending": "트렌딩",
+      "discover": "발견",
+      "saved": "저장됨",
+      "drafts": "초안",
+      "archive": "아카이브",
+      "scheduled": "예약됨",
+      "custom": "사용자 정의",
+      "addTab": "탭 추가",
+      "addTabDescription": "탭 추가 (곧 출시)",
+      "tabArea": "탭 표시 영역"
+    },
+    "development": {
+      "phase1Complete": "1단계: 탭 표시 영역 설정 완료",
+      "phase2Planned": "탭 기능은 2단계에서 구현될 예정",
+      "placeholder": "플레이스홀더 표시"
+    }
   },
   "profile": {
     "displayName": "표시 이름",
@@ -109,5 +148,112 @@
   },
   "misc": {
     "languageSelection": "언어 선택"
+  },
+  "settings": {
+    "title": "설정",
+    "loading": "설정을 불러오는 중...",
+    "initializationFailed": "설정 페이지 초기화에 실패했습니다.",
+    "changingSettings": "설정을 변경하는 중...",
+    "tabs": {
+      "theme": "테마 및 외관",
+      "language": "언어 설정",
+      "account": "계정",
+      "notifications": "알림"
+    },
+    "comingSoon": "준비 중",
+    "theme": {
+      "title": "테마 및 외관 설정",
+      "description": "애플리케이션의 외관과 테마를 구성합니다",
+      "mode": "테마 모드",
+      "animation": "애니메이션 효과",
+      "animationDescription": "테마 전환 및 UI 요소 애니메이션",
+      "animationNote": "애니메이션을 비활성화하면 성능이 향상됩니다",
+      "autoSchedule": "자동 스케줄",
+      "autoScheduleDescription": "시간대에 따른 자동 테마 전환",
+      "autoScheduleNote": "지정된 시간에 자동으로 라이트/다크 테마 간 전환",
+      "lightStart": "라이트 테마 시작",
+      "darkStart": "다크 테마 시작",
+      "currentInfo": "현재 테마 정보",
+      "settingMode": "설정 모드",
+      "appliedTheme": "적용된 테마",
+      "animations": "애니메이션",
+      "enabled": "활성화됨",
+      "disabled": "비활성화됨",
+      "selected": "선택됨",
+      "systemTheme": "시스템",
+      "lightTheme": "라이트",
+      "darkTheme": "다크",
+      "highContrastTheme": "고대비",
+      "systemDescription": "시스템 설정에 따라 자동으로 테마를 전환합니다",
+      "lightDescription": "밝은 배경의 깔끔한 테마입니다",
+      "darkDescription": "눈에 편안한 어두운 테마입니다",
+      "highContrastDescription": "접근성에 중점을 둔 고대비 테마입니다",
+      "changedTo": "테마를 \"{theme}\"로 변경했습니다",
+      "animationToggled": "애니메이션 효과를 {state}했습니다",
+      "scheduleToggled": "자동 스케줄을 {state}했습니다",
+      "changeError": "테마 변경에 실패했습니다",
+      "animationError": "애니메이션 설정 변경에 실패했습니다",
+      "scheduleError": "자동 스케줄 설정 변경에 실패했습니다",
+      "scheduleTimeError": "스케줄 시간 변경에 실패했습니다",
+      "sampleText": "샘플 텍스트"
+    },
+    "language": {
+      "title": "언어 및 현지화 설정",
+      "description": "애플리케이션 표시 언어 및 현지화를 구성합니다",
+      "displayLanguage": "표시 언어",
+      "systemIntegration": "시스템 연동",
+      "useSystemLanguage": "시스템 언어 사용",
+      "useSystemLanguageDescription": "OS 언어 \"{language}\" 사용",
+      "resetToSystem": "시스템 언어로 재설정",
+      "redetectLanguage": "시스템 언어 재감지",
+      "redetectDescription": "OS 설정 변경 시 언어를 재감지합니다",
+      "redetect": "재감지",
+      "currentInfo": "현재 언어 정보",
+      "currentLanguage": "현재 언어",
+      "systemLanguage": "시스템 언어",
+      "detectionMethod": "감지 방법",
+      "initializationStatus": "초기화 상태",
+      "completed": "완료됨",
+      "initializing": "초기화 중...",
+      "features": "현지화 기능",
+      "implementedFeatures": "구현된 기능",
+      "supportedLanguages": "지원 언어 ({count}개 언어)",
+      "changedTo": "언어를 \"{language}\"로 변경했습니다",
+      "resetToSystemSuccess": "시스템 언어 \"{language}\"로 재설정했습니다",
+      "redetectedSuccess": "시스템 언어를 재감지했습니다",
+      "changeError": "언어 변경에 실패했습니다",
+      "resetError": "시스템 언어로 재설정에 실패했습니다",
+      "redetectError": "언어 재감지에 실패했습니다",
+      "unknown": "알 수 없음",
+      "direction": "방향",
+      "region": "지역",
+      "primaryLanguage": "주 언어 - 최고 품질 번역",
+      "globalStandard": "글로벌 표준 - 폴백 언어",
+      "brazilMarket": "브라질 - 남미 시장",
+      "europeanMarket": "독일어 - 유럽 시장",
+      "eastAsianMarket": "한국어 - 동아시아 시장",
+      "detectionSources": {
+        "stored": "저장된 설정",
+        "os": "시스템 설정",
+        "browser": "브라우저 설정",
+        "fallback": "폴백"
+      }
+    },
+    "account": {
+      "title": "계정 설정",
+      "description": "계정 설정 기능이 곧 제공될 예정입니다"
+    },
+    "notifications": {
+      "title": "알림 설정",
+      "description": "알림 설정 기능이 곧 제공될 예정입니다"
+    },
+    "authRequired": "인증이 필요합니다",
+    "closeMessage": "메시지 닫기"
+  },
+  "theme": {
+    "loading": "테마 로딩 중...",
+    "loadingShort": "테마 로딩 중...",
+    "error": "테마 로딩 오류",
+    "retry": "재시도"
   }
 }
