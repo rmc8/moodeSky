@@ -75,6 +75,30 @@
       "postCompose": "Post creation & management features",
       "searchFilter": "Search & filtering features",
       "realTimeUpdate": "Real-time updates"
+    },
+    "tabs": {
+      "timeline": "Timeline",
+      "mentions": "Mentions",
+      "bookmarks": "Bookmarks",
+      "lists": "Lists",
+      "analytics": "Analytics",
+      "following": "Following",
+      "followers": "Followers",
+      "trending": "Trending",
+      "discover": "Discover",
+      "saved": "Saved",
+      "drafts": "Drafts",
+      "archive": "Archive",
+      "scheduled": "Scheduled",
+      "custom": "Custom",
+      "addTab": "Add Tab",
+      "addTabDescription": "Add Tab (Coming Soon)",
+      "tabArea": "Tab Display Area"
+    },
+    "development": {
+      "phase1Complete": "Phase 1: Tab display area setup complete",
+      "phase2Planned": "Tab functionality will be implemented in Phase 2",
+      "placeholder": "Placeholder display"
     }
   },
   "profile": {

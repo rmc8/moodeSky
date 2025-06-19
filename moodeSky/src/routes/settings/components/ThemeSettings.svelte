@@ -21,7 +21,8 @@
   let errorMessage = $state('');
 
   // テーマオプション定義（ThemeToggleと同じ構造）
-  const themeOptions: Array<{
+  // $derivedを使用してリアクティブに言語切り替えに対応
+  const themeOptions = $derived<Array<{
     mode: ThemeMode;
     label: string;
     icon: string;
@@ -32,7 +33,7 @@
       text: string;
       accent: string;
     };
-  }> = [
+  }>>([
     {
       mode: 'system',
       label: m['settings.theme.systemTheme'](),
@@ -81,7 +82,7 @@
         accent: 'text-primary'
       }
     }
-  ];
+  ]);
 
   // ===================================================================
   // イベントハンドラー

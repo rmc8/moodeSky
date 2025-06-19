@@ -1498,3 +1498,59 @@ const error = m['validation.requiredFields']();
 > Paraglide-JS v2の型安全性とTauri OS Pluginのネイティブ統合により、
 > 真のクロスプラットフォーム多言語化が実現。レガシーなi18nライブラリとは
 > 一線を画す開発体験とユーザー体験を提供。
+
+### 🔄 リアクティブ多言語化実装パターン
+
+**問題と解決策**:
+Svelte 5では、翻訳を含む配列を静的に定義すると、言語切り替え時に自動更新されません。`$derived`を使用してリアクティブにする必要があります。
+
+**実装パターン**:
+```typescript
+// ❌ Bad: 静的配列定義（言語切り替え時に更新されない）
+const navItems: NavItem[] = [
+  {
+    id: 'home',
+    label: t('navigation.home'),
+    icon: ICONS.HOME,
+    path: '/deck'
+  },
+  // ...
+];
+
+// ✅ Good: $derivedを使用したリアクティブ配列
+const navItems = $derived<NavItem[]>([
+  {
+    id: 'home',
+    label: t('navigation.home'),
+    icon: ICONS.HOME,
+    path: '/deck'
+  },
+  // ...
+]);
+```
+
+**適用すべきケース**:
+1. **ナビゲーションメニュー**: 翻訳されたラベルを持つメニュー項目
+2. **設定オプション**: 言語・テーマ選択などの選択肢リスト
+3. **プレースホルダーデータ**: デモ用データの翻訳テキスト
+4. **動的リスト**: 翻訳関数を使用する任意の配列定義
+
+**実装済みファイル**:
+- `DeckTabBar.svelte` - デッキタブバー
+- `MobileDeckTabs.svelte` - モバイル用デッキタブ
+- `SideNavigation.svelte` - サイドナビゲーション
+- `BottomNavigation.svelte` - ボトムナビゲーション
+- `ThemeSettings.svelte` - テーマ設定オプション
+- `LanguageSettings.svelte` - 言語設定オプション
+
+**重要な注意点**:
+- `useTranslation()`フックから取得した`t()`関数は、内部で`currentLanguage`を参照
+- `$derived`により、言語変更時に自動的に配列全体が再計算される
+- TypeScriptの型注釈は`$derived<Type[]>([...])`の形式で指定
+- パフォーマンスへの影響は最小限（言語変更時のみ再計算）
+
+**教訓**:
+> 翻訳を含む配列やオブジェクトは必ず`$derived`でラップし、
+> 言語切り替え時のリアクティビティを確保する。
+> これはSvelte 5のrunes modeにおける必須パターン。
+> 一線を画す開発体験とユーザー体験を提供。

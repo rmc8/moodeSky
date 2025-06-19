@@ -16,28 +16,29 @@
   // 将来的にタブデータを受け取る予定
   
   // デモ用プレースホルダーデータ（スクロールテスト用に大幅増量）
-  const placeholderTabs = [
+  // $derivedを使用してリアクティブに言語切り替えに対応
+  const placeholderTabs = $derived([
     { id: 'home', title: t('navigation.home'), icon: '🏠' },
     { id: 'notifications', title: t('navigation.notifications'), icon: '🔔' },
     { id: 'search', title: t('navigation.search'), icon: '🔍' },
-    { id: 'timeline1', title: 'タイムライン 1', icon: '📱' },
-    { id: 'timeline2', title: 'タイムライン 2', icon: '📺' },
-    { id: 'mentions', title: 'メンション', icon: '💬' },
-    { id: 'bookmarks', title: 'ブックマーク', icon: '🔖' },
-    { id: 'lists', title: 'リスト', icon: '📋' },
-    { id: 'analytics', title: '分析', icon: '📊' },
-    { id: 'settings', title: '設定', icon: '⚙️' },
-    { id: 'following', title: 'フォロー中', icon: '👥' },
-    { id: 'followers', title: 'フォロワー', icon: '👨‍👩‍👧‍👦' },
-    { id: 'trending', title: 'トレンド', icon: '📈' },
-    { id: 'discover', title: '発見', icon: '🔭' },
-    { id: 'saved', title: '保存済み', icon: '💾' },
-    { id: 'drafts', title: '下書き', icon: '📝' },
-    { id: 'archive', title: 'アーカイブ', icon: '📦' },
-    { id: 'scheduled', title: '予約投稿', icon: '⏰' },
-    { id: 'custom1', title: 'カスタム 1', icon: '🎯' },
-    { id: 'custom2', title: 'カスタム 2', icon: '🎨' }
-  ];
+    { id: 'timeline1', title: `${t('deck.tabs.timeline')} 1`, icon: '📱' },
+    { id: 'timeline2', title: `${t('deck.tabs.timeline')} 2`, icon: '📺' },
+    { id: 'mentions', title: t('deck.tabs.mentions'), icon: '💬' },
+    { id: 'bookmarks', title: t('deck.tabs.bookmarks'), icon: '🔖' },
+    { id: 'lists', title: t('deck.tabs.lists'), icon: '📋' },
+    { id: 'analytics', title: t('deck.tabs.analytics'), icon: '📊' },
+    { id: 'settings', title: t('navigation.settings'), icon: '⚙️' },
+    { id: 'following', title: t('deck.tabs.following'), icon: '👥' },
+    { id: 'followers', title: t('deck.tabs.followers'), icon: '👨‍👩‍👧‍👦' },
+    { id: 'trending', title: t('deck.tabs.trending'), icon: '📈' },
+    { id: 'discover', title: t('deck.tabs.discover'), icon: '🔭' },
+    { id: 'saved', title: t('deck.tabs.saved'), icon: '💾' },
+    { id: 'drafts', title: t('deck.tabs.drafts'), icon: '📝' },
+    { id: 'archive', title: t('deck.tabs.archive'), icon: '📦' },
+    { id: 'scheduled', title: t('deck.tabs.scheduled'), icon: '⏰' },
+    { id: 'custom1', title: `${t('deck.tabs.custom')} 1`, icon: '🎯' },
+    { id: 'custom2', title: `${t('deck.tabs.custom')} 2`, icon: '🎨' }
+  ]);
 </script>
 
 <!-- デッキタブバー - 緊急修正: 高さ制限追加 -->
@@ -46,7 +47,7 @@
       <!-- Phase 1: プレースホルダー表示 -->
       {#each placeholderTabs as tab}
         <div
-          class="flex items-center gap-3 p-3 rounded-lg bg-muted/50 text-themed hover:bg-muted transition-colors duration-200"
+          class="flex items-center gap-3 p-3 rounded-lg bg-muted/50 text-themed hover:bg-muted/70 transition-colors duration-200"
           role="tab"
           tabindex="0"
           aria-label={tab.title}
@@ -66,8 +67,8 @@
       <!-- Phase 1: プレースホルダーメッセージ -->
       <div class="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
         <p class="text-xs text-themed/70 text-center">
-          🚧 Phase 1: タブ表示エリア確保完了<br />
-          Phase 2でタブ機能を実装予定
+          🚧 {t('deck.development.phase1Complete')}<br />
+          {t('deck.development.phase2Planned')}
         </p>
       </div>
     </div>

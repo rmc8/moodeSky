@@ -75,6 +75,30 @@
       "postCompose": "게시글 작성 및 관리 기능",
       "searchFilter": "검색 및 필터링 기능",
       "realTimeUpdate": "실시간 업데이트"
+    },
+    "tabs": {
+      "timeline": "타임라인",
+      "mentions": "멘션",
+      "bookmarks": "북마크",
+      "lists": "리스트",
+      "analytics": "분석",
+      "following": "팔로잉",
+      "followers": "팔로워",
+      "trending": "트렌딩",
+      "discover": "발견",
+      "saved": "저장됨",
+      "drafts": "초안",
+      "archive": "아카이브",
+      "scheduled": "예약됨",
+      "custom": "사용자 정의",
+      "addTab": "탭 추가",
+      "addTabDescription": "탭 추가 (곧 출시)",
+      "tabArea": "탭 표시 영역"
+    },
+    "development": {
+      "phase1Complete": "1단계: 탭 표시 영역 설정 완료",
+      "phase2Planned": "탭 기능은 2단계에서 구현될 예정",
+      "placeholder": "플레이스홀더 표시"
     }
   },
   "profile": {

@@ -14,7 +14,8 @@
   // リアクティブ翻訳システム
   const { t } = useTranslation();
   
-  export let currentPath: string = '';
+  // $propsを使用してプロップを受け取る（Svelte 5 runes mode）
+  const { currentPath = '' } = $props<{ currentPath?: string }>();
   
   interface NavItem {
     id: string;
@@ -23,7 +24,8 @@
     path: string;
   }
   
-  const navItems: NavItem[] = [
+  // $derivedを使用してリアクティブに言語切り替えに対応
+  const navItems = $derived<NavItem[]>([
     {
       id: 'home',
       label: t('navigation.home'),
@@ -42,7 +44,7 @@
       icon: ICONS.SETTINGS,
       path: '/settings'
     }
-  ];
+  ]);
   
   function isActive(path: string): boolean {
     if (path === '/deck' && (currentPath === '/deck' || currentPath === '/')) {

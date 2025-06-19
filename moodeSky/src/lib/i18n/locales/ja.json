@@ -75,6 +75,30 @@
       "postCompose": "投稿作成・操作機能",
       "searchFilter": "検索・フィルタリング機能",
       "realTimeUpdate": "リアルタイム更新"
+    },
+    "tabs": {
+      "timeline": "タイムライン",
+      "mentions": "メンション",
+      "bookmarks": "ブックマーク",
+      "lists": "リスト",
+      "analytics": "分析",
+      "following": "フォロー中",
+      "followers": "フォロワー",
+      "trending": "トレンド",
+      "discover": "発見",
+      "saved": "保存済み",
+      "drafts": "下書き",
+      "archive": "アーカイブ",
+      "scheduled": "予約投稿",
+      "custom": "カスタム",
+      "addTab": "タブを追加",
+      "addTabDescription": "タブを追加（準備中）",
+      "tabArea": "タブ表示エリア"
+    },
+    "development": {
+      "phase1Complete": "Phase 1: タブ表示エリア確保完了",
+      "phase2Planned": "Phase 2でタブ機能を実装予定",
+      "placeholder": "プレースホルダー表示中"
     }
   },
   "profile": {

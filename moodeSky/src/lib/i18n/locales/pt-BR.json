@@ -226,6 +226,44 @@
     "authRequired": "Autenticação necessária",
     "closeMessage": "Fechar mensagem"
   },
+  "deck": {
+    "welcome": "Bem-vindo ao sistema de painel moodeSky!",
+    "welcomeDescription": "Recursos de linha do tempo e coluna serão implementados aqui.",
+    "developmentFeatures": "Recursos planejados",
+    "unexpectedState": "Estado inesperado",
+    "unexpectedStateDescription": "A aplicação está em um estado inesperado.",
+    "plannedFeatures": {
+      "homeTimeline": "Exibição da linha do tempo inicial",
+      "multiColumn": "Sistema de painel multi-coluna",
+      "postCompose": "Recursos de criação e gestão de posts",
+      "searchFilter": "Recursos de busca e filtragem",
+      "realTimeUpdate": "Atualizações em tempo real"
+    },
+    "tabs": {
+      "timeline": "Linha do Tempo",
+      "mentions": "Menções",
+      "bookmarks": "Favoritos",
+      "lists": "Listas",
+      "analytics": "Análises",
+      "following": "Seguindo",
+      "followers": "Seguidores",
+      "trending": "Tendências",
+      "discover": "Descobrir",
+      "saved": "Salvos",
+      "drafts": "Rascunhos",
+      "archive": "Arquivo",
+      "scheduled": "Agendados",
+      "custom": "Personalizado",
+      "addTab": "Adicionar Aba",
+      "addTabDescription": "Adicionar Aba (Em Breve)",
+      "tabArea": "Área de Exibição de Abas"
+    },
+    "development": {
+      "phase1Complete": "Fase 1: Configuração da área de exibição de abas concluída",
+      "phase2Planned": "Funcionalidade de abas será implementada na Fase 2",
+      "placeholder": "Exibição de marcador"
+    }
+  },
   "theme": {
     "loading": "Carregando tema...",
     "loadingShort": "Carregando tema...",

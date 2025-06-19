@@ -21,12 +21,13 @@
   let errorMessage = $state('');
 
   // 言語オプション定義（SUPPORTED_LANGUAGESベース）
-  const languageOptions: Array<{
+  // $derivedを使用してリアクティブに言語切り替えに対応
+  const languageOptions = $derived<Array<{
     code: SupportedLanguage;
     info: typeof SUPPORTED_LANGUAGES[SupportedLanguage];
     description: string;
     flag: string;
-  }> = [
+  }>>([
     {
       code: 'ja',
       info: SUPPORTED_LANGUAGES.ja,
@@ -57,7 +58,7 @@
       description: m['settings.language.eastAsianMarket'](),
       flag: '🇰🇷'
     }
-  ];
+  ]);
 
   // ===================================================================
   // イベントハンドラー
