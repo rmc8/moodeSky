@@ -122,6 +122,10 @@ export const ICONS = {
   ATTACH_FILE: 'material-symbols:attach-file',
   DOWNLOAD: 'material-symbols:download',
   UPLOAD: 'material-symbols:upload',
+  
+  // 設定・スケジュール
+  SCHEDULE: 'material-symbols:schedule',
+  ANIMATION: 'material-symbols:animation',
 } as const;
 
 /**

@@ -13,6 +13,9 @@
   import { navigation, auth, common } from '$lib/i18n/paraglide/messages.js';
   import { page } from '$app/stores';
   
+  // 設定コンポーネント
+  import ThemeSettings from './components/ThemeSettings.svelte';
+  
   // ===================================================================
   // 状態管理
   // ===================================================================
@@ -21,6 +24,7 @@
   let isLoading = $state(true);
   let errorMessage = $state('');
   let currentPath = $state($page.url.pathname);
+  let activeSection = $state<'theme' | 'language' | 'account' | 'notifications'>('theme');
 
   // 現在のパスを監視
   $effect(() => {
@@ -81,6 +85,13 @@
       console.error('ログアウト中にエラー:', error);
       errorMessage = auth.logoutError();
     }
+  }
+
+  /**
+   * 設定セクション切り替え
+   */
+  function switchSection(section: typeof activeSection) {
+    activeSection = section;
   }
 </script>
 
@@ -154,62 +165,67 @@
       </header>
 
       <!-- メインコンテンツ -->
-      <div class="p-6 max-w-4xl mx-auto">
-        <!-- セクションヘッダー -->
-        <div class="mb-12 text-center">
-          <h2 class="text-themed text-3xl font-bold mb-4 flex items-center justify-center gap-3">
-            <span class="text-4xl">🚧</span>
-            設定機能準備中
-          </h2>
-          <p class="text-themed opacity-70 text-lg max-w-2xl mx-auto">
-            設定機能は現在開発中です。<br>
-            言語設定、テーマ設定、アカウント管理などの機能を順次追加予定です。
-          </p>
-        </div>
-
-        <!-- 準備中カード -->
-        <div class="bg-card rounded-xl shadow-lg p-8 text-center border border-themed">
-          <div class="text-6xl mb-6">⚙️</div>
-          <h3 class="text-themed text-xl font-semibold mb-4">
-            設定メニュー
-          </h3>
-          <p class="text-themed opacity-70 mb-6">
-            以下の設定機能を開発中です：
-          </p>
-          
-          <!-- 予定機能リスト -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-            <div class="bg-muted/20 rounded-lg p-4 border border-themed/10">
-              <div class="text-2xl mb-2">🌍</div>
-              <h4 class="text-themed font-medium mb-1">言語・地域設定</h4>
-              <p class="text-themed opacity-60 text-sm">表示言語の変更</p>
-            </div>
-            
-            <div class="bg-muted/20 rounded-lg p-4 border border-themed/10">
-              <div class="text-2xl mb-2">🎨</div>
-              <h4 class="text-themed font-medium mb-1">テーマ・外観</h4>
-              <p class="text-themed opacity-60 text-sm">ダーク/ライトモード</p>
-            </div>
-            
-            <div class="bg-muted/20 rounded-lg p-4 border border-themed/10">
-              <div class="text-2xl mb-2">👤</div>
-              <h4 class="text-themed font-medium mb-1">アカウント管理</h4>
-              <p class="text-themed opacity-60 text-sm">プロフィール設定</p>
-            </div>
-            
-            <div class="bg-muted/20 rounded-lg p-4 border border-themed/10">
-              <div class="text-2xl mb-2">🔔</div>
-              <h4 class="text-themed font-medium mb-1">通知設定</h4>
-              <p class="text-themed opacity-60 text-sm">通知のカスタマイズ</p>
-            </div>
+      <div class="p-6">
+        <!-- 設定ナビゲーション -->
+        <div class="max-w-4xl mx-auto mb-6">
+          <div class="flex flex-wrap gap-2 p-2 bg-card rounded-lg border border-themed">
+            <button
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class:bg-primary={activeSection === 'theme'}
+              class:text-white={activeSection === 'theme'}
+              class:text-themed={activeSection !== 'theme'}
+              class:hover:bg-muted={activeSection !== 'theme'}
+              onclick={() => switchSection('theme')}
+            >
+              🎨 テーマ・外観
+            </button>
+            <button
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed"
+              disabled
+            >
+              🌍 言語設定（準備中）
+            </button>
+            <button
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed"
+              disabled
+            >
+              👤 アカウント（準備中）
+            </button>
+            <button
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed"
+              disabled
+            >
+              🔔 通知（準備中）
+            </button>
           </div>
         </div>
 
-        <!-- フィードバック用メッセージ -->
-        <div class="mt-8 text-center">
-          <p class="text-themed opacity-60 text-sm">
-            ご要望やフィードバックがございましたら、お気軽にお知らせください。
-          </p>
+        <!-- 設定コンテンツ -->
+        <div class="transition-all duration-300">
+          {#if activeSection === 'theme'}
+            <ThemeSettings />
+          {:else if activeSection === 'language'}
+            <!-- 言語設定（準備中） -->
+            <div class="max-w-4xl mx-auto text-center py-12">
+              <div class="text-6xl mb-4">🌍</div>
+              <h3 class="text-themed text-xl font-semibold mb-2">言語設定</h3>
+              <p class="text-themed opacity-70">言語設定機能は準備中です</p>
+            </div>
+          {:else if activeSection === 'account'}
+            <!-- アカウント設定（準備中） -->
+            <div class="max-w-4xl mx-auto text-center py-12">
+              <div class="text-6xl mb-4">👤</div>
+              <h3 class="text-themed text-xl font-semibold mb-2">アカウント設定</h3>
+              <p class="text-themed opacity-70">アカウント設定機能は準備中です</p>
+            </div>
+          {:else if activeSection === 'notifications'}
+            <!-- 通知設定（準備中） -->
+            <div class="max-w-4xl mx-auto text-center py-12">
+              <div class="text-6xl mb-4">🔔</div>
+              <h3 class="text-themed text-xl font-semibold mb-2">通知設定</h3>
+              <p class="text-themed opacity-70">通知設定機能は準備中です</p>
+            </div>
+          {/if}
         </div>
       </div>
     </main>
