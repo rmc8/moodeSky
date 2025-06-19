@@ -15,6 +15,7 @@
   
   // 設定コンポーネント
   import ThemeSettings from './components/ThemeSettings.svelte';
+  import LanguageSettings from './components/LanguageSettings.svelte';
   
   // ===================================================================
   // 状態管理
@@ -180,10 +181,14 @@
               🎨 テーマ・外観
             </button>
             <button
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed"
-              disabled
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class:bg-primary={activeSection === 'language'}
+              class:text-white={activeSection === 'language'}
+              class:text-themed={activeSection !== 'language'}
+              class:hover:bg-muted={activeSection !== 'language'}
+              onclick={() => switchSection('language')}
             >
-              🌍 言語設定（準備中）
+              🌍 言語設定
             </button>
             <button
               class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed"
@@ -205,12 +210,7 @@
           {#if activeSection === 'theme'}
             <ThemeSettings />
           {:else if activeSection === 'language'}
-            <!-- 言語設定（準備中） -->
-            <div class="max-w-4xl mx-auto text-center py-12">
-              <div class="text-6xl mb-4">🌍</div>
-              <h3 class="text-themed text-xl font-semibold mb-2">言語設定</h3>
-              <p class="text-themed opacity-70">言語設定機能は準備中です</p>
-            </div>
+            <LanguageSettings />
           {:else if activeSection === 'account'}
             <!-- アカウント設定（準備中） -->
             <div class="max-w-4xl mx-auto text-center py-12">
