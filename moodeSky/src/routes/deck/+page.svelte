@@ -3,7 +3,6 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import Navigation from '$lib/components/Navigation.svelte';
-  import ThemeToggle from '$lib/components/ThemeToggle.svelte';
   import Avatar from '$lib/components/Avatar.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
@@ -107,23 +106,6 @@
     };
   });
   
-  async function logout() {
-    try {
-      const result = await authService.clearAll();
-      
-      if (!result.success) {
-        console.error('ログアウト処理に失敗:', result.error);
-        errorMessage = auth.logoutFailed();
-        return;
-      }
-      
-      console.log('正常にログアウトしました');
-      await goto('/login');
-    } catch (error) {
-      console.error('ログアウト中にエラー:', error);
-      errorMessage = auth.logoutError();
-    }
-  }
 </script>
 
 {#if isLoading}
@@ -167,39 +149,22 @@
           </h1>
         </div>
         
-        <div class="flex items-center gap-4">
-          <!-- ユーザー情報 -->
-          <div class="flex items-center gap-3">
-            <Avatar 
-              src={activeAccount.profile.avatar || ''} 
-              displayName={activeAccount.profile.displayName || ''} 
-              handle={activeAccount.profile.handle}
-              size="sm"
-            />
-            <div class="hidden md:block">
-              <p class="text-themed font-medium text-sm">
-                {activeAccount.profile.displayName || activeAccount.profile.handle}
-              </p>
-              <p class="text-themed opacity-70 text-xs">
-                @{activeAccount.profile.handle}
-              </p>
-            </div>
+        <!-- ユーザー情報 -->
+        <div class="flex items-center gap-3">
+          <Avatar 
+            src={activeAccount.profile.avatar || ''} 
+            displayName={activeAccount.profile.displayName || ''} 
+            handle={activeAccount.profile.handle}
+            size="sm"
+          />
+          <div class="hidden md:block">
+            <p class="text-themed font-medium text-sm">
+              {activeAccount.profile.displayName || activeAccount.profile.handle}
+            </p>
+            <p class="text-themed opacity-70 text-xs">
+              @{activeAccount.profile.handle}
+            </p>
           </div>
-          
-          <!-- テーマ切り替え -->
-          <ThemeToggle variant="menu" size="sm" />
-          
-          <!-- ログアウトボタン -->
-          <button 
-            class="text-themed opacity-70 hover:text-error transition-colors p-2 rounded-lg hover:bg-error/10"
-            onclick={logout}
-            title={auth.logout()}
-            aria-label={auth.logout()}
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-            </svg>
-          </button>
         </div>
       </header>
       
