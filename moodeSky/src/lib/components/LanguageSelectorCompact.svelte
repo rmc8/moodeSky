@@ -7,7 +7,10 @@
   import { SUPPORTED_LANGUAGES } from '../services/i18nService.js';
   import Icon from './Icon.svelte';
   import { ICONS } from '../types/icon.js';
-  import { language, common, misc } from '../i18n/paraglide/messages.js';
+  import { useTranslation } from '../utils/reactiveTranslation.svelte.js';
+
+  // リアクティブ翻訳システム
+  const { t } = useTranslation();
 
   let isOpen = $state(false);
   let dropdownRef: HTMLDivElement | undefined;
@@ -64,14 +67,14 @@
     onclick={toggleDropdown}
     disabled={i18nStore.isLoading}
     class="trigger-button"
-    aria-label={language.current()}
-    title={`${language.current()}: ${currentLanguageInfo?.nativeName}`}
+    aria-label={t('language.current')}
+    title={`${t('language.current')}: ${currentLanguageInfo?.nativeName}`}
   >
     <Icon 
       icon={ICONS.TRANSLATE}
       size="lg"
       color="themed"
-      ariaLabel={misc.languageSelection()}
+      ariaLabel={t('misc.languageSelection')}
     />
     <span class="current-language">{currentLanguageInfo?.code.toUpperCase()}</span>
   </button>
@@ -96,7 +99,7 @@
               icon={ICONS.CHECK}
               size="sm"
               color="primary"
-              ariaLabel={common.active()}
+              ariaLabel={t('common.active')}
             />
           {/if}
         </button>
@@ -117,9 +120,9 @@
           icon={ICONS.COMPUTER}
           size="sm"
           color="themed"
-          ariaLabel={language.system()}
+          ariaLabel={t('language.system')}
         />
-        <span>{language.system()}</span>
+        <span>{t('language.system')}</span>
       </button>
     </div>
   {/if}

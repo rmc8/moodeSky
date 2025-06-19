@@ -2,17 +2,22 @@
   テーマプロバイダーコンポーネント
   テーマストア統合によるリアクティブなテーマ管理
   Tauri Store Plugin永続化対応
+  多言語対応: リアクティブ翻訳システム統合
 -->
 
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { themeStore } from '../stores/theme.svelte.js';
+  import { useTranslation } from '../utils/reactiveTranslation.svelte.js';
   
   interface Props {
     children?: import('svelte').Snippet;
   }
   
   let { children }: Props = $props();
+
+  // リアクティブ翻訳システム
+  const { t } = useTranslation();
 
   // テーマストアの初期化フラグ
   let initializationPromise: Promise<void> | null = null;
@@ -72,10 +77,10 @@
   <!-- ローディング状態 -->
   <div class="min-h-screen w-full flex items-center justify-center bg-themed">
     <div class="text-center">
-      <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-primary rounded-full mb-4" role="status" aria-label="テーマ読み込み中">
-        <span class="sr-only">テーマ読み込み中...</span>
+      <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-primary rounded-full mb-4" role="status" aria-label={t('app.loading')}>
+        <span class="sr-only">{t('app.loading')}</span>
       </div>
-      <p class="text-sm text-themed opacity-70">テーマを読み込んでいます...</p>
+      <p class="text-sm text-themed opacity-70">{t('app.loading')}</p>
     </div>
   </div>
 {:else if themeStore.error}
@@ -83,7 +88,7 @@
   <div class="min-h-screen w-full flex items-center justify-center bg-themed">
     <div class="text-center max-w-md mx-auto p-6">
       <div class="bg-error/10 border border-error/20 text-error p-4 rounded-lg mb-4">
-        <h2 class="font-semibold mb-2">テーマ読み込みエラー</h2>
+        <h2 class="font-semibold mb-2">{t('app.error')}</h2>
         <p class="text-sm">{themeStore.error}</p>
       </div>
       <button 
@@ -93,7 +98,7 @@
         }}
         class="button-primary"
       >
-        再試行
+        {t('common.retry')}
       </button>
     </div>
   </div>

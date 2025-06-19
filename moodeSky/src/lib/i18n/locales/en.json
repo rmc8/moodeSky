@@ -60,7 +60,22 @@
     "previous": "Previous",
     "retry": "Retry",
     "error": "Error",
-    "active": "Active"
+    "active": "Active",
+    "reload": "Reload page"
+  },
+  "deck": {
+    "welcome": "Welcome to moodeSky deck system!",
+    "welcomeDescription": "Timeline and column features will be implemented here.",
+    "developmentFeatures": "Planned features",
+    "unexpectedState": "Unexpected state",
+    "unexpectedStateDescription": "The application is in an unexpected state.",
+    "plannedFeatures": {
+      "homeTimeline": "Home timeline display",
+      "multiColumn": "Multi-column deck system",
+      "postCompose": "Post creation & management features",
+      "searchFilter": "Search & filtering features",
+      "realTimeUpdate": "Real-time updates"
+    }
   },
   "profile": {
     "displayName": "Display Name",
@@ -109,5 +124,112 @@
   },
   "misc": {
     "languageSelection": "Language selection"
+  },
+  "settings": {
+    "title": "Settings",
+    "loading": "Loading settings...",
+    "initializationFailed": "Failed to initialize settings page.",
+    "changingSettings": "Changing settings...",
+    "tabs": {
+      "theme": "Theme & Appearance",
+      "language": "Language Settings",
+      "account": "Account",
+      "notifications": "Notifications"
+    },
+    "comingSoon": "Coming Soon",
+    "theme": {
+      "title": "Theme & Appearance Settings",
+      "description": "Configure application appearance and theme",
+      "mode": "Theme Mode",
+      "animation": "Animation Effects",
+      "animationDescription": "Theme transitions and UI element animations",
+      "animationNote": "Disabling animations improves performance",
+      "autoSchedule": "Auto Schedule",
+      "autoScheduleDescription": "Automatic theme switching based on time",
+      "autoScheduleNote": "Automatically switch between light/dark themes at specified times",
+      "lightStart": "Light Theme Start",
+      "darkStart": "Dark Theme Start",
+      "currentInfo": "Current Theme Information",
+      "settingMode": "Set Mode",
+      "appliedTheme": "Applied Theme",
+      "animations": "Animations",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "selected": "Selected",
+      "systemTheme": "System",
+      "lightTheme": "Light",
+      "darkTheme": "Dark",
+      "highContrastTheme": "High Contrast",
+      "systemDescription": "Automatically switches theme according to system settings",
+      "lightDescription": "Light and clean theme with bright background",
+      "darkDescription": "Dark theme that's easier on the eyes",
+      "highContrastDescription": "High contrast theme focused on accessibility",
+      "changedTo": "Theme changed to \"{theme}\"",
+      "animationToggled": "Animation effects {state}",
+      "scheduleToggled": "Auto schedule {state}",
+      "changeError": "Failed to change theme",
+      "animationError": "Failed to change animation settings",
+      "scheduleError": "Failed to change auto schedule settings",
+      "scheduleTimeError": "Failed to change schedule time",
+      "sampleText": "Sample Text"
+    },
+    "language": {
+      "title": "Language & Localization Settings",
+      "description": "Configure application display language and localization",
+      "displayLanguage": "Display Language",
+      "systemIntegration": "System Integration",
+      "useSystemLanguage": "Use System Language",
+      "useSystemLanguageDescription": "Use OS language \"{language}\"",
+      "resetToSystem": "Reset to System Language",
+      "redetectLanguage": "Re-detect System Language",
+      "redetectDescription": "Re-detect language when OS settings change",
+      "redetect": "Re-detect",
+      "currentInfo": "Current Language Information",
+      "currentLanguage": "Current Language",
+      "systemLanguage": "System Language",
+      "detectionMethod": "Detection Method",
+      "initializationStatus": "Initialization Status",
+      "completed": "Completed",
+      "initializing": "Initializing...",
+      "features": "Localization Features",
+      "implementedFeatures": "Implemented Features",
+      "supportedLanguages": "Supported Languages ({count} languages)",
+      "changedTo": "Language changed to \"{language}\"",
+      "resetToSystemSuccess": "Reset to system language \"{language}\"",
+      "redetectedSuccess": "System language re-detected",
+      "changeError": "Failed to change language",
+      "resetError": "Failed to reset to system language",
+      "redetectError": "Failed to re-detect language",
+      "unknown": "Unknown",
+      "direction": "Direction",
+      "region": "Region",
+      "primaryLanguage": "Primary language - highest quality translation",
+      "globalStandard": "Global standard - fallback language",
+      "brazilMarket": "Brazil - South American market",
+      "europeanMarket": "German - European market",
+      "eastAsianMarket": "Korean - East Asian market",
+      "detectionSources": {
+        "stored": "Saved Settings",
+        "os": "System Settings",
+        "browser": "Browser Settings",
+        "fallback": "Fallback"
+      }
+    },
+    "account": {
+      "title": "Account Settings",
+      "description": "Account settings feature is coming soon"
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "description": "Notification settings feature is coming soon"
+    },
+    "authRequired": "Authentication required",
+    "closeMessage": "Close message"
+  },
+  "theme": {
+    "loading": "Loading theme...",
+    "loadingShort": "Loading theme...",
+    "error": "Theme loading error",
+    "retry": "Retry"
   }
 }

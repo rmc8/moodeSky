@@ -11,7 +11,10 @@
   import Icon from './Icon.svelte';
   import DeckTabBar from './deck/DeckTabBar.svelte';
   import { ICONS } from '$lib/types/icon.js';
-  import { navigation } from '$lib/i18n/paraglide/messages.js';
+  import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
+  
+  // リアクティブ翻訳システム
+  const { t } = useTranslation();
   
   export let currentPath: string = '';
   
@@ -25,19 +28,19 @@
   const navItems: NavItem[] = [
     {
       id: 'home',
-      label: navigation.home(),
+      label: t('navigation.home'),
       icon: ICONS.HOME,
       path: '/deck'
     },
     {
       id: 'deck-add',
-      label: navigation.deckAdd(),
+      label: t('navigation.deckAdd'),
       icon: ICONS.ADD_CIRCLE,
       path: '/deck/add'
     },
     {
       id: 'settings',
-      label: navigation.settings(),
+      label: t('navigation.settings'),
       icon: ICONS.SETTINGS,
       path: '/settings'
     }
@@ -63,24 +66,24 @@
 <!-- サイドナビゲーションバー -->
 <nav 
   class="fixed left-0 top-0 bottom-0 z-40 w-64 bg-card border-r-2 border-themed shadow-lg flex flex-col"
-  aria-label={navigation.home()}
+  aria-label={t('navigation.home')}
 >
   <!-- 上部: 投稿ボタン -->
   <div class="p-4 border-b border-themed">
     <button
       class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-6 rounded-xl text-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex items-center justify-center gap-2"
       onclick={handleCompose}
-      aria-label={navigation.compose()}
+      aria-label={t('navigation.compose')}
     >
       <Icon 
         icon={ICONS.CREATE}
         size="md"
         color="themed"
-        ariaLabel={navigation.compose()}
+        ariaLabel={t('navigation.compose')}
         decorative={true}
         class="text-white"
       />
-      <span>{navigation.post()}</span>
+      <span>{t('navigation.post')}</span>
     </button>
   </div>
   

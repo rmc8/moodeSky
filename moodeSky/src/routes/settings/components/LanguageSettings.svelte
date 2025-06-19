@@ -10,7 +10,7 @@
   import { SUPPORTED_LANGUAGES } from '$lib/services/i18nService.js';
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
-  import { language, common, misc } from '$lib/i18n/paraglide/messages.js';
+  import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
   // 状態管理
@@ -30,31 +30,31 @@
     {
       code: 'ja',
       info: SUPPORTED_LANGUAGES.ja,
-      description: 'プライマリ言語・最高品質の翻訳',
+      description: m['settings.language.primaryLanguage'](),
       flag: '🇯🇵'
     },
     {
       code: 'en',
       info: SUPPORTED_LANGUAGES.en,
-      description: 'グローバル標準・フォールバック言語',
+      description: m['settings.language.globalStandard'](),
       flag: '🇺🇸'
     },
     {
       code: 'pt-BR',
       info: SUPPORTED_LANGUAGES['pt-BR'],
-      description: 'ブラジル・南米市場向け',
+      description: m['settings.language.brazilMarket'](),
       flag: '🇧🇷'
     },
     {
       code: 'de',
       info: SUPPORTED_LANGUAGES.de,
-      description: 'ドイツ語・ヨーロッパ市場向け',
+      description: m['settings.language.europeanMarket'](),
       flag: '🇩🇪'
     },
     {
       code: 'ko',
       info: SUPPORTED_LANGUAGES.ko,
-      description: '韓国語・東アジア市場向け',
+      description: m['settings.language.eastAsianMarket'](),
       flag: '🇰🇷'
     }
   ];
@@ -76,11 +76,11 @@
     try {
       await i18nStore.setLanguage(code);
       const selectedLanguage = languageOptions.find(opt => opt.code === code);
-      successMessage = `言語を「${selectedLanguage?.info.nativeName}」に変更しました`;
+      successMessage = m['settings.language.changedTo']({ language: selectedLanguage?.info.nativeName || code });
       setTimeout(() => successMessage = '', 3000);
     } catch (error) {
       console.error('言語変更エラー:', error);
-      errorMessage = '言語の変更に失敗しました';
+      errorMessage = m['settings.language.changeError']();
     } finally {
       isLoading = false;
     }
@@ -97,11 +97,11 @@
 
     try {
       await i18nStore.resetToSystemLanguage();
-      successMessage = `システム言語「${SUPPORTED_LANGUAGES[i18nStore.systemLanguage]?.nativeName}」に戻しました`;
+      successMessage = m['settings.language.resetToSystemSuccess']({ language: SUPPORTED_LANGUAGES[i18nStore.systemLanguage]?.nativeName || i18nStore.systemLanguage });
       setTimeout(() => successMessage = '', 3000);
     } catch (error) {
       console.error('システム言語リセットエラー:', error);
-      errorMessage = 'システム言語への復帰に失敗しました';
+      errorMessage = m['settings.language.resetError']();
     } finally {
       isLoading = false;
     }
@@ -116,11 +116,11 @@
 
     try {
       await i18nStore.redetectLanguage();
-      successMessage = 'システム言語を再検出しました';
+      successMessage = m['settings.language.redetectedSuccess']();
       setTimeout(() => successMessage = '', 3000);
     } catch (error) {
       console.error('言語再検出エラー:', error);
-      errorMessage = '言語再検出に失敗しました';
+      errorMessage = m['settings.language.redetectError']();
     } finally {
       isLoading = false;
     }
@@ -151,25 +151,25 @@
     switch (result.source) {
       case 'stored':
         return {
-          source: '保存された設定',
+          source: m['settings.language.detectionSources.stored'](),
           icon: ICONS.SETTINGS,
           color: 'primary' as const
         };
       case 'os':
         return {
-          source: 'システム設定',
+          source: m['settings.language.detectionSources.os'](),
           icon: ICONS.COMPUTER,
           color: 'themed' as const
         };
       case 'browser':
         return {
-          source: 'ブラウザ設定',
+          source: m['settings.language.detectionSources.browser'](),
           icon: ICONS.PUBLIC,
           color: 'themed' as const
         };
       case 'fallback':
         return {
-          source: 'フォールバック',
+          source: m['settings.language.detectionSources.fallback'](),
           icon: ICONS.WARNING,
           color: 'warning' as const
         };
@@ -185,10 +185,10 @@
   <div class="mb-8">
     <h2 class="text-themed text-2xl font-bold mb-2 flex items-center gap-3">
       <span class="text-3xl">🌍</span>
-      言語・多言語化設定
+      {m['settings.language.title']()}
     </h2>
     <p class="text-themed opacity-70">
-      アプリケーションの表示言語とローカライゼーション設定
+      {m['settings.language.description']()}
     </p>
   </div>
 
@@ -207,7 +207,7 @@
       <button 
         class="ml-auto text-error hover:text-error/80 transition-colors"
         onclick={clearMessages}
-        aria-label="エラーメッセージを閉じる"
+        aria-label={m['settings.closeMessage']()}
       >
         <Icon icon={ICONS.CLOSE} size="sm" />
       </button>
@@ -220,7 +220,7 @@
     <div class="bg-card rounded-xl p-6 border border-themed">
       <h3 class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
         <Icon icon={ICONS.LANGUAGE} size="md" color="primary" />
-        表示言語
+        {m['settings.language.displayLanguage']()}
       </h3>
       
       <!-- 言語選択グリッド -->
@@ -245,7 +245,7 @@
                     <span class="text-xs opacity-70">{option.info.code.toUpperCase()}</span>
                   </h4>
                   {#if option.code === i18nStore.currentLanguage}
-                    <span class="text-xs text-primary font-medium">選択中</span>
+                    <span class="text-xs text-primary font-medium">{m['settings.theme.selected']()}</span>
                   {/if}
                 </div>
               </div>
@@ -258,7 +258,7 @@
             
             <!-- 言語情報 -->
             <div class="text-xs text-themed opacity-60">
-              方向: {option.info.isRTL ? 'RTL' : 'LTR'} | 地域: {option.info.region}
+              {m['settings.language.direction']()}: {option.info.isRTL ? 'RTL' : 'LTR'} | {m['settings.language.region']()}: {option.info.region}
             </div>
           </button>
         {/each}
@@ -269,7 +269,7 @@
     <div class="bg-card rounded-xl p-6 border border-themed">
       <h3 class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
         <Icon icon={ICONS.COMPUTER} size="md" color="primary" />
-        システム連携
+        {m['settings.language.systemIntegration']()}
       </h3>
       
       <div class="space-y-4">
@@ -277,10 +277,10 @@
         <div class="flex items-center justify-between">
           <div class="flex-1">
             <p class="text-themed mb-2">
-              システム言語を使用
+              {m['settings.language.useSystemLanguage']()}
             </p>
             <p class="text-themed opacity-60 text-sm">
-              OS設定の言語「{SUPPORTED_LANGUAGES[i18nStore.systemLanguage]?.nativeName}」を使用
+              {m['settings.language.useSystemLanguageDescription']({ language: SUPPORTED_LANGUAGES[i18nStore.systemLanguage]?.nativeName || i18nStore.systemLanguage })}
             </p>
           </div>
           
@@ -290,7 +290,7 @@
             onclick={handleResetToSystemLanguage}
           >
             <Icon icon={ICONS.COMPUTER} size="sm" color="themed" />
-            システム言語に戻す
+            {m['settings.language.resetToSystem']()}
           </button>
         </div>
 
@@ -298,10 +298,10 @@
         <div class="flex items-center justify-between pt-4 border-t border-themed/20">
           <div class="flex-1">
             <p class="text-themed mb-2">
-              システム言語を再検出
+              {m['settings.language.redetectLanguage']()}
             </p>
             <p class="text-themed opacity-60 text-sm">
-              OS設定が変更された場合に言語を再取得
+              {m['settings.language.redetectDescription']()}
             </p>
           </div>
           
@@ -311,7 +311,7 @@
             onclick={handleRedetectLanguage}
           >
             <Icon icon={ICONS.REFRESH} size="sm" color="themed" />
-            再検出
+            {m['settings.language.redetect']()}
           </button>
         </div>
       </div>
@@ -321,12 +321,12 @@
     <div class="bg-muted/20 rounded-xl p-6 border border-themed/20">
       <h3 class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
         <Icon icon={ICONS.INFO} size="md" color="themed" />
-        現在の言語情報
+        {m['settings.language.currentInfo']()}
       </h3>
       
       <div class="space-y-3 text-sm">
         <div class="flex justify-between items-center">
-          <span class="text-themed opacity-70">現在の言語:</span>
+          <span class="text-themed opacity-70">{m['settings.language.currentLanguage']()}:</span>
           <span class="text-themed font-medium flex items-center gap-2">
             {languageOptions.find(opt => opt.code === i18nStore.currentLanguage)?.flag}
             {SUPPORTED_LANGUAGES[i18nStore.currentLanguage]?.nativeName}
@@ -334,7 +334,7 @@
           </span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-themed opacity-70">システム言語:</span>
+          <span class="text-themed opacity-70">{m['settings.language.systemLanguage']()}:</span>
           <span class="text-themed font-medium flex items-center gap-2">
             {languageOptions.find(opt => opt.code === i18nStore.systemLanguage)?.flag}
             {SUPPORTED_LANGUAGES[i18nStore.systemLanguage]?.nativeName}
@@ -343,17 +343,17 @@
         </div>
         {#if detectionInfo()}
           <div class="flex justify-between items-center">
-            <span class="text-themed opacity-70">検出方法:</span>
+            <span class="text-themed opacity-70">{m['settings.language.detectionMethod']()}:</span>
             <span class="text-themed font-medium flex items-center gap-2">
               <Icon icon={detectionInfo()?.icon || ICONS.INFO} size="sm" color={detectionInfo()?.color || 'themed'} />
-              {detectionInfo()?.source || '不明'}
+              {detectionInfo()?.source || m['settings.language.unknown']()}
             </span>
           </div>
         {/if}
         <div class="flex justify-between items-center">
-          <span class="text-themed opacity-70">初期化状態:</span>
+          <span class="text-themed opacity-70">{m['settings.language.initializationStatus']()}:</span>
           <span class="text-themed font-medium">
-            {i18nStore.isInitialized ? '完了' : '初期化中...'}
+            {i18nStore.isInitialized ? m['settings.language.completed']() : m['settings.language.initializing']()}
           </span>
         </div>
       </div>
@@ -363,7 +363,7 @@
     <div class="bg-card rounded-xl p-6 border border-themed">
       <h3 class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
         <Icon icon={ICONS.TRANSLATE} size="md" color="primary" />
-        多言語化機能
+        {m['settings.language.features']()}
       </h3>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -371,7 +371,7 @@
         <div class="space-y-3">
           <h4 class="text-themed font-medium flex items-center gap-2">
             <Icon icon={ICONS.CHECK} size="sm" color="success" />
-            実装済み機能
+            {m['settings.language.implementedFeatures']()}
           </h4>
           <ul class="space-y-2 text-sm text-themed opacity-80">
             <li>• Paraglide-JS v2 型安全翻訳</li>
@@ -386,7 +386,7 @@
         <div class="space-y-3">
           <h4 class="text-themed font-medium flex items-center gap-2">
             <Icon icon={ICONS.PUBLIC} size="sm" color="primary" />
-            対応言語（{languageOptions.length}言語）
+            {m['settings.language.supportedLanguages']({ count: languageOptions.length.toString() })}
           </h4>
           <ul class="space-y-2 text-sm text-themed opacity-80">
             {#each languageOptions as option}
@@ -407,7 +407,7 @@
     <div class="fixed inset-0 bg-themed/50 flex items-center justify-center z-50">
       <div class="bg-card rounded-lg p-6 shadow-xl flex items-center gap-3">
         <div class="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-        <span class="text-themed">言語設定を変更中...</span>
+        <span class="text-themed">{m['settings.changingSettings']()}</span>
       </div>
     </div>
   {/if}

@@ -11,13 +11,15 @@ export type IconSize = 'sm' | 'md' | 'lg' | 'xl';
 /**
  * アイコンカラーバリアント  
  * 既存のテーマシステム（TailwindCSS v4 + data-theme）と統合
+ * 
+ * 🚫 DEPRECATED: 'muted' は使用禁止（背景色を文字色として使用するため視認性問題）
+ * ✅ 推奨: 'secondary' または 'inactive' を使用
  */
 export type IconColor = 
   | 'themed'     // メインテキスト色
   | 'primary'    // プライマリアクセント色
-  | 'muted'      // 🚫 DEPRECATED: 背景色流用（使用禁止）
-  | 'secondary'  // ✅ セカンダリテキスト専用色
-  | 'inactive'   // ✅ 非アクティブ状態専用色
+  | 'secondary'  // ✅ セカンダリテキスト専用色（推奨）
+  | 'inactive'   // ✅ 非アクティブ状態専用色（推奨）
   | 'error'      // エラー状態色
   | 'success'    // 成功状態色
   | 'warning';   // 警告状態色

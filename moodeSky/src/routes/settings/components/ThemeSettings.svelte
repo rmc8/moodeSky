@@ -10,7 +10,7 @@
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import type { ThemeMode } from '$lib/types/theme.js';
-  import { theme, common } from '$lib/i18n/paraglide/messages.js';
+  import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
   // 状態管理
@@ -35,50 +35,50 @@
   }> = [
     {
       mode: 'system',
-      label: theme.system(),
+      label: m['settings.theme.systemTheme'](),
       icon: ICONS.COMPUTER,
-      description: 'システム設定に従って自動的にテーマを切り替えます',
+      description: m['settings.theme.systemDescription'](),
       preview: {
-        background: 'from-slate-50 to-slate-900',
-        surface: 'bg-white/80 dark:bg-slate-800/80',
-        text: 'text-slate-900 dark:text-slate-100',
-        accent: 'text-blue-600 dark:text-orange-400'
+        background: 'bg-gradient-themed',
+        surface: 'bg-card border-themed',
+        text: 'text-themed',
+        accent: 'text-primary'
       }
     },
     {
       mode: 'light',
-      label: theme.light(),
+      label: m['settings.theme.lightTheme'](),
       icon: ICONS.LIGHT_MODE,
-      description: '明るい背景の軽やかなテーマです',
+      description: m['settings.theme.lightDescription'](),
       preview: {
-        background: 'from-white to-blue-50',
-        surface: 'bg-white border-blue-200',
-        text: 'text-slate-900',
-        accent: 'text-blue-600'
+        background: 'bg-gradient-primary',
+        surface: 'bg-card border-themed',
+        text: 'text-themed',
+        accent: 'text-primary'
       }
     },
     {
       mode: 'dark',
-      label: theme.dark(),
+      label: m['settings.theme.darkTheme'](),
       icon: ICONS.DARK_MODE,
-      description: '暗い背景で目に優しいテーマです',
+      description: m['settings.theme.darkDescription'](),
       preview: {
-        background: 'from-slate-900 to-orange-950',
-        surface: 'bg-slate-800 border-orange-700',
-        text: 'text-slate-100',
-        accent: 'text-orange-400'
+        background: 'bg-gradient-themed',
+        surface: 'bg-card border-themed',
+        text: 'text-themed',
+        accent: 'text-primary'
       }
     },
     {
       mode: 'high-contrast',
-      label: theme.highContrast(),
+      label: m['settings.theme.highContrastTheme'](),
       icon: ICONS.CONTRAST,
-      description: 'アクセシビリティを重視した高コントラストテーマです',
+      description: m['settings.theme.highContrastDescription'](),
       preview: {
-        background: 'from-black to-white',
-        surface: 'bg-white border-black border-2',
-        text: 'text-black',
-        accent: 'text-yellow-600'
+        background: 'bg-gradient-themed',
+        surface: 'bg-card border-themed border-2',
+        text: 'text-themed',
+        accent: 'text-primary'
       }
     }
   ];
@@ -99,11 +99,11 @@
 
     try {
       await themeStore.setThemeMode(mode);
-      successMessage = `テーマを「${themeOptions.find(opt => opt.mode === mode)?.label}」に変更しました`;
+      successMessage = m['settings.theme.changedTo']({ theme: themeOptions.find(opt => opt.mode === mode)?.label || mode });
       setTimeout(() => successMessage = '', 3000);
     } catch (error) {
       console.error('テーマ変更エラー:', error);
-      errorMessage = 'テーマの変更に失敗しました';
+      errorMessage = m['settings.theme.changeError']();
     } finally {
       isLoading = false;
     }
@@ -118,11 +118,11 @@
 
     try {
       await themeStore.toggleAnimations();
-      successMessage = `アニメーション効果を${themeStore.settings.animations ? '有効' : '無効'}にしました`;
+      successMessage = m['settings.theme.animationToggled']({ state: themeStore.settings.animations ? m['settings.theme.enabled']() : m['settings.theme.disabled']() });
       setTimeout(() => successMessage = '', 3000);
     } catch (error) {
       console.error('アニメーション設定変更エラー:', error);
-      errorMessage = 'アニメーション設定の変更に失敗しました';
+      errorMessage = m['settings.theme.animationError']();
     } finally {
       isLoading = false;
     }
@@ -139,11 +139,11 @@
       await themeStore.updateAutoSchedule({
         enabled: !themeStore.settings.autoSchedule.enabled
       });
-      successMessage = `自動スケジュールを${themeStore.settings.autoSchedule.enabled ? '有効' : '無効'}にしました`;
+      successMessage = m['settings.theme.scheduleToggled']({ state: themeStore.settings.autoSchedule.enabled ? m['settings.theme.enabled']() : m['settings.theme.disabled']() });
       setTimeout(() => successMessage = '', 3000);
     } catch (error) {
       console.error('自動スケジュール設定変更エラー:', error);
-      errorMessage = '自動スケジュール設定の変更に失敗しました';
+      errorMessage = m['settings.theme.scheduleError']();
     } finally {
       isLoading = false;
     }
@@ -162,7 +162,7 @@
       });
     } catch (error) {
       console.error('スケジュール時刻変更エラー:', error);
-      errorMessage = 'スケジュール時刻の変更に失敗しました';
+      errorMessage = m['settings.theme.scheduleTimeError']();
     } finally {
       isLoading = false;
     }
@@ -192,10 +192,10 @@
   <div class="mb-8">
     <h2 class="text-themed text-2xl font-bold mb-2 flex items-center gap-3">
       <span class="text-3xl">🎨</span>
-      テーマ・外観設定
+      {m['settings.theme.title']()}
     </h2>
     <p class="text-themed opacity-70">
-      アプリケーションの外観とテーマを設定します
+      {m['settings.theme.description']()}
     </p>
   </div>
 
@@ -214,7 +214,7 @@
       <button 
         class="ml-auto text-error hover:text-error/80 transition-colors"
         onclick={clearMessages}
-        aria-label="エラーメッセージを閉じる"
+        aria-label={m['settings.closeMessage']()}
       >
         <Icon icon={ICONS.CLOSE} size="sm" />
       </button>
@@ -227,7 +227,7 @@
     <div class="bg-card rounded-xl p-6 border border-themed">
       <h3 class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
         <Icon icon={ICONS.PALETTE} size="md" color="primary" />
-        テーマモード
+        {m['settings.theme.mode']()}
       </h3>
       
       <!-- テーマ選択グリッド -->
@@ -258,7 +258,7 @@
                   <div>
                     <h4 class="font-semibold text-themed">{option.label}</h4>
                     {#if option.mode === themeStore.settings.mode}
-                      <span class="text-xs text-primary font-medium">選択中</span>
+                      <span class="text-xs text-primary font-medium">{m['settings.theme.selected']()}</span>
                     {/if}
                   </div>
                 </div>
@@ -272,7 +272,7 @@
                 <div class="text-xs {option.preview.text}">
                   <div class="flex items-center gap-2 mb-1">
                     <div class="w-2 h-2 rounded-full {option.preview.accent}"></div>
-                    <span class="font-medium">サンプルテキスト</span>
+                    <span class="font-medium">{m['settings.theme.sampleText']()}</span>
                   </div>
                   <div class="opacity-70">{option.description}</div>
                 </div>
@@ -287,16 +287,16 @@
     <div class="bg-card rounded-xl p-6 border border-themed">
       <h3 class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
         <Icon icon={ICONS.ANIMATION} size="md" color="primary" />
-        アニメーション効果
+        {m['settings.theme.animation']()}
       </h3>
       
       <div class="flex items-center justify-between">
         <div class="flex-1">
           <p class="text-themed mb-2">
-            テーマ切り替えやUI要素のアニメーション効果
+            {m['settings.theme.animationDescription']()}
           </p>
           <p class="text-themed opacity-60 text-sm">
-            アニメーションを無効にするとパフォーマンスが向上します
+            {m['settings.theme.animationNote']()}
           </p>
         </div>
         
@@ -326,17 +326,17 @@
     <div class="bg-card rounded-xl p-6 border border-themed">
       <h3 class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
         <Icon icon={ICONS.SCHEDULE} size="md" color="primary" />
-        自動スケジュール
+        {m['settings.theme.autoSchedule']()}
       </h3>
       
       <!-- 自動スケジュール有効/無効 -->
       <div class="flex items-center justify-between mb-6">
         <div class="flex-1">
           <p class="text-themed mb-2">
-            時間帯に応じた自動テーマ切り替え
+            {m['settings.theme.autoScheduleDescription']()}
           </p>
           <p class="text-themed opacity-60 text-sm">
-            指定した時刻に自動的にライト/ダークテーマを切り替えます
+            {m['settings.theme.autoScheduleNote']()}
           </p>
         </div>
         
@@ -369,7 +369,7 @@
             <label class="block">
               <div class="flex items-center gap-2 mb-2">
                 <Icon icon={ICONS.LIGHT_MODE} size="sm" color="themed" />
-                <span class="text-themed font-medium text-sm">ライトテーマ開始</span>
+                <span class="text-themed font-medium text-sm">{m['settings.theme.lightStart']()}</span>
               </div>
               <select
                 class="w-full p-2 bg-themed border border-themed rounded text-themed focus:border-primary focus:outline-none text-sm"
@@ -389,7 +389,7 @@
             <label class="block">
               <div class="flex items-center gap-2 mb-2">
                 <Icon icon={ICONS.DARK_MODE} size="sm" color="themed" />
-                <span class="text-themed font-medium text-sm">ダークテーマ開始</span>
+                <span class="text-themed font-medium text-sm">{m['settings.theme.darkStart']()}</span>
               </div>
               <select
                 class="w-full p-2 bg-themed border border-themed rounded text-themed focus:border-primary focus:outline-none text-sm"
@@ -411,36 +411,36 @@
     <div class="bg-muted/20 rounded-xl p-6 border border-themed/20">
       <h3 class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
         <Icon icon={ICONS.INFO} size="md" color="themed" />
-        現在のテーマ情報
+        {m['settings.theme.currentInfo']()}
       </h3>
       
       <div class="space-y-3 text-sm">
         <div class="flex justify-between items-center">
-          <span class="text-themed opacity-70">設定中のモード:</span>
+          <span class="text-themed opacity-70">{m['settings.theme.settingMode']()}:</span>
           <span class="text-themed font-medium">
             {themeOptions.find(opt => opt.mode === themeStore.settings.mode)?.label}
           </span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-themed opacity-70">適用中のテーマ:</span>
+          <span class="text-themed opacity-70">{m['settings.theme.appliedTheme']()}:</span>
           <span class="text-themed font-medium">
-            {themeStore.currentTheme === 'light' ? 'ライト' : 
-             themeStore.currentTheme === 'dark' ? 'ダーク' : 
-             themeStore.currentTheme === 'high-contrast' ? 'ハイコントラスト' : themeStore.currentTheme}
+            {themeStore.currentTheme === 'light' ? m['settings.theme.lightTheme']() : 
+             themeStore.currentTheme === 'dark' ? m['settings.theme.darkTheme']() : 
+             themeStore.currentTheme === 'high-contrast' ? m['settings.theme.highContrastTheme']() : themeStore.currentTheme}
           </span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-themed opacity-70">アニメーション:</span>
+          <span class="text-themed opacity-70">{m['settings.theme.animations']()}:</span>
           <span class="text-themed font-medium">
-            {themeStore.settings.animations ? '有効' : '無効'}
+            {themeStore.settings.animations ? m['settings.theme.enabled']() : m['settings.theme.disabled']()}
           </span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-themed opacity-70">自動スケジュール:</span>
+          <span class="text-themed opacity-70">{m['settings.theme.autoSchedule']()}:</span>
           <span class="text-themed font-medium">
             {themeStore.settings.autoSchedule.enabled ? 
-              `有効 (${themeStore.settings.autoSchedule.lightStart}:00-${themeStore.settings.autoSchedule.darkStart}:00)` : 
-              '無効'}
+              `${m['settings.theme.enabled']()} (${themeStore.settings.autoSchedule.lightStart}:00-${themeStore.settings.autoSchedule.darkStart}:00)` : 
+              m['settings.theme.disabled']()}
           </span>
         </div>
       </div>
@@ -452,7 +452,7 @@
     <div class="fixed inset-0 bg-themed/50 flex items-center justify-center z-50">
       <div class="bg-card rounded-lg p-6 shadow-xl flex items-center gap-3">
         <div class="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-        <span class="text-themed">設定を変更中...</span>
+        <span class="text-themed">{m['settings.changingSettings']()}</span>
       </div>
     </div>
   {/if}

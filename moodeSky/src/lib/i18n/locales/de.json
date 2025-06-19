@@ -60,7 +60,22 @@
     "previous": "Vorherige",
     "retry": "Wiederholen",
     "error": "Fehler",
-    "active": "Aktiv"
+    "active": "Aktiv",
+    "reload": "Seite neu laden"
+  },
+  "deck": {
+    "welcome": "Willkommen im moodeSky Deck-System!",
+    "welcomeDescription": "Timeline- und Spalten-Features werden hier implementiert.",
+    "developmentFeatures": "Geplante Features",
+    "unexpectedState": "Unerwarteter Zustand",
+    "unexpectedStateDescription": "Die Anwendung befindet sich in einem unerwarteten Zustand.",
+    "plannedFeatures": {
+      "homeTimeline": "Home-Timeline-Anzeige",
+      "multiColumn": "Multi-Spalten Deck-System",
+      "postCompose": "Post-Erstellung & Verwaltungs-Features",
+      "searchFilter": "Such- & Filter-Features",
+      "realTimeUpdate": "Echtzeit-Updates"
+    }
   },
   "profile": {
     "displayName": "Anzeigename",
@@ -109,5 +124,112 @@
   },
   "misc": {
     "languageSelection": "Sprachauswahl"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "loading": "Einstellungen werden geladen...",
+    "initializationFailed": "Initialisierung der Einstellungsseite fehlgeschlagen.",
+    "changingSettings": "Einstellungen werden geändert...",
+    "tabs": {
+      "theme": "Theme & Erscheinungsbild",
+      "language": "Spracheinstellungen",
+      "account": "Konto",
+      "notifications": "Benachrichtigungen"
+    },
+    "comingSoon": "Demnächst verfügbar",
+    "theme": {
+      "title": "Theme & Erscheinungsbild-Einstellungen",
+      "description": "Erscheinungsbild und Theme der Anwendung konfigurieren",
+      "mode": "Theme-Modus",
+      "animation": "Animationseffekte",
+      "animationDescription": "Theme-Übergänge und UI-Element-Animationen",
+      "animationNote": "Das Deaktivieren von Animationen verbessert die Leistung",
+      "autoSchedule": "Automatische Zeitplanung",
+      "autoScheduleDescription": "Automatischer Theme-Wechsel basierend auf der Zeit",
+      "autoScheduleNote": "Automatischer Wechsel zwischen hellen/dunklen Themes zu festgelegten Zeiten",
+      "lightStart": "Helles Theme Start",
+      "darkStart": "Dunkles Theme Start",
+      "currentInfo": "Aktuelle Theme-Informationen",
+      "settingMode": "Eingestellter Modus",
+      "appliedTheme": "Angewendetes Theme",
+      "animations": "Animationen",
+      "enabled": "Aktiviert",
+      "disabled": "Deaktiviert",
+      "selected": "Ausgewählt",
+      "systemTheme": "System",
+      "lightTheme": "Hell",
+      "darkTheme": "Dunkel",
+      "highContrastTheme": "Hoher Kontrast",
+      "systemDescription": "Wechselt automatisch das Theme entsprechend den Systemeinstellungen",
+      "lightDescription": "Helles und sauberes Theme mit hellem Hintergrund",
+      "darkDescription": "Dunkles Theme, das schonender für die Augen ist",
+      "highContrastDescription": "Theme mit hohem Kontrast, fokussiert auf Barrierefreiheit",
+      "changedTo": "Theme geändert zu \"{theme}\"",
+      "animationToggled": "Animationseffekte {state}",
+      "scheduleToggled": "Automatische Zeitplanung {state}",
+      "changeError": "Theme-Änderung fehlgeschlagen",
+      "animationError": "Änderung der Animationseinstellungen fehlgeschlagen",
+      "scheduleError": "Änderung der automatischen Zeitplaneinstellungen fehlgeschlagen",
+      "scheduleTimeError": "Änderung der Zeitplanzeit fehlgeschlagen",
+      "sampleText": "Beispieltext"
+    },
+    "language": {
+      "title": "Sprach- und Lokalisierungseinstellungen",
+      "description": "Anzeigesprache und Lokalisierung der Anwendung konfigurieren",
+      "displayLanguage": "Anzeigesprache",
+      "systemIntegration": "Systemintegration",
+      "useSystemLanguage": "Systemsprache verwenden",
+      "useSystemLanguageDescription": "OS-Sprache \"{language}\" verwenden",
+      "resetToSystem": "Auf Systemsprache zurücksetzen",
+      "redetectLanguage": "Systemsprache neu erkennen",
+      "redetectDescription": "Sprache neu erkennen, wenn sich OS-Einstellungen ändern",
+      "redetect": "Neu erkennen",
+      "currentInfo": "Aktuelle Sprachinformationen",
+      "currentLanguage": "Aktuelle Sprache",
+      "systemLanguage": "Systemsprache",
+      "detectionMethod": "Erkennungsmethode",
+      "initializationStatus": "Initialisierungsstatus",
+      "completed": "Abgeschlossen",
+      "initializing": "Initialisiere...",
+      "features": "Lokalisierungsfeatures",
+      "implementedFeatures": "Implementierte Features",
+      "supportedLanguages": "Unterstützte Sprachen ({count} Sprachen)",
+      "changedTo": "Sprache geändert zu \"{language}\"",
+      "resetToSystemSuccess": "Auf Systemsprache \"{language}\" zurückgesetzt",
+      "redetectedSuccess": "Systemsprache neu erkannt",
+      "changeError": "Sprachänderung fehlgeschlagen",
+      "resetError": "Zurücksetzen auf Systemsprache fehlgeschlagen",
+      "redetectError": "Neuerkennung der Sprache fehlgeschlagen",
+      "unknown": "Unbekannt",
+      "direction": "Richtung",
+      "region": "Region",
+      "primaryLanguage": "Primärsprache - höchste Übersetzungsqualität",
+      "globalStandard": "Globaler Standard - Fallback-Sprache",
+      "brazilMarket": "Brasilien - südamerikanischer Markt",
+      "europeanMarket": "Deutsch - europäischer Markt",
+      "eastAsianMarket": "Koreanisch - ostasiatischer Markt",
+      "detectionSources": {
+        "stored": "Gespeicherte Einstellungen",
+        "os": "Systemeinstellungen",
+        "browser": "Browser-Einstellungen",
+        "fallback": "Fallback"
+      }
+    },
+    "account": {
+      "title": "Kontoeinstellungen",
+      "description": "Kontoeinstellungsfeature kommt demnächst"
+    },
+    "notifications": {
+      "title": "Benachrichtigungseinstellungen",
+      "description": "Benachrichtigungseinstellungsfeature kommt demnächst"
+    },
+    "authRequired": "Authentifizierung erforderlich",
+    "closeMessage": "Nachricht schließen"
+  },
+  "theme": {
+    "loading": "Theme wird geladen...",
+    "loadingShort": "Theme wird geladen...",
+    "error": "Theme-Ladefehler",
+    "retry": "Wiederholen"
   }
 }

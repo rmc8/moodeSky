@@ -7,16 +7,19 @@
   将来機能: ドラッグ&ドロップ、タブ追加・削除
 -->
 <script lang="ts">
-  import { navigation } from '$lib/i18n/paraglide/messages.js';
+  import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
+  
+  // リアクティブ翻訳システム
+  const { t } = useTranslation();
   
   // Phase 1: プレースホルダー状態
   // 将来的にタブデータを受け取る予定
   
   // デモ用プレースホルダーデータ（アイコンのみ、スクロールテスト用に増量）
   const placeholderTabs = [
-    { id: 'home', title: navigation.home(), icon: '🏠' },
-    { id: 'notifications', title: navigation.notifications(), icon: '🔔' },
-    { id: 'search', title: navigation.search(), icon: '🔍' },
+    { id: 'home', title: t('navigation.home'), icon: '🏠' },
+    { id: 'notifications', title: t('navigation.notifications'), icon: '🔔' },
+    { id: 'search', title: t('navigation.search'), icon: '🔍' },
     { id: 'trending', title: 'トレンド', icon: '📈' },
     { id: 'lists', title: 'リスト', icon: '📝' },
     { id: 'bookmarks', title: 'ブックマーク', icon: '🔖' },
