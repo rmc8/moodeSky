@@ -108,6 +108,17 @@ export const ICONS = {
   ADD: 'material-symbols:add',
   ADD_CIRCLE: 'material-symbols:add-circle',
   CREATE: 'material-symbols:create',
+  DELETE: 'material-symbols:delete',
+  LOGOUT: 'material-symbols:logout',
+  
+  // ユーザー・アカウント
+  PEOPLE: 'material-symbols:people',
+  GROUP: 'material-symbols:group',
+  SECURITY: 'material-symbols:security',
+  
+  // 未来・開発
+  FUTURE: 'material-symbols:auto-awesome',
+  EXPAND_LESS: 'material-symbols:expand-less',
   
   // デッキ・カラム管理
   DASHBOARD: 'material-symbols:dashboard',
