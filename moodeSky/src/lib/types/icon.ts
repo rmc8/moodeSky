@@ -125,6 +125,21 @@ export const ICONS = {
   DASHBOARD: 'material-symbols:dashboard',
   VIEW_COLUMN: 'material-symbols:view-column',
   GRID_VIEW: 'material-symbols:grid-view',
+  COLUMNS: 'material-symbols:view-column',
+  INBOX: 'material-symbols:inbox',
+  LOADER: 'material-symbols:autorenew',
+  
+  // ソーシャルメディア拡張
+  BOOKMARK: 'material-symbols:bookmark',
+  HEART: 'material-symbols:favorite',
+  AT: 'material-symbols:alternate-email',
+  LIST: 'material-symbols:list',
+  HASHTAG: 'material-symbols:tag',
+  THREAD: 'material-symbols:forum',
+  FEED: 'material-symbols:dynamic-feed',
+  
+  // モバイル・スワイプ
+  SWIPE_HORIZONTAL: 'material-symbols:swipe',
   
   // 国際化・言語
   TRANSLATE: 'material-symbols:translate',

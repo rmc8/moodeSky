@@ -310,6 +310,30 @@
       "phase1Complete": "Phase 1: Tab-Anzeigebereich-Setup abgeschlossen",
       "phase2Planned": "Tab-Funktionalität wird in Phase 2 implementiert",
       "placeholder": "Platzhalter-Anzeige"
+    },
+    "loading": "Deck wird geladen...",
+    "addColumn": "Spalte hinzufügen",
+    "selectColumnType": "Bitte wählen Sie einen Spaltentyp",
+    "empty": {
+      "title": "Willkommen zum Deck",
+      "description": "Fügen Sie Ihre erste Spalte hinzu, um mit dem moodeSky Deck-System zu beginnen",
+      "addFirstColumn": "Erste Spalte hinzufügen"
+    },
+    "column": {
+      "refresh": "Aktualisieren",
+      "settings": "Einstellungen",
+      "width": "Spaltenbreite",
+      "delete": "Spalte löschen",
+      "confirmDelete": "Sind Sie sicher, dass Sie diese Spalte löschen möchten?",
+      "loading": "Wird geladen...",
+      "loadContent": "Inhalt laden",
+      "empty": {
+        "title": "Kein Inhalt",
+        "description": "Diese Spalte hat noch keinen Inhalt"
+      }
+    },
+    "mobile": {
+      "swipeHint": "Wischen, um Spalten zu wechseln"
     }
   },
   "theme": {

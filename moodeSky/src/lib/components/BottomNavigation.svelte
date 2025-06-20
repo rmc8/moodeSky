@@ -70,7 +70,7 @@
         style={isActive(item.path) ? "background-color: rgb(var(--primary) / 0.2);" : ""}
         class:text-primary={isActive(item.path)}
         class:text-themed={!isActive(item.path)}
-        class:hover:bg-muted={!isActive(item.path)}
+        class:nav-hover={!isActive(item.path)}
         onclick={() => handleNavigation(item.path)}
         aria-label={item.label}
         aria-current={isActive(item.path) ? 'page' : undefined}
@@ -96,3 +96,9 @@
 
 <!-- ボトムナビゲーション分のスペース確保 -->
 <div class="h-14"></div>
+
+<style>
+  .nav-hover:hover {
+    background-color: rgb(var(--primary) / 0.05);
+  }
+</style>

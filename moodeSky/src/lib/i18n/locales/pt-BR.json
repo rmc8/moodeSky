@@ -310,6 +310,30 @@
       "phase1Complete": "Fase 1: Configuração da área de exibição de abas concluída",
       "phase2Planned": "Funcionalidade de abas será implementada na Fase 2",
       "placeholder": "Exibição de marcador"
+    },
+    "loading": "Carregando painel...",
+    "addColumn": "Adicionar Coluna",
+    "selectColumnType": "Por favor, selecione um tipo de coluna",
+    "empty": {
+      "title": "Bem-vindo ao Painel",
+      "description": "Adicione sua primeira coluna para começar com o sistema de painel moodeSky",
+      "addFirstColumn": "Adicionar Primeira Coluna"
+    },
+    "column": {
+      "refresh": "Atualizar",
+      "settings": "Configurações",
+      "width": "Largura da Coluna",
+      "delete": "Excluir Coluna",
+      "confirmDelete": "Tem certeza de que deseja excluir esta coluna?",
+      "loading": "Carregando...",
+      "loadContent": "Carregar Conteúdo",
+      "empty": {
+        "title": "Sem Conteúdo",
+        "description": "Esta coluna ainda não possui nenhum conteúdo"
+      }
+    },
+    "mobile": {
+      "swipeHint": "Deslize para alternar colunas"
     }
   },
   "theme": {

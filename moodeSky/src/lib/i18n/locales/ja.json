@@ -99,6 +99,30 @@
       "phase1Complete": "Phase 1: タブ表示エリア確保完了",
       "phase2Planned": "Phase 2でタブ機能を実装予定",
       "placeholder": "プレースホルダー表示中"
+    },
+    "loading": "デッキを読み込み中...",
+    "addColumn": "カラムを追加",
+    "selectColumnType": "カラムタイプを選択してください",
+    "empty": {
+      "title": "デッキへようこそ",
+      "description": "最初のカラムを追加してmoodeSkyデッキシステムを開始しましょう",
+      "addFirstColumn": "最初のカラムを追加"
+    },
+    "column": {
+      "refresh": "リフレッシュ",
+      "settings": "設定",
+      "width": "カラム幅",
+      "delete": "カラムを削除",
+      "confirmDelete": "このカラムを削除しますか？",
+      "loading": "読み込み中...",
+      "loadContent": "コンテンツを読み込み",
+      "empty": {
+        "title": "コンテンツなし",
+        "description": "このカラムにはまだコンテンツがありません"
+      }
+    },
+    "mobile": {
+      "swipeHint": "スワイプでカラムを切り替え"
     }
   },
   "profile": {

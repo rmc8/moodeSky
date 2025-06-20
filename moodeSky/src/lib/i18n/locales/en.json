@@ -99,6 +99,30 @@
       "phase1Complete": "Phase 1: Tab display area setup complete",
       "phase2Planned": "Tab functionality will be implemented in Phase 2",
       "placeholder": "Placeholder display"
+    },
+    "loading": "Loading deck...",
+    "addColumn": "Add Column",
+    "selectColumnType": "Please select a column type",
+    "empty": {
+      "title": "Welcome to Deck",
+      "description": "Add your first column to get started with the moodeSky deck system",
+      "addFirstColumn": "Add First Column"
+    },
+    "column": {
+      "refresh": "Refresh",
+      "settings": "Settings",
+      "width": "Column Width",
+      "delete": "Delete Column",
+      "confirmDelete": "Are you sure you want to delete this column?",
+      "loading": "Loading...",
+      "loadContent": "Load Content",
+      "empty": {
+        "title": "No Content",
+        "description": "This column doesn't have any content yet"
+      }
+    },
+    "mobile": {
+      "swipeHint": "Swipe to switch columns"
     }
   },
   "profile": {

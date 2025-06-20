@@ -4,6 +4,7 @@
   import { goto } from '$app/navigation';
   import Navigation from '$lib/components/Navigation.svelte';
   import Avatar from '$lib/components/Avatar.svelte';
+  import DeckContainer from '$lib/deck/components/DeckContainer.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
@@ -172,29 +173,11 @@
       </header>
       
       <!-- デッキコンテンツエリア -->
-      <div class="p-4">
-        <!-- 暫定的なウェルカムメッセージ -->
-        <div class="bg-card rounded-xl shadow-lg p-8 text-center">
-          <h2 class="text-themed text-3xl font-bold mb-4">
-            🎉 {t('navigation.home')}
-          </h2>
-          <p class="text-themed opacity-80 text-lg mb-6">
-            {t('deck.welcome')}<br>
-            {t('deck.welcomeDescription')}
-          </p>
-          
-          <!-- 開発状況 -->
-          <div class="bg-muted/10 border-2 border-themed rounded-lg p-6 text-left">
-            <h3 class="text-themed font-semibold text-lg mb-3">🚧 {t('deck.developmentFeatures')}</h3>
-            <ul class="text-themed opacity-80 space-y-2">
-              <li>• {t('deck.plannedFeatures.homeTimeline')}</li>
-              <li>• {t('deck.plannedFeatures.multiColumn')}</li>
-              <li>• {t('deck.plannedFeatures.postCompose')}</li>
-              <li>• {t('deck.plannedFeatures.searchFilter')}</li>
-              <li>• {t('deck.plannedFeatures.realTimeUpdate')}</li>
-            </ul>
-          </div>
-        </div>
+      <div class="h-[calc(100vh-80px)] overflow-hidden">
+        <DeckContainer 
+          accountId={activeAccount.profile.handle}
+          className="h-full"
+        />
       </div>
     </main>
   </div>

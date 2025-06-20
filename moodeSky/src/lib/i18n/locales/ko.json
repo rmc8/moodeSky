@@ -99,6 +99,30 @@
       "phase1Complete": "1단계: 탭 표시 영역 설정 완료",
       "phase2Planned": "탭 기능은 2단계에서 구현될 예정",
       "placeholder": "플레이스홀더 표시"
+    },
+    "loading": "덱 로딩 중...",
+    "addColumn": "컴럼 추가",
+    "selectColumnType": "컴럼 타입을 선택하세요",
+    "empty": {
+      "title": "덱에 오신 것을 환영합니다",
+      "description": "첫 번째 컴럼을 추가하여 moodeSky 덱 시스템을 시작하세요",
+      "addFirstColumn": "첫 번째 컴럼 추가"
+    },
+    "column": {
+      "refresh": "새로 고침",
+      "settings": "설정",
+      "width": "컴럼 폭",
+      "delete": "컴럼 삭제",
+      "confirmDelete": "이 컴럼을 삭제하시겠습니까?",
+      "loading": "로딩 중...",
+      "loadContent": "콘텐츠 로드",
+      "empty": {
+        "title": "콘텐츠 없음",
+        "description": "이 컴럼에는 아직 콘텐츠가 없습니다"
+      }
+    },
+    "mobile": {
+      "swipeHint": "스와이프하여 컴럼 전환"
     }
   },
   "profile": {
