@@ -12,7 +12,7 @@
   import { deckStore } from '../store.svelte.js';
   import type { Column, ColumnWidth } from '../types.js';
   import { COLUMN_WIDTHS } from '../types.js';
-  import * as m from '$paraglide/messages.js';
+  import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
   // Props
@@ -38,7 +38,7 @@
   // カラム幅の動的スタイル
   // ===================================================================
 
-  const columnStyle = $derived(() => {
+  const styleString = $derived(() => {
     const width = COLUMN_WIDTHS[column.settings.width];
     return `width: ${width.width}px; min-width: ${width.width}px;`;
   });
@@ -53,7 +53,7 @@
       column.scrollElement = scrollElement;
     }
 
-    console.log('🎛️ [DeckColumn] Column mounted:', column.id, column.algorithm.name);
+    console.log('🎛️ [DeckColumn] Column mounted:', column.id, column.settings.title);
   });
 
   onDestroy(() => {
@@ -138,7 +138,7 @@
   class="deck-column"
   class:deck-column--minimized={column.settings.isMinimized}
   class:deck-column--pinned={column.settings.isPinned}
-  style={columnStyle}
+  style={styleString()}
 >
   <!-- カラムヘッダー -->
   <header class="deck-column__header">
@@ -148,10 +148,8 @@
       onclick={handleHeaderClick}
     >
       <div class="deck-column__icon">
-        {#if column.algorithm.type === 'home'}
+        {#if column.algorithm === 'reverse_chronological'}
           <Icon icon={ICONS.HOME} size="md" color="primary" />
-        {:else if column.algorithm.type === 'notifications'}
-          <Icon icon={ICONS.NOTIFICATIONS} size="md" color="primary" />
         {:else}
           <Icon icon={ICONS.FEED} size="md" color="primary" />
         {/if}
@@ -159,7 +157,7 @@
       
       <div class="deck-column__title-info">
         <h3 class="deck-column__title text-themed">
-          {column.algorithm.name}
+          {column.settings.title}
         </h3>
         <p class="deck-column__subtitle text-themed opacity-60">
           @{accountId.split('.')[0] || 'user'}

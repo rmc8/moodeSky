@@ -9,7 +9,7 @@
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import type { Column } from '../types.js';
-  import * as m from '$paraglide/messages.js';
+  import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
   // Props
@@ -60,20 +60,16 @@
    * カラムアイコンを取得
    */
   function getColumnIcon(column: Column): string {
-    switch (column.algorithm.type) {
-      case 'home': return ICONS.HOME;
-      case 'notifications': return ICONS.NOTIFICATIONS;
-      case 'mentions': return ICONS.AT;
-      case 'search': return ICONS.SEARCH;
-      case 'bookmarks': return ICONS.BOOKMARK;
-      case 'likes': return ICONS.HEART;
-      case 'following': return ICONS.PEOPLE;
-      case 'followers': return ICONS.PEOPLE;
-      case 'list': return ICONS.LIST;
-      case 'hashtag': return ICONS.HASHTAG;
-      case 'author': return ICONS.ACCOUNT_CIRCLE;
-      case 'thread': return ICONS.THREAD;
-      case 'custom': return ICONS.FEED;
+    switch (column.algorithm) {
+      case 'reverse_chronological': return ICONS.HOME;
+      case 'top_posts': return ICONS.FAVORITE;
+      case 'most_friends': return ICONS.PEOPLE;
+      case 'best_of_follows': return ICONS.AUTO_AWESOME;
+      case 'quiet_posters': return ICONS.VOLUME_DOWN;
+      case 'loud_posters': return ICONS.VOLUME_UP;
+      case 'close_friends': return ICONS.FAVORITE_BORDER;
+      case 'popular_in_network': return ICONS.PUBLIC;
+      case 'popular_with_friends': return ICONS.GROUP;
       default: return ICONS.FEED;
     }
   }
@@ -90,8 +86,8 @@
           class:indicator-dot--active={index === activeIndex}
           onclick={() => handleIndicatorClick(index)}
           onkeydown={(e) => handleKeydown(e, index)}
-          aria-label="{column.algorithm.name} ({index + 1}/{columns.length})"
-          title={column.algorithm.name}
+          aria-label="{column.settings.title} ({index + 1}/{columns.length})"
+          title={column.settings.title}
         >
           <!-- アクティブ時のアイコン表示 -->
           {#if index === activeIndex}
@@ -108,7 +104,7 @@
     <!-- カラム情報表示 -->
     <div class="column-info">
       <span class="column-name text-themed">
-        {columns[activeIndex]?.algorithm.name || ''}
+        {columns[activeIndex]?.settings.title || ''}
       </span>
       <span class="column-counter text-themed opacity-60">
         {activeIndex + 1} / {columns.length}
@@ -273,12 +269,14 @@
   }
 
   /* ダークモード対応 */
+  /*
   @media (prefers-color-scheme: dark) {
     .indicators-track,
     .column-info {
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
   }
+  */
 
   /* 安全領域対応 */
   .column-indicators {

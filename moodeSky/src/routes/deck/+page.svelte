@@ -94,7 +94,7 @@
             'reverse_chronological',
             {
               title: t('navigation.home'),
-              subtitle: t('deck.column.defaultSubtitle')
+              subtitle: 'フォロー中のユーザーの投稿'
             }
           );
         }

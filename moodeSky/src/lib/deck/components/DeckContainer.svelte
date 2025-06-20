@@ -14,7 +14,8 @@
   import DeckColumn from './DeckColumn.svelte';
   import ColumnIndicators from './ColumnIndicators.svelte';
   import { SwipeDetector, CircularColumnNavigator, ColumnIntersectionObserver } from '../utils/swipeDetector.js';
-  import * as m from '$paraglide/messages.js';
+  import { COLUMN_WIDTHS } from '../types.js';
+  import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
   // Props
@@ -91,9 +92,14 @@
    */
   async function handleAddHomeColumn() {
     try {
-      await deckStore.addColumn(accountId, {
-        type: 'home',
-        name: 'ホームタイムライン'
+      if (!accountId) {
+        console.warn('🎛️ [DeckContainer] accountId not provided, cannot add column');
+        return;
+      }
+      
+      await deckStore.addColumn(accountId, 'reverse_chronological', {
+        title: 'ホームタイムライン',
+        subtitle: 'フォロー中のユーザーの投稿'
       });
       showAddColumnModal = false;
       console.log('🎛️ [DeckContainer] Home column added');
@@ -113,6 +119,11 @@
    * モバイル機能の初期化
    */
   function initializeMobileFeatures() {
+    if (!deckColumnsElement) {
+      console.warn('🎛️ [DeckContainer] deckColumnsElement not available');
+      return;
+    }
+    
     // 既存のインスタンスをクリーンアップ
     swipeDetector?.destroy();
     intersectionObserver?.destroy();
@@ -183,8 +194,10 @@
         columnNavigator?.updateTotalColumns(deckStore.columns.length);
         
         // インターセクション監視の更新
-        const columnElements = deckColumnsElement.querySelectorAll('.deck-column') as NodeListOf<HTMLElement>;
-        intersectionObserver?.observeColumns(Array.from(columnElements));
+        if (deckColumnsElement) {
+          const columnElements = deckColumnsElement.querySelectorAll('.deck-column') as NodeListOf<HTMLElement>;
+          intersectionObserver?.observeColumns(Array.from(columnElements));
+        }
       }, 100);
     }
   });
@@ -232,25 +245,35 @@
     
   {:else}
     <!-- デッキカラム表示 -->
-    <div class="deck-columns" bind:this={deckColumnsElement}>
-      <!-- カラム一覧 -->
+    
+    <!-- デスクトップ: 横並び固定幅 -->
+    <div class="hidden md:flex deck-columns-desktop overflow-x-auto gap-4 p-4" bind:this={deckColumnsElement}>
       {#each deckStore.columns as column, index (column.id)}
-        <DeckColumn
-          {column}
-          {index}
-          {accountId}
-        />
+        <div class="flex-shrink-0 deck-column" style="width: {column.settings.width ? COLUMN_WIDTHS[column.settings.width].width : COLUMN_WIDTHS.medium.width}px">
+          <DeckColumn
+            {column}
+            {index}
+            {accountId}
+          />
+        </div>
       {/each}
-      
-      <!-- カラム追加ボタン -->
-      <div class="deck-add-column">
-        <button 
-          class="deck-add-column__button"
-          onclick={handleAddColumn}
-          aria-label={m['deck.addColumn']()}
-        >
-          <Icon icon={ICONS.ADD} size="lg" color="primary" />
-        </button>
+    </div>
+    
+    <!-- モバイル: 100%幅スワイプ切り替え -->
+    <div class="md:hidden deck-columns-mobile w-full overflow-hidden">
+      <div 
+        class="flex transition-transform duration-300"
+        style="width: {deckStore.columns.length * 100}%; transform: translateX(-{activeColumnIndex * 100 / deckStore.columns.length}%)"
+      >
+        {#each deckStore.columns as column, index (column.id)}
+          <div class="w-full flex-shrink-0 deck-column">
+            <DeckColumn
+              {column}
+              {index}
+              {accountId}
+            />
+          </div>
+        {/each}
       </div>
     </div>
     
@@ -275,12 +298,13 @@
 
 <!-- カラム追加モーダル（仮実装） -->
 {#if showAddColumnModal}
-  <div 
+  <button
     class="modal-overlay" 
     onclick={handleCloseAddModal}
     onkeydown={(e) => e.key === 'Escape' && handleCloseAddModal()}
     role="dialog" 
     aria-modal="true"
+    aria-label={m['common.close']()}
     tabindex="0"
   >
     <div 
@@ -292,13 +316,16 @@
         <h3 class="text-themed text-lg font-semibold">
           {m['deck.addColumn']()}
         </h3>
-        <button 
+        <div 
           class="modal-close"
           onclick={handleCloseAddModal}
+          onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCloseAddModal()}
+          role="button"
+          tabindex="0"
           aria-label={m['common.close']()}
         >
           <Icon icon={ICONS.CLOSE} size="md" color="themed" />
-        </button>
+        </div>
       </div>
       
       <div class="modal-body">
@@ -307,19 +334,22 @@
         </p>
         
         <!-- デモ用ホームタイムラインボタン -->
-        <button 
+        <div 
           class="column-type-button"
           onclick={handleAddHomeColumn}
+          onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleAddHomeColumn()}
+          role="button"
+          tabindex="0"
         >
           <Icon icon={ICONS.HOME} size="md" color="primary" />
           <div class="column-type-info">
             <h4 class="text-themed font-medium">ホームタイムライン</h4>
             <p class="text-themed opacity-60 text-sm">フォロー中のユーザーの投稿</p>
           </div>
-        </button>
+        </div>
       </div>
     </div>
-  </div>
+  </button>
 {/if}
 
 <style>
@@ -474,6 +504,10 @@
     align-items: center;
     justify-content: center;
     z-index: 50;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
   }
   
   .modal-content {
@@ -502,6 +536,8 @@
     align-items: center;
     justify-content: center;
     border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 200ms;
   }
   
   .modal-close:hover {
@@ -523,6 +559,7 @@
     gap: 0.75rem;
     text-align: left;
     transition: all 200ms;
+    cursor: pointer;
   }
   
   .column-type-button:hover {

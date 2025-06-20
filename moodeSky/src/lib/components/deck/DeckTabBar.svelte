@@ -26,11 +26,6 @@
     console.log('🎛️ [DeckTabBar] Switched to column:', columnId);
   }
   
-  // カラムを追加（簡易版 - 後でモーダル/ドロップダウンに置き換え）
-  async function addColumn() {
-    // TODO: カラム追加UIの実装
-    console.log('🎛️ [DeckTabBar] Add column clicked');
-  }
 </script>
 
 <!-- デッキタブバー -->
@@ -70,25 +65,8 @@
           decorative={true}
           class="mx-auto mb-2"
         />
-        <p class="text-sm">{t('deck.noColumns')}</p>
+        <p class="text-sm">まだカラムがありません</p>
       </div>
     {/if}
-    
-    <!-- カラム追加ボタン -->
-    <button
-      class="w-full flex items-center gap-3 p-3 rounded-lg border-2 border-dashed border-themed/30 text-themed/50 hover:border-themed/50 hover:text-themed/70 transition-all duration-200"
-      onclick={addColumn}
-      aria-label={t('deck.tabs.addTab')}
-    >
-      <Icon 
-        icon={ICONS.ADD_CIRCLE}
-        size="md"
-        color="inactive"
-        decorative={true}
-      />
-      <span class="font-medium text-sm">
-        {t('deck.tabs.addTab')}
-      </span>
-    </button>
   </div>
 </div>

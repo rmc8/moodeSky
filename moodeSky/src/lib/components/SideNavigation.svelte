@@ -12,15 +12,20 @@
   import DeckTabBar from './deck/DeckTabBar.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
+  import { deckStore } from '$lib/deck/store.svelte.js';
+  import * as m from '../../paraglide/messages.js';
   
   // リアクティブ翻訳システム
   const { t } = useTranslation();
   
   // $propsを使用してプロップを受け取る（Svelte 5 runes mode）
-  const { currentPath = '' } = $props<{ currentPath?: string }>();
+  const { currentPath = '', accountId = '' } = $props<{ currentPath?: string; accountId?: string }>();
   
   // デバッグログ追加
   console.log('🔍 [SideNavigation] Component mounted, currentPath:', currentPath);
+  
+  // カラム追加モーダル状態
+  let showAddColumnModal = $state(false);
   
   interface NavItem {
     id: string;
@@ -58,13 +63,48 @@
     return currentPath === path;
   }
   
-  function handleNavigation(path: string) {
-    goto(path);
+  function handleNavigation(path: string, itemId: string) {
+    if (itemId === 'deck-add') {
+      // デッキ追加ボタンの場合はモーダルを表示
+      showAddColumnModal = true;
+    } else {
+      // その他のナビゲーション
+      goto(path);
+    }
   }
   
   function handleCompose() {
     // TODO: 投稿作成モーダル/ページを開く
     console.log('投稿作成機能（未実装）');
+  }
+  
+  /**
+   * カラム追加モーダルを閉じる
+   */
+  function handleCloseAddModal() {
+    showAddColumnModal = false;
+  }
+  
+  /**
+   * デモ用のホームタイムラインカラムを追加
+   */
+  async function handleAddHomeColumn() {
+    try {
+      if (!accountId) {
+        console.warn('🔍 [SideNavigation] accountId not provided, cannot add column');
+        return;
+      }
+      
+      await deckStore.addColumn(accountId, 'reverse_chronological', {
+        title: t('navigation.home'),
+        subtitle: 'デフォルト'
+      });
+      
+      showAddColumnModal = false;
+      console.log('🔍 [SideNavigation] Home column added');
+    } catch (error) {
+      console.error('🔍 [SideNavigation] Failed to add home column:', error);
+    }
   }
 </script>
 
@@ -104,7 +144,7 @@
         class:text-primary={isActive(item.path)}
         class:text-themed={!isActive(item.path)}
         class:nav-hover={!isActive(item.path)}
-        onclick={() => handleNavigation(item.path)}
+        onclick={() => handleNavigation(item.path, item.id)}
         aria-label={item.label}
         aria-current={isActive(item.path) ? 'page' : undefined}
       >
@@ -123,8 +163,143 @@
   </div>
 </nav>
 
+<!-- カラム追加モーダル -->
+{#if showAddColumnModal}
+  <button
+    class="modal-overlay" 
+    onclick={handleCloseAddModal}
+    onkeydown={(e) => e.key === 'Escape' && handleCloseAddModal()}
+    role="dialog" 
+    aria-modal="true"
+    aria-label={m['common.close']()}
+    tabindex="0"
+  >
+    <div 
+      class="modal-content" 
+      onclick={(e) => e.stopPropagation()}
+      role="document"
+    >
+      <div class="modal-header">
+        <h3 class="text-themed text-lg font-semibold">
+          {m['deck.addColumn']()}
+        </h3>
+        <div 
+          class="modal-close"
+          onclick={handleCloseAddModal}
+          onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCloseAddModal()}
+          role="button"
+          tabindex="0"
+          aria-label={m['common.close']()}
+        >
+          <Icon icon={ICONS.CLOSE} size="md" color="themed" />
+        </div>
+      </div>
+      
+      <div class="modal-body">
+        <p class="text-themed opacity-70 mb-4">
+          {m['deck.selectColumnType']()}
+        </p>
+        
+        <!-- デモ用ホームタイムラインボタン -->
+        <div 
+          class="column-type-button"
+          onclick={handleAddHomeColumn}
+          onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleAddHomeColumn()}
+          role="button"
+          tabindex="0"
+        >
+          <Icon icon={ICONS.HOME} size="md" color="primary" />
+          <div class="column-type-info">
+            <h4 class="text-themed font-medium">{t('navigation.home')}</h4>
+            <p class="text-themed opacity-60 text-sm">フォロー中のユーザーの投稿</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </button>
+{/if}
+
 <style>
   .nav-hover:hover {
     background-color: rgb(var(--primary) / 0.05);
+  }
+  
+  /* モーダル */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(var(--foreground) / 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  
+  .modal-content {
+    background-color: var(--color-card);
+    border-radius: 0.75rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-width: 28rem;
+    width: 100%;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    border: 1px solid var(--color-border);
+  }
+  
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgb(var(--border) / 0.2);
+  }
+  
+  .modal-close {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 200ms;
+  }
+  
+  .modal-close:hover {
+    background-color: rgb(var(--muted) / 0.2);
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  /* カラムタイプボタン */
+  .column-type-button {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid rgb(var(--border) / 0.2);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: left;
+    transition: all 200ms;
+    cursor: pointer;
+  }
+  
+  .column-type-button:hover {
+    border-color: rgb(var(--primary) / 0.4);
+    background-color: rgb(var(--primary) / 0.05);
+  }
+  
+  .column-type-info {
+    flex: 1;
   }
 </style>

@@ -6,7 +6,7 @@
 /**
  * アイコンサイズバリアント
  */
-export type IconSize = 'sm' | 'md' | 'lg' | 'xl';
+export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 /**
  * アイコンカラーバリアント  
@@ -54,6 +54,7 @@ export interface IconProps {
  * アイコンサイズのピクセル値マッピング
  */
 export const ICON_SIZES: Record<IconSize, number> = {
+  xs: 12,
   sm: 16,
   md: 20, 
   lg: 24,

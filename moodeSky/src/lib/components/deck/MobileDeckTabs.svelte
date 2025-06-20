@@ -26,11 +26,6 @@
     console.log('🎛️ [MobileDeckTabs] Switched to column:', columnId);
   }
   
-  // カラムを追加（簡易版 - 後でモーダル/ドロップダウンに置き換え）
-  async function addColumn() {
-    // TODO: カラム追加UIの実装
-    console.log('🎛️ [MobileDeckTabs] Add column clicked');
-  }
 </script>
 
 <!-- モバイルデッキタブバー -->
@@ -71,21 +66,6 @@
         />
       </div>
     {/if}
-    
-    <!-- タブ追加ボタン -->
-    <button
-      class="flex-shrink-0 flex items-center justify-center w-12 h-12 mx-1 rounded-lg border-2 border-dashed border-themed/30 text-themed/50 hover:border-themed/50 hover:text-themed/70 transition-all duration-200"
-      aria-label={t('deck.tabs.addTab')}
-      title={t('deck.tabs.addTabDescription')}
-      onclick={addColumn}
-    >
-      <Icon 
-        icon={ICONS.ADD}
-        size="lg"
-        color="inactive"
-        decorative={true}
-      />
-    </button>
   </div>
 </div>
 

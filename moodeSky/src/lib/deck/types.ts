@@ -48,6 +48,8 @@ export type ColumnType =
 // ===================================================================
 
 export interface ColumnSettings {
+  title: string;           // カラムタイトル
+  subtitle?: string;       // カラムサブタイトル
   width: ColumnWidth;
   autoRefresh: boolean;
   refreshInterval: number; // 分単位
@@ -66,7 +68,18 @@ export interface ColumnSettings {
 // カラムアルゴリズム（AT Protocol対応）
 // ===================================================================
 
-export interface ColumnAlgorithm {
+export type ColumnAlgorithm = 
+  | 'reverse_chronological'  // ホームタイムライン（逆時系列）
+  | 'top_posts'              // トップ投稿（人気順）
+  | 'most_friends'           // フレンド（友達との投稿）
+  | 'best_of_follows'        // ベストフォロー
+  | 'quiet_posters'          // 控えめな投稿者
+  | 'loud_posters'           // 活発な投稿者
+  | 'close_friends'          // 親しい友達
+  | 'popular_in_network'     // ネットワークで人気
+  | 'popular_with_friends';  // 友達に人気
+
+export interface ColumnAlgorithmConfig {
   type: ColumnType;
   name: string;
   uri?: string;          // フィードURI（カスタムフィード用）
@@ -98,6 +111,7 @@ export interface Column {
   id: string;
   accountId: string;     // 所有アカウントID
   algorithm: ColumnAlgorithm;
+  algorithmConfig?: ColumnAlgorithmConfig; // 詳細設定
   settings: ColumnSettings;
   data: ColumnData;
   createdAt: string;
@@ -139,6 +153,8 @@ export interface DeckState {
 // ===================================================================
 
 export const DEFAULT_COLUMN_SETTINGS: ColumnSettings = {
+  title: 'New Column',
+  subtitle: '',
   width: 'medium',
   autoRefresh: false,
   refreshInterval: 5,
@@ -177,7 +193,10 @@ export function createColumn(
     id: crypto.randomUUID(),
     accountId,
     algorithm,
-    settings: { ...DEFAULT_COLUMN_SETTINGS, ...settings },
+    settings: { 
+      ...DEFAULT_COLUMN_SETTINGS, 
+      ...settings 
+    },
     data: {
       feed: [],
       isLoading: false,
