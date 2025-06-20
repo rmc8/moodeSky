@@ -17,7 +17,7 @@ type TranslationFunction = (...args: any[]) => string;
  */
 export function useTranslation() {
   // i18nStore.currentLanguageの変更を監視してリアクティブに翻訳を更新
-  const currentLanguage = $derived(i18nStore.currentLanguage);
+  const currentLanguage = $derived(() => i18nStore.currentLanguage);
   
   // 翻訳オブジェクトを個別に定義
   const translationObject = $derived({
@@ -26,7 +26,7 @@ export function useTranslation() {
      */
     t: (key: keyof typeof messages): string => {
       // 現在の言語を強制的に参照してリアクティブに
-      const _ = currentLanguage;
+      const _ = currentLanguage();
       
       const messageFunction = messages[key] as TranslationFunction;
       if (typeof messageFunction === 'function') {
@@ -47,7 +47,7 @@ export function useTranslation() {
      */
     tp: (key: keyof typeof messages, params: Record<string, any> = {}): string => {
       // 現在の言語を強制的に参照してリアクティブに
-      const _ = currentLanguage;
+      const _ = currentLanguage();
       
       const messageFunction = messages[key] as TranslationFunction;
       if (typeof messageFunction === 'function') {
@@ -93,8 +93,8 @@ class ReactiveTranslationStore {
    */
   getTranslations() {
     // i18nStoreの変更とforceUpdateを監視
-    const currentLanguage = $derived(i18nStore.currentLanguage);
-    const updateFlag = $derived(this.state.forceUpdate);
+    const currentLanguage = $derived(() => i18nStore.currentLanguage);
+    const updateFlag = $derived(() => this.state.forceUpdate);
     
     // 翻訳オブジェクトを個別に定義
     const translationObject = $derived({
@@ -103,8 +103,8 @@ class ReactiveTranslationStore {
        */
       t: (key: keyof typeof messages): string => {
         // リアクティブ依存関係を確立
-        const _ = currentLanguage;
-        const __ = updateFlag;
+        const _ = currentLanguage();
+        const __ = updateFlag();
         
         const messageFunction = messages[key] as TranslationFunction;
         if (typeof messageFunction === 'function') {
@@ -125,8 +125,8 @@ class ReactiveTranslationStore {
        */
       tp: (key: keyof typeof messages, params: Record<string, any> = {}): string => {
         // リアクティブ依存関係を確立
-        const _ = currentLanguage;
-        const __ = updateFlag;
+        const _ = currentLanguage();
+        const __ = updateFlag();
         
         const messageFunction = messages[key] as TranslationFunction;
         if (typeof messageFunction === 'function') {
@@ -145,7 +145,7 @@ class ReactiveTranslationStore {
       /**
        * 現在の言語
        */
-      currentLanguage: currentLanguage
+      currentLanguage: currentLanguage()
     });
     
     return translationObject;

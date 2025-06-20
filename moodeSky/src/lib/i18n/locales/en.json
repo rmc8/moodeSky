@@ -149,6 +149,30 @@
   "misc": {
     "languageSelection": "Language selection"
   },
+  "session": {
+    "expiresIn": "Expires In",
+    "daysLeft": "{count} day(s)",
+    "hoursLeft": "{count} hour(s)",
+    "minutesLeft": "{count} minute(s)",
+    "expired": "Session Expired",
+    "refreshNeeded": "Refresh Needed",
+    "remainingTime": "Time Remaining"
+  },
+  "reauth": {
+    "title": "Account Reauthentication",
+    "description": "Please enter your app password to refresh your session",
+    "button": "Reauthenticate",
+    "passwordLabel": "App Password",
+    "passwordPlaceholder": "Enter your app password",
+    "success": "Reauthentication completed successfully",
+    "failed": "Reauthentication failed",
+    "sessionExpired": "Session has expired",
+    "sessionExpiredDescription": "Your authentication has expired. Reauthentication is required to continue.",
+    "cancel": "Cancel",
+    "authenticating": "Authenticating...",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
   "settings": {
     "title": "Settings",
     "loading": "Loading settings...",
@@ -240,8 +264,32 @@
       }
     },
     "account": {
-      "title": "Account Settings",
-      "description": "Account settings feature is coming soon"
+      "title": "Account Management",
+      "description": "Manage logged-in accounts and settings",
+      "addAccount": "Add Account",
+      "addAccountDescription": "Sign in with a new Bluesky account",
+      "currentAccounts": "Logged-in Accounts",
+      "noAccounts": "No logged-in accounts",
+      "logoutAll": "Log Out from All Accounts",
+      "logoutAllConfirm": "Log out from all accounts?",
+      "logoutAllSuccess": "Logged out from all accounts",
+      "logoutAllError": "Failed to log out",
+      "accountDetails": "Account Details",
+      "sessionInfo": "Session Information",
+      "sessionActive": "Active",
+      "sessionExpired": "Expired",
+      "sessionExpiry": "Expires",
+      "lastLogin": "Last Login",
+      "loginHistory": "Login History",
+      "followers": "Followers",
+      "following": "Following",
+      "posts": "Posts",
+      "security": "Security",
+      "appPassword": "App Password",
+      "logoutAccount": "Sign Out",
+      "logoutAccountConfirm": "Log out from this account?",
+      "logoutAccountSuccess": "Logged out from account",
+      "logoutAccountError": "Failed to log out"
     },
     "notifications": {
       "title": "Notification Settings",

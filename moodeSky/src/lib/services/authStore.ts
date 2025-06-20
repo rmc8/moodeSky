@@ -125,7 +125,7 @@ export class AuthService {
   }
 
   /**
-   * アカウントを追加・更新
+   * アカウントを追加・更新（最大100アカウント制限）
    */
   async saveAccount(
     service: string,
@@ -168,6 +168,17 @@ export class AuthService {
         };
         authStore.accounts[existingAccountIndex] = account;
       } else {
+        // 最大アカウント数チェック（100アカウント制限）
+        if (authStore.accounts.length >= 100) {
+          return {
+            success: false,
+            error: {
+              type: 'STORE_SAVE_FAILED',
+              message: 'Maximum number of accounts (100) reached',
+            },
+          };
+        }
+
         // 新規アカウントを作成
         account = {
           id: this.generateId(),
@@ -180,8 +191,6 @@ export class AuthService {
         authStore.accounts.push(account);
       }
 
-      // アクティブアカウントとして設定
-      authStore.activeAccountId = account.id;
       authStore.lastLoginAt = now;
 
       // ストアに保存
@@ -211,7 +220,27 @@ export class AuthService {
   }
 
   /**
-   * アクティブアカウントを取得
+   * 指定IDのアカウントを取得
+   */
+  async getAccountById(accountId: string): Promise<AuthResult<Account | null>> {
+    const storeResult = await this.loadAuthStore();
+    if (!storeResult.success) {
+      return {
+        success: false,
+        error: storeResult.error,
+      } as AuthResult<Account | null>;
+    }
+
+    const authStore = storeResult.data!;
+    const account = authStore.accounts.find(
+      (acc) => acc.id === accountId
+    );
+
+    return { success: true, data: account || null };
+  }
+
+  /**
+   * 最初のアカウントを取得（後方互換性用）
    */
   async getActiveAccount(): Promise<AuthResult<Account | null>> {
     const storeResult = await this.loadAuthStore();
@@ -223,25 +252,9 @@ export class AuthService {
     }
 
     const authStore = storeResult.data!;
-    if (!authStore.activeAccountId) {
-      return { success: true, data: null };
-    }
+    const firstAccount = authStore.accounts.length > 0 ? authStore.accounts[0] : null;
 
-    const account = authStore.accounts.find(
-      (acc) => acc.id === authStore.activeAccountId
-    );
-
-    if (!account) {
-      return {
-        success: false,
-        error: {
-          type: 'ACCOUNT_NOT_FOUND',
-          message: 'Active account not found',
-        },
-      };
-    }
-
-    return { success: true, data: account };
+    return { success: true, data: firstAccount };
   }
 
   /**
@@ -289,13 +302,6 @@ export class AuthService {
 
       // アカウントを削除
       authStore.accounts.splice(accountIndex, 1);
-
-      // アクティブアカウントだった場合はクリア
-      if (authStore.activeAccountId === accountId) {
-        authStore.activeAccountId = authStore.accounts.length > 0 
-          ? authStore.accounts[0].id 
-          : undefined;
-      }
 
       return await this.saveAuthStore(authStore);
     } catch (error) {
@@ -609,6 +615,116 @@ export class AuthService {
         error: {
           type: 'STORE_SAVE_FAILED',
           message: `Failed to save store: ${error}`,
+        },
+      };
+    }
+  }
+
+  /**
+   * アカウント再認証
+   * 既存のhandleを使用してパスワードのみで認証を更新
+   */
+  async reauthenticateAccount(accountId: string, password: string): Promise<AuthResult<Account>> {
+    try {
+      // 既存アカウントを取得
+      const accountResult = await this.getAccountById(accountId);
+      if (!accountResult.success || !accountResult.data) {
+        return {
+          success: false,
+          error: {
+            type: 'ACCOUNT_NOT_FOUND',
+            message: 'Account not found for reauthentication',
+          },
+        };
+      }
+
+      const existingAccount = accountResult.data;
+      const { BskyAgent } = await import('@atproto/api');
+
+      // 新しいAgentを作成して認証
+      const agent = new BskyAgent({
+        service: existingAccount.service,
+      });
+
+      // ハンドルとパスワードで認証
+      await agent.login({
+        identifier: existingAccount.profile.handle,
+        password: password,
+      });
+
+      // セッションデータを取得
+      const session = agent.session;
+      if (!session) {
+        return {
+          success: false,
+          error: {
+            type: 'AUTH_FAILED',
+            message: 'Failed to create new session',
+          },
+        };
+      }
+
+      // プロフィール情報を更新取得
+      const profileResult = await agent.getProfile({
+        actor: existingAccount.profile.handle,
+      });
+
+      let updatedProfile = existingAccount.profile;
+      if (profileResult.success) {
+        updatedProfile = {
+          did: session.did,
+          handle: session.handle,
+          displayName: profileResult.data.displayName || undefined,
+          avatar: profileResult.data.avatar || undefined,
+        };
+      }
+
+      // 新しいセッションで既存アカウントを更新
+      const saveResult = await this.saveAccount(
+        existingAccount.service,
+        session,
+        updatedProfile
+      );
+
+      if (!saveResult.success) {
+        return {
+          success: false,
+          error: saveResult.error,
+        } as AuthResult<Account>;
+      }
+
+      return { success: true, data: saveResult.data };
+    } catch (error: any) {
+      // @atproto/api のエラーを詳細に解析
+      let errorType: AuthError = 'AUTH_FAILED';
+      let errorMessage = 'Reauthentication failed';
+
+      if (error?.error) {
+        switch (error.error) {
+          case 'AuthRequiredError':
+            errorType = 'AUTH_FAILED';
+            errorMessage = 'Invalid credentials provided';
+            break;
+          case 'NetworkError':
+            errorType = 'NETWORK_ERROR';
+            errorMessage = 'Network connection failed';
+            break;
+          case 'RateLimitError':
+            errorType = 'RATE_LIMITED';
+            errorMessage = 'Too many authentication attempts';
+            break;
+          default:
+            errorMessage = error.message || 'Reauthentication failed';
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      return {
+        success: false,
+        error: {
+          type: errorType,
+          message: errorMessage,
         },
       };
     }

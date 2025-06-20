@@ -16,6 +16,7 @@
   // 設定コンポーネント
   import ThemeSettings from './components/ThemeSettings.svelte';
   import LanguageSettings from './components/LanguageSettings.svelte';
+  import AccountSettings from './components/AccountSettings.svelte';
   
   // ===================================================================
   // 状態管理
@@ -194,10 +195,14 @@
               🌍 {t('settings.tabs.language')}
             </button>
             <button
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed"
-              disabled
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class:bg-primary={activeSection === 'account'}
+              class:text-white={activeSection === 'account'}
+              class:text-themed={activeSection !== 'account'}
+              class:hover:bg-muted={activeSection !== 'account'}
+              onclick={() => switchSection('account')}
             >
-              👤 {t('settings.tabs.account')}（{t('settings.comingSoon')}）
+              👤 {t('settings.tabs.account')}
             </button>
             <button
               class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed"
@@ -215,12 +220,7 @@
           {:else if activeSection === 'language'}
             <LanguageSettings />
           {:else if activeSection === 'account'}
-            <!-- アカウント設定（準備中） -->
-            <div class="max-w-4xl mx-auto text-center py-12">
-              <div class="text-6xl mb-4">👤</div>
-              <h3 class="text-themed text-xl font-semibold mb-2">{t('settings.account.title')}</h3>
-              <p class="text-themed opacity-70">{t('settings.account.description')}</p>
-            </div>
+            <AccountSettings />
           {:else if activeSection === 'notifications'}
             <!-- 通知設定（準備中） -->
             <div class="max-w-4xl mx-auto text-center py-12">

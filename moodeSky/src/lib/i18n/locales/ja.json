@@ -149,6 +149,30 @@
   "misc": {
     "languageSelection": "言語選択"
   },
+  "session": {
+    "expiresIn": "有効期限",
+    "daysLeft": "{count}日後",
+    "hoursLeft": "{count}時間後",
+    "minutesLeft": "{count}分後", 
+    "expired": "セッション切れ",
+    "refreshNeeded": "更新が必要",
+    "remainingTime": "残り時間"
+  },
+  "reauth": {
+    "title": "アカウント再認証",
+    "description": "セッションを更新するためにアプリパスワードを入力してください",
+    "button": "再認証",
+    "passwordLabel": "アプリパスワード",
+    "passwordPlaceholder": "アプリパスワードを入力してください",
+    "success": "再認証が完了しました",
+    "failed": "再認証に失敗しました",
+    "sessionExpired": "セッションが期限切れです",
+    "sessionExpiredDescription": "認証の有効期限が切れています。続行するには再認証が必要です。",
+    "cancel": "キャンセル",
+    "authenticating": "認証中...",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを非表示"
+  },
   "settings": {
     "title": "設定",
     "loading": "設定を読み込み中...",
@@ -240,8 +264,32 @@
       }
     },
     "account": {
-      "title": "アカウント設定",
-      "description": "アカウント設定機能は準備中です"
+      "title": "アカウント管理",
+      "description": "ログインアカウントの管理と設定",
+      "addAccount": "アカウントを追加",
+      "addAccountDescription": "新しいBlueskyアカウントでログイン",
+      "currentAccounts": "ログイン中のアカウント",
+      "noAccounts": "ログイン中のアカウントがありません",
+      "logoutAll": "全てのアカウントからログアウト",
+      "logoutAllConfirm": "全てのアカウントからログアウトしますか？",
+      "logoutAllSuccess": "全てのアカウントからログアウトしました",
+      "logoutAllError": "ログアウト処理に失敗しました",
+      "accountDetails": "アカウント詳細",
+      "sessionInfo": "セッション情報",
+      "sessionActive": "アクティブ",
+      "sessionExpired": "期限切れ",
+      "sessionExpiry": "有効期限",
+      "lastLogin": "最終ログイン",
+      "loginHistory": "ログイン履歴",
+      "followers": "フォロワー",
+      "following": "フォロー中",
+      "posts": "投稿",
+      "security": "セキュリティ",
+      "appPassword": "アプリパスワード",
+      "logoutAccount": "ログアウト",
+      "logoutAccountConfirm": "このアカウントからログアウトしますか？",
+      "logoutAccountSuccess": "アカウントからログアウトしました",
+      "logoutAccountError": "ログアウト処理に失敗しました"
     },
     "notifications": {
       "title": "通知設定", 

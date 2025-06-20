@@ -181,7 +181,7 @@
 </script>
 
 <!-- 言語設定セクション -->
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto pb-20 md:pb-8">
   <!-- セクションヘッダー -->
   <div class="mb-8">
     <h2 class="text-themed text-2xl font-bold mb-2 flex items-center gap-3">

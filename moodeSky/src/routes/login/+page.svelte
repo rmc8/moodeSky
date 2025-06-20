@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { AtpAgent } from '@atproto/api';
   import { authService } from '$lib/services/authStore.js';
+  import { accountsStore } from '$lib/stores/accounts.svelte.js';
   import Icon from '$lib/components/Icon.svelte';
   import ThemeToggle from '$lib/components/ThemeToggle.svelte';
   import LanguageSelectorCompact from '$lib/components/LanguageSelectorCompact.svelte';
@@ -77,6 +78,12 @@
       }
       
       console.log('認証情報を正常に保存:', saveResult.data);
+      
+      // アカウントストアにも追加（リアクティブ更新）
+      if (saveResult.data) {
+        await accountsStore.addAccount(saveResult.data);
+      }
+      
       await goto('/deck');
       
     } catch (error: any) {

@@ -36,14 +36,11 @@ export interface Account {
 
 /**
  * 認証ストレージのメインデータ構造
- * 複数アカウント管理とアクティブアカウント管理
+ * 最大100アカウントの同時管理（全アカウント同時アクティブ）
  */
 export interface AuthStore {
-  /** 登録済みアカウント一覧 */
+  /** 登録済みアカウント一覧（最大100アカウント） */
   accounts: Account[];
-  
-  /** 現在アクティブなアカウントID */
-  activeAccountId?: string;
   
   /** 最後にログインした日時 (ISO 8601) */
   lastLoginAt: string;
@@ -70,7 +67,10 @@ export type AuthError =
   | 'ACCOUNT_NOT_FOUND'
   | 'SESSION_EXPIRED'
   | 'INVALID_SESSION_DATA'
-  | 'MIGRATION_FAILED';
+  | 'MIGRATION_FAILED'
+  | 'AUTH_FAILED'
+  | 'NETWORK_ERROR'
+  | 'RATE_LIMITED';
 
 /**
  * 認証操作結果

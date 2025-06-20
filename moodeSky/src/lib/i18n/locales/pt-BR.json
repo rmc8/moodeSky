@@ -125,6 +125,30 @@
   "misc": {
     "languageSelection": "Seleção de idioma"
   },
+  "session": {
+    "expiresIn": "Expira Em",
+    "daysLeft": "{count} dia(s)",
+    "hoursLeft": "{count} hora(s)",
+    "minutesLeft": "{count} minuto(s)",
+    "expired": "Sessão Expirada",
+    "refreshNeeded": "Atualização Necessária",
+    "remainingTime": "Tempo Restante"
+  },
+  "reauth": {
+    "title": "Reautenticação da Conta",
+    "description": "Digite sua senha do app para atualizar sua sessão",
+    "button": "Reautenticar",
+    "passwordLabel": "Senha do App",
+    "passwordPlaceholder": "Digite sua senha do app",
+    "success": "Reautenticação concluída com sucesso",
+    "failed": "Falha na reautenticação",
+    "sessionExpired": "Sessão expirou",
+    "sessionExpiredDescription": "Sua autenticação expirou. Reautenticação é necessária para continuar.",
+    "cancel": "Cancelar",
+    "authenticating": "Autenticando...",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha"
+  },
   "settings": {
     "title": "Configurações",
     "loading": "Carregando configurações...",
@@ -216,8 +240,32 @@
       }
     },
     "account": {
-      "title": "Configurações da Conta",
-      "description": "O recurso de configurações da conta está chegando em breve"
+      "title": "Gerenciamento de Contas",
+      "description": "Gerencie contas logadas e configurações",
+      "addAccount": "Adicionar Conta",
+      "addAccountDescription": "Entrar com uma nova conta Bluesky",
+      "currentAccounts": "Contas Logadas",
+      "noAccounts": "Nenhuma conta logada",
+      "logoutAll": "Sair de Todas as Contas",
+      "logoutAllConfirm": "Sair de todas as contas?",
+      "logoutAllSuccess": "Saiu de todas as contas",
+      "logoutAllError": "Falha ao sair",
+      "accountDetails": "Detalhes da Conta",
+      "sessionInfo": "Informações da Sessão",
+      "sessionActive": "Ativo",
+      "sessionExpired": "Expirado",
+      "sessionExpiry": "Expira",
+      "lastLogin": "Último Login",
+      "loginHistory": "Histórico de Login",
+      "followers": "Seguidores",
+      "following": "Seguindo",
+      "posts": "Publicações",
+      "security": "Segurança",
+      "appPassword": "Senha do App",
+      "logoutAccount": "Sair",
+      "logoutAccountConfirm": "Sair desta conta?",
+      "logoutAccountSuccess": "Saiu da conta",
+      "logoutAccountError": "Falha ao sair"
     },
     "notifications": {
       "title": "Configurações de Notificação",
