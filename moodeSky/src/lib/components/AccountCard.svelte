@@ -81,9 +81,26 @@
   /**
    * アカウント削除
    */
-  function onRemoveAccount() {
-    // TODO: 将来のマルチアカウント対応時に実装
-    console.log('Remove account:', account.profile.handle);
+  async function onRemoveAccount() {
+    try {
+      isLoading = true;
+      
+      // authService.deleteAccount を呼び出し
+      const result = await import('$lib/services/authStore.js').then(m => m.authService.deleteAccount(account.id));
+      
+      if (result.success) {
+        console.log('Account removed successfully:', account.profile.handle);
+        // 成功時は親コンポーネントの再読み込みをトリガー
+        // CustomEvent を発火してAccountSettingsに通知
+        window.dispatchEvent(new CustomEvent('accountDeleted', { detail: { accountId: account.id } }));
+      } else {
+        console.error('Failed to remove account:', result.error);
+      }
+    } catch (error) {
+      console.error('Error removing account:', error);
+    } finally {
+      isLoading = false;
+    }
   }
 
   /**
@@ -233,16 +250,14 @@
         <span>{showDetails ? m['common.close']() : m['settings.account.accountDetails']()}</span>
       </button>
       
-      <!-- 将来のマルチアカウント対応時に有効化 -->
-      <!-- 
       <button
-        class="account-card__action-btn account-card__action-btn--danger"
+        class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-error/10 text-error hover:bg-error/20 border border-error/20"
         onclick={onRemoveAccount}
+        disabled={isLoading}
       >
         <Icon icon={ICONS.DELETE} size="sm" color="error" />
         <span>{m['settings.account.removeAccount']()}</span>
       </button>
-      -->
     </div>
   {/if}
 

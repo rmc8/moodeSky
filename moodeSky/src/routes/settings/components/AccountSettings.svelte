@@ -9,6 +9,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { authService } from '$lib/services/authStore.js';
+  import { accountsStore } from '$lib/stores/accounts.svelte.js';
   import AccountCard from '$lib/components/AccountCard.svelte';
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
@@ -19,24 +20,17 @@
   // 状態管理
   // ===================================================================
 
-  let activeAccount = $state<Account | null>(null);
   let isLoading = $state(false);
-  let isInitializing = $state(true);
   let successMessage = $state('');
   let errorMessage = $state('');
   let showSignOutConfirm = $state(false);
 
-  // ===================================================================
-  // 算出プロパティ
-  // ===================================================================
-
-  // アカウントリスト（現在はシングルアカウントのみ）
-  const accounts = $derived(() => {
-    return activeAccount ? [activeAccount] : [];
-  });
-
-  // アカウントが存在するかどうか
-  const hasAccounts = $derived(() => accounts.length > 0);
+  // アカウントストアから状態を取得（リアクティブ）
+  const allAccounts = $derived(() => accountsStore.allAccounts);
+  const accountCount = $derived(() => accountsStore.accountCount);
+  const hasAccounts = $derived(() => accountsStore.hasAccounts);
+  const isMaxAccountsReached = $derived(() => accountsStore.isMaxAccountsReached);
+  const isInitializing = $derived(() => !accountsStore.isInitialized);
 
   // ===================================================================
   // イベントハンドラー
@@ -67,10 +61,11 @@
       isLoading = true;
       errorMessage = '';
       
-      const result = await authService.clearAll();
+      // アカウントストアを使用して全アカウントをクリア
+      await accountsStore.clearAllAccounts();
       
-      if (!result.success) {
-        console.error('Sign out failed:', result.error);
+      if (accountsStore.error) {
+        console.error('Sign out failed:', accountsStore.error);
         errorMessage = m['settings.account.signOutAllError']();
         return;
       }
@@ -113,33 +108,38 @@
     errorMessage = '';
   }
 
+  /**
+   * アカウント削除イベントをリスンして再読み込み
+   */
+  function handleAccountDeleted(event: Event) {
+    const customEvent = event as CustomEvent;
+    console.log('🛠️ [AccountSettings] Account deleted:', customEvent.detail.accountId);
+    // アカウントストアから削除（リアクティブ更新）
+    accountsStore.removeAccount(customEvent.detail.accountId);
+  }
+
   // ===================================================================
   // ライフサイクル・初期化
   // ===================================================================
 
   onMount(() => {
+    // アカウントストアを初期化（未初期化の場合のみ）
     (async () => {
       try {
         console.log('🛠️ [AccountSettings] 初期化開始');
-        
-        // アクティブアカウントを取得
-        const result = await authService.getActiveAccount();
-        
-        if (result.success && result.data) {
-          activeAccount = result.data;
-          console.log('🛠️ [AccountSettings] アカウント取得成功:', activeAccount);
-        } else {
-          console.log('🛠️ [AccountSettings] アカウントが見つかりません');
-          // アカウントがない場合でも設定画面は表示する（追加ボタンのため）
-        }
-        
+        await accountsStore.initialize();
       } catch (error) {
         console.error('🛠️ [AccountSettings] 初期化エラー:', error);
-        errorMessage = 'アカウント情報の取得に失敗しました';
-      } finally {
-        isInitializing = false;
+        errorMessage = 'アカウント情報の初期化に失敗しました';
       }
     })();
+
+    // アカウント削除イベントをリスン
+    window.addEventListener('accountDeleted', handleAccountDeleted);
+    
+    return () => {
+      window.removeEventListener('accountDeleted', handleAccountDeleted);
+    };
   });
 
   // 自動的にメッセージをクリア
@@ -188,7 +188,7 @@
   {/if}
 
   <!-- 初期化中 -->
-  {#if isInitializing}
+  {#if isInitializing()}
     <div class="flex items-center justify-center py-12">
       <div class="flex items-center gap-3">
         <div class="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
@@ -209,11 +209,16 @@
             <p class="text-themed opacity-70">
               {m['settings.account.addAccountDescription']()}
             </p>
+            {#if isMaxAccountsReached()}
+              <p class="text-error text-sm mt-2">
+                最大100アカウントに達しています
+              </p>
+            {/if}
           </div>
           
           <button
             class="button-primary"
-            disabled={isLoading}
+            disabled={isLoading || isMaxAccountsReached()}
             onclick={addAccount}
           >
             <Icon icon={ICONS.ADD} size="sm" color="themed" />
@@ -231,11 +236,11 @@
         
         {#if hasAccounts()}
           <div class="space-y-4">
-            {#each accounts() as account, index}
+            {#each allAccounts() as account}
               <AccountCard 
                 {account}
-                isActive={true}
-                showActions={false}
+                isActive={false}
+                showActions={true}
                 compact={false}
               />
             {/each}
@@ -263,8 +268,8 @@
       <!-- 3. 全アカウントからサインアウト（最下部） -->
       {#if hasAccounts()}
         <div class="bg-error/5 border border-error/20 rounded-xl p-6">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
+          <div class="space-y-4">
+            <div>
               <h3 class="text-error text-lg font-semibold mb-2 flex items-center gap-2">
                 <Icon icon={ICONS.LOGOUT} size="md" color="error" />
                 {m['settings.account.signOutAll']()}
@@ -274,14 +279,16 @@
               </p>
             </div>
             
-            <button
-              class="px-4 py-2 bg-error/10 text-error border border-error/30 rounded-lg hover:bg-error/20 transition-colors font-medium"
-              disabled={isLoading}
-              onclick={confirmSignOutAll}
-            >
-              <Icon icon={ICONS.LOGOUT} size="sm" color="error" />
-              {m['settings.account.signOutAll']()}
-            </button>
+            <div class="flex justify-end">
+              <button
+                class="px-4 py-2 bg-error/10 text-error border border-error/30 rounded-lg hover:bg-error/20 transition-colors font-medium flex items-center gap-2"
+                disabled={isLoading}
+                onclick={confirmSignOutAll}
+              >
+                <Icon icon={ICONS.LOGOUT} size="sm" color="error" />
+                {m['settings.account.signOutAll']()}
+              </button>
+            </div>
           </div>
         </div>
       {/if}
