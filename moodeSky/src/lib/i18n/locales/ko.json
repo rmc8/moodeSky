@@ -31,11 +31,10 @@
     "logoutError": "로그아웃 중 오류가 발생했습니다."
   },
   "theme": {
-    "light": "라이트",
-    "dark": "다크",
-    "highContrast": "고대비",
-    "system": "시스템",
-    "themeToggle": "테마 전환"
+    "loading": "테마 로딩 중...",
+    "loadingShort": "테마 로딩 중...",
+    "error": "테마 로딩 오류",
+    "retry": "재시도"
   },
   "language": {
     "current": "현재 언어",
@@ -119,11 +118,13 @@
       "empty": {
         "title": "콘텐츠 없음",
         "description": "이 컴럼에는 아직 콘텐츠가 없습니다"
-      }
+      },
+      "defaultSubtitle": "Default timeline"
     },
     "mobile": {
       "swipeHint": "스와이프하여 컴럼 전환"
-    }
+    },
+    "noColumns": "No columns"
   },
   "profile": {
     "displayName": "표시 이름",
@@ -321,11 +322,5 @@
     },
     "authRequired": "인증이 필요합니다",
     "closeMessage": "메시지 닫기"
-  },
-  "theme": {
-    "loading": "테마 로딩 중...",
-    "loadingShort": "테마 로딩 중...",
-    "error": "테마 로딩 오류",
-    "retry": "재시도"
   }
 }

@@ -31,11 +31,10 @@
     "logoutError": "Fehler beim Abmelden."
   },
   "theme": {
-    "light": "Hell",
-    "dark": "Dunkel",
-    "highContrast": "Hoher Kontrast",
-    "system": "System",
-    "themeToggle": "Design wechseln"
+    "loading": "Theme wird geladen...",
+    "loadingShort": "Theme wird geladen...",
+    "error": "Theme-Ladefehler",
+    "retry": "Wiederholen"
   },
   "language": {
     "current": "Aktuelle Sprache",
@@ -75,7 +74,57 @@
       "postCompose": "Post-Erstellung & Verwaltungs-Features",
       "searchFilter": "Such- & Filter-Features",
       "realTimeUpdate": "Echtzeit-Updates"
-    }
+    },
+    "tabs": {
+      "timeline": "Zeitlinie",
+      "mentions": "Erwähnungen",
+      "bookmarks": "Lesezeichen",
+      "lists": "Listen",
+      "analytics": "Analysen",
+      "following": "Folge ich",
+      "followers": "Follower",
+      "trending": "Trends",
+      "discover": "Entdecken",
+      "saved": "Gespeichert",
+      "drafts": "Entwürfe",
+      "archive": "Archiv",
+      "scheduled": "Geplant",
+      "custom": "Benutzerdefiniert",
+      "addTab": "Tab hinzufügen",
+      "addTabDescription": "Tab hinzufügen (Demnächst)",
+      "tabArea": "Tab-Anzeigebereich"
+    },
+    "development": {
+      "phase1Complete": "Phase 1: Tab-Anzeigebereich-Setup abgeschlossen",
+      "phase2Planned": "Tab-Funktionalität wird in Phase 2 implementiert",
+      "placeholder": "Platzhalter-Anzeige"
+    },
+    "loading": "Deck wird geladen...",
+    "addColumn": "Spalte hinzufügen",
+    "selectColumnType": "Bitte wählen Sie einen Spaltentyp",
+    "empty": {
+      "title": "Willkommen zum Deck",
+      "description": "Fügen Sie Ihre erste Spalte hinzu, um mit dem moodeSky Deck-System zu beginnen",
+      "addFirstColumn": "Erste Spalte hinzufügen"
+    },
+    "column": {
+      "refresh": "Aktualisieren",
+      "settings": "Einstellungen",
+      "width": "Spaltenbreite",
+      "delete": "Spalte löschen",
+      "confirmDelete": "Sind Sie sicher, dass Sie diese Spalte löschen möchten?",
+      "loading": "Wird geladen...",
+      "loadContent": "Inhalt laden",
+      "empty": {
+        "title": "Kein Inhalt",
+        "description": "Diese Spalte hat noch keinen Inhalt"
+      },
+      "defaultSubtitle": "Default timeline"
+    },
+    "mobile": {
+      "swipeHint": "Wischen, um Spalten zu wechseln"
+    },
+    "noColumns": "No columns"
   },
   "profile": {
     "displayName": "Anzeigename",
@@ -273,73 +322,5 @@
     },
     "authRequired": "Authentifizierung erforderlich",
     "closeMessage": "Nachricht schließen"
-  },
-  "deck": {
-    "welcome": "Willkommen im moodeSky Deck-System!",
-    "welcomeDescription": "Timeline- und Spalten-Features werden hier implementiert.",
-    "developmentFeatures": "Geplante Features",
-    "unexpectedState": "Unerwarteter Zustand",
-    "unexpectedStateDescription": "Die Anwendung befindet sich in einem unerwarteten Zustand.",
-    "plannedFeatures": {
-      "homeTimeline": "Home-Timeline-Anzeige",
-      "multiColumn": "Multi-Spalten Deck-System",
-      "postCompose": "Post-Erstellung & Verwaltungs-Features",
-      "searchFilter": "Such- & Filter-Features",
-      "realTimeUpdate": "Echtzeit-Updates"
-    },
-    "tabs": {
-      "timeline": "Zeitlinie",
-      "mentions": "Erwähnungen",
-      "bookmarks": "Lesezeichen",
-      "lists": "Listen",
-      "analytics": "Analysen",
-      "following": "Folge ich",
-      "followers": "Follower",
-      "trending": "Trends",
-      "discover": "Entdecken",
-      "saved": "Gespeichert",
-      "drafts": "Entwürfe",
-      "archive": "Archiv",
-      "scheduled": "Geplant",
-      "custom": "Benutzerdefiniert",
-      "addTab": "Tab hinzufügen",
-      "addTabDescription": "Tab hinzufügen (Demnächst)",
-      "tabArea": "Tab-Anzeigebereich"
-    },
-    "development": {
-      "phase1Complete": "Phase 1: Tab-Anzeigebereich-Setup abgeschlossen",
-      "phase2Planned": "Tab-Funktionalität wird in Phase 2 implementiert",
-      "placeholder": "Platzhalter-Anzeige"
-    },
-    "loading": "Deck wird geladen...",
-    "addColumn": "Spalte hinzufügen",
-    "selectColumnType": "Bitte wählen Sie einen Spaltentyp",
-    "empty": {
-      "title": "Willkommen zum Deck",
-      "description": "Fügen Sie Ihre erste Spalte hinzu, um mit dem moodeSky Deck-System zu beginnen",
-      "addFirstColumn": "Erste Spalte hinzufügen"
-    },
-    "column": {
-      "refresh": "Aktualisieren",
-      "settings": "Einstellungen",
-      "width": "Spaltenbreite",
-      "delete": "Spalte löschen",
-      "confirmDelete": "Sind Sie sicher, dass Sie diese Spalte löschen möchten?",
-      "loading": "Wird geladen...",
-      "loadContent": "Inhalt laden",
-      "empty": {
-        "title": "Kein Inhalt",
-        "description": "Diese Spalte hat noch keinen Inhalt"
-      }
-    },
-    "mobile": {
-      "swipeHint": "Wischen, um Spalten zu wechseln"
-    }
-  },
-  "theme": {
-    "loading": "Theme wird geladen...",
-    "loadingShort": "Theme wird geladen...",
-    "error": "Theme-Ladefehler",
-    "retry": "Wiederholen"
   }
 }

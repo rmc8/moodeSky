@@ -31,11 +31,10 @@
     "logoutError": "An error occurred during logout."
   },
   "theme": {
-    "light": "Light",
-    "dark": "Dark",
-    "highContrast": "High Contrast",
-    "system": "System",
-    "themeToggle": "Toggle theme"
+    "loading": "Loading theme...",
+    "loadingShort": "Loading theme...",
+    "error": "Theme loading error",
+    "retry": "Retry"
   },
   "language": {
     "current": "Current language",
@@ -119,11 +118,13 @@
       "empty": {
         "title": "No Content",
         "description": "This column doesn't have any content yet"
-      }
+      },
+      "defaultSubtitle": "Default timeline"
     },
     "mobile": {
       "swipeHint": "Swipe to switch columns"
-    }
+    },
+    "noColumns": "No columns"
   },
   "profile": {
     "displayName": "Display Name",
@@ -321,11 +322,5 @@
     },
     "authRequired": "Authentication required",
     "closeMessage": "Close message"
-  },
-  "theme": {
-    "loading": "Loading theme...",
-    "loadingShort": "Loading theme...",
-    "error": "Theme loading error",
-    "retry": "Retry"
   }
 }

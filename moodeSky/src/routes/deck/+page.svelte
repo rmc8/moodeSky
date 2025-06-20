@@ -8,6 +8,7 @@
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
+  import { deckStore } from '$lib/deck/store.svelte.js';
   
   
   // リアクティブ翻訳システム
@@ -80,6 +81,25 @@
         console.log('🔍 [DEBUG] Setting activeAccount:', result.data);
         activeAccount = result.data;
         console.log('🔍 [DEBUG] activeAccount set successfully:', activeAccount);
+        
+        // デッキストアを初期化
+        console.log('🔍 [DEBUG] Initializing deck store...');
+        await deckStore.initialize(activeAccount.profile.handle);
+        
+        // 初回利用時（カラムが0個）の場合、デフォルトカラムを作成
+        if (deckStore.isEmpty) {
+          console.log('🔍 [DEBUG] No columns found, creating default column');
+          await deckStore.addColumn(
+            activeAccount.profile.handle,
+            'reverse_chronological',
+            {
+              title: t('navigation.home'),
+              subtitle: t('deck.column.defaultSubtitle')
+            }
+          );
+        }
+        
+        console.log('🔍 [DEBUG] Deck initialized with', deckStore.columnCount, 'columns');
         
         // ブラウザバック防止
         history.pushState(null, '', window.location.href);

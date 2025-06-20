@@ -119,7 +119,12 @@ export const ICONS = {
   
   // 未来・開発
   FUTURE: 'material-symbols:auto-awesome',
+  AUTO_AWESOME: 'material-symbols:auto-awesome',
   EXPAND_LESS: 'material-symbols:expand-less',
+  
+  // 音量・アクティビティ
+  VOLUME_DOWN: 'material-symbols:volume-down',
+  VOLUME_UP: 'material-symbols:volume-up',
   
   // デッキ・カラム管理
   DASHBOARD: 'material-symbols:dashboard',

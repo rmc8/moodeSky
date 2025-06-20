@@ -6,6 +6,8 @@
  * Tauri統合・多言語対応・マルチプラットフォーム対応
  */
 
+import { ICONS } from '$lib/types/icon.js';
+
 // ===================================================================
 // カラム幅設定（tokimekibluesky参考）
 // ===================================================================
@@ -184,4 +186,31 @@ export function createColumn(
     createdAt: now,
     updatedAt: now
   };
+}
+
+// ===================================================================
+// カラムアイコンマッピング
+// ===================================================================
+
+/**
+ * ColumnAlgorithmに対応するアイコンを取得
+ */
+export const COLUMN_ALGORITHM_ICONS: Record<ColumnAlgorithm, string> = {
+  'reverse_chronological': ICONS.HOME,           // ホームタイムライン
+  'top_posts': ICONS.FAVORITE,                  // トップ投稿（人気）
+  'most_friends': ICONS.PEOPLE,                  // フレンド
+  'best_of_follows': ICONS.AUTO_AWESOME,         // ベストフォロー
+  'quiet_posters': ICONS.VOLUME_DOWN,            // 控えめな投稿者
+  'loud_posters': ICONS.VOLUME_UP,              // 活発な投稿者  
+  'close_friends': ICONS.FAVORITE_BORDER,        // 親しい友達
+  'popular_in_network': ICONS.PUBLIC,            // ネットワークで人気
+  'popular_with_friends': ICONS.GROUP            // 友達に人気
+};
+
+/**
+ * カラムタイプに基づいてアイコンを取得
+ */
+export function getColumnIcon(column: Column): string {
+  // 将来的にカラムタイプ別のアイコンも追加可能
+  return COLUMN_ALGORITHM_ICONS[column.algorithm] || ICONS.FEED;
 }

@@ -4,31 +4,33 @@
   
   配置: 画面最上部（固定位置）
   特徴: 横スクロール対応、アイコンのみ表示
-  将来機能: ドラッグ&ドロップ、タブ追加・削除
+  機能: カラム切り替え、タブ追加・削除
 -->
 <script lang="ts">
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
+  import { deckStore } from '$lib/deck/store.svelte.js';
+  import { getColumnIcon } from '$lib/deck/types.js';
+  import Icon from '$lib/components/Icon.svelte';
+  import { ICONS } from '$lib/types/icon.js';
   
   // リアクティブ翻訳システム
   const { t } = useTranslation();
   
-  // Phase 1: プレースホルダー状態
-  // 将来的にタブデータを受け取る予定
+  // デッキストアから実際のカラムデータを取得（リアクティブ）
+  const columns = $derived(deckStore.columns);
+  const activeColumnId = $derived(deckStore.state.activeColumnId);
   
-  // デモ用プレースホルダーデータ（アイコンのみ、スクロールテスト用に増量）
-  // $derivedを使用してリアクティブに言語切り替えに対応
-  const placeholderTabs = $derived([
-    { id: 'home', title: t('navigation.home'), icon: '🏠' },
-    { id: 'notifications', title: t('navigation.notifications'), icon: '🔔' },
-    { id: 'search', title: t('navigation.search'), icon: '🔍' },
-    { id: 'trending', title: t('deck.tabs.trending'), icon: '📈' },
-    { id: 'lists', title: t('deck.tabs.lists'), icon: '📝' },
-    { id: 'bookmarks', title: t('deck.tabs.bookmarks'), icon: '🔖' },
-    { id: 'mentions', title: t('deck.tabs.mentions'), icon: '💬' },
-    { id: 'analytics', title: t('deck.tabs.analytics'), icon: '📊' },
-    { id: 'timeline1', title: `${t('deck.tabs.timeline')} 1`, icon: '📱' },
-    { id: 'timeline2', title: `${t('deck.tabs.timeline')} 2`, icon: '📺' }
-  ]);
+  // カラムを切り替える
+  function switchColumn(columnId: string) {
+    deckStore.state.activeColumnId = columnId;
+    console.log('🎛️ [MobileDeckTabs] Switched to column:', columnId);
+  }
+  
+  // カラムを追加（簡易版 - 後でモーダル/ドロップダウンに置き換え）
+  async function addColumn() {
+    // TODO: カラム追加UIの実装
+    console.log('🎛️ [MobileDeckTabs] Add column clicked');
+  }
 </script>
 
 <!-- モバイルデッキタブバー -->
@@ -37,29 +39,52 @@
   role="tablist"
   aria-label={t('deck.tabs.tabArea')}
 >
-  <!-- Phase 1: プレースホルダー表示 -->
   <div class="flex overflow-x-auto scrollbar-hide px-2 py-2">
-    {#each placeholderTabs as tab}
-      <button
-        class="flex-shrink-0 flex items-center justify-center w-12 h-12 mx-1 rounded-lg bg-muted/50 text-themed hover:bg-muted/70 active:scale-95 transition-all duration-200"
-        role="tab"
-        aria-label={tab.title}
-        title={tab.title}
-      >
-        <!-- アイコンのみ表示 -->
-        <span class="text-lg" aria-hidden="true">
-          {tab.icon}
-        </span>
-      </button>
-    {/each}
+    {#if columns.length > 0}
+      <!-- 実際のカラムタブ表示 -->
+      {#each columns as column}
+        <button
+          class="flex-shrink-0 flex items-center justify-center w-12 h-12 mx-1 rounded-lg transition-all duration-200 active:scale-95 {column.id === activeColumnId ? 'bg-primary/20' : 'bg-muted/50 hover:bg-muted/70'}"
+          role="tab"
+          aria-selected={column.id === activeColumnId}
+          aria-label={column.settings.title}
+          title={column.settings.title}
+          onclick={() => switchColumn(column.id)}
+        >
+          <!-- アイコンのみ表示 -->
+          <Icon 
+            icon={getColumnIcon(column)}
+            size="lg"
+            color={column.id === activeColumnId ? 'primary' : 'themed'}
+            decorative={true}
+          />
+        </button>
+      {/each}
+    {:else}
+      <!-- カラムがない場合のプレースホルダー -->
+      <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 mx-1 rounded-lg bg-muted/50">
+        <Icon 
+          icon={ICONS.INBOX}
+          size="lg"
+          color="inactive"
+          decorative={true}
+        />
+      </div>
+    {/if}
     
-    <!-- タブ追加ボタン（プレースホルダー） -->
+    <!-- タブ追加ボタン -->
     <button
       class="flex-shrink-0 flex items-center justify-center w-12 h-12 mx-1 rounded-lg border-2 border-dashed border-themed/30 text-themed/50 hover:border-themed/50 hover:text-themed/70 transition-all duration-200"
       aria-label={t('deck.tabs.addTab')}
       title={t('deck.tabs.addTabDescription')}
+      onclick={addColumn}
     >
-      <span class="text-lg" aria-hidden="true">➕</span>
+      <Icon 
+        icon={ICONS.ADD}
+        size="lg"
+        color="inactive"
+        decorative={true}
+      />
     </button>
   </div>
 </div>

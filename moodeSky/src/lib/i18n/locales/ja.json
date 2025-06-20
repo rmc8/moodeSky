@@ -101,6 +101,7 @@
       "placeholder": "プレースホルダー表示中"
     },
     "loading": "デッキを読み込み中...",
+    "noColumns": "カラムがありません",
     "addColumn": "カラムを追加",
     "selectColumnType": "カラムタイプを選択してください",
     "empty": {
@@ -119,7 +120,8 @@
       "empty": {
         "title": "コンテンツなし",
         "description": "このカラムにはまだコンテンツがありません"
-      }
+      },
+      "defaultSubtitle": "デフォルトタイムライン"
     },
     "mobile": {
       "swipeHint": "スワイプでカラムを切り替え"
