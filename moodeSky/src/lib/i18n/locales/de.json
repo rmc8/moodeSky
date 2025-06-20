@@ -125,6 +125,30 @@
   "misc": {
     "languageSelection": "Sprachauswahl"
   },
+  "session": {
+    "expiresIn": "Läuft ab in",
+    "daysLeft": "{count} Tag(e)",
+    "hoursLeft": "{count} Stunde(n)",
+    "minutesLeft": "{count} Minute(n)",
+    "expired": "Sitzung abgelaufen",
+    "refreshNeeded": "Aktualisierung erforderlich",
+    "remainingTime": "Verbleibende Zeit"
+  },
+  "reauth": {
+    "title": "Konto-Reauthentifizierung",
+    "description": "Bitte geben Sie Ihr App-Passwort ein, um Ihre Sitzung zu erneuern",
+    "button": "Reauthentifizieren",
+    "passwordLabel": "App-Passwort",
+    "passwordPlaceholder": "App-Passwort eingeben",
+    "success": "Reauthentifizierung erfolgreich abgeschlossen",
+    "failed": "Reauthentifizierung fehlgeschlagen",
+    "sessionExpired": "Sitzung ist abgelaufen",
+    "sessionExpiredDescription": "Ihre Authentifizierung ist abgelaufen. Eine Reauthentifizierung ist erforderlich.",
+    "cancel": "Abbrechen",
+    "authenticating": "Authentifiziere...",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen"
+  },
   "settings": {
     "title": "Einstellungen",
     "loading": "Einstellungen werden geladen...",
@@ -222,10 +246,10 @@
       "addAccountDescription": "Mit einem neuen Bluesky-Konto anmelden",
       "currentAccounts": "Angemeldete Konten",
       "noAccounts": "Keine angemeldeten Konten",
-      "signOutAll": "Von allen Konten abmelden",
-      "signOutAllConfirm": "Von allen Konten abmelden?",
-      "signOutAllSuccess": "Von allen Konten abgemeldet",
-      "signOutAllError": "Abmeldung fehlgeschlagen",
+      "logoutAll": "Von allen Konten abmelden",
+      "logoutAllConfirm": "Von allen Konten abmelden?",
+      "logoutAllSuccess": "Von allen Konten abgemeldet",
+      "logoutAllError": "Abmeldung fehlgeschlagen",
       "accountDetails": "Kontodetails",
       "sessionInfo": "Sitzungsinformationen",
       "sessionActive": "Aktiv",
@@ -238,10 +262,10 @@
       "posts": "Beiträge",
       "security": "Sicherheit",
       "appPassword": "App-Passwort",
-      "removeAccount": "Konto entfernen",
-      "removeAccountConfirm": "Dieses Konto entfernen?",
-      "removeAccountSuccess": "Konto entfernt",
-      "removeAccountError": "Konto entfernen fehlgeschlagen"
+      "logoutAccount": "Abmelden",
+      "logoutAccountConfirm": "Von diesem Konto abmelden?",
+      "logoutAccountSuccess": "Vom Konto abgemeldet",
+      "logoutAccountError": "Abmeldung fehlgeschlagen"
     },
     "notifications": {
       "title": "Benachrichtigungseinstellungen",

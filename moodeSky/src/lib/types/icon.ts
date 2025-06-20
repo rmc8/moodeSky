@@ -109,6 +109,7 @@ export const ICONS = {
   ADD_CIRCLE: 'material-symbols:add-circle',
   CREATE: 'material-symbols:create',
   DELETE: 'material-symbols:delete',
+  LOGIN: 'material-symbols:login',
   LOGOUT: 'material-symbols:logout',
   
   // ユーザー・アカウント

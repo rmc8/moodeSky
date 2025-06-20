@@ -125,6 +125,30 @@
   "misc": {
     "languageSelection": "Seleção de idioma"
   },
+  "session": {
+    "expiresIn": "Expira Em",
+    "daysLeft": "{count} dia(s)",
+    "hoursLeft": "{count} hora(s)",
+    "minutesLeft": "{count} minuto(s)",
+    "expired": "Sessão Expirada",
+    "refreshNeeded": "Atualização Necessária",
+    "remainingTime": "Tempo Restante"
+  },
+  "reauth": {
+    "title": "Reautenticação da Conta",
+    "description": "Digite sua senha do app para atualizar sua sessão",
+    "button": "Reautenticar",
+    "passwordLabel": "Senha do App",
+    "passwordPlaceholder": "Digite sua senha do app",
+    "success": "Reautenticação concluída com sucesso",
+    "failed": "Falha na reautenticação",
+    "sessionExpired": "Sessão expirou",
+    "sessionExpiredDescription": "Sua autenticação expirou. Reautenticação é necessária para continuar.",
+    "cancel": "Cancelar",
+    "authenticating": "Autenticando...",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha"
+  },
   "settings": {
     "title": "Configurações",
     "loading": "Carregando configurações...",
@@ -222,10 +246,10 @@
       "addAccountDescription": "Entrar com uma nova conta Bluesky",
       "currentAccounts": "Contas Logadas",
       "noAccounts": "Nenhuma conta logada",
-      "signOutAll": "Sair de Todas as Contas",
-      "signOutAllConfirm": "Sair de todas as contas?",
-      "signOutAllSuccess": "Saiu de todas as contas",
-      "signOutAllError": "Falha ao sair",
+      "logoutAll": "Sair de Todas as Contas",
+      "logoutAllConfirm": "Sair de todas as contas?",
+      "logoutAllSuccess": "Saiu de todas as contas",
+      "logoutAllError": "Falha ao sair",
       "accountDetails": "Detalhes da Conta",
       "sessionInfo": "Informações da Sessão",
       "sessionActive": "Ativo",
@@ -238,10 +262,10 @@
       "posts": "Publicações",
       "security": "Segurança",
       "appPassword": "Senha do App",
-      "removeAccount": "Remover Conta",
-      "removeAccountConfirm": "Remover esta conta?",
-      "removeAccountSuccess": "Conta removida",
-      "removeAccountError": "Falha ao remover conta"
+      "logoutAccount": "Sair",
+      "logoutAccountConfirm": "Sair desta conta?",
+      "logoutAccountSuccess": "Saiu da conta",
+      "logoutAccountError": "Falha ao sair"
     },
     "notifications": {
       "title": "Configurações de Notificação",

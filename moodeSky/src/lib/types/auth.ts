@@ -67,7 +67,10 @@ export type AuthError =
   | 'ACCOUNT_NOT_FOUND'
   | 'SESSION_EXPIRED'
   | 'INVALID_SESSION_DATA'
-  | 'MIGRATION_FAILED';
+  | 'MIGRATION_FAILED'
+  | 'AUTH_FAILED'
+  | 'NETWORK_ERROR'
+  | 'RATE_LIMITED';
 
 /**
  * 認証操作結果

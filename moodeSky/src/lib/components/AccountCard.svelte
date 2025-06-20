@@ -6,11 +6,15 @@
   プロフィール、セッション状態、統計情報を含む
 -->
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import Avatar from './Avatar.svelte';
   import Icon from './Icon.svelte';
+  import ReauthModal from './ReauthModal.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import type { Account } from '$lib/types/auth.js';
+  import { getTokenRemainingSeconds, isTokenExpired } from '$lib/utils/jwt.js';
+  import { calculateTimeRemaining, getWarningLevelClass, getWarningLevelIcon, getNextUpdateInterval } from '$lib/utils/timeUtils.js';
+  import type { TimeRemaining } from '$lib/utils/timeUtils.js';
   import * as m from '../../paraglide/messages.js';
 
   // ===================================================================
@@ -42,6 +46,14 @@
     following: number;
     posts: number;
   } | null>(null);
+  
+  // リフレッシュトークン期限管理
+  let tokenTimeRemaining = $state<TimeRemaining | null>(null);
+  let updateTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // 再認証モーダル管理
+  let showReauthModal = $state(false);
+  let currentAccount = $state(account);
 
   // ===================================================================
   // 算出プロパティ
@@ -49,11 +61,11 @@
 
   // セッション状態を判定
   const sessionStatus = $derived(() => {
-    if (!account.session) return 'expired';
+    if (!account.session || !account.session.refreshJwt) return 'expired';
     
-    // 実際のセッション有効期限チェックはここで実装
-    // 現在はアクティブと仮定
-    return 'active';
+    // リフレッシュトークンの有効期限チェック
+    const isExpired = isTokenExpired(account.session.refreshJwt);
+    return isExpired ? 'expired' : 'active';
   });
 
   // 表示名またはハンドルを取得
@@ -79,25 +91,25 @@
   }
 
   /**
-   * アカウント削除
+   * アカウントからログアウト
    */
-  async function onRemoveAccount() {
+  async function onLogoutAccount() {
     try {
       isLoading = true;
       
-      // authService.deleteAccount を呼び出し
+      // authService.deleteAccount を呼び出し（ローカルからアカウント情報を削除）
       const result = await import('$lib/services/authStore.js').then(m => m.authService.deleteAccount(account.id));
       
       if (result.success) {
-        console.log('Account removed successfully:', account.profile.handle);
+        console.log('Account logout successfully:', account.profile.handle);
         // 成功時は親コンポーネントの再読み込みをトリガー
         // CustomEvent を発火してAccountSettingsに通知
         window.dispatchEvent(new CustomEvent('accountDeleted', { detail: { accountId: account.id } }));
       } else {
-        console.error('Failed to remove account:', result.error);
+        console.error('Failed to logout account:', result.error);
       }
     } catch (error) {
-      console.error('Error removing account:', error);
+      console.error('Error logging out account:', error);
     } finally {
       isLoading = false;
     }
@@ -124,6 +136,103 @@
     }
   }
 
+  /**
+   * リフレッシュトークンの期限情報を更新
+   */
+  function updateTokenExpiration() {
+    try {
+      if (!account.session?.refreshJwt) {
+        tokenTimeRemaining = null;
+        return;
+      }
+
+      const remainingSeconds = getTokenRemainingSeconds(account.session.refreshJwt);
+      tokenTimeRemaining = calculateTimeRemaining(remainingSeconds);
+
+      // 次回更新をスケジュール
+      scheduleNextUpdate();
+      
+    } catch (error) {
+      console.warn('Failed to update token expiration:', error);
+      tokenTimeRemaining = null;
+    }
+  }
+
+  /**
+   * 次回更新をスケジュール
+   */
+  function scheduleNextUpdate() {
+    // 既存のタイマーをクリア
+    if (updateTimer) {
+      clearTimeout(updateTimer);
+      updateTimer = null;
+    }
+
+    if (!tokenTimeRemaining) return;
+
+    // 更新間隔を決定
+    const interval = getNextUpdateInterval(tokenTimeRemaining);
+    
+    updateTimer = setTimeout(() => {
+      updateTokenExpiration();
+    }, interval * 1000);
+  }
+
+  /**
+   * 期限表示用のテキストを生成
+   */
+  function getExpirationDisplayText(timeRemaining: TimeRemaining): string {
+    if (timeRemaining.isExpired) {
+      return m['session.expired']();
+    }
+
+    switch (timeRemaining.unit) {
+      case 'days':
+        return m['session.daysLeft']({ count: timeRemaining.value });
+      case 'hours':
+        return m['session.hoursLeft']({ count: timeRemaining.value });
+      case 'minutes':
+        return m['session.minutesLeft']({ count: timeRemaining.value });
+      default:
+        return m['session.expired']();
+    }
+  }
+
+  /**
+   * 再認証モーダルを開く
+   */
+  function openReauthModal() {
+    showReauthModal = true;
+  }
+
+  /**
+   * 再認証モーダルを閉じる
+   */
+  function closeReauthModal() {
+    showReauthModal = false;
+  }
+
+  /**
+   * 再認証成功時の処理
+   */
+  function handleReauthSuccess(updatedAccount: Account) {
+    // アカウント情報を更新
+    currentAccount = updatedAccount;
+    
+    // トークン期限情報を更新
+    updateTokenExpiration();
+    
+    // 成功イベントを発火してAccountSettingsに通知
+    window.dispatchEvent(new CustomEvent('accountReauthenticated', { 
+      detail: { 
+        accountId: updatedAccount.id,
+        account: updatedAccount
+      } 
+    }));
+    
+    console.log('Reauthentication successful:', updatedAccount.profile.handle);
+  }
+
   // ===================================================================
   // ライフサイクル
   // ===================================================================
@@ -132,6 +241,26 @@
     if (!compact) {
       loadProfileStats();
     }
+    
+    // リフレッシュトークンの期限情報を初期化
+    updateTokenExpiration();
+  });
+
+  onDestroy(() => {
+    // タイマーをクリア
+    if (updateTimer) {
+      clearTimeout(updateTimer);
+      updateTimer = null;
+    }
+  });
+
+  // ===================================================================
+  // リアクティブ処理
+  // ===================================================================
+
+  // アカウント情報の更新を監視
+  $effect(() => {
+    currentAccount = account;
   });
 </script>
 
@@ -188,6 +317,21 @@
         </span>
       </div>
       
+      <!-- リフレッシュトークン期限表示 -->
+      {#if tokenTimeRemaining}
+        <div class="flex items-center gap-1 mt-1">
+          <Icon 
+            icon={getWarningLevelIcon(tokenTimeRemaining.warningLevel)} 
+            size="sm" 
+            color={tokenTimeRemaining.warningLevel === 'normal' ? 'success' : 
+                   tokenTimeRemaining.warningLevel === 'warning' ? 'warning' : 'error'} 
+          />
+          <span class="text-xs {getWarningLevelClass(tokenTimeRemaining.warningLevel)}">
+            {getExpirationDisplayText(tokenTimeRemaining)}
+          </span>
+        </div>
+      {/if}
+      
       {#if !compact}
         <p class="text-themed opacity-60 text-xs mt-1">
           {m['settings.account.lastLogin']()}: {lastLoginTime()}
@@ -241,23 +385,49 @@
 
   <!-- アクション（非コンパクトモード） -->
   {#if showActions && !compact}
-    <div class="flex gap-2 mt-4 pt-4 border-t border-themed/20">
-      <button
-        class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-muted/20 text-themed hover:bg-muted/30"
-        onclick={toggleDetails}
-      >
-        <Icon icon={showDetails ? ICONS.EXPAND_LESS : ICONS.EXPAND_MORE} size="sm" color="themed" />
-        <span>{showDetails ? m['common.close']() : m['settings.account.accountDetails']()}</span>
-      </button>
-      
-      <button
-        class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-error/10 text-error hover:bg-error/20 border border-error/20"
-        onclick={onRemoveAccount}
-        disabled={isLoading}
-      >
-        <Icon icon={ICONS.DELETE} size="sm" color="error" />
-        <span>{m['settings.account.removeAccount']()}</span>
-      </button>
+    <div class="mt-4 pt-4 border-t border-themed/20">
+      <!-- セッション期限切れ時のアクション（再認証 + ログアウト） -->
+      {#if sessionStatus() === 'expired'}
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button
+            class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30 flex-1"
+            onclick={openReauthModal}
+            disabled={isLoading}
+          >
+            <Icon icon={ICONS.REFRESH} size="sm" color="primary" />
+            <span>{m['reauth.button']()}</span>
+          </button>
+          
+          <button
+            class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-error/10 text-error hover:bg-error/20 border border-error/20 flex-1"
+            onclick={onLogoutAccount}
+            disabled={isLoading}
+          >
+            <Icon icon={ICONS.LOGOUT} size="sm" color="error" />
+            <span>{m['settings.account.logoutAccount']()}</span>
+          </button>
+        </div>
+      {:else}
+        <!-- セッション正常時のアクション（詳細表示 + ログアウト） -->
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button
+            class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-muted/20 text-themed hover:bg-muted/30 flex-1"
+            onclick={toggleDetails}
+          >
+            <Icon icon={showDetails ? ICONS.EXPAND_LESS : ICONS.EXPAND_MORE} size="sm" color="themed" />
+            <span>{showDetails ? m['common.close']() : m['settings.account.accountDetails']()}</span>
+          </button>
+          
+          <button
+            class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-error/10 text-error hover:bg-error/20 border border-error/20 flex-1"
+            onclick={onLogoutAccount}
+            disabled={isLoading}
+          >
+            <Icon icon={ICONS.LOGOUT} size="sm" color="error" />
+            <span>{m['settings.account.logoutAccount']()}</span>
+          </button>
+        </div>
+      {/if}
     </div>
   {/if}
 
@@ -268,4 +438,12 @@
     </div>
   {/if}
 </div>
+
+<!-- 再認証モーダル -->
+<ReauthModal
+  account={currentAccount}
+  isOpen={showReauthModal}
+  onClose={closeReauthModal}
+  onSuccess={handleReauthSuccess}
+/>
 

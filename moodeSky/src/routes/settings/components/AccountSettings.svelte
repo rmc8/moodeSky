@@ -54,9 +54,9 @@
   }
 
   /**
-   * 全アカウントからサインアウト
+   * 全アカウントからログアウト
    */
-  async function signOutAll() {
+  async function logoutAll() {
     try {
       isLoading = true;
       errorMessage = '';
@@ -65,12 +65,12 @@
       await accountsStore.clearAllAccounts();
       
       if (accountsStore.error) {
-        console.error('Sign out failed:', accountsStore.error);
-        errorMessage = m['settings.account.signOutAllError']();
+        console.error('Log out failed:', accountsStore.error);
+        errorMessage = m['settings.account.logoutAllError']();
         return;
       }
       
-      successMessage = m['settings.account.signOutAllSuccess']();
+      successMessage = m['settings.account.logoutAllSuccess']();
       
       // 短い遅延後にログイン画面へリダイレクト
       setTimeout(async () => {
@@ -78,8 +78,8 @@
       }, 1500);
       
     } catch (error) {
-      console.error('Sign out error:', error);
-      errorMessage = m['settings.account.signOutAllError']();
+      console.error('Log out error:', error);
+      errorMessage = m['settings.account.logoutAllError']();
     } finally {
       isLoading = false;
       showSignOutConfirm = false;
@@ -87,16 +87,16 @@
   }
 
   /**
-   * サインアウト確認ダイアログを表示
+   * ログアウト確認ダイアログを表示
    */
-  function confirmSignOutAll() {
+  function confirmLogoutAll() {
     showSignOutConfirm = true;
   }
 
   /**
-   * サインアウト確認をキャンセル
+   * ログアウト確認をキャンセル
    */
-  function cancelSignOutAll() {
+  function cancelLogoutAll() {
     showSignOutConfirm = false;
   }
 
@@ -118,6 +118,21 @@
     accountsStore.removeAccount(customEvent.detail.accountId);
   }
 
+  /**
+   * アカウント再認証イベントをリスンして更新
+   */
+  function handleAccountReauthenticated(event: Event) {
+    const customEvent = event as CustomEvent;
+    console.log('🛠️ [AccountSettings] Account reauthenticated:', customEvent.detail.accountId);
+    
+    // 成功メッセージを表示
+    successMessage = m['reauth.success']();
+    
+    // アカウントストアを更新（必要に応じて）
+    // 既にAccountCardで更新されているため、特別な処理は不要
+    // ただし、将来的にはストアの再初期化を検討
+  }
+
   // ===================================================================
   // ライフサイクル・初期化
   // ===================================================================
@@ -134,11 +149,13 @@
       }
     })();
 
-    // アカウント削除イベントをリスン
+    // アカウント削除・再認証イベントをリスン
     window.addEventListener('accountDeleted', handleAccountDeleted);
+    window.addEventListener('accountReauthenticated', handleAccountReauthenticated);
     
     return () => {
       window.removeEventListener('accountDeleted', handleAccountDeleted);
+      window.removeEventListener('accountReauthenticated', handleAccountReauthenticated);
     };
   });
 
@@ -153,7 +170,7 @@
 </script>
 
 <!-- アカウント管理セクション -->
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto pb-20 md:pb-8">
   <!-- セクションヘッダー -->
   <div class="mb-8">
     <h2 class="text-themed text-2xl font-bold mb-2 flex items-center gap-3">
@@ -200,7 +217,7 @@
     <div class="space-y-8">
       <!-- 1. アカウント追加ボタン（最上部） -->
       <div class="bg-card rounded-xl p-6 border border-themed">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div class="flex-1">
             <h3 class="text-themed text-lg font-semibold mb-2 flex items-center gap-2">
               <Icon icon={ICONS.ADD} size="md" color="primary" />
@@ -272,10 +289,10 @@
             <div>
               <h3 class="text-error text-lg font-semibold mb-2 flex items-center gap-2">
                 <Icon icon={ICONS.LOGOUT} size="md" color="error" />
-                {m['settings.account.signOutAll']()}
+                {m['settings.account.logoutAll']()}
               </h3>
               <p class="text-error opacity-80">
-                全てのアカウントからサインアウトし、ログイン画面に戻ります
+                全てのアカウントからログアウトし、ログイン画面に戻ります
               </p>
             </div>
             
@@ -283,10 +300,10 @@
               <button
                 class="px-4 py-2 bg-error/10 text-error border border-error/30 rounded-lg hover:bg-error/20 transition-colors font-medium flex items-center gap-2"
                 disabled={isLoading}
-                onclick={confirmSignOutAll}
+                onclick={confirmLogoutAll}
               >
                 <Icon icon={ICONS.LOGOUT} size="sm" color="error" />
-                {m['settings.account.signOutAll']()}
+                {m['settings.account.logoutAll']()}
               </button>
             </div>
           </div>
@@ -337,7 +354,7 @@
       <div class="bg-card rounded-xl p-6 shadow-xl max-w-md w-full mx-4">
         <h3 class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
           <Icon icon={ICONS.WARNING} size="md" color="warning" />
-          {m['settings.account.signOutAllConfirm']()}
+          {m['settings.account.logoutAllConfirm']()}
         </h3>
         
         <p class="text-themed opacity-80 mb-6">
@@ -348,19 +365,19 @@
         <div class="flex gap-3 justify-end">
           <button
             class="px-4 py-2 border border-themed rounded-lg text-themed hover:bg-muted/20 transition-colors"
-            onclick={cancelSignOutAll}
+            onclick={cancelLogoutAll}
           >
             {m['common.cancel']()}
           </button>
           <button
             class="px-4 py-2 bg-error text-white rounded-lg hover:bg-error/80 transition-colors"
-            onclick={signOutAll}
+            onclick={logoutAll}
             disabled={isLoading}
           >
             {#if isLoading}
               <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 inline-block"></div>
             {/if}
-            {m['settings.account.signOutAll']()}
+            {m['settings.account.logoutAll']()}
           </button>
         </div>
       </div>

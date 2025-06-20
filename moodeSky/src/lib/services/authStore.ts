@@ -619,6 +619,116 @@ export class AuthService {
       };
     }
   }
+
+  /**
+   * アカウント再認証
+   * 既存のhandleを使用してパスワードのみで認証を更新
+   */
+  async reauthenticateAccount(accountId: string, password: string): Promise<AuthResult<Account>> {
+    try {
+      // 既存アカウントを取得
+      const accountResult = await this.getAccountById(accountId);
+      if (!accountResult.success || !accountResult.data) {
+        return {
+          success: false,
+          error: {
+            type: 'ACCOUNT_NOT_FOUND',
+            message: 'Account not found for reauthentication',
+          },
+        };
+      }
+
+      const existingAccount = accountResult.data;
+      const { BskyAgent } = await import('@atproto/api');
+
+      // 新しいAgentを作成して認証
+      const agent = new BskyAgent({
+        service: existingAccount.service,
+      });
+
+      // ハンドルとパスワードで認証
+      await agent.login({
+        identifier: existingAccount.profile.handle,
+        password: password,
+      });
+
+      // セッションデータを取得
+      const session = agent.session;
+      if (!session) {
+        return {
+          success: false,
+          error: {
+            type: 'AUTH_FAILED',
+            message: 'Failed to create new session',
+          },
+        };
+      }
+
+      // プロフィール情報を更新取得
+      const profileResult = await agent.getProfile({
+        actor: existingAccount.profile.handle,
+      });
+
+      let updatedProfile = existingAccount.profile;
+      if (profileResult.success) {
+        updatedProfile = {
+          did: session.did,
+          handle: session.handle,
+          displayName: profileResult.data.displayName || undefined,
+          avatar: profileResult.data.avatar || undefined,
+        };
+      }
+
+      // 新しいセッションで既存アカウントを更新
+      const saveResult = await this.saveAccount(
+        existingAccount.service,
+        session,
+        updatedProfile
+      );
+
+      if (!saveResult.success) {
+        return {
+          success: false,
+          error: saveResult.error,
+        } as AuthResult<Account>;
+      }
+
+      return { success: true, data: saveResult.data };
+    } catch (error: any) {
+      // @atproto/api のエラーを詳細に解析
+      let errorType: AuthError = 'AUTH_FAILED';
+      let errorMessage = 'Reauthentication failed';
+
+      if (error?.error) {
+        switch (error.error) {
+          case 'AuthRequiredError':
+            errorType = 'AUTH_FAILED';
+            errorMessage = 'Invalid credentials provided';
+            break;
+          case 'NetworkError':
+            errorType = 'NETWORK_ERROR';
+            errorMessage = 'Network connection failed';
+            break;
+          case 'RateLimitError':
+            errorType = 'RATE_LIMITED';
+            errorMessage = 'Too many authentication attempts';
+            break;
+          default:
+            errorMessage = error.message || 'Reauthentication failed';
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      return {
+        success: false,
+        error: {
+          type: errorType,
+          message: errorMessage,
+        },
+      };
+    }
+  }
 }
 
 // シングルトンインスタンス
