@@ -26,37 +26,37 @@
     code: SupportedLanguage;
     info: typeof SUPPORTED_LANGUAGES[SupportedLanguage];
     description: string;
-    flag: string;
+    flagCode: string;
   }>>([
     {
       code: 'ja',
       info: SUPPORTED_LANGUAGES.ja,
       description: m['settings.language.primaryLanguage'](),
-      flag: '🇯🇵'
+      flagCode: 'JP'
     },
     {
       code: 'en',
       info: SUPPORTED_LANGUAGES.en,
       description: m['settings.language.globalStandard'](),
-      flag: '🇺🇸'
+      flagCode: 'EN'
     },
     {
       code: 'pt-BR',
       info: SUPPORTED_LANGUAGES['pt-BR'],
       description: m['settings.language.brazilMarket'](),
-      flag: '🇧🇷'
+      flagCode: 'PT'
     },
     {
       code: 'de',
       info: SUPPORTED_LANGUAGES.de,
       description: m['settings.language.europeanMarket'](),
-      flag: '🇩🇪'
+      flagCode: 'DE'
     },
     {
       code: 'ko',
       info: SUPPORTED_LANGUAGES.ko,
       description: m['settings.language.eastAsianMarket'](),
-      flag: '🇰🇷'
+      flagCode: 'KO'
     }
   ]);
 
@@ -185,7 +185,7 @@
   <!-- セクションヘッダー -->
   <div class="mb-8">
     <h2 class="text-themed text-2xl font-bold mb-2 flex items-center gap-3">
-      <span class="text-3xl">🌍</span>
+      <Icon icon={ICONS.LANGUAGE} size="xl" color="themed" />
       {m['settings.language.title']()}
     </h2>
     <p class="text-themed opacity-70">
@@ -239,7 +239,10 @@
           >
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-3">
-                <span class="text-2xl">{option.flag}</span>
+                <div class="flex items-center gap-1 bg-muted/20 rounded-md px-2 py-1">
+                  <Icon icon={ICONS.LANGUAGE} size="sm" color="themed" />
+                  <span class="text-xs font-medium text-themed">{option.flagCode}</span>
+                </div>
                 <div>
                   <h4 class="font-semibold text-themed flex items-center gap-2">
                     {option.info.nativeName}
@@ -286,11 +289,11 @@
           </div>
           
           <button
-            class="button-primary"
+            class="button-primary flex items-center gap-2"
             disabled={isLoading || i18nStore.currentLanguage === i18nStore.systemLanguage}
             onclick={handleResetToSystemLanguage}
           >
-            <Icon icon={ICONS.COMPUTER} size="sm" color="themed" />
+            <Icon icon={ICONS.COMPUTER} size="sm" color="white" />
             {m['settings.language.resetToSystem']()}
           </button>
         </div>
@@ -307,7 +310,7 @@
           </div>
           
           <button
-            class="px-4 py-2 border border-themed rounded-lg text-themed hover:bg-muted/20 transition-colors"
+            class="px-4 py-2 border border-themed rounded-lg text-themed hover:bg-muted/20 transition-colors flex items-center gap-2"
             disabled={isLoading}
             onclick={handleRedetectLanguage}
           >
@@ -329,7 +332,10 @@
         <div class="flex justify-between items-center">
           <span class="text-themed opacity-70">{m['settings.language.currentLanguage']()}:</span>
           <span class="text-themed font-medium flex items-center gap-2">
-            {languageOptions.find(opt => opt.code === i18nStore.currentLanguage)?.flag}
+            <div class="flex items-center gap-1 bg-muted/20 rounded-md px-2 py-1">
+              <Icon icon={ICONS.LANGUAGE} size="sm" color="themed" />
+              <span class="text-xs font-medium text-themed">{languageOptions.find(opt => opt.code === i18nStore.currentLanguage)?.flagCode}</span>
+            </div>
             {SUPPORTED_LANGUAGES[i18nStore.currentLanguage]?.nativeName}
             <span class="text-xs opacity-70">({i18nStore.currentLanguage.toUpperCase()})</span>
           </span>
@@ -337,7 +343,10 @@
         <div class="flex justify-between items-center">
           <span class="text-themed opacity-70">{m['settings.language.systemLanguage']()}:</span>
           <span class="text-themed font-medium flex items-center gap-2">
-            {languageOptions.find(opt => opt.code === i18nStore.systemLanguage)?.flag}
+            <div class="flex items-center gap-1 bg-muted/20 rounded-md px-2 py-1">
+              <Icon icon={ICONS.LANGUAGE} size="sm" color="themed" />
+              <span class="text-xs font-medium text-themed">{languageOptions.find(opt => opt.code === i18nStore.systemLanguage)?.flagCode}</span>
+            </div>
             {SUPPORTED_LANGUAGES[i18nStore.systemLanguage]?.nativeName}
             <span class="text-xs opacity-70">({i18nStore.systemLanguage.toUpperCase()})</span>
           </span>
@@ -392,7 +401,10 @@
           <ul class="space-y-2 text-sm text-themed opacity-80">
             {#each languageOptions as option}
               <li class="flex items-center gap-2">
-                <span>{option.flag}</span>
+                <div class="flex items-center gap-1 bg-muted/20 rounded-md px-2 py-1">
+                  <Icon icon={ICONS.LANGUAGE} size="sm" color="themed" />
+                  <span class="text-xs font-medium text-themed">{option.flagCode}</span>
+                </div>
                 <span>{option.info.nativeName}</span>
                 <span class="text-xs opacity-60">({option.info.code.toUpperCase()})</span>
               </li>

@@ -126,40 +126,44 @@
         <div class="max-w-4xl mx-auto mb-6">
           <div class="flex flex-wrap gap-2 p-2 bg-card rounded-lg border border-themed">
             <button
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
               class:bg-primary={activeSection === 'theme'}
               class:text-white={activeSection === 'theme'}
               class:text-themed={activeSection !== 'theme'}
               class:hover:bg-muted={activeSection !== 'theme'}
               onclick={() => switchSection('theme')}
             >
-              🎨 {t('settings.tabs.theme')}
+              <Icon icon={ICONS.PALETTE} size="sm" color={activeSection === 'theme' ? 'white' : 'themed'} />
+              {t('settings.tabs.theme')}
             </button>
             <button
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
               class:bg-primary={activeSection === 'language'}
               class:text-white={activeSection === 'language'}
               class:text-themed={activeSection !== 'language'}
               class:hover:bg-muted={activeSection !== 'language'}
               onclick={() => switchSection('language')}
             >
-              🌍 {t('settings.tabs.language')}
+              <Icon icon={ICONS.LANGUAGE} size="sm" color={activeSection === 'language' ? 'white' : 'themed'} />
+              {t('settings.tabs.language')}
             </button>
             <button
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
               class:bg-primary={activeSection === 'account'}
               class:text-white={activeSection === 'account'}
               class:text-themed={activeSection !== 'account'}
               class:hover:bg-muted={activeSection !== 'account'}
               onclick={() => switchSection('account')}
             >
-              👤 {t('settings.tabs.account')}
+              <Icon icon={ICONS.PERSON} size="sm" color={activeSection === 'account' ? 'white' : 'themed'} />
+              {t('settings.tabs.account')}
             </button>
             <button
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed"
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed flex items-center gap-2"
               disabled
             >
-              🔔 {t('settings.tabs.notifications')}（{t('settings.comingSoon')}）
+              <Icon icon={ICONS.NOTIFICATIONS} size="sm" color="themed" />
+              {t('settings.tabs.notifications')}（{t('settings.comingSoon')}）
             </button>
           </div>
         </div>

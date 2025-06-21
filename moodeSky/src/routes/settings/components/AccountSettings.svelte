@@ -174,7 +174,7 @@
   <!-- セクションヘッダー -->
   <div class="mb-8">
     <h2 class="text-themed text-2xl font-bold mb-2 flex items-center gap-3">
-      <span class="text-3xl">👤</span>
+      <Icon icon={ICONS.PERSON} size="xl" color="themed" />
       {m['settings.account.title']()}
     </h2>
     <p class="text-themed opacity-70">
