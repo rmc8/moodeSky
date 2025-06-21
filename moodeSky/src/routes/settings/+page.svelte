@@ -8,10 +8,12 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import Navigation from '$lib/components/Navigation.svelte';
+  import Icon from '$lib/components/Icon.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
   import { page } from '$app/stores';
+  import { ICONS } from '$lib/types/icon.js';
   
   // 設定コンポーネント
   import ThemeSettings from './components/ThemeSettings.svelte';
@@ -113,7 +115,7 @@
       <!-- ヘッダー -->
       <header class="bg-card border-b-2 border-themed shadow-sm p-4">
         <h1 class="text-themed text-2xl font-bold flex items-center gap-2">
-          <span class="text-2xl">⚙️</span>
+          <Icon icon={ICONS.SETTINGS} size="lg" color="themed" />
           {t('settings.title')}
         </h1>
       </header>

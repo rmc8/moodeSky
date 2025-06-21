@@ -41,6 +41,7 @@
       case 'primary': return 'text-primary';  
       case 'secondary': return 'text-secondary';   // ✅ セカンダリテキスト用（推奨）
       case 'inactive': return 'text-inactive';     // ✅ 非アクティブ状態用（推奨）
+      case 'white': return 'text-white';           // 白色（プライマリボタン等）
       case 'error': return 'text-error';
       case 'success': return 'text-success';
       case 'warning': return 'text-warning';

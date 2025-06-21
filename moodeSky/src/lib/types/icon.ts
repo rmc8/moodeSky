@@ -20,6 +20,7 @@ export type IconColor =
   | 'primary'    // プライマリアクセント色
   | 'secondary'  // ✅ セカンダリテキスト専用色（推奨）
   | 'inactive'   // ✅ 非アクティブ状態専用色（推奨）
+  | 'white'      // 白色（プライマリボタン等）
   | 'error'      // エラー状態色
   | 'success'    // 成功状態色
   | 'warning';   // 警告状態色

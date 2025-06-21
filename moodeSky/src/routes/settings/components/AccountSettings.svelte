@@ -234,7 +234,7 @@
           </div>
           
           <button
-            class="button-primary"
+            class="button-primary flex items-center gap-2"
             disabled={isLoading || isMaxAccountsReached()}
             onclick={addAccount}
           >
