@@ -238,7 +238,7 @@
             disabled={isLoading || isMaxAccountsReached()}
             onclick={addAccount}
           >
-            <Icon icon={ICONS.ADD} size="sm" color="themed" />
+            <Icon icon={ICONS.ADD} size="sm" color="white" />
             {m['settings.account.addAccount']()}
           </button>
         </div>
