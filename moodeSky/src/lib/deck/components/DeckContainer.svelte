@@ -743,6 +743,9 @@
     flex-direction: column;
     flex: 1;
     min-height: 0;
+    /* 確実な高さ制御とボックスサイジング */
+    box-sizing: border-box;
+    overflow: hidden; /* 子要素のスクロール制御 */
   }
   
   .deck-container--loading {
@@ -802,7 +805,9 @@
   
   /* デスクトップデッキコンテナ */
   .deck-desktop-container {
-    /* Flexboxで親の高さを活用 */
+    /* 確実に親の高さを100%使用 */
+    height: 100%;
+    width: 100%;
     flex: 1;
     overflow-x: auto;
     overflow-y: hidden;
@@ -810,9 +815,10 @@
     gap: var(--deck-gap, 16px);
     scroll-behavior: smooth;
     display: flex;
+    align-items: stretch; /* 子要素の高さを確実に揃える */
     min-height: 0; /* flexboxの高さ制御 */
-    /* 🚨 デバッグ用背景色 - 要素の可視性確認 */
-    background-color: rgba(255, 0, 0, 0.1);
+    /* スクロールバーが不要な場合の余白を防止 */
+    box-sizing: border-box;
   }
   
   /* モバイルデッキコンテナ */
@@ -823,8 +829,6 @@
     overflow: hidden;
     position: relative;
     min-height: 0; /* flexboxの高さ制御 */
-    /* 🚨 デバッグ用背景色 - モバイル版の可視性確認 */
-    background-color: rgba(255, 0, 255, 0.1);
   }
   
   .deck-columns-track {
@@ -836,8 +840,8 @@
   /* カラムラッパー */
   .deck-column-wrapper {
     height: 100%; /* 親コンテナの高さに合わせる */
-    /* 🚨 デバッグ用背景色 - 要素の可視性確認 */
-    background-color: rgba(0, 255, 0, 0.1);
+    display: flex;
+    flex-direction: column;
   }
   
   .deck-column-mobile-wrapper {

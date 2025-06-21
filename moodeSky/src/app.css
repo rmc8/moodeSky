@@ -20,6 +20,10 @@
     --success: 34 197 94;
     --warning: 251 191 36;
     --error: 239 68 68;
+    
+    /* UI要素の高さ定義 */
+    --mobile-tab-height: 48px;
+    --mobile-nav-height: 56px;
   }
 
   /* Sky Theme - ライト + 空色アクセント */

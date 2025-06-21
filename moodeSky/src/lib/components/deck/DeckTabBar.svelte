@@ -56,9 +56,6 @@
     display: flex;
     flex-direction: column;
     min-height: 0; /* flexboxの高さ制御 */
-    /* 🚨 デバッグ用背景色 - SideNavigation内での配置確認 */
-    background-color: rgba(255, 255, 0, 0.1);
-    border: 1px solid yellow;
   }
   
   .deck-tab-bar__content {

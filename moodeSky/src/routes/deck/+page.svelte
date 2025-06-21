@@ -160,7 +160,7 @@
 {:else if activeAccount}
   <!-- メインデッキレイアウト -->
   {console.log('🔍 [DEBUG] Rendering main deck layout with account:', activeAccount)}
-  <div class="h-screen md:min-h-screen bg-themed">
+  <div class="h-screen flex flex-col md:flex-row bg-themed">
     <!-- ナビゲーション（レスポンシブ制御は Navigation 内部で実施） -->
     <Navigation {currentPath} accountId={activeAccount.profile.handle} />
     
@@ -168,7 +168,7 @@
     <DeckTabs variant="mobile" class="md:hidden" />
     
     <!-- メインコンテンツエリア -->
-    <main class="md:ml-64 h-full md:min-h-screen mobile-main-content main-content-flex">
+    <main class="flex-1 md:ml-0 mobile-main-content main-content-flex">
       <!-- デスクトップのみヘッダー表示 -->
       <header class="hidden md:flex bg-card border-b-2 border-themed shadow-sm p-4 items-center justify-between">
         <div class="flex items-center gap-4">
@@ -239,8 +239,8 @@
   /* モバイル版の全画面対応 */
   .mobile-main-content {
     /* モバイル: 上部はコンパクトタブ分、下部はボトムナビ分のスペース確保 */
-    padding-top: calc(48px + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding-top: calc(var(--mobile-tab-height) + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
   }
   
   /* デスクトップ版では通常のパディング */
@@ -255,24 +255,35 @@
   .main-content-flex {
     display: flex;
     flex-direction: column;
-    /* モバイル: パディング分を差し引いた高さ */
-    height: calc(100vh - 48px - 56px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    flex: 1;
+    overflow: hidden;
   }
   
-  /* デスクトップでの高さ調整 */
-  @media (min-width: 768px) {
+  /* モバイル専用高さ設定 */
+  @media (max-width: 767px) {
     .main-content-flex {
-      height: 100vh; /* デスクトップでは通常の全画面高さ */
+      /* モバイル: タブとナビゲーション分を差し引いた高さ */
+      height: calc(100vh - var(--mobile-tab-height) - var(--mobile-nav-height) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     }
   }
   
-  /* 🚨 デバッグ用スタイル - 要素の可視性確認 */
+  /* デスクトップ専用高さ設定 */
+  @media (min-width: 768px) {
+    .main-content-flex {
+      /* 親要素の残り高さを完全に使用 */
+      height: 100%;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  
   .deck-content-wrapper {
-    background-color: rgba(0, 0, 255, 0.1);
-    /* Flexboxで残り高さを取得 */
+    /* 親の残り高さを取得してデッキが100%高さを使用 */
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0; /* flexboxの高さ制御 */
+    overflow: hidden; /* 子要素のスクロール制御 */
   }
 </style>

@@ -327,7 +327,7 @@
   
   @media (min-width: 768px) {
     .deck-column {
-      height: calc(100vh - 128px); /* デスクトップ: ヘッダー80px + タブ48px */
+      height: 100%; /* 親要素の高さを継承 */
     }
   }
   

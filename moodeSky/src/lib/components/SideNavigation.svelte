@@ -232,9 +232,6 @@
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    /* 🚨 デバッグ用背景色 - SideNavigation全体の可視性確認 */
-    background-color: rgba(0, 255, 255, 0.1);
-    border: 2px solid cyan;
   }
   
   /* ヘッダー部分 - 投稿ボタン */
