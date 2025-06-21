@@ -72,27 +72,6 @@
   // ===================================================================
 
   /**
-   * ログアウト処理
-   */
-  async function logout() {
-    try {
-      const result = await authService.clearAll();
-      
-      if (!result.success) {
-        console.error('ログアウト処理に失敗:', result.error);
-        errorMessage = t('auth.logoutFailed');
-        return;
-      }
-      
-      console.log('正常にログアウトしました');
-      await goto('/login');
-    } catch (error) {
-      console.error('ログアウト中にエラー:', error);
-      errorMessage = t('auth.logoutError');
-    }
-  }
-
-  /**
    * 設定セクション切り替え
    */
   function switchSection(section: typeof activeSection) {
@@ -125,48 +104,18 @@
   </div>
 {:else}
   <!-- メイン設定画面 -->
-  <div class="min-h-screen bg-themed">
+  <div class="h-screen bg-themed">
     <!-- ナビゲーション -->
     <Navigation {currentPath} />
     
     <!-- メインコンテンツエリア -->
-    <main class="md:ml-64 h-screen pb-20 md:pb-0 overflow-hidden flex flex-col">
+    <main class="md:ml-64 h-full pb-14 md:pb-0 flex flex-col">
       <!-- ヘッダー -->
-      <header class="bg-card border-b-2 border-themed shadow-sm p-4 flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <h1 class="text-themed text-2xl font-bold flex items-center gap-2">
-            <span class="text-2xl">⚙️</span>
-            {t('settings.title')}
-          </h1>
-        </div>
-        
-        <div class="flex items-center gap-4">
-          <!-- アカウント情報（デスクトップのみ） -->
-          {#if activeAccount}
-            <div class="hidden md:flex items-center gap-3">
-              <div class="text-right">
-                <p class="text-themed font-medium text-sm">
-                  {activeAccount.profile.displayName || activeAccount.profile.handle}
-                </p>
-                <p class="text-themed opacity-70 text-xs">
-                  @{activeAccount.profile.handle}
-                </p>
-              </div>
-            </div>
-          {/if}
-          
-          <!-- ログアウトボタン -->
-          <button 
-            class="text-themed opacity-70 hover:text-error transition-colors p-2 rounded-lg hover:bg-error/10"
-            onclick={logout}
-            title={t('auth.logout')}
-            aria-label={t('auth.logout')}
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-            </svg>
-          </button>
-        </div>
+      <header class="bg-card border-b-2 border-themed shadow-sm p-4">
+        <h1 class="text-themed text-2xl font-bold flex items-center gap-2">
+          <span class="text-2xl">⚙️</span>
+          {t('settings.title')}
+        </h1>
       </header>
 
       <!-- スクロール可能なメインコンテンツ -->
@@ -230,9 +179,6 @@
             </div>
           {/if}
         </div>
-        
-        <!-- 底部スペース（モバイルナビゲーション用） -->
-        <div class="h-16 md:h-0"></div>
       </div>
     </main>
   </div>

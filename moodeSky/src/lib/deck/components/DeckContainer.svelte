@@ -222,6 +222,18 @@
           scrollHeight: desktopDeckElement.scrollHeight
         });
         
+        // 親要素の高さ確認
+        const parentElement = desktopDeckElement.parentElement;
+        if (parentElement) {
+          console.log('🚨 [HEIGHT DEBUG] Parent element:', {
+            tagName: parentElement.tagName,
+            className: parentElement.className,
+            offsetHeight: parentElement.offsetHeight,
+            clientHeight: parentElement.clientHeight,
+            computedHeight: window.getComputedStyle(parentElement).height
+          });
+        }
+        
         // Computed Styleの詳細確認
         const computedStyle = window.getComputedStyle(desktopDeckElement);
         console.log('🚨 [VISIBILITY DEBUG] Computed styles:', {
@@ -349,7 +361,10 @@
         columnsCount: deckStore.columns.length,
         desktopElementExists: !!desktopDeckElement,
         windowWidth: window.innerWidth,
-        isDesktopSize: window.innerWidth >= 768
+        isDesktopSize: window.innerWidth >= 768,
+        actualHeight: desktopDeckElement ? desktopDeckElement.offsetHeight : 'N/A',
+        computedHeight: desktopDeckElement ? window.getComputedStyle(desktopDeckElement).height : 'N/A',
+        parentHeight: desktopDeckElement?.parentElement ? desktopDeckElement.parentElement.offsetHeight : 'N/A'
       });
       
     } catch (error) {
@@ -723,6 +738,11 @@
     width: 100%;
     height: 100%;
     position: relative;
+    /* Flexboxで親の高さを完全に活用 */
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
   }
   
   .deck-container--loading {
@@ -782,29 +802,29 @@
   
   /* デスクトップデッキコンテナ */
   .deck-desktop-container {
-    height: calc(100vh - 128px); /* ヘッダー80px + デスクトップタブ48px */
+    /* Flexboxで親の高さを活用 */
+    flex: 1;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: var(--deck-padding, 16px);
+    padding: 8px !important; /* 全方向8px均等（上右下左） - デスクトップ最適化（CSS変数より優先） */
     gap: var(--deck-gap, 16px);
     scroll-behavior: smooth;
     display: flex;
+    min-height: 0; /* flexboxの高さ制御 */
     /* 🚨 デバッグ用背景色 - 要素の可視性確認 */
     background-color: rgba(255, 0, 0, 0.1);
-    border: 2px solid red;
-    /* 🚨 最小高さを確保して表示を強制 */
-    min-height: 400px;
   }
   
   /* モバイルデッキコンテナ */
   .deck-mobile-container {
     width: 100%;
-    height: calc(100vh - 48px - env(safe-area-inset-top, 0px)); /* モバイルタブ(48px) + 上部セーフエリア */
+    /* Flexboxで親の高さを活用 */
+    flex: 1;
     overflow: hidden;
     position: relative;
+    min-height: 0; /* flexboxの高さ制御 */
     /* 🚨 デバッグ用背景色 - モバイル版の可視性確認 */
     background-color: rgba(255, 0, 255, 0.1);
-    border: 2px solid magenta;
   }
   
   .deck-columns-track {
@@ -815,10 +835,9 @@
   
   /* カラムラッパー */
   .deck-column-wrapper {
-    height: calc(100vh - 128px); /* ヘッダー80px + デスクトップタブ48px */
+    height: 100%; /* 親コンテナの高さに合わせる */
     /* 🚨 デバッグ用背景色 - 要素の可視性確認 */
     background-color: rgba(0, 255, 0, 0.1);
-    border: 1px solid green;
   }
   
   .deck-column-mobile-wrapper {

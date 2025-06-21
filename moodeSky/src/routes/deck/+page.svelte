@@ -170,7 +170,7 @@
     <DeckTabs variant="mobile" class="md:hidden" />
     
     <!-- メインコンテンツエリア -->
-    <main class="md:ml-64 h-full md:min-h-screen mobile-main-content">
+    <main class="md:ml-64 h-full md:min-h-screen mobile-main-content main-content-flex">
       <!-- デスクトップのみヘッダー表示 -->
       <header class="hidden md:flex bg-card border-b-2 border-themed shadow-sm p-4 items-center justify-between">
         <div class="flex items-center gap-4">
@@ -204,7 +204,7 @@
       </div>
       
       <!-- デッキコンテンツエリア -->
-      <div class="h-full md:h-[calc(100vh_-_128px)] overflow-hidden deck-content-wrapper">
+      <div class="deck-content-wrapper">
         <DeckContainer 
           accountId={activeAccount.profile.handle}
           className="h-full"
@@ -212,7 +212,7 @@
       </div>
     </main>
     
-    <!-- モバイル用ボトムナビ（ページの一部として） -->
+    <!-- モバイル用ボトムナビ（固定配置） -->
     <div class="md:hidden">
       <Navigation {currentPath} />
     </div>
@@ -245,9 +245,9 @@
 <style>
   /* モバイル版の全画面対応 */
   .mobile-main-content {
-    /* モバイル: コンパクトタブ分のみ（ボトムナビはfixed配置のため不要） */
+    /* モバイル: 上部はコンパクトタブ分、下部はボトムナビ分のスペース確保 */
     padding-top: calc(48px + env(safe-area-inset-top, 0px));
-    padding-bottom: 0;
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
   }
   
   /* デスクトップ版では通常のパディング */
@@ -258,10 +258,28 @@
     }
   }
   
+  /* メインコンテンツのFlexboxレイアウト */
+  .main-content-flex {
+    display: flex;
+    flex-direction: column;
+    /* モバイル: パディング分を差し引いた高さ */
+    height: calc(100vh - 48px - 56px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  }
+  
+  /* デスクトップでの高さ調整 */
+  @media (min-width: 768px) {
+    .main-content-flex {
+      height: 100vh; /* デスクトップでは通常の全画面高さ */
+    }
+  }
+  
   /* 🚨 デバッグ用スタイル - 要素の可視性確認 */
   .deck-content-wrapper {
     background-color: rgba(0, 0, 255, 0.1);
-    border: 2px solid blue;
-    min-height: 200px;
+    /* Flexboxで残り高さを取得 */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* flexboxの高さ制御 */
   }
 </style>

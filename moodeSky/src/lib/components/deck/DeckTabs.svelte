@@ -218,7 +218,7 @@
   }
   
   .deck-tabs--desktop .deck-tabs__content {
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 1rem; /* 上下余白を縮小：12px→8px */
     gap: 0.5rem;
   }
   

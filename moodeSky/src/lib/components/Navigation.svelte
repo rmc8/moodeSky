@@ -17,6 +17,9 @@
   // メディアクエリを使用してレスポンシブ制御
   let isDesktop = $state(false);
   
+  // 設定画面判定
+  const isSettingsPage = $derived(currentPath.startsWith('/settings'));
+  
   onMount(() => {
     // 768px以上をデスクトップとする（TailwindCSSのmdブレークポイント）
     const mediaQuery = window.matchMedia('(min-width: 768px)');
@@ -46,8 +49,10 @@
 {:else}
   <!-- モバイル用ナビゲーション (768px未満) -->
   {console.log('🔍 [Navigation] Rendering mobile navigation')}
-  <!-- モバイル用デッキタブ (画面最上部) -->
-  <MobileDeckTabs />
+  <!-- モバイル用デッキタブ (画面最上部) - 設定画面では非表示 -->
+  {#if !isSettingsPage}
+    <MobileDeckTabs />
+  {/if}
   
   <!-- モバイル用ボトムナビゲーション -->
   <BottomNavigation {currentPath} {accountId} />

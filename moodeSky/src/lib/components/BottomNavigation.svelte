@@ -134,8 +134,6 @@
   </div>
 </nav>
 
-<!-- ボトムナビゲーション分のスペース確保 -->
-<div class="h-14"></div>
 
 <!-- カラム追加モーダル（モバイル用） -->
 {#if showAddColumnModal}
