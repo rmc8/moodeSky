@@ -223,15 +223,19 @@
     opacity: 0.7;
   }
 
+  /*
   .text-error {
     color: var(--color-error);
   }
+  */
 
   .text-sm {
     font-size: 0.875rem;
   }
 
+  /*
   .text-xs {
     font-size: 0.75rem;
   }
+  */
 </style>

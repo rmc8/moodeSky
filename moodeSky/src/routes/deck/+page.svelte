@@ -4,9 +4,12 @@
   import { goto } from '$app/navigation';
   import Navigation from '$lib/components/Navigation.svelte';
   import Avatar from '$lib/components/Avatar.svelte';
+  import DeckContainer from '$lib/deck/components/DeckContainer.svelte';
+  import DeckTabs from '$lib/components/deck/DeckTabs.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
+  import { deckStore } from '$lib/deck/store.svelte.js';
   
   
   // リアクティブ翻訳システム
@@ -80,6 +83,25 @@
         activeAccount = result.data;
         console.log('🔍 [DEBUG] activeAccount set successfully:', activeAccount);
         
+        // デッキストアを初期化
+        console.log('🔍 [DEBUG] Initializing deck store...');
+        await deckStore.initialize(activeAccount.profile.handle);
+        
+        // 初回利用時（カラムが0個）の場合、デフォルトカラムを作成
+        if (deckStore.isEmpty) {
+          console.log('🔍 [DEBUG] No columns found, creating default column');
+          await deckStore.addColumn(
+            activeAccount.profile.handle,
+            'reverse_chronological',
+            {
+              title: t('navigation.home'),
+              subtitle: 'フォロー中のユーザーの投稿'
+            }
+          );
+        }
+        
+        console.log('🔍 [DEBUG] Deck initialized with', deckStore.columnCount, 'columns');
+        
         // ブラウザバック防止
         history.pushState(null, '', window.location.href);
         
@@ -138,14 +160,17 @@
 {:else if activeAccount}
   <!-- メインデッキレイアウト -->
   {console.log('🔍 [DEBUG] Rendering main deck layout with account:', activeAccount)}
-  <div class="min-h-screen bg-themed">
-    <!-- ナビゲーション -->
-    <Navigation {currentPath} />
+  <div class="h-screen flex flex-col bg-themed">
+    <!-- ナビゲーション（レスポンシブ制御は Navigation 内部で実施） -->
+    <Navigation {currentPath} accountId={activeAccount.profile.handle} />
+    
+    <!-- モバイル用デッキタブ（画面上部） -->
+    <DeckTabs variant="mobile" class="md:hidden" />
     
     <!-- メインコンテンツエリア -->
-    <main class="md:ml-64 min-h-screen pb-20 md:pb-0">
-      <!-- ヘッダー -->
-      <header class="bg-card border-b-2 border-themed shadow-sm p-4 flex items-center justify-between">
+    <main class="flex-1 md:ml-64 mobile-main-content main-content-flex">
+      <!-- デスクトップのみヘッダー表示 -->
+      <header class="hidden md:flex bg-card border-b-2 border-themed shadow-sm p-4 items-center justify-between">
         <div class="flex items-center gap-4">
           <h1 class="text-themed text-2xl font-bold">
             {t('app.name')}
@@ -171,30 +196,17 @@
         </div>
       </header>
       
+      <!-- デスクトップ用デッキタブ -->
+      <div class="hidden md:block">
+        <DeckTabs variant="desktop" />
+      </div>
+      
       <!-- デッキコンテンツエリア -->
-      <div class="p-4">
-        <!-- 暫定的なウェルカムメッセージ -->
-        <div class="bg-card rounded-xl shadow-lg p-8 text-center">
-          <h2 class="text-themed text-3xl font-bold mb-4">
-            🎉 {t('navigation.home')}
-          </h2>
-          <p class="text-themed opacity-80 text-lg mb-6">
-            {t('deck.welcome')}<br>
-            {t('deck.welcomeDescription')}
-          </p>
-          
-          <!-- 開発状況 -->
-          <div class="bg-muted/10 border-2 border-themed rounded-lg p-6 text-left">
-            <h3 class="text-themed font-semibold text-lg mb-3">🚧 {t('deck.developmentFeatures')}</h3>
-            <ul class="text-themed opacity-80 space-y-2">
-              <li>• {t('deck.plannedFeatures.homeTimeline')}</li>
-              <li>• {t('deck.plannedFeatures.multiColumn')}</li>
-              <li>• {t('deck.plannedFeatures.postCompose')}</li>
-              <li>• {t('deck.plannedFeatures.searchFilter')}</li>
-              <li>• {t('deck.plannedFeatures.realTimeUpdate')}</li>
-            </ul>
-          </div>
-        </div>
+      <div class="deck-content-wrapper">
+        <DeckContainer 
+          accountId={activeAccount.profile.handle}
+          className="h-full"
+        />
       </div>
     </main>
   </div>
@@ -222,3 +234,56 @@
     </div>
   </div>
 {/if}
+
+<style>
+  /* モバイル版の全画面対応 */
+  .mobile-main-content {
+    /* モバイル: 上部はコンパクトタブ分、下部はボトムナビ分のスペース確保 */
+    padding-top: calc(var(--mobile-tab-height) + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
+  }
+  
+  /* デスクトップ版では通常のパディング */
+  @media (min-width: 768px) {
+    .mobile-main-content {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+  
+  /* メインコンテンツのFlexboxレイアウト */
+  .main-content-flex {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  /* モバイル専用高さ設定 */
+  @media (max-width: 767px) {
+    .main-content-flex {
+      /* モバイル: タブとナビゲーション分を差し引いた高さ */
+      height: calc(100vh - var(--mobile-tab-height) - var(--mobile-nav-height) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    }
+  }
+  
+  /* デスクトップ専用高さ設定 */
+  @media (min-width: 768px) {
+    .main-content-flex {
+      /* デスクトップ: サイドナビゲーション分を考慮した高さ */
+      height: 100vh;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  
+  .deck-content-wrapper {
+    /* 親の残り高さを取得してデッキが100%高さを使用 */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* flexboxの高さ制御 */
+    overflow: hidden; /* 子要素のスクロール制御 */
+  }
+</style>

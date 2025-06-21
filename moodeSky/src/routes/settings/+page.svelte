@@ -8,10 +8,12 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import Navigation from '$lib/components/Navigation.svelte';
+  import Icon from '$lib/components/Icon.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
   import { page } from '$app/stores';
+  import { ICONS } from '$lib/types/icon.js';
   
   // 設定コンポーネント
   import ThemeSettings from './components/ThemeSettings.svelte';
@@ -72,27 +74,6 @@
   // ===================================================================
 
   /**
-   * ログアウト処理
-   */
-  async function logout() {
-    try {
-      const result = await authService.clearAll();
-      
-      if (!result.success) {
-        console.error('ログアウト処理に失敗:', result.error);
-        errorMessage = t('auth.logoutFailed');
-        return;
-      }
-      
-      console.log('正常にログアウトしました');
-      await goto('/login');
-    } catch (error) {
-      console.error('ログアウト中にエラー:', error);
-      errorMessage = t('auth.logoutError');
-    }
-  }
-
-  /**
    * 設定セクション切り替え
    */
   function switchSection(section: typeof activeSection) {
@@ -125,48 +106,18 @@
   </div>
 {:else}
   <!-- メイン設定画面 -->
-  <div class="min-h-screen bg-themed">
+  <div class="h-screen bg-themed">
     <!-- ナビゲーション -->
     <Navigation {currentPath} />
     
     <!-- メインコンテンツエリア -->
-    <main class="md:ml-64 h-screen pb-20 md:pb-0 overflow-hidden flex flex-col">
+    <main class="md:ml-64 h-full pb-14 md:pb-0 flex flex-col">
       <!-- ヘッダー -->
-      <header class="bg-card border-b-2 border-themed shadow-sm p-4 flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <h1 class="text-themed text-2xl font-bold flex items-center gap-2">
-            <span class="text-2xl">⚙️</span>
-            {t('settings.title')}
-          </h1>
-        </div>
-        
-        <div class="flex items-center gap-4">
-          <!-- アカウント情報（デスクトップのみ） -->
-          {#if activeAccount}
-            <div class="hidden md:flex items-center gap-3">
-              <div class="text-right">
-                <p class="text-themed font-medium text-sm">
-                  {activeAccount.profile.displayName || activeAccount.profile.handle}
-                </p>
-                <p class="text-themed opacity-70 text-xs">
-                  @{activeAccount.profile.handle}
-                </p>
-              </div>
-            </div>
-          {/if}
-          
-          <!-- ログアウトボタン -->
-          <button 
-            class="text-themed opacity-70 hover:text-error transition-colors p-2 rounded-lg hover:bg-error/10"
-            onclick={logout}
-            title={t('auth.logout')}
-            aria-label={t('auth.logout')}
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-            </svg>
-          </button>
-        </div>
+      <header class="bg-card border-b-2 border-themed shadow-sm p-4">
+        <h1 class="text-themed text-2xl font-bold flex items-center gap-2">
+          <Icon icon={ICONS.SETTINGS} size="lg" color="themed" />
+          {t('settings.title')}
+        </h1>
       </header>
 
       <!-- スクロール可能なメインコンテンツ -->
@@ -175,40 +126,44 @@
         <div class="max-w-4xl mx-auto mb-6">
           <div class="flex flex-wrap gap-2 p-2 bg-card rounded-lg border border-themed">
             <button
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
               class:bg-primary={activeSection === 'theme'}
               class:text-white={activeSection === 'theme'}
               class:text-themed={activeSection !== 'theme'}
               class:hover:bg-muted={activeSection !== 'theme'}
               onclick={() => switchSection('theme')}
             >
-              🎨 {t('settings.tabs.theme')}
+              <Icon icon={ICONS.PALETTE} size="sm" color={activeSection === 'theme' ? 'white' : 'themed'} />
+              {t('settings.tabs.theme')}
             </button>
             <button
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
               class:bg-primary={activeSection === 'language'}
               class:text-white={activeSection === 'language'}
               class:text-themed={activeSection !== 'language'}
               class:hover:bg-muted={activeSection !== 'language'}
               onclick={() => switchSection('language')}
             >
-              🌍 {t('settings.tabs.language')}
+              <Icon icon={ICONS.LANGUAGE} size="sm" color={activeSection === 'language' ? 'white' : 'themed'} />
+              {t('settings.tabs.language')}
             </button>
             <button
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
               class:bg-primary={activeSection === 'account'}
               class:text-white={activeSection === 'account'}
               class:text-themed={activeSection !== 'account'}
               class:hover:bg-muted={activeSection !== 'account'}
               onclick={() => switchSection('account')}
             >
-              👤 {t('settings.tabs.account')}
+              <Icon icon={ICONS.PERSON} size="sm" color={activeSection === 'account' ? 'white' : 'themed'} />
+              {t('settings.tabs.account')}
             </button>
             <button
-              class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed"
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed flex items-center gap-2"
               disabled
             >
-              🔔 {t('settings.tabs.notifications')}（{t('settings.comingSoon')}）
+              <Icon icon={ICONS.NOTIFICATIONS} size="sm" color="themed" />
+              {t('settings.tabs.notifications')}（{t('settings.comingSoon')}）
             </button>
           </div>
         </div>
@@ -230,9 +185,6 @@
             </div>
           {/if}
         </div>
-        
-        <!-- 底部スペース（モバイルナビゲーション用） -->
-        <div class="h-16 md:h-0"></div>
       </div>
     </main>
   </div>

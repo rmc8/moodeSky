@@ -6,7 +6,7 @@
 /**
  * アイコンサイズバリアント
  */
-export type IconSize = 'sm' | 'md' | 'lg' | 'xl';
+export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 /**
  * アイコンカラーバリアント  
@@ -20,6 +20,7 @@ export type IconColor =
   | 'primary'    // プライマリアクセント色
   | 'secondary'  // ✅ セカンダリテキスト専用色（推奨）
   | 'inactive'   // ✅ 非アクティブ状態専用色（推奨）
+  | 'white'      // 白色（プライマリボタン等）
   | 'error'      // エラー状態色
   | 'success'    // 成功状態色
   | 'warning';   // 警告状態色
@@ -54,6 +55,7 @@ export interface IconProps {
  * アイコンサイズのピクセル値マッピング
  */
 export const ICON_SIZES: Record<IconSize, number> = {
+  xs: 12,
   sm: 16,
   md: 20, 
   lg: 24,
@@ -119,12 +121,32 @@ export const ICONS = {
   
   // 未来・開発
   FUTURE: 'material-symbols:auto-awesome',
+  AUTO_AWESOME: 'material-symbols:auto-awesome',
   EXPAND_LESS: 'material-symbols:expand-less',
+  
+  // 音量・アクティビティ
+  VOLUME_DOWN: 'material-symbols:volume-down',
+  VOLUME_UP: 'material-symbols:volume-up',
   
   // デッキ・カラム管理
   DASHBOARD: 'material-symbols:dashboard',
   VIEW_COLUMN: 'material-symbols:view-column',
   GRID_VIEW: 'material-symbols:grid-view',
+  COLUMNS: 'material-symbols:view-column',
+  INBOX: 'material-symbols:inbox',
+  LOADER: 'material-symbols:autorenew',
+  
+  // ソーシャルメディア拡張
+  BOOKMARK: 'material-symbols:bookmark',
+  HEART: 'material-symbols:favorite',
+  AT: 'material-symbols:alternate-email',
+  LIST: 'material-symbols:list',
+  HASHTAG: 'material-symbols:tag',
+  THREAD: 'material-symbols:forum',
+  FEED: 'material-symbols:dynamic-feed',
+  
+  // モバイル・スワイプ
+  SWIPE_HORIZONTAL: 'material-symbols:swipe',
   
   // 国際化・言語
   TRANSLATE: 'material-symbols:translate',

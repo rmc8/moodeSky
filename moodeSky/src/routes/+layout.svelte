@@ -18,7 +18,7 @@
 <ThemeProvider>
   {#snippet children()}
     <!-- メインアプリケーションのレイアウト -->
-    <main class="min-h-screen w-full">
+    <main class="h-screen w-full flex flex-col">
       <slot />
     </main>
   {/snippet}
