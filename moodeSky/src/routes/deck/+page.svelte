@@ -160,7 +160,7 @@
 {:else if activeAccount}
   <!-- メインデッキレイアウト -->
   {console.log('🔍 [DEBUG] Rendering main deck layout with account:', activeAccount)}
-  <div class="h-screen flex flex-col md:flex-row bg-themed">
+  <div class="h-screen flex flex-col bg-themed">
     <!-- ナビゲーション（レスポンシブ制御は Navigation 内部で実施） -->
     <Navigation {currentPath} accountId={activeAccount.profile.handle} />
     
@@ -168,7 +168,7 @@
     <DeckTabs variant="mobile" class="md:hidden" />
     
     <!-- メインコンテンツエリア -->
-    <main class="flex-1 md:ml-0 mobile-main-content main-content-flex">
+    <main class="flex-1 md:ml-64 mobile-main-content main-content-flex">
       <!-- デスクトップのみヘッダー表示 -->
       <header class="hidden md:flex bg-card border-b-2 border-themed shadow-sm p-4 items-center justify-between">
         <div class="flex items-center gap-4">
@@ -270,9 +270,9 @@
   /* デスクトップ専用高さ設定 */
   @media (min-width: 768px) {
     .main-content-flex {
-      /* 親要素の残り高さを完全に使用 */
-      height: 100%;
-      min-height: 100%;
+      /* デスクトップ: サイドナビゲーション分を考慮した高さ */
+      height: 100vh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
     }

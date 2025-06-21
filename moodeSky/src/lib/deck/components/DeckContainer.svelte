@@ -45,6 +45,8 @@
   let swipeDetector: SwipeDetector | undefined;
   let columnNavigator: CircularColumnNavigator | undefined;
   let intersectionObserver: ColumnIntersectionObserver | undefined;
+  let stateMonitorInterval: number | undefined;
+  let debugState = $state({ canSwipe: true, isAnimating: false, timeSinceLastSwipe: 0 });
 
   // ===================================================================
   // ライフサイクル・初期化
@@ -68,6 +70,11 @@
         // DOM要素の準備を待つ
         setTimeout(() => {
           initializeDeckFeatures();
+          
+          // 自動監視システムの開始（モバイルのみ）
+          if (isMobile) {
+            startStateMonitoring();
+          }
         }, 100);
       }
     } catch (error) {
@@ -82,6 +89,11 @@
     window.removeEventListener('resize', updateResponsiveState);
     swipeDetector?.destroy();
     intersectionObserver?.destroy();
+    
+    // 状態監視の停止
+    if (stateMonitorInterval) {
+      clearInterval(stateMonitorInterval);
+    }
   });
 
   // ===================================================================
@@ -414,31 +426,17 @@
       swipeTarget,
       {
         onSwipeLeft: () => {
-          const nextIndex = Math.min(activeColumnIndex + 1, deckStore.columns.length - 1);
-          if (nextIndex !== activeColumnIndex) {
-            activeColumnIndex = nextIndex;
-            // タブバーとの同期
-            const targetColumn = deckStore.columns[nextIndex];
-            if (targetColumn) {
-              deckStore.state.activeColumnId = targetColumn.id;
-            }
-          }
+          // CircularColumnNavigator を使用して確実に1つ隣に移動
+          columnNavigator?.moveNext();
         },
         onSwipeRight: () => {
-          const prevIndex = Math.max(activeColumnIndex - 1, 0);
-          if (prevIndex !== activeColumnIndex) {
-            activeColumnIndex = prevIndex;
-            // タブバーとの同期
-            const targetColumn = deckStore.columns[prevIndex];
-            if (targetColumn) {
-              deckStore.state.activeColumnId = targetColumn.id;
-            }
-          }
+          // CircularColumnNavigator を使用して確実に1つ隣に移動
+          columnNavigator?.movePrevious();
         }
       },
       {
-        threshold: 50,
-        velocity: 0.3,
+        threshold: 30,  // 超高感度 - 軽いタッチで即反応
+        velocity: 0.2,  // より軽いスワイプでも検出
         enableCircular: true
       }
     );
@@ -450,6 +448,16 @@
       {
         onColumnChange: (index) => {
           activeColumnIndex = index;
+        },
+        onTransitionComplete: () => {
+          // アニメーション完了をスワイプ検出器に通知
+          swipeDetector?.notifyAnimationComplete();
+          swipeDetector?.forceReset(); // 追加の安全策
+          
+          console.log('✅ [DeckContainer] Transition complete, swipe re-enabled');
+          
+          // デバッグ状態更新
+          updateDebugState();
         }
       }
     );
@@ -472,6 +480,64 @@
    */
   function handleColumnSelect(index: number) {
     columnNavigator?.scrollToColumn(index);
+  }
+
+  /**
+   * デバッグ状態の更新
+   */
+  function updateDebugState() {
+    if (swipeDetector) {
+      const state = swipeDetector.getDebugState() as any;
+      debugState = {
+        canSwipe: state.canSwipe,
+        isAnimating: state.isAnimating,
+        timeSinceLastSwipe: state.timeSinceLastSwipe
+      };
+    }
+  }
+
+  /**
+   * 手動リセット機能
+   */
+  function handleManualReset() {
+    console.log('🔧 [Manual Reset] Forcing swipe system reset');
+    swipeDetector?.forceReset();
+    columnNavigator?.forceReset();
+    updateDebugState();
+  }
+
+  /**
+   * 自動監視システムの開始
+   */
+  function startStateMonitoring() {
+    if (stateMonitorInterval) {
+      clearInterval(stateMonitorInterval);
+    }
+    
+    stateMonitorInterval = setInterval(() => {
+      if (swipeDetector && columnNavigator) {
+        updateDebugState();
+        
+        const swipeState = swipeDetector.getDebugState() as any;
+        const navState = columnNavigator.isCurrentlyTransitioning();
+        
+        // 超積極的な異常状態の検出と自動回復
+        if (swipeState.timeSinceLastSwipe > 400 && (swipeState.isAnimating || navState)) {
+          console.warn('🚨 [Auto-Recovery] Stuck state detected, forcing reset');
+          console.warn('🚨 [Auto-Recovery] State:', { 
+            swipeAnimating: swipeState.isAnimating, 
+            navTransitioning: navState,
+            timeSinceLastSwipe: swipeState.timeSinceLastSwipe 
+          });
+          
+          swipeDetector.forceReset();
+          columnNavigator.forceReset();
+          updateDebugState();
+        }
+      }
+    }, 250); // 超高頻度での監視
+    
+    console.log('🔍 [Monitor] State monitoring started');
   }
   
   /**
@@ -630,6 +696,27 @@
     {#if isMobile}
       <!-- モバイル版: 100%幅スワイプ切り替え -->
       {console.log('🚨 [RENDER DEBUG] Rendering MOBILE deck')}
+      
+      <!-- デバッグ用インデックス表示 -->
+      <div class="debug-index">
+        {activeColumnIndex + 1} / {deckStore.columns.length}
+      </div>
+
+      <!-- デバッグコントロール -->
+      <div class="debug-controls">
+        <button 
+          class="debug-reset-button"
+          onclick={handleManualReset}
+        >
+          Reset
+        </button>
+        
+        <div class="debug-state">
+          {debugState.canSwipe ? '✅' : '🚫'} 
+          {debugState.isAnimating ? 'ANIM' : 'READY'}
+        </div>
+      </div>
+      
       <div class="deck-mobile-container" bind:this={mobileDeckElement}>
         <div 
           class="deck-columns-track"
@@ -823,19 +910,33 @@
   
   /* モバイルデッキコンテナ */
   .deck-mobile-container {
-    width: 100%;
+    width: 100vw; /* ビューポート幅100%で確実に画面幅に合わせる */
     /* Flexboxで親の高さを活用 */
     flex: 1;
     overflow: hidden;
     position: relative;
     min-height: 0; /* flexboxの高さ制御 */
+    box-sizing: border-box; /* パディング・ボーダーを幅に含める */
+    padding: 0; /* 余計なパディングを削除 */
+    /* スワイプ機能のための設定 */
+    margin: 0;
+    max-width: 100vw; /* 画面からはみ出さないように */
+    /* パフォーマンス最適化 */
+    contain: layout style paint; /* CSS containment */
   }
   
   .deck-columns-track {
     display: flex;
     height: 100%;
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* 超高速アニメーション */
+    transition: transform 0.15s ease-out;
+    will-change: transform; /* GPU加速の明示 */
+    transform-style: preserve-3d; /* 3D変換の最適化 */
   }
+  
+  /* モバイル版でのdeck-columns-track幅制御を削除 */
+  /* スワイプ機能のためにwidth: カラム数×100%を保持する必要があるため */
+  /* 代わりに、個別カラムの幅をより厳密に制御 */
   
   /* カラムラッパー */
   .deck-column-wrapper {
@@ -845,14 +946,16 @@
   }
   
   .deck-column-mobile-wrapper {
-    width: 100% !important;
+    /* スワイプ機能のための幅設定: 画面幅に対する相対値 */
+    width: 100vw; /* ビューポート幅100% */
     height: 100%;
     flex-shrink: 0;
     scroll-snap-align: start;
-    /* padding削除でスワイプ時の余白を解消 */
-    /* 100%幅を確実に適用 */
-    min-width: 100% !important;
-    max-width: 100% !important;
+    /* 確実な幅制御 */
+    min-width: 100vw;
+    max-width: 100vw;
+    box-sizing: border-box; /* パディング・ボーダーを幅に含める */
+    overflow: hidden; /* 横スクロールを防止 */
   }
   
   /* カラム追加ボタン */
@@ -973,5 +1076,68 @@
   
   .column-type-info {
     flex: 1;
+  }
+  
+  /* デバッグ用インデックス表示 */
+  .debug-index {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    z-index: 1000;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* デバッグコントロール */
+  .debug-controls {
+    position: fixed;
+    top: 4rem;
+    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 1000;
+  }
+
+  .debug-reset-button {
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .debug-reset-button:hover {
+    background-color: rgba(255, 0, 0, 1);
+  }
+
+  .debug-state {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    user-select: none;
+    pointer-events: none;
+  }
+  
+  /* デスクトップでは非表示 */
+  @media (min-width: 768px) {
+    .debug-index,
+    .debug-controls {
+      display: none;
+    }
   }
 </style>

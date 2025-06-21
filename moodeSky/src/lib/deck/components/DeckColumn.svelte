@@ -322,6 +322,8 @@
       width: 100% !important;
       min-width: 100% !important;
       max-width: 100% !important;
+      box-sizing: border-box !important; /* パディング・ボーダーを幅に含める */
+      margin: 0 !important; /* マージンを削除 */
     }
   }
   
@@ -517,6 +519,16 @@
     height: 100%;
     padding: 1.5rem;
     text-align: center;
+  }
+  
+  /* モバイル版での空状態の余白調整 */
+  @media (max-width: 767px) {
+    .deck-column__empty {
+      padding-top: 0; /* 上の余白なし */
+      padding-bottom: 60px; /* 下は60px固定 */
+      padding-left: 8px; /* 左右は8px */
+      padding-right: 8px;
+    }
   }
   
   .deck-column__empty-icon {
