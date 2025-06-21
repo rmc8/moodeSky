@@ -8,6 +8,7 @@
 <script lang="ts">
   import { themeStore } from '$lib/stores/theme.svelte.js';
   import Icon from '$lib/components/Icon.svelte';
+  import ToggleSwitch from '$lib/components/ToggleSwitch.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import type { ThemeMode } from '$lib/types/theme.js';
   import * as m from '../../../paraglide/messages.js';
@@ -301,25 +302,12 @@
           </p>
         </div>
         
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            checked={themeStore.settings.animations}
-            disabled={isLoading}
-            onchange={handleAnimationToggle}
-            class="sr-only"
-          />
-          <div 
-            class="w-12 h-6 bg-muted rounded-full transition-colors duration-200"
-            class:bg-primary={themeStore.settings.animations}
-          >
-            <div 
-              class="w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200"
-              class:translate-x-6={themeStore.settings.animations}
-              class:translate-x-0.5={!themeStore.settings.animations}
-            ></div>
-          </div>
-        </label>
+        <ToggleSwitch 
+          checked={themeStore.settings.animations}
+          disabled={isLoading}
+          onchange={handleAnimationToggle}
+          id="animation-toggle"
+        />
       </div>
     </div>
 
@@ -341,25 +329,12 @@
           </p>
         </div>
         
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            checked={themeStore.settings.autoSchedule.enabled}
-            disabled={isLoading}
-            onchange={handleScheduleToggle}
-            class="sr-only"
-          />
-          <div 
-            class="w-12 h-6 bg-muted rounded-full transition-colors duration-200"
-            class:bg-primary={themeStore.settings.autoSchedule.enabled}
-          >
-            <div 
-              class="w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200"
-              class:translate-x-6={themeStore.settings.autoSchedule.enabled}
-              class:translate-x-0.5={!themeStore.settings.autoSchedule.enabled}
-            ></div>
-          </div>
-        </label>
+        <ToggleSwitch 
+          checked={themeStore.settings.autoSchedule.enabled}
+          disabled={isLoading}
+          onchange={handleScheduleToggle}
+          id="schedule-toggle"
+        />
       </div>
 
       <!-- スケジュール時刻設定 -->
