@@ -4,6 +4,8 @@
   
   スマートフォン: ボトムナビゲーション
   タブレット・デスクトップ: サイドナビゲーション
+  
+  改良版 JavaScript 制御（SSR対応・初期値最適化）
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
@@ -14,8 +16,9 @@
   // $propsを使用してプロップを受け取る（Svelte 5 runes mode）
   const { currentPath = '', accountId = '' } = $props<{ currentPath?: string; accountId?: string }>();
   
-  // メディアクエリを使用してレスポンシブ制御
-  let isDesktop = $state(false);
+  // SSR対応: 初期値をデスクトップサイズに設定（表示遅延を防ぐ）
+  // ブラウザ環境では実際の幅をチェック、サーバー環境ではデスクトップを仮定
+  let isDesktop = $state(typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
   
   // 設定画面判定
   const isSettingsPage = $derived(currentPath.startsWith('/settings'));
@@ -24,9 +27,9 @@
     // 768px以上をデスクトップとする（TailwindCSSのmdブレークポイント）
     const mediaQuery = window.matchMedia('(min-width: 768px)');
     
-    // 初期値設定
+    // 即座に正しい値を設定
     isDesktop = mediaQuery.matches;
-    console.log('🔍 [Navigation] Initial isDesktop:', isDesktop, 'Window width:', window.innerWidth);
+    console.log('🔍 [Navigation] Media query matches:', isDesktop, 'Window width:', window.innerWidth);
     
     // リサイズイベントの監視
     const handleMediaChange = (e: MediaQueryListEvent) => {
@@ -44,7 +47,7 @@
 
 {#if isDesktop}
   <!-- デスクトップ・タブレット用サイドナビゲーション (768px以上) -->
-  {console.log('🔍 [Navigation] Rendering desktop navigation')}
+  {console.log('🔍 [Navigation] Rendering desktop navigation (SideNavigation)')}
   <SideNavigation {currentPath} {accountId} />
 {:else}
   <!-- モバイル用ナビゲーション (768px未満) -->

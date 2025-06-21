@@ -161,10 +161,8 @@
   <!-- メインデッキレイアウト -->
   {console.log('🔍 [DEBUG] Rendering main deck layout with account:', activeAccount)}
   <div class="h-screen md:min-h-screen bg-themed">
-    <!-- デスクトップナビゲーション -->
-    <div class="hidden md:block">
-      <Navigation {currentPath} accountId={activeAccount.profile.handle} />
-    </div>
+    <!-- ナビゲーション（レスポンシブ制御は Navigation 内部で実施） -->
+    <Navigation {currentPath} accountId={activeAccount.profile.handle} />
     
     <!-- モバイル用デッキタブ（画面上部） -->
     <DeckTabs variant="mobile" class="md:hidden" />
@@ -211,11 +209,6 @@
         />
       </div>
     </main>
-    
-    <!-- モバイル用ボトムナビ（固定配置） -->
-    <div class="md:hidden">
-      <Navigation {currentPath} />
-    </div>
   </div>
 {:else}
   <!-- フォールバック画面 - 条件に当てはまらない場合 -->
