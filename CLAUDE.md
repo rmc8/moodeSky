@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Repository Information
 
 **Repository Name:** `rmc8/moodeSky`  
-**GitHub URL:** https://github.com/rmc8/moodeSky  
+**GitHub URL:** https://GitHub.com/rmc8/moodeSky  
 **Repository Type:** Public  
 **License:** MIT License
 
@@ -62,19 +62,19 @@ moodeSky/
 **moodeSky** は、Tauriを使用したマルチプラットフォーム対応のBlueskyクライアントアプリケーションです。
 
 ### プロジェクト構成
-1. **moodeSky** - Tauri デスクトップ・モバイルアプリ (SvelteKit + Rust)
-2. **dev_rag** - 開発支援RAGツール (AT Protocol & Tauri ドキュメント vectorization)
+1. **moodeSky** - Tauriデスクトップ・モバイルアプリ（SvelteKit + Rust）
+2. **dev_rag** - 開発支援RAGツール（AT Protocol & Tauriドキュメント vectorization）
 
 ### 対象プラットフォーム
 - **デスクトップ**: macOS, Windows, Linux
-- **モバイル**: iOS, Android (Tauri Mobile Alpha使用)
+- **モバイル**: iOS, Android（Tauri Mobile Alpha使用）
 
 ### 技術スタック
-- **フロントエンド**: SvelteKit + TypeScript (SPA構成)
-  - **Svelte 5**: 最新版のSvelteフレームワーク (runes使用)
+- **フロントエンド**: SvelteKit + TypeScript（SPA構成）
+  - **Svelte 5**: 最新版のSvelteフレームワーク（runes使用）
   - **TailwindCSS v4**: 最新のユーティリティファーストCSS
-- **バックエンド**: Rust (Tauri 2.0)
-- **データベース**: SQLite (Tauri SQL Plugin必須)
+- **バックエンド**: Rust（Tauri 2.0）
+- **データベース**: SQLite（Tauri SQL Plugin必須）
   - **Tauri SQL Plugin**: ローカルデータベース操作
   - **セキュアストレージ**: 認証情報等の暗号化保存
 - **状態管理**:
@@ -84,8 +84,8 @@ moodeSky/
   - **Paraglide-JS v2**: 型安全な翻訳システム
   - **Tauri OS Plugin**: ネイティブシステム言語検出
   - **多層言語検出**: 保存設定→OS→ブラウザ→フォールバック
-- **AT Protocol**: Bluesky API統合 (@atproto/api使用)
-- **開発支援**: dev_rag (RAGベース ドキュメント検索)
+- **AT Protocol**: Bluesky API統合（@atproto/api使用）
+- **開発支援**: dev_rag（RAGベースドキュメント検索）
 
 ## Development Commands
 
@@ -114,10 +114,10 @@ Navigate to `moodeSky/` directory for all commands:
 
 **Mobile (Tauri Mobile Alpha):**
 - `pnpm run tauri android init` - Android プロジェクト初期化
-- `pnpm run tauri android dev` - Android 開発 (エミュレータ)
+- `pnpm run tauri android dev` - Android開発（エミュレーター）
 - `pnpm run tauri android build` - Android APK/AAB生成
-- `pnpm run tauri ios init` - iOS プロジェクト初期化 (macOS のみ)
-- `pnpm run tauri ios dev` - iOS 開発 (シミュレータ)
+- `pnpm run tauri ios init` - iOSプロジェクト初期化（macOSのみ）
+- `pnpm run tauri ios dev` - iOS開発（シミュレーター）
 - `pnpm run tauri ios build` - iOS IPA生成
 
 **Backend (Rust) - from src-tauri/ directory:**
@@ -131,16 +131,16 @@ Navigate to `moodeSky/` directory for all commands:
 Navigate to `dev_rag/` directory:
 
 **Setup:**
-- `uv sync` - 依存関係インストール (推奨)
+- `uv sync` - 依存関係インストール（推奨）
 - `uv sync --dev` - 開発依存関係含む
 
-**Vectorization (ドキュメント vectorization):**
-- `uv run dev-rag vec_tauri` - Tauri ドキュメント
-- `uv run dev-rag vec_bluesky` - Bluesky ドキュメント
-- `uv run dev-rag vec_atproto` - AT Protocol ドキュメント
-- `uv run dev-rag vec_sveltekit` - SvelteKit ドキュメント
-- `uv run dev-rag vec_svelte` - Svelte ドキュメント
-- `uv run dev-rag vec_moode` - ローカル moodeSky プロジェクト
+**Vectorization（ドキュメント vectorization）:**
+- `uv run dev-rag vec_tauri` - Tauriドキュメント
+- `uv run dev-rag vec_bluesky` - Blueskyドキュメント
+- `uv run dev-rag vec_atproto` - AT Protocolドキュメント
+- `uv run dev-rag vec_sveltekit` - SvelteKitドキュメント
+- `uv run dev-rag vec_svelte` - Svelteドキュメント
+- `uv run dev-rag vec_moode` - ローカルmoodeSkyプロジェクト
 - `uv run dev-rag vector_all` - 全リポジトリ一括処理
 
 **Operations:**
@@ -149,9 +149,9 @@ Navigate to `dev_rag/` directory:
 - `uv run dev-rag setup_mcp` - MCP設定生成
 
 **Code Quality:**
-- `uv run black .` - Python コードフォーマット
-- `uv run ruff check .` - Python リント
-- `uv run pytest` - Python テスト実行
+- `uv run black .` - Pythonコードフォーマット
+- `uv run ruff check .` - Pythonリント
+- `uv run pytest` - Pythonテスト実行
 
 ## Architecture
 
@@ -558,9 +558,9 @@ const text = auth.login(); // Type safe
 }
 ```
 
-#### 3. **動的翻訳・パラメータ化**
+#### 3. **動的翻訳・パラメーター化**
 ```typescript
-// ❌ 問題: パラメータ化翻訳の複雑性
+// ❌ 問題: パラメーター化翻訳の複雑性
 const message = t('user.greeting', { name: 'John' });
 
 // ✅ 解決: シンプルな翻訳 + JavaScript結合
@@ -921,7 +921,7 @@ color={isActive ? 'primary' : 'secondary'}
 
 ### 🐙 GitHub 連携
 
-**github** - **プロジェクト管理**
+**GitHub** - **プロジェクト管理**
 - GitHubの操作が可能
 - **Issue を使って開発の設計や管理** - 常に確認し情報を最新に
 - プルリクエスト作成、レビュー、マージ
@@ -935,17 +935,29 @@ color={isActive ? 'primary' : 'secondary'}
 2. **技術固有のRAG** (sveltekit-docs, svelte-docs, tauri-docs) - 実装時
 3. **bluesky/atproto-docs** - API統合作業時
 4. **tavily/context7** - 不明な点や最新情報が必要な時
-5. **github** - プロジェクト管理・コラボレーション時
+5. **GitHub** - プロジェクト管理・コラボレーション時
 
 #### 効果的な組み合わせ
 - **設計フェーズ**: sequential_thinking → tauri-docs → sveltekit-docs
 - **API実装**: bluesky-docs → atproto-docs → bluesky (実証)
 - **問題解決**: sequential_thinking → 関連RAG → tavily (最新情報)
-- **プロジェクト管理**: github (常時) + sequential_thinking (計画時)
+- **プロジェクト管理**: GitHub (常時) + sequential_thinking (計画時)
+
+### 🔧 実践的デバッグ手法
+
+#### レイアウトデバッグ
+1. **高さ問題**: 開発者ツール → Elements → Computed → heightを確認
+2. **Flexbox**: `flex: 1`が効かない場合は親要素の`display: flex`確認
+3. **モバイル**: Device ModeでiPhone 12 Pro設定、実際のスワイプ確認
+
+#### 状態管理デバッグ
+1. **console.log戦略**: 状態変更の前後で必ずログ出力
+2. **デバッグUI実装**: 状態を画面上に常時表示
+3. **タイミング問題**: `setTimeout`の多重設定で確実な復旧
 
 ## 🔄 改良版開発フロー
 
-このプロジェクトでは Issue-driven development と Test-Driven Development を組み合わせた体系的な開発フローを採用します。
+このプロジェクトでは Issue-driven development と段階的実装を組み合わせた体系的な開発フローを採用します。
 
 ### 📋 完全開発フロー
 
@@ -1104,7 +1116,7 @@ color={isActive ? 'primary' : 'secondary'}
 **視認性問題発見時:**
 1. **即座停止**: 該当機能の開発を一時停止
 2. **全テーマ調査**: 他の箇所での同様問題確認  
-3. **一括修正**: 同じパターンを全て修正
+3. **一括修正**: 同じパターンをすべて修正
 4. **包括的テスト**: 全テーマ・全デバイスでの確認
 5. **ルール更新**: CLAUDE.mdへの教訓追記
 
@@ -1328,7 +1340,7 @@ color={isActive ? 'primary' : 'secondary'}
 
 ### 🔍 Context7による型定義調査の重要性
 
-**問題**: 外部ライブラリ（特に@atproto/api）の型定義が不明で、自前で型定義を作ろうとする
+**問題**: 外部ライブラリ（とくに@atproto/api）の型定義が不明で、自前で型定義を作ろうとする
 
 **解決パターン**: 
 1. **必ずContext7で調査**: `use context7` で既存の型定義ライブラリを確認
@@ -1553,4 +1565,57 @@ const navItems = $derived<NavItem[]>([
 > 翻訳を含む配列やオブジェクトは必ず`$derived`でラップし、
 > 言語切り替え時のリアクティビティを確保する。
 > これはSvelte 5のrunes modeにおける必須パターン。
-> 一線を画す開発体験とユーザー体験を提供。
+
+## 📑 開発チートシート
+
+### モバイルスワイプ実装
+```typescript
+// SwipeDetector設定
+threshold: 30    // px - 高感度
+velocity: 0.2    // 低速でも検出
+cooldown: 100    // ms - 超高速応答
+
+// CSSアニメーション
+transition: transform 0.15s ease-out;
+will-change: transform;
+transform-style: preserve-3d;
+```
+
+### レイアウト高さ計算
+```css
+/* モバイル高さ */
+height: calc(100vh 
+  - var(--mobile-tab-height)     /* 48px */
+  - var(--mobile-nav-height)     /* 64px */
+  - env(safe-area-inset-top) 
+  - env(safe-area-inset-bottom));
+```
+
+### 状態管理フォールバック
+1. 通常完了: 170ms (CSS 150ms + 20ms)
+2. 早期フォールバック: 180ms
+3. 最終フォールバック: 250ms
+4. 自動復旧: 400ms
+
+## 🎯 今後の優先事項
+
+### 実装済み ✅
+- AT Protocol認証システム（Tauri Store Plugin）
+- 基本UI・テーマシステム（TailwindCSS v4）
+- 多言語化システム（Paraglide-JS v2 + 5言語）
+- シングルアカウント対応
+- デッキレイアウト基盤
+- 超高速モバイルスワイプ
+
+### 次期実装 🚧
+- 基本的なタイムライン表示
+- 投稿作成・削除機能
+- リアルタイムWebSocket接続
+- 投稿のキャッシュシステム
+
+### 重要な教訓
+1. **型定義は自作する前にContext7で調査**
+2. **レイアウトにはmin-heightではなくheight使用**
+3. **モバイルスワイプには!important禁止**
+4. **アニメーション状態は多重フォールバック必須**
+5. **翻訳配列は$derivedでリアクティブに**
