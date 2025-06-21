@@ -110,13 +110,13 @@
 
 <!-- サイドナビゲーションバー -->
 <nav 
-  class="fixed left-0 top-0 bottom-0 z-40 w-64 bg-card border-r-2 border-themed shadow-lg flex flex-col"
+  class="side-navigation"
   aria-label={t('navigation.home')}
 >
   <!-- 上部: 投稿ボタン -->
-  <div class="p-4 border-b border-themed">
+  <div class="side-navigation__header">
     <button
-      class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-6 rounded-xl text-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex items-center justify-center gap-2"
+      class="side-navigation__compose-button"
       onclick={handleCompose}
       aria-label={t('navigation.compose')}
     >
@@ -133,17 +133,16 @@
   </div>
   
   <!-- 中央部: デッキタブエリア -->
-  <DeckTabBar />
+  <div class="side-navigation__deck-tabs">
+    <DeckTabBar />
+  </div>
   
   <!-- 下部: ナビゲーション項目 -->
-  <div class="p-4 space-y-2">
+  <div class="side-navigation__footer">
     {#each navItems as item}
       <button
-        class="w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 active:scale-98 text-left"
-        style={isActive(item.path) ? "background-color: rgb(var(--primary) / 0.2);" : ""}
-        class:text-primary={isActive(item.path)}
-        class:text-themed={!isActive(item.path)}
-        class:nav-hover={!isActive(item.path)}
+        class="side-navigation__nav-button"
+        class:side-navigation__nav-button--active={isActive(item.path)}
         onclick={() => handleNavigation(item.path, item.id)}
         aria-label={item.label}
         aria-current={isActive(item.path) ? 'page' : undefined}
@@ -155,7 +154,7 @@
           ariaLabel={item.label}
           decorative={true}
         />
-        <span class="font-medium text-lg">
+        <span class="side-navigation__nav-label">
           {item.label}
         </span>
       </button>
@@ -220,8 +219,110 @@
 {/if}
 
 <style>
-  .nav-hover:hover {
+  /* SideNavigation ベーススタイル */
+  .side-navigation {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 40;
+    width: 16rem; /* w-64 */
+    background-color: var(--color-card);
+    border-right: 2px solid rgb(var(--border) / 0.2);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    /* 🚨 デバッグ用背景色 - SideNavigation全体の可視性確認 */
+    background-color: rgba(0, 255, 255, 0.1);
+    border: 2px solid cyan;
+  }
+  
+  /* ヘッダー部分 - 投稿ボタン */
+  .side-navigation__header {
+    flex-shrink: 0;
+    padding: 1rem;
+    border-bottom: 1px solid rgb(var(--border) / 0.2);
+  }
+  
+  .side-navigation__compose-button {
+    width: 100%;
+    background-color: rgb(var(--primary));
+    color: white;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 1.125rem;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .side-navigation__compose-button:hover {
+    background-color: rgb(var(--primary) / 0.9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  .side-navigation__compose-button:active {
+    transform: translateY(0);
+  }
+  
+  /* 中央部分 - デッキタブ */
+  .side-navigation__deck-tabs {
+    flex: 1;
+    min-height: 0; /* flexboxの高さ制御 */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* フッター部分 - ナビゲーション */
+  .side-navigation__footer {
+    flex-shrink: 0;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .side-navigation__nav-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: left;
+    background-color: transparent;
+    color: var(--color-foreground);
+  }
+  
+  .side-navigation__nav-button:hover {
     background-color: rgb(var(--primary) / 0.05);
+  }
+  
+  .side-navigation__nav-button--active {
+    background-color: rgb(var(--primary) / 0.1);
+    color: rgb(var(--primary));
+  }
+  
+  .side-navigation__nav-button:active {
+    transform: scale(0.98);
+  }
+  
+  .side-navigation__nav-label {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: inherit;
+  }
+  
+  /* フォーカス状態 */
+  .side-navigation__compose-button:focus-visible,
+  .side-navigation__nav-button:focus-visible {
+    outline: 2px solid rgb(var(--primary) / 0.6);
+    outline-offset: 2px;
   }
   
   /* モーダル */
@@ -250,7 +351,7 @@
     width: 100%;
     margin-left: 1rem;
     margin-right: 1rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid rgb(var(--border) / 0.2);
   }
   
   .modal-header {
@@ -273,7 +374,7 @@
   }
   
   .modal-close:hover {
-    background-color: rgb(var(--muted) / 0.2);
+    background-color: rgb(var(--primary) / 0.1);
   }
   
   .modal-body {

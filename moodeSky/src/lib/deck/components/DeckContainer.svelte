@@ -12,7 +12,7 @@
   import { deckStore } from '../store.svelte.js';
   import type { Column } from '../types.js';
   import DeckColumn from './DeckColumn.svelte';
-  import ColumnIndicators from './ColumnIndicators.svelte';
+  // import ColumnIndicators from './ColumnIndicators.svelte'; // 上部タブに統一のため削除
   import { SwipeDetector, CircularColumnNavigator, ColumnIntersectionObserver } from '../utils/swipeDetector.js';
   import { COLUMN_WIDTHS } from '../types.js';
   import * as m from '../../../paraglide/messages.js';
@@ -35,8 +35,12 @@
   let isInitializing = $state(true);
   let showAddColumnModal = $state(false);
   
-  // モバイル対応
-  let deckColumnsElement = $state<HTMLElement>();
+  // レスポンシブ状態管理
+  let isMobile = $state(false);
+  
+  // デスクトップ・モバイル要素参照を分離
+  let desktopDeckElement = $state<HTMLElement>();
+  let mobileDeckElement = $state<HTMLElement>();
   let activeColumnIndex = $state(0);
   let swipeDetector: SwipeDetector | undefined;
   let columnNavigator: CircularColumnNavigator | undefined;
@@ -49,12 +53,22 @@
   onMount(async () => {
     try {
       console.log('🎛️ [DeckContainer] Initializing for account:', accountId);
+      
+      // レスポンシブ判定の初期化
+      updateResponsiveState();
+      
+      // ウィンドウリサイズ監視
+      window.addEventListener('resize', updateResponsiveState);
+      
       await deckStore.initialize(accountId);
       console.log('🎛️ [DeckContainer] Deck store initialized, columns:', deckStore.columns.length);
       
-      // モバイル対応の初期化
-      if (deckColumnsElement && deckStore.columns.length > 0) {
-        initializeMobileFeatures();
+      // デッキ機能の初期化
+      if (deckStore.columns.length > 0) {
+        // DOM要素の準備を待つ
+        setTimeout(() => {
+          initializeDeckFeatures();
+        }, 100);
       }
     } catch (error) {
       console.error('🎛️ [DeckContainer] Failed to initialize deck store:', error);
@@ -65,9 +79,49 @@
   
   onDestroy(() => {
     // クリーンアップ
+    window.removeEventListener('resize', updateResponsiveState);
     swipeDetector?.destroy();
     intersectionObserver?.destroy();
   });
+
+  // ===================================================================
+  // レスポンシブ状態管理
+  // ===================================================================
+  
+  /**
+   * レスポンシブ状態を更新（768px基準）
+   */
+  function updateResponsiveState() {
+    const newIsMobile = window.innerWidth < 768;
+    if (newIsMobile !== isMobile) {
+      console.log('🎛️ [DeckContainer] Responsive state changed:', { 
+        from: isMobile ? 'mobile' : 'desktop', 
+        to: newIsMobile ? 'mobile' : 'desktop',
+        windowWidth: window.innerWidth 
+      });
+      isMobile = newIsMobile;
+      
+      // プラットフォーム変更時は既存の機能をクリーンアップして再初期化
+      if (deckStore.columns.length > 0) {
+        cleanupDeckFeatures();
+        setTimeout(() => {
+          initializeDeckFeatures();
+        }, 100);
+      }
+    }
+  }
+  
+  /**
+   * デッキ機能のクリーンアップ
+   */
+  function cleanupDeckFeatures() {
+    swipeDetector?.destroy();
+    intersectionObserver?.destroy();
+    swipeDetector = undefined;
+    columnNavigator = undefined;
+    intersectionObserver = undefined;
+    console.log('🎛️ [DeckContainer] Deck features cleaned up');
+  }
 
   // ===================================================================
   // イベントハンドラー
@@ -104,10 +158,10 @@
       showAddColumnModal = false;
       console.log('🎛️ [DeckContainer] Home column added');
       
-      // モバイル機能を再初期化
+      // デッキ機能を再初期化
       setTimeout(() => {
-        if (deckColumnsElement && deckStore.columns.length > 0) {
-          initializeMobileFeatures();
+        if (deckStore.columns.length > 0) {
+          initializeDeckFeatures();
         }
       }, 100);
     } catch (error) {
@@ -116,11 +170,216 @@
   }
   
   /**
+   * デッキ機能の統合初期化（レスポンシブ対応）
+   */
+  function initializeDeckFeatures() {
+    console.log('🎛️ [DeckContainer] Initializing deck features, isMobile:', isMobile);
+    console.log('🎛️ [DeckContainer] Window size:', window.innerWidth, 'x', window.innerHeight);
+    console.log('🎛️ [DeckContainer] Available elements:', { 
+      mobile: !!mobileDeckElement, 
+      desktop: !!desktopDeckElement 
+    });
+    
+    if (isMobile) {
+      initializeMobileFeatures();
+    } else {
+      initializeDesktopFeatures();
+    }
+  }
+  
+  /**
+   * デスクトップ機能の初期化
+   */
+  function initializeDesktopFeatures() {
+    if (!desktopDeckElement) {
+      console.warn('🎛️ [DeckContainer] desktopDeckElement not available');
+      return;
+    }
+    
+    try {
+      console.log('🎛️ [DeckContainer] Starting desktop features initialization...');
+      console.log('🎛️ [DeckContainer] Columns available:', deckStore.columns.length);
+      console.log('🎛️ [DeckContainer] Current activeColumnId:', deckStore.state.activeColumnId);
+      
+      // 1. デスクトップでは activeColumnId の概念を削除
+      // モバイルとは異なり、全カラムが同時に表示されるため不要
+      console.log('🎛️ [DeckContainer] Desktop mode: activeColumnId concept not needed');
+      
+      // 2. 水平スクロール制御
+      if (desktopDeckElement) {
+        // スクロール位置をリセット
+        desktopDeckElement.scrollLeft = 0;
+        
+        // 要素の詳細な可視性チェック
+        console.log('🚨 [VISIBILITY DEBUG] Desktop element details:', {
+          element: desktopDeckElement,
+          className: desktopDeckElement.className,
+          offsetWidth: desktopDeckElement.offsetWidth,
+          offsetHeight: desktopDeckElement.offsetHeight,
+          clientWidth: desktopDeckElement.clientWidth,
+          clientHeight: desktopDeckElement.clientHeight,
+          scrollWidth: desktopDeckElement.scrollWidth,
+          scrollHeight: desktopDeckElement.scrollHeight
+        });
+        
+        // Computed Styleの詳細確認
+        const computedStyle = window.getComputedStyle(desktopDeckElement);
+        console.log('🚨 [VISIBILITY DEBUG] Computed styles:', {
+          display: computedStyle.display,
+          visibility: computedStyle.visibility,
+          opacity: computedStyle.opacity,
+          width: computedStyle.width,
+          height: computedStyle.height,
+          overflow: computedStyle.overflow,
+          overflowX: computedStyle.overflowX,
+          overflowY: computedStyle.overflowY,
+          position: computedStyle.position,
+          zIndex: computedStyle.zIndex,
+          transform: computedStyle.transform,
+          padding: computedStyle.padding,
+          margin: computedStyle.margin,
+          backgroundColor: computedStyle.backgroundColor,
+          border: computedStyle.border
+        });
+        
+        // 親要素の階層チェック
+        let parent = desktopDeckElement.parentElement;
+        let level = 1;
+        while (parent && level <= 5) {
+          const parentStyle = window.getComputedStyle(parent);
+          console.log(`🚨 [VISIBILITY DEBUG] Parent level ${level}:`, {
+            tagName: parent.tagName,
+            className: parent.className,
+            display: parentStyle.display,
+            visibility: parentStyle.visibility,
+            opacity: parentStyle.opacity,
+            width: parentStyle.width,
+            height: parentStyle.height,
+            overflow: parentStyle.overflow
+          });
+          parent = parent.parentElement;
+          level++;
+        }
+        
+        // 3. DOM要素の状態確認
+        const columnElements = desktopDeckElement.querySelectorAll('.deck-column-wrapper');
+        console.log('🚨 [VISIBILITY DEBUG] Column elements found:', columnElements.length);
+        
+        columnElements.forEach((element, index) => {
+          const rect = element.getBoundingClientRect();
+          const computedColumnStyle = window.getComputedStyle(element);
+          console.log(`🚨 [VISIBILITY DEBUG] Column ${index} details:`, {
+            element: element,
+            boundingRect: {
+              width: rect.width,
+              height: rect.height,
+              top: rect.top,
+              left: rect.left,
+              right: rect.right,
+              bottom: rect.bottom,
+              visible: rect.width > 0 && rect.height > 0
+            },
+            computedStyle: {
+              display: computedColumnStyle.display,
+              visibility: computedColumnStyle.visibility,
+              opacity: computedColumnStyle.opacity,
+              width: computedColumnStyle.width,
+              height: computedColumnStyle.height,
+              position: computedColumnStyle.position,
+              transform: computedColumnStyle.transform
+            },
+            offsetDimensions: {
+              offsetWidth: (element as HTMLElement).offsetWidth,
+              offsetHeight: (element as HTMLElement).offsetHeight
+            }
+          });
+          
+          // 子要素（DeckColumn）の確認
+          const deckColumnEl = element.querySelector('.deck-column');
+          if (deckColumnEl) {
+            const deckColumnStyle = window.getComputedStyle(deckColumnEl);
+            console.log(`🚨 [VISIBILITY DEBUG] DeckColumn ${index} child:`, {
+              display: deckColumnStyle.display,
+              visibility: deckColumnStyle.visibility,
+              width: deckColumnStyle.width,
+              height: deckColumnStyle.height
+            });
+          }
+        });
+        
+        // 4. SideNavigationの状態確認（正しいセレクタを使用）
+        const sideNav = document.querySelector('nav[aria-label]');
+        if (sideNav) {
+          const sideNavStyle = window.getComputedStyle(sideNav);
+          console.log('🚨 [VISIBILITY DEBUG] SideNavigation:', {
+            element: sideNav,
+            display: sideNavStyle.display,
+            visibility: sideNavStyle.visibility,
+            width: sideNavStyle.width,
+            height: sideNavStyle.height,
+            position: sideNavStyle.position,
+            zIndex: sideNavStyle.zIndex
+          });
+        } else {
+          console.warn('🚨 [VISIBILITY DEBUG] SideNavigation not found!');
+        }
+        
+        // 5. 高さ計算の詳細確認
+        console.log('🚨 [HEIGHT DEBUG] Page structure:', {
+          viewportHeight: window.innerHeight,
+          documentHeight: document.documentElement.clientHeight,
+          bodyHeight: document.body.clientHeight,
+          expectedDeckHeight: `${window.innerHeight - 128}px`,
+          actualDeckHeight: computedStyle.height
+        });
+        
+        // 6. hidden/flexクラスの動作確認
+        console.log('🚨 [CLASS DEBUG] Desktop deck element classes:', {
+          classList: desktopDeckElement.classList.toString(),
+          hasHidden: desktopDeckElement.classList.contains('hidden'),
+          hasFlex: desktopDeckElement.classList.contains('flex'),
+          hasMdFlex: desktopDeckElement.classList.contains('md:flex'),
+          computedDisplay: computedStyle.display
+        });
+      }
+      
+      // 5. 初期化完了確認
+      console.log('🎛️ [DeckContainer] Desktop features initialization completed');
+      console.log('🎛️ [DeckContainer] Final diagnostic:', {
+        columnsCount: deckStore.columns.length,
+        desktopElementExists: !!desktopDeckElement,
+        windowWidth: window.innerWidth,
+        isDesktopSize: window.innerWidth >= 768
+      });
+      
+    } catch (error) {
+      console.error('🚨 [DeckContainer] Desktop features initialization failed:', error);
+      console.error('🚨 [DeckContainer] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        elementExists: !!desktopDeckElement,
+        columnsLength: deckStore.columns.length
+      });
+    }
+  }
+  
+  /**
    * モバイル機能の初期化
    */
   function initializeMobileFeatures() {
-    if (!deckColumnsElement) {
-      console.warn('🎛️ [DeckContainer] deckColumnsElement not available');
+    if (!isMobile) {
+      console.log('🎛️ [DeckContainer] Skipping mobile features on desktop');
+      return;
+    }
+    
+    if (!mobileDeckElement) {
+      console.warn('🎛️ [DeckContainer] mobileDeckElement not available, waiting...');
+      // DOM要素の準備を再度待つ
+      setTimeout(() => {
+        if (mobileDeckElement) {
+          initializeMobileFeatures();
+        }
+      }, 50);
       return;
     }
     
@@ -128,12 +387,39 @@
     swipeDetector?.destroy();
     intersectionObserver?.destroy();
     
+    // モバイル用のスワイプ対象要素を取得
+    const swipeTarget = mobileDeckElement.querySelector('.deck-columns-track') as HTMLElement;
+    if (!swipeTarget) {
+      console.warn('🎛️ [DeckContainer] Mobile swipe target not found');
+      return;
+    }
+    
     // スワイプ検出
     swipeDetector = new SwipeDetector(
-      deckColumnsElement,
+      swipeTarget,
       {
-        onSwipeLeft: () => columnNavigator?.moveNext(),
-        onSwipeRight: () => columnNavigator?.movePrevious()
+        onSwipeLeft: () => {
+          const nextIndex = Math.min(activeColumnIndex + 1, deckStore.columns.length - 1);
+          if (nextIndex !== activeColumnIndex) {
+            activeColumnIndex = nextIndex;
+            // タブバーとの同期
+            const targetColumn = deckStore.columns[nextIndex];
+            if (targetColumn) {
+              deckStore.state.activeColumnId = targetColumn.id;
+            }
+          }
+        },
+        onSwipeRight: () => {
+          const prevIndex = Math.max(activeColumnIndex - 1, 0);
+          if (prevIndex !== activeColumnIndex) {
+            activeColumnIndex = prevIndex;
+            // タブバーとの同期
+            const targetColumn = deckStore.columns[prevIndex];
+            if (targetColumn) {
+              deckStore.state.activeColumnId = targetColumn.id;
+            }
+          }
+        }
       },
       {
         threshold: 50,
@@ -144,7 +430,7 @@
     
     // 循環ナビゲーション
     columnNavigator = new CircularColumnNavigator(
-      deckColumnsElement,
+      swipeTarget,
       deckStore.columns.length,
       {
         onColumnChange: (index) => {
@@ -159,11 +445,11 @@
       columnNavigator?.updateCurrentIndex(index);
     });
     
-    // カラム要素を監視
-    const columnElements = deckColumnsElement.querySelectorAll('.deck-column') as NodeListOf<HTMLElement>;
+    // モバイルカラム要素を監視
+    const columnElements = swipeTarget.querySelectorAll('.deck-column-mobile-wrapper') as NodeListOf<HTMLElement>;
     intersectionObserver.observeColumns(Array.from(columnElements));
     
-    console.log('🎛️ [DeckContainer] Mobile features initialized');
+    console.log('🎛️ [DeckContainer] Mobile features initialized for', deckStore.columns.length, 'columns');
   }
   
   /**
@@ -171,6 +457,25 @@
    */
   function handleColumnSelect(index: number) {
     columnNavigator?.scrollToColumn(index);
+  }
+  
+  /**
+   * キーボードナビゲーション（デスクトップ用）
+   */
+  function handleKeyNavigation(event: KeyboardEvent) {
+    if (window.innerWidth < 768) return; // モバイルでは無効
+    
+    if (!desktopDeckElement) return;
+    
+    if (event.key === 'ArrowLeft' && event.ctrlKey) {
+      event.preventDefault();
+      // 左にスクロール
+      desktopDeckElement.scrollBy({ left: -320, behavior: 'smooth' });
+    } else if (event.key === 'ArrowRight' && event.ctrlKey) {
+      event.preventDefault();
+      // 右にスクロール
+      desktopDeckElement.scrollBy({ left: 320, behavior: 'smooth' });
+    }
   }
 
   // ===================================================================
@@ -186,20 +491,76 @@
     root.style.setProperty('--deck-padding', `${settings.padding}px`);
   });
   
-  // カラム数変更の監視
+  // カラム数変更とデッキ機能の監視
   $effect(() => {
-    if (deckStore.columns.length > 0 && deckColumnsElement && !isInitializing) {
-      // カラム数が変更された場合の再初期化
-      setTimeout(() => {
-        columnNavigator?.updateTotalColumns(deckStore.columns.length);
-        
-        // インターセクション監視の更新
-        if (deckColumnsElement) {
-          const columnElements = deckColumnsElement.querySelectorAll('.deck-column') as NodeListOf<HTMLElement>;
-          intersectionObserver?.observeColumns(Array.from(columnElements));
-        }
-      }, 100);
+    if (deckStore.columns.length > 0 && !isInitializing) {
+      // DOM要素の存在確認（プラットフォーム別）
+      const hasValidElement = isMobile ? mobileDeckElement : desktopDeckElement;
+      
+      if (hasValidElement) {
+        // カラム数が変更された場合の再初期化
+        setTimeout(() => {
+          // デッキ機能の再初期化
+          initializeDeckFeatures();
+          
+          // ナビゲーター更新（モバイルのみ）
+          if (isMobile && columnNavigator) {
+            columnNavigator.updateTotalColumns(deckStore.columns.length);
+          }
+        }, 150); // DOM更新を待つ
+      }
     }
+  });
+  
+  // キーボードナビゲーション
+  $effect(() => {
+    window.addEventListener('keydown', handleKeyNavigation);
+    return () => window.removeEventListener('keydown', handleKeyNavigation);
+  });
+  
+  // タブからの切り替えイベントを受信（モバイル用）
+  $effect(() => {
+    const handleTabSwitch = (event: CustomEvent) => {
+      const { columnId } = event.detail;
+      const columnIndex = deckStore.columns.findIndex(col => col.id === columnId);
+      if (columnIndex !== -1 && columnIndex !== activeColumnIndex) {
+        activeColumnIndex = columnIndex;
+        
+        // スワイプ用のスムーズ移動を実行
+        if (columnNavigator && window.innerWidth < 768) {
+          columnNavigator.scrollToColumn(columnIndex);
+        }
+        
+        console.log('🎛️ [DeckContainer] Tab switch received, index:', columnIndex);
+      }
+    };
+    
+    window.addEventListener('tabColumnSwitch', handleTabSwitch as EventListener);
+    return () => window.removeEventListener('tabColumnSwitch', handleTabSwitch as EventListener);
+  });
+  
+  // デスクトップ用スクロールイベントを受信
+  $effect(() => {
+    const handleDesktopScroll = (event: CustomEvent) => {
+      const { columnIndex } = event.detail;
+      
+      if (!desktopDeckElement || window.innerWidth < 768) return;
+      
+      // カラム幅を取得（デフォルト320px + gap 16px）
+      const columnWidth = 320 + 16;
+      const scrollLeft = columnIndex * columnWidth;
+      
+      // スムーズスクロール
+      desktopDeckElement.scrollTo({
+        left: scrollLeft,
+        behavior: 'smooth'
+      });
+      
+      console.log('🎛️ [DeckContainer] Desktop scroll to column:', columnIndex, 'scrollLeft:', scrollLeft);
+    };
+    
+    window.addEventListener('desktopScrollToColumn', handleDesktopScroll as EventListener);
+    return () => window.removeEventListener('desktopScrollToColumn', handleDesktopScroll as EventListener);
   });
 </script>
 
@@ -245,28 +606,42 @@
     
   {:else}
     <!-- デッキカラム表示 -->
+    {console.log('🚨 [RENDER DEBUG] Rendering deck columns section')}
+    {console.log('🚨 [RENDER DEBUG] isMobile:', isMobile)}
+    {console.log('🚨 [RENDER DEBUG] deckStore.columns:', deckStore.columns)}
+    {console.log('🚨 [RENDER DEBUG] deckStore.isEmpty:', deckStore.isEmpty)}
+    {console.log('🚨 [RENDER DEBUG] isInitializing:', isInitializing)}
     
-    <!-- デスクトップ: 横並び固定幅 -->
-    <div class="hidden md:flex deck-columns-desktop overflow-x-auto gap-4 p-4" bind:this={deckColumnsElement}>
-      {#each deckStore.columns as column, index (column.id)}
-        <div class="flex-shrink-0 deck-column" style="width: {column.settings.width ? COLUMN_WIDTHS[column.settings.width].width : COLUMN_WIDTHS.medium.width}px">
-          <DeckColumn
-            {column}
-            {index}
-            {accountId}
-          />
+    {#if isMobile}
+      <!-- モバイル版: 100%幅スワイプ切り替え -->
+      {console.log('🚨 [RENDER DEBUG] Rendering MOBILE deck')}
+      <div class="deck-mobile-container" bind:this={mobileDeckElement}>
+        <div 
+          class="deck-columns-track"
+          style="width: {deckStore.columns.length * 100}%; transform: translateX(-{activeColumnIndex * 100 / deckStore.columns.length}%)"
+        >
+          {#each deckStore.columns as column, index (column.id)}
+            {console.log('🚨 [RENDER DEBUG] Rendering MOBILE column:', column.id, column.settings.title)}
+            <div class="deck-column-mobile-wrapper">
+              <DeckColumn
+                {column}
+                {index}
+                {accountId}
+              />
+            </div>
+          {/each}
         </div>
-      {/each}
-    </div>
-    
-    <!-- モバイル: 100%幅スワイプ切り替え -->
-    <div class="md:hidden deck-columns-mobile w-full overflow-hidden">
-      <div 
-        class="flex transition-transform duration-300"
-        style="width: {deckStore.columns.length * 100}%; transform: translateX(-{activeColumnIndex * 100 / deckStore.columns.length}%)"
-      >
+      </div>
+    {:else}
+      <!-- デスクトップ版: 横並び固定幅 -->
+      {console.log('🚨 [RENDER DEBUG] Rendering DESKTOP deck')}
+      <div class="deck-desktop-container scrollbar-professional" bind:this={desktopDeckElement}>
         {#each deckStore.columns as column, index (column.id)}
-          <div class="w-full flex-shrink-0 deck-column">
+          {console.log('🚨 [RENDER DEBUG] Rendering DESKTOP column:', column.id, column.settings.title)}
+          <div 
+            class="flex-shrink-0 deck-column-wrapper" 
+            style="width: {column.settings.width ? COLUMN_WIDTHS[column.settings.width].width : COLUMN_WIDTHS.medium.width}px"
+          >
             <DeckColumn
               {column}
               {index}
@@ -275,15 +650,6 @@
           </div>
         {/each}
       </div>
-    </div>
-    
-    <!-- モバイル用カラムインジケーター -->
-    {#if deckStore.columns.length > 0}
-      <ColumnIndicators
-        columns={deckStore.columns}
-        activeIndex={activeColumnIndex}
-        onColumnSelect={handleColumnSelect}
-      />
     {/if}
   {/if}
 
@@ -414,41 +780,56 @@
     gap: 0.5rem;
   }
   
-  /* デッキカラム */
-  .deck-columns {
-    display: flex;
-    gap: 1rem;
-    height: 100%;
+  /* デスクトップデッキコンテナ */
+  .deck-desktop-container {
+    height: calc(100vh - 128px); /* ヘッダー80px + デスクトップタブ48px */
     overflow-x: auto;
     overflow-y: hidden;
     padding: var(--deck-padding, 16px);
     gap: var(--deck-gap, 16px);
-    
-    /* スクロールバースタイリング */
-    &::-webkit-scrollbar {
-      height: 0.5rem;
-    }
-    
-    &::-webkit-scrollbar-track {
-      background-color: rgb(var(--muted) / 0.2);
-      border-radius: 0.25rem;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-      background-color: rgb(var(--foreground) / 0.3);
-      border-radius: 0.25rem;
-    }
-    
-    &::-webkit-scrollbar-thumb:hover {
-      background-color: rgb(var(--foreground) / 0.5);
-    }
-    
-    /* モバイル対応 */
-    @media (max-width: 767px) {
-      padding-left: 1rem;
-      padding-right: 1rem;
-      scroll-snap-type: x mandatory;
-    }
+    scroll-behavior: smooth;
+    display: flex;
+    /* 🚨 デバッグ用背景色 - 要素の可視性確認 */
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 2px solid red;
+    /* 🚨 最小高さを確保して表示を強制 */
+    min-height: 400px;
+  }
+  
+  /* モバイルデッキコンテナ */
+  .deck-mobile-container {
+    width: 100%;
+    height: calc(100vh - 48px - env(safe-area-inset-top, 0px)); /* モバイルタブ(48px) + 上部セーフエリア */
+    overflow: hidden;
+    position: relative;
+    /* 🚨 デバッグ用背景色 - モバイル版の可視性確認 */
+    background-color: rgba(255, 0, 255, 0.1);
+    border: 2px solid magenta;
+  }
+  
+  .deck-columns-track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  /* カラムラッパー */
+  .deck-column-wrapper {
+    height: calc(100vh - 128px); /* ヘッダー80px + デスクトップタブ48px */
+    /* 🚨 デバッグ用背景色 - 要素の可視性確認 */
+    background-color: rgba(0, 255, 0, 0.1);
+    border: 1px solid green;
+  }
+  
+  .deck-column-mobile-wrapper {
+    width: 100% !important;
+    height: 100%;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    /* padding削除でスワイプ時の余白を解消 */
+    /* 100%幅を確実に適用 */
+    min-width: 100% !important;
+    max-width: 100% !important;
   }
   
   /* カラム追加ボタン */

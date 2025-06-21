@@ -5,6 +5,7 @@
   import Navigation from '$lib/components/Navigation.svelte';
   import Avatar from '$lib/components/Avatar.svelte';
   import DeckContainer from '$lib/deck/components/DeckContainer.svelte';
+  import DeckTabs from '$lib/components/deck/DeckTabs.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
@@ -159,14 +160,19 @@
 {:else if activeAccount}
   <!-- メインデッキレイアウト -->
   {console.log('🔍 [DEBUG] Rendering main deck layout with account:', activeAccount)}
-  <div class="min-h-screen bg-themed">
-    <!-- ナビゲーション -->
-    <Navigation {currentPath} />
+  <div class="h-screen md:min-h-screen bg-themed">
+    <!-- デスクトップナビゲーション -->
+    <div class="hidden md:block">
+      <Navigation {currentPath} accountId={activeAccount.profile.handle} />
+    </div>
+    
+    <!-- モバイル用デッキタブ（画面上部） -->
+    <DeckTabs variant="mobile" class="md:hidden" />
     
     <!-- メインコンテンツエリア -->
-    <main class="md:ml-64 min-h-screen pb-20 md:pb-0">
-      <!-- ヘッダー -->
-      <header class="bg-card border-b-2 border-themed shadow-sm p-4 flex items-center justify-between">
+    <main class="md:ml-64 h-full md:min-h-screen mobile-main-content">
+      <!-- デスクトップのみヘッダー表示 -->
+      <header class="hidden md:flex bg-card border-b-2 border-themed shadow-sm p-4 items-center justify-between">
         <div class="flex items-center gap-4">
           <h1 class="text-themed text-2xl font-bold">
             {t('app.name')}
@@ -192,14 +198,24 @@
         </div>
       </header>
       
+      <!-- デスクトップ用デッキタブ -->
+      <div class="hidden md:block">
+        <DeckTabs variant="desktop" />
+      </div>
+      
       <!-- デッキコンテンツエリア -->
-      <div class="h-[calc(100vh-80px)] overflow-hidden">
+      <div class="h-full md:h-[calc(100vh_-_128px)] overflow-hidden deck-content-wrapper">
         <DeckContainer 
           accountId={activeAccount.profile.handle}
           className="h-full"
         />
       </div>
     </main>
+    
+    <!-- モバイル用ボトムナビ（ページの一部として） -->
+    <div class="md:hidden">
+      <Navigation {currentPath} />
+    </div>
   </div>
 {:else}
   <!-- フォールバック画面 - 条件に当てはまらない場合 -->
@@ -225,3 +241,27 @@
     </div>
   </div>
 {/if}
+
+<style>
+  /* モバイル版の全画面対応 */
+  .mobile-main-content {
+    /* モバイル: コンパクトタブ分のみ（ボトムナビはfixed配置のため不要） */
+    padding-top: calc(48px + env(safe-area-inset-top, 0px));
+    padding-bottom: 0;
+  }
+  
+  /* デスクトップ版では通常のパディング */
+  @media (min-width: 768px) {
+    .mobile-main-content {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+  
+  /* 🚨 デバッグ用スタイル - 要素の可視性確認 */
+  .deck-content-wrapper {
+    background-color: rgba(0, 0, 255, 0.1);
+    border: 2px solid blue;
+    min-height: 200px;
+  }
+</style>

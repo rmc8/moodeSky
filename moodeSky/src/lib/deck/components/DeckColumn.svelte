@@ -38,9 +38,19 @@
   // カラム幅の動的スタイル
   // ===================================================================
 
+  // 画面幅の監視用
+  let windowWidth = $state(768);
+  
   const styleString = $derived(() => {
-    const width = COLUMN_WIDTHS[column.settings.width];
-    return `width: ${width.width}px; min-width: ${width.width}px;`;
+    // モバイル検出（768px未満）
+    const isMobile = windowWidth < 768;
+    
+    if (isMobile) {
+      return 'width: 100%; min-width: 100%;'; // モバイル: 強制100%
+    } else {
+      const width = COLUMN_WIDTHS[column.settings.width];
+      return `width: ${width.width}px; min-width: ${width.width}px;`; // デスクトップ: 設定幅
+    }
   });
 
   // ===================================================================
@@ -51,6 +61,21 @@
     // スクロール要素を登録
     if (scrollElement) {
       column.scrollElement = scrollElement;
+    }
+
+    // 初期画面幅設定
+    if (typeof window !== 'undefined') {
+      windowWidth = window.innerWidth;
+      
+      // リサイズイベント監視
+      const handleResize = () => {
+        windowWidth = window.innerWidth;
+      };
+      
+      window.addEventListener('resize', handleResize);
+      
+      // クリーンアップ用に返す
+      return () => window.removeEventListener('resize', handleResize);
     }
 
     console.log('🎛️ [DeckColumn] Column mounted:', column.id, column.settings.title);
@@ -231,7 +256,7 @@
 
   <!-- カラムコンテンツ -->
   <div 
-    class="deck-column__content"
+    class="deck-column__content scrollbar-professional"
     bind:this={scrollElement}
   >
     <!-- 空状態（現在の実装） -->
@@ -275,7 +300,7 @@
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     overflow: hidden;
     position: relative;
-    height: calc(100vh - 200px); /* 調整可能 */
+    height: 100%;
     transition: width 0.2s ease-in-out;
   }
   
@@ -289,12 +314,20 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   
-  /* モバイル対応 */
+  /* レスポンシブ高さ調整 */
   @media (max-width: 767px) {
     .deck-column {
-      width: calc(100vw - 32px) !important;
-      min-width: calc(100vw - 32px) !important;
-      scroll-snap-align: start;
+      height: calc(100vh - 48px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); /* モバイル: コンパクトタブ(48px) + セーフエリア */
+      /* モバイルで100%幅を強制 */
+      width: 100% !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .deck-column {
+      height: calc(100vh - 128px); /* デスクトップ: ヘッダー80px + タブ48px */
     }
   }
   
@@ -473,23 +506,7 @@
     overflow-x: hidden;
   }
   
-  /* スクロールバースタイリング */
-  .deck-column__content::-webkit-scrollbar {
-    width: 0.25rem;
-  }
-  
-  .deck-column__content::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .deck-column__content::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--foreground) / 0.2);
-    border-radius: 9999px;
-  }
-  
-  .deck-column__content::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(var(--foreground) / 0.4);
-  }
+  /* 統合スクロールバーは scrollbar-professional クラスで適用済み */
   
   /* 空状態 */
   .deck-column__empty {

@@ -250,11 +250,13 @@
 
   /* アニメーション効果 */
   .indicators-track {
-    animation: slideUp 0.3s ease-out;
+    animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform, opacity;
   }
 
   .column-info {
-    animation: slideUp 0.4s ease-out;
+    animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform, opacity;
   }
 
   @keyframes slideUp {
@@ -266,6 +268,15 @@
       transform: translateY(0);
       opacity: 1;
     }
+  }
+  
+  /* パフォーマンス最適化 */
+  .indicator-dot {
+    will-change: transform, background-color, border-color;
+  }
+  
+  .indicator-dot--active {
+    backface-visibility: hidden;
   }
 
   /* ダークモード対応 */
