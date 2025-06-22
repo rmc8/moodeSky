@@ -49,22 +49,22 @@
   // システムテーマのプレビュー色を動的に決定
   const systemPreview = $derived(() => {
     if (isSystemDarkMode) {
-      // システムがダークモード -> ダークテーマの色
+      // システムがダークモード -> ダークテーマの実色
       return {
-        background: 'bg-gradient-themed',
-        surface: 'bg-card border-themed',
-        text: 'text-themed',
-        textColor: 'var(--color-foreground)',
-        accent: 'bg-primary'
+        background: 'from-slate-900 to-slate-800',
+        surface: 'bg-slate-800 border-slate-600',
+        text: 'text-slate-100',
+        textColor: '#f1f5f9',  // slate-100
+        accent: 'bg-orange-400'
       };
     } else {
-      // システムがライトモード -> ライトテーマの色
+      // システムがライトモード -> ライトテーマの実色
       return {
-        background: 'bg-gradient-themed',
-        surface: 'bg-card border-themed',
-        text: 'text-themed',
-        textColor: 'var(--color-foreground)',
-        accent: 'bg-primary'
+        background: 'from-blue-50 to-blue-100',
+        surface: 'bg-white border-slate-200',
+        text: 'text-slate-900',
+        textColor: '#0f172a',  // slate-900
+        accent: 'bg-blue-500'
       };
     }
   });
@@ -101,11 +101,11 @@
       icon: ICONS.LIGHT_MODE,
       description: m['settings.theme.lightDescription'](),
       preview: {
-        background: 'bg-gradient-primary',
-        surface: 'bg-card border-themed',
-        text: 'text-themed',
-        textColor: 'var(--color-foreground)',
-        accent: 'bg-primary'
+        background: 'from-blue-50 to-blue-100',
+        surface: 'bg-white border-slate-200',
+        text: 'text-slate-900',
+        textColor: '#0f172a',  // slate-900
+        accent: 'bg-blue-500'
       }
     },
     {
@@ -114,11 +114,11 @@
       icon: ICONS.DARK_MODE,
       description: m['settings.theme.darkDescription'](),
       preview: {
-        background: 'bg-gradient-themed',
-        surface: 'bg-card border-themed',
-        text: 'text-themed',
-        textColor: 'var(--color-foreground)',
-        accent: 'bg-primary'
+        background: 'from-slate-900 to-slate-800',
+        surface: 'bg-slate-800 border-slate-600',
+        text: 'text-slate-100',
+        textColor: '#f1f5f9',  // slate-100
+        accent: 'bg-orange-400'
       }
     },
     {
@@ -127,11 +127,11 @@
       icon: ICONS.CONTRAST,
       description: m['settings.theme.highContrastDescription'](),
       preview: {
-        background: 'bg-gradient-themed',
-        surface: 'bg-card border-themed border-2',
-        text: 'text-themed',
-        textColor: 'var(--color-foreground)',
-        accent: 'bg-primary'
+        background: 'from-black to-gray-900',
+        surface: 'bg-black border-white border-2',
+        text: 'text-white',
+        textColor: '#ffffff',  // pure white
+        accent: 'bg-yellow-400'
       }
     }
   ]);
@@ -290,7 +290,7 @@
             class="group p-4 rounded-lg border-2 transition-all duration-200 text-left hover:scale-[1.02] focus:scale-[1.02] overflow-hidden relative"
             class:border-primary={option.mode === themeStore.settings.mode}
             class:bg-primary={option.mode === themeStore.settings.mode}
-            class:border-themed={option.mode !== themeStore.settings.mode}
+            class:border-slate-300={option.mode !== themeStore.settings.mode}
             class:hover:border-primary={option.mode !== themeStore.settings.mode}
             style={option.mode === themeStore.settings.mode ? 'background: rgb(var(--primary) / 0.1);' : ''}
             disabled={isLoading}
@@ -317,14 +317,37 @@
                 {/if}
               </div>
               
-              <!-- プレビューカード -->
-              <div class="rounded border p-2 {option.preview.surface}">
-                <div class="text-xs">
-                  <div class="flex items-center gap-2 mb-1">
-                    <div class="w-2 h-2 rounded-full {option.preview.accent}"></div>
-                    <span class="font-medium preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color)">{m['settings.theme.sampleText']()}</span>
+              <!-- 強化されたプレビューカード -->
+              <div class="rounded-lg border p-3 bg-gradient-to-br {option.preview.background} {option.preview.surface} relative overflow-hidden">
+                <!-- 背景パターン -->
+                <div class="absolute inset-0 opacity-20">
+                  <div class="w-full h-1 {option.preview.accent} absolute top-0"></div>
+                </div>
+                
+                <!-- プレビューコンテンツ -->
+                <div class="relative z-10 space-y-2">
+                  <!-- ヘッダー風要素 -->
+                  <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full {option.preview.accent}"></div>
+                    <div class="h-2 {option.preview.accent} rounded flex-1 max-w-16 opacity-60"></div>
                   </div>
-                  <div class="preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color); opacity: 0.7">{option.description}</div>
+                  
+                  <!-- メインテキスト -->
+                  <div class="text-xs font-medium preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color)">
+                    {m['settings.theme.sampleText']()}
+                  </div>
+                  
+                  <!-- セカンダリテキスト -->
+                  <div class="text-xs preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color); opacity: 0.7">
+                    {option.description}
+                  </div>
+                  
+                  <!-- UI要素風のライン -->
+                  <div class="flex gap-1 mt-2">
+                    <div class="h-1 rounded-full flex-1 max-w-8" style="background-color: {option.preview.textColor}; opacity: 0.3"></div>
+                    <div class="h-1 rounded-full flex-1 max-w-6" style="background-color: {option.preview.textColor}; opacity: 0.2"></div>
+                    <div class="h-1 rounded-full flex-1 max-w-4" style="background-color: {option.preview.textColor}; opacity: 0.1"></div>
+                  </div>
                 </div>
               </div>
             </div>
