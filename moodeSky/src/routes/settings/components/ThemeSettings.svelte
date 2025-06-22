@@ -54,6 +54,7 @@
         background: 'from-[#0f172a] to-[#0c1220]',
         surface: 'bg-[#0f172a] border-slate-500',
         text: 'text-slate-100',
+        textColor: '#f1f5f9',  // slate-100の実際の色値
         accent: 'bg-orange-400'
       };
     } else {
@@ -62,6 +63,7 @@
         background: 'from-blue-50 to-blue-100',
         surface: 'bg-white border-gray-200',
         text: 'text-slate-900',
+        textColor: '#0f172a',  // slate-900の実際の色値
         accent: 'bg-blue-500'
       };
     }
@@ -82,6 +84,7 @@
       background: string;
       surface: string;
       text: string;
+      textColor: string;
       accent: string;
     };
   }>>([
@@ -101,6 +104,7 @@
         background: 'from-blue-50 to-blue-100',
         surface: 'bg-white border-gray-200',
         text: 'text-slate-900',
+        textColor: '#0f172a',  // slate-900
         accent: 'bg-blue-500'
       }
     },
@@ -113,6 +117,7 @@
         background: 'from-[#0f172a] to-[#0c1220]',
         surface: 'bg-[#0f172a] border-slate-500',
         text: 'text-slate-100',
+        textColor: '#f1f5f9',  // slate-100
         accent: 'bg-orange-400'
       }
     },
@@ -125,6 +130,7 @@
         background: 'from-black to-gray-900',
         surface: 'bg-black border-white border-2',
         text: 'text-white',
+        textColor: '#ffffff',  // white
         accent: 'bg-yellow-400'
       }
     }
@@ -313,12 +319,12 @@
               
               <!-- プレビューカード -->
               <div class="rounded border p-2 {option.preview.surface}">
-                <div class="text-xs {option.preview.text}">
+                <div class="text-xs">
                   <div class="flex items-center gap-2 mb-1">
                     <div class="w-2 h-2 rounded-full {option.preview.accent}"></div>
-                    <span class="font-medium">{m['settings.theme.sampleText']()}</span>
+                    <span class="font-medium preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color)">{m['settings.theme.sampleText']()}</span>
                   </div>
-                  <div class="opacity-70">{option.description}</div>
+                  <div class="preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color); opacity: 0.7">{option.description}</div>
                 </div>
               </div>
             </div>
