@@ -21,6 +21,56 @@
   let successMessage = $state('');
   let errorMessage = $state('');
 
+  // ===================================================================
+  // システム色設定検出
+  // ===================================================================
+
+  // システムがダークモードかどうかを検出
+  let isSystemDarkMode = $state(false);
+
+  // システム色設定の初期化と監視
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      isSystemDarkMode = mediaQuery.matches;
+      
+      const handleChange = (e: MediaQueryListEvent) => {
+        isSystemDarkMode = e.matches;
+      };
+      
+      mediaQuery.addEventListener('change', handleChange);
+      
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }
+  });
+
+  // システムテーマのプレビュー色を動的に決定
+  const systemPreview = $derived(() => {
+    if (isSystemDarkMode) {
+      // システムがダークモード -> ダークテーマの色
+      return {
+        background: 'from-[#0f172a] to-[#0c1220]',
+        surface: 'bg-[#0f172a] border-slate-500',
+        text: 'text-slate-100',
+        accent: 'bg-orange-400'
+      };
+    } else {
+      // システムがライトモード -> ライトテーマの色
+      return {
+        background: 'from-blue-50 to-blue-100',
+        surface: 'bg-white border-gray-200',
+        text: 'text-slate-900',
+        accent: 'bg-blue-500'
+      };
+    }
+  });
+
+  // ===================================================================
+  // テーマオプション定義
+  // ===================================================================
+
   // テーマオプション定義（ThemeToggleと同じ構造）
   // $derivedを使用してリアクティブに言語切り替えに対応
   const themeOptions = $derived<Array<{
@@ -40,12 +90,7 @@
       label: m['settings.theme.systemTheme'](),
       icon: ICONS.COMPUTER,
       description: m['settings.theme.systemDescription'](),
-      preview: {
-        background: 'bg-gradient-themed',
-        surface: 'bg-card border-themed',
-        text: 'text-themed',
-        accent: 'text-primary'
-      }
+      preview: systemPreview()
     },
     {
       mode: 'light',
@@ -53,10 +98,10 @@
       icon: ICONS.LIGHT_MODE,
       description: m['settings.theme.lightDescription'](),
       preview: {
-        background: 'bg-gradient-primary',
-        surface: 'bg-card border-themed',
-        text: 'text-themed',
-        accent: 'text-primary'
+        background: 'from-blue-50 to-blue-100',
+        surface: 'bg-white border-gray-200',
+        text: 'text-slate-900',
+        accent: 'bg-blue-500'
       }
     },
     {
@@ -65,10 +110,10 @@
       icon: ICONS.DARK_MODE,
       description: m['settings.theme.darkDescription'](),
       preview: {
-        background: 'bg-gradient-themed',
-        surface: 'bg-card border-themed',
-        text: 'text-themed',
-        accent: 'text-primary'
+        background: 'from-[#0f172a] to-[#0c1220]',
+        surface: 'bg-[#0f172a] border-slate-500',
+        text: 'text-slate-100',
+        accent: 'bg-orange-400'
       }
     },
     {
@@ -77,10 +122,10 @@
       icon: ICONS.CONTRAST,
       description: m['settings.theme.highContrastDescription'](),
       preview: {
-        background: 'bg-gradient-themed',
-        surface: 'bg-card border-themed border-2',
-        text: 'text-themed',
-        accent: 'text-primary'
+        background: 'from-black to-gray-900',
+        surface: 'bg-black border-white border-2',
+        text: 'text-white',
+        accent: 'bg-yellow-400'
       }
     }
   ]);
@@ -245,9 +290,6 @@
             disabled={isLoading}
             onclick={() => handleThemeChange(option.mode)}
           >
-            <!-- プレビュー背景 -->
-            <div class="absolute inset-0 bg-gradient-to-br opacity-10 {option.preview.background}"></div>
-            
             <!-- コンテンツ -->
             <div class="relative z-10">
               <div class="flex items-center justify-between mb-3">
