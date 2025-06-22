@@ -899,7 +899,6 @@
     overflow-x: auto;
     overflow-y: hidden;
     padding: 8px !important; /* 全方向8px均等（上右下左） - デスクトップ最適化（CSS変数より優先） */
-    gap: var(--deck-gap, 16px);
     scroll-behavior: smooth;
     display: flex;
     align-items: stretch; /* 子要素の高さを確実に揃える */
@@ -943,6 +942,8 @@
     height: 100%; /* 親コンテナの高さに合わせる */
     display: flex;
     flex-direction: column;
+    margin-left: 0; /* 全カラムで左マージンなし - タイトなレイアウト */
+    margin-right: 8px; /* 全カラムで右余白8px */
   }
   
   .deck-column-mobile-wrapper {
