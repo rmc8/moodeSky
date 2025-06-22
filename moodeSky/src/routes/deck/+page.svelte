@@ -169,38 +169,6 @@
     
     <!-- メインコンテンツエリア -->
     <main class="flex-1 md:ml-64 mobile-main-content main-content-flex">
-      <!-- デスクトップのみヘッダー表示 -->
-      <header class="hidden md:flex bg-card border-b-2 border-themed shadow-sm p-4 items-center justify-between">
-        <div class="flex items-center gap-4">
-          <h1 class="text-themed text-2xl font-bold">
-            {t('app.name')}
-          </h1>
-        </div>
-        
-        <!-- ユーザー情報 -->
-        <div class="flex items-center gap-3">
-          <Avatar 
-            src={activeAccount.profile.avatar || ''} 
-            displayName={activeAccount.profile.displayName || ''} 
-            handle={activeAccount.profile.handle}
-            size="sm"
-          />
-          <div class="hidden md:block">
-            <p class="text-themed font-medium text-sm">
-              {activeAccount.profile.displayName || activeAccount.profile.handle}
-            </p>
-            <p class="text-themed opacity-70 text-xs">
-              @{activeAccount.profile.handle}
-            </p>
-          </div>
-        </div>
-      </header>
-      
-      <!-- デスクトップ用デッキタブ -->
-      <div class="hidden md:block">
-        <DeckTabs variant="desktop" />
-      </div>
-      
       <!-- デッキコンテンツエリア -->
       <div class="deck-content-wrapper">
         <DeckContainer 

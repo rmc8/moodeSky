@@ -106,25 +106,19 @@
   * {
     box-sizing: border-box;
     /* 全端末でテキスト選択無効化 - スワイプ動作最適化 */
-    -webkit-user-select: none;  /* Safari/Chrome */
-    -moz-user-select: none;     /* Firefox */
-    -ms-user-select: none;      /* IE/Edge */
+    -webkit-user-select: none;  /* WebKit (macOS/iOS) */
     user-select: none;          /* Standard */
   }
 
   /* フォーム要素のテキスト選択は有効化 */
   input, textarea, select {
     -webkit-user-select: text !important;
-    -moz-user-select: text !important; 
-    -ms-user-select: text !important;
     user-select: text !important;
   }
 
   /* 編集可能要素の選択許可 */
   [contenteditable="true"] {
     -webkit-user-select: text !important;
-    -moz-user-select: text !important;
-    -ms-user-select: text !important; 
     user-select: text !important;
   }
 
@@ -390,223 +384,9 @@
 
 /* Utility Layer */
 @layer utilities {
-  /* Standard TailwindCSS Utilities */
-  .gap-4 {
-    gap: 1rem;
-  }
+  /* Custom utilities only - TailwindCSS v4 auto-generates standard utilities */
 
-  .bottom-20 {
-    bottom: 5rem;
-  }
 
-  .top-0 {
-    top: 0;
-  }
-
-  .left-0 {
-    left: 0;
-  }
-
-  .right-0 {
-    right: 0;
-  }
-
-  .w-full {
-    width: 100%;
-  }
-
-  .h-full {
-    height: 100%;
-  }
-
-  .flex {
-    display: flex;
-  }
-
-  .grid {
-    display: grid;
-  }
-
-  .hidden {
-    display: none;
-  }
-
-  .items-center {
-    align-items: center;
-  }
-
-  .justify-center {
-    justify-content: center;
-  }
-
-  .justify-between {
-    justify-content: space-between;
-  }
-
-  .space-x-2 > * + * {
-    margin-left: 0.5rem;
-  }
-
-  .space-y-2 > * + * {
-    margin-top: 0.5rem;
-  }
-
-  .p-2 {
-    padding: 0.5rem;
-  }
-
-  .p-4 {
-    padding: 1rem;
-  }
-
-  .px-4 {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  .py-2 {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-
-  .m-2 {
-    margin: 0.5rem;
-  }
-
-  .mx-auto {
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .rounded {
-    border-radius: 0.25rem;
-  }
-
-  .rounded-lg {
-    border-radius: 0.5rem;
-  }
-
-  .border {
-    border-width: 1px;
-  }
-
-  .fixed {
-    position: fixed;
-  }
-
-  .absolute {
-    position: absolute;
-  }
-
-  .relative {
-    position: relative;
-  }
-
-  .z-10 {
-    z-index: 10;
-  }
-
-  .z-50 {
-    z-index: 50;
-  }
-
-  .opacity-50 {
-    opacity: 0.5;
-  }
-
-  .pointer-events-none {
-    pointer-events: none;
-  }
-
-  .cursor-pointer {
-    cursor: pointer;
-  }
-
-  .select-none {
-    user-select: none;
-  }
-
-  .overflow-hidden {
-    overflow: hidden;
-  }
-
-  .overflow-auto {
-    overflow: auto;
-  }
-
-  .text-sm {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
-
-  .text-base {
-    font-size: 1rem;
-    line-height: 1.5rem;
-  }
-
-  .text-lg {
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-  }
-
-  .font-medium {
-    font-weight: 500;
-  }
-
-  .font-semibold {
-    font-weight: 600;
-  }
-
-  .font-bold {
-    font-weight: 700;
-  }
-
-  .transform {
-    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-  }
-
-  .transition {
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
-  }
-
-  .duration-200 {
-    transition-duration: 200ms;
-  }
-
-  .ease-in-out {
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Responsive utilities */
-  @media (min-width: 768px) {
-    .md\\:flex {
-      display: flex;
-    }
-
-    .md\\:hidden {
-      display: none;
-    }
-
-    .md\\:block {
-      display: block;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .lg\\:flex {
-      display: flex;
-    }
-
-    .lg\\:hidden {
-      display: none;
-    }
-
-    .lg\\:block {
-      display: block;
-    }
-  }
 
   /* Opacity modifier utilities for custom classes */
   .bg-themed\/20 {
@@ -806,12 +586,11 @@
 
   /* デフォルトスクロールバーを完全に隠す */
   .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;     /* Firefox */
+    /* Tauri WebView特化 - IE/Firefox用コード削除 */
   }
   
   .scrollbar-hide::-webkit-scrollbar {
-    display: none;             /* Chrome, Safari, Opera */
+    display: none;             /* WebKit/Chromium (Tauri WebView) */
   }
 
   /* Research-Based Hybrid CSS Variables */
@@ -831,9 +610,7 @@
     --scrollbar-thumb: var(--scrollbar-thumb-bg-light);
     --scrollbar-thumb-hover: var(--scrollbar-thumb-hover-bg-light);
 
-    /* W3C Standard Properties (Firefox compatibility) */
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-    scrollbar-width: thin;
+    /* Tauri WebView特化 - Firefox互換性コード削除 */
 
     /* UX Improvement: Prevent overscroll bounce on macOS */
     overscroll-behavior-y: contain;
@@ -846,8 +623,7 @@
     --scrollbar-thumb: var(--scrollbar-thumb-bg-dark);
     --scrollbar-thumb-hover: var(--scrollbar-thumb-hover-bg-dark);
 
-    /* Update W3C Properties for Dark Mode */
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    /* Tauri WebView特化 - Firefox用ダークモードコード削除 */
   }
 
   /* 
@@ -920,9 +696,8 @@
   }
 
   .scrollbar-standard {
-    /* Uses W3C standard properties for Firefox compatibility */
-    scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    /* Tauri WebView特化 - WebKit/Chromium系のみ対応 */
+    /* Firefox互換性コード削除 */
   }
 
   /* 
