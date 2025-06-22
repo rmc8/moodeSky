@@ -110,13 +110,13 @@
 
 <!-- サイドナビゲーションバー -->
 <nav 
-  class="side-navigation"
+  class="fixed left-0 top-0 bottom-0 z-40 w-64 bg-card border-r border-subtle shadow-lg flex flex-col"
   aria-label={t('navigation.home')}
 >
   <!-- 上部: 投稿ボタン -->
-  <div class="side-navigation__header">
+  <div class="flex-shrink-0 p-4">
     <button
-      class="side-navigation__compose-button"
+      class="w-full bg-primary text-[var(--color-background)] font-semibold px-6 py-4 rounded-xl text-lg transition-all duration-200 ease-out flex items-center justify-center gap-2 hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 focus-ring-subtle focus-visible:outline-2 focus-visible:outline-primary/60 focus-visible:outline-offset-1"
       onclick={handleCompose}
       aria-label={t('navigation.compose')}
     >
@@ -133,16 +133,18 @@
   </div>
   
   <!-- 中央部: デッキタブエリア -->
-  <div class="side-navigation__deck-tabs">
+  <div class="flex-1 min-h-0 flex flex-col">
     <DeckTabBar />
   </div>
   
   <!-- 下部: ナビゲーション項目 -->
-  <div class="side-navigation__footer">
+  <div class="flex-shrink-0 p-4 flex flex-col gap-2">
     {#each navItems as item}
       <button
-        class="side-navigation__nav-button"
-        class:side-navigation__nav-button--active={isActive(item.path)}
+        class="w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 ease-out text-left bg-transparent hover:bg-primary-hover active:scale-98 focus-ring-subtle focus-visible:outline-2 focus-visible:outline-primary-outline focus-visible:outline-offset-1"
+        class:bg-primary-active={isActive(item.path)}
+        class:text-primary={isActive(item.path)}
+        class:text-themed={!isActive(item.path)}
         onclick={() => handleNavigation(item.path, item.id)}
         aria-label={item.label}
         aria-current={isActive(item.path) ? 'page' : undefined}
@@ -154,7 +156,7 @@
           ariaLabel={item.label}
           decorative={true}
         />
-        <span class="side-navigation__nav-label">
+        <span class="text-lg font-medium">
           {item.label}
         </span>
       </button>
@@ -165,7 +167,7 @@
 <!-- カラム追加モーダル -->
 {#if showAddColumnModal}
   <button
-    class="modal-overlay" 
+    class="fixed inset-0 bg-foreground/50 flex items-center justify-center z-50 border-none p-0 m-0 cursor-pointer" 
     onclick={handleCloseAddModal}
     onkeydown={(e) => e.key === 'Escape' && handleCloseAddModal()}
     role="dialog" 
@@ -174,16 +176,16 @@
     tabindex="0"
   >
     <div 
-      class="modal-content" 
+      class="bg-card rounded-xl shadow-2xl max-w-md w-full mx-4 border border-themed/15" 
       onclick={(e) => e.stopPropagation()}
       role="document"
     >
-      <div class="modal-header">
+      <div class="flex items-center justify-between p-6 border-b border-themed/12">
         <h3 class="text-themed text-lg font-semibold">
           {m['deck.addColumn']()}
         </h3>
         <div 
-          class="modal-close"
+          class="w-8 h-8 flex items-center justify-center rounded cursor-pointer transition-colors duration-200 hover:bg-primary/10"
           onclick={handleCloseAddModal}
           onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCloseAddModal()}
           role="button"
@@ -194,21 +196,21 @@
         </div>
       </div>
       
-      <div class="modal-body">
+      <div class="p-6">
         <p class="text-themed opacity-70 mb-4">
           {m['deck.selectColumnType']()}
         </p>
         
         <!-- デモ用ホームタイムラインボタン -->
         <div 
-          class="column-type-button"
+          class="w-full p-4 border border-themed/20 rounded-lg flex items-center gap-3 text-left transition-all duration-200 cursor-pointer hover:border-primary/40 hover:bg-primary/5"
           onclick={handleAddHomeColumn}
           onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleAddHomeColumn()}
           role="button"
           tabindex="0"
         >
           <Icon icon={ICONS.HOME} size="md" color="primary" />
-          <div class="column-type-info">
+          <div class="flex-1">
             <h4 class="text-themed font-medium">{t('navigation.home')}</h4>
             <p class="text-themed opacity-60 text-sm">フォロー中のユーザーの投稿</p>
           </div>
@@ -218,186 +220,3 @@
   </button>
 {/if}
 
-<style>
-  /* SideNavigation ベーススタイル */
-  .side-navigation {
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 40;
-    width: 16rem; /* w-64 */
-    background-color: var(--color-card);
-    border-right: 2px solid rgb(var(--border) / 0.2);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* ヘッダー部分 - 投稿ボタン */
-  .side-navigation__header {
-    flex-shrink: 0;
-    padding: 1rem;
-    border-bottom: 1px solid rgb(var(--border) / 0.2);
-  }
-  
-  .side-navigation__compose-button {
-    width: 100%;
-    background-color: rgb(var(--primary));
-    color: var(--color-background);
-    font-weight: 600;
-    padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
-    font-size: 1.125rem;
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-  
-  .side-navigation__compose-button:hover {
-    background-color: rgb(var(--primary) / 0.9);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  }
-  
-  .side-navigation__compose-button:active {
-    transform: translateY(0);
-  }
-  
-  /* 中央部分 - デッキタブ */
-  .side-navigation__deck-tabs {
-    flex: 1;
-    min-height: 0; /* flexboxの高さ制御 */
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* フッター部分 - ナビゲーション */
-  .side-navigation__footer {
-    flex-shrink: 0;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .side-navigation__nav-button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    border-radius: 0.75rem;
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    text-align: left;
-    background-color: transparent;
-    color: var(--color-foreground);
-  }
-  
-  .side-navigation__nav-button:hover {
-    background-color: rgb(var(--primary) / 0.05);
-  }
-  
-  .side-navigation__nav-button--active {
-    background-color: rgb(var(--primary) / 0.1);
-    color: rgb(var(--primary));
-  }
-  
-  .side-navigation__nav-button:active {
-    transform: scale(0.98);
-  }
-  
-  .side-navigation__nav-label {
-    font-size: 1.125rem;
-    font-weight: 500;
-    color: inherit;
-  }
-  
-  /* フォーカス状態 */
-  .side-navigation__compose-button:focus-visible,
-  .side-navigation__nav-button:focus-visible {
-    outline: 2px solid rgb(var(--primary) / 0.6);
-    outline-offset: 2px;
-  }
-  
-  /* モーダル */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgb(var(--foreground) / 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    border: none;
-    padding: 0;
-    margin: 0;
-    cursor: pointer;
-  }
-  
-  .modal-content {
-    background-color: var(--color-card);
-    border-radius: 0.75rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    max-width: 28rem;
-    width: 100%;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    border: 1px solid rgb(var(--border) / 0.2);
-  }
-  
-  .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem;
-    border-bottom: 1px solid rgb(var(--border) / 0.2);
-  }
-  
-  .modal-close {
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    transition: background-color 200ms;
-  }
-  
-  .modal-close:hover {
-    background-color: rgb(var(--primary) / 0.1);
-  }
-  
-  .modal-body {
-    padding: 1.5rem;
-  }
-  
-  /* カラムタイプボタン */
-  .column-type-button {
-    width: 100%;
-    padding: 1rem;
-    border: 1px solid rgb(var(--border) / 0.2);
-    border-radius: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    text-align: left;
-    transition: all 200ms;
-    cursor: pointer;
-  }
-  
-  .column-type-button:hover {
-    border-color: rgb(var(--primary) / 0.4);
-    background-color: rgb(var(--primary) / 0.05);
-  }
-  
-  .column-type-info {
-    flex: 1;
-  }
-</style>
