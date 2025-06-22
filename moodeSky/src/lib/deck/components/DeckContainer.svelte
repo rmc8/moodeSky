@@ -25,16 +25,21 @@
   interface Props {
     accountId: string;
     className?: string;
+    showAddDeckModal?: boolean;
+    onCloseAddDeckModal?: () => void;
   }
 
-  const { accountId, className = '' }: Props = $props();
+  const { accountId, className = '', showAddDeckModal: externalShowAddDeckModal = false, onCloseAddDeckModal }: Props = $props();
 
   // ===================================================================
   // 状態管理
   // ===================================================================
 
   let isInitializing = $state(true);
-  let showAddDeckModal = $state(false);
+  
+  // モーダル状態は外部プロップまたは内部状態を使用
+  let internalShowAddDeckModal = $state(false);
+  const showAddDeckModal = $derived(externalShowAddDeckModal || internalShowAddDeckModal);
   
   // レスポンシブ状態管理
   let isMobile = $state(false);
@@ -144,14 +149,20 @@
    * Add Deck モーダルを開く
    */
   function handleAddDeck() {
-    showAddDeckModal = true;
+    internalShowAddDeckModal = true;
   }
 
   /**
    * Add Deck モーダルを閉じる
    */
   function handleCloseAddDeckModal() {
-    showAddDeckModal = false;
+    if (onCloseAddDeckModal) {
+      // 外部のコールバックが提供されている場合は使用
+      onCloseAddDeckModal();
+    } else {
+      // 内部状態の場合は直接操作
+      internalShowAddDeckModal = false;
+    }
   }
 
   /**

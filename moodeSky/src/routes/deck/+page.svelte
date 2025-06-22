@@ -19,6 +19,17 @@
   let isLoading = $state(true);
   let errorMessage = $state('');
   
+  // Add Deck モーダル状態管理
+  let showAddDeckModal = $state(false);
+  
+  function handleOpenAddDeckModal() {
+    showAddDeckModal = true;
+  }
+  
+  function handleCloseAddDeckModal() {
+    showAddDeckModal = false;
+  }
+  
   // デバッグ用の状態監視
   $effect(() => {
     console.log('🔍 [DEBUG] State change - isLoading:', isLoading);
@@ -162,7 +173,7 @@
   {console.log('🔍 [DEBUG] Rendering main deck layout with account:', activeAccount)}
   <div class="h-screen flex flex-col bg-themed">
     <!-- ナビゲーション（レスポンシブ制御は Navigation 内部で実施） -->
-    <Navigation {currentPath} accountId={activeAccount.profile.handle} />
+    <Navigation {currentPath} accountId={activeAccount.profile.handle} onAddDeck={handleOpenAddDeckModal} />
     
     <!-- モバイル用デッキタブ（画面上部） -->
     <DeckTabs variant="mobile" class="md:hidden" />
@@ -174,6 +185,8 @@
         <DeckContainer 
           accountId={activeAccount.profile.handle}
           className="h-full"
+          {showAddDeckModal}
+          onCloseAddDeckModal={handleCloseAddDeckModal}
         />
       </div>
     </main>

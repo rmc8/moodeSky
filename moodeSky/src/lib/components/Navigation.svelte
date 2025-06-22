@@ -14,7 +14,11 @@
   import MobileDeckTabs from './deck/MobileDeckTabs.svelte';
   
   // $propsを使用してプロップを受け取る（Svelte 5 runes mode）
-  const { currentPath = '', accountId = '' } = $props<{ currentPath?: string; accountId?: string }>();
+  const { currentPath = '', accountId = '', onAddDeck } = $props<{ 
+    currentPath?: string; 
+    accountId?: string; 
+    onAddDeck?: () => void;
+  }>();
   
   // SSR対応: 初期値をデスクトップサイズに設定（表示遅延を防ぐ）
   // ブラウザ環境では実際の幅をチェック、サーバー環境ではデスクトップを仮定
@@ -48,7 +52,7 @@
 {#if isDesktop}
   <!-- デスクトップ・タブレット用サイドナビゲーション (768px以上) -->
   {console.log('🔍 [Navigation] Rendering desktop navigation (SideNavigation)')}
-  <SideNavigation {currentPath} {accountId} />
+  <SideNavigation {currentPath} {accountId} {onAddDeck} />
 {:else}
   <!-- モバイル用ナビゲーション (768px未満) -->
   {console.log('🔍 [Navigation] Rendering mobile navigation')}
@@ -58,5 +62,5 @@
   {/if}
   
   <!-- モバイル用ボトムナビゲーション -->
-  <BottomNavigation {currentPath} {accountId} />
+  <BottomNavigation {currentPath} {accountId} {onAddDeck} />
 {/if}
