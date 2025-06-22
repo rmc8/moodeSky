@@ -21,6 +21,58 @@
   let successMessage = $state('');
   let errorMessage = $state('');
 
+  // ===================================================================
+  // システム色設定検出
+  // ===================================================================
+
+  // システムがダークモードかどうかを検出
+  let isSystemDarkMode = $state(false);
+
+  // システム色設定の初期化と監視
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      isSystemDarkMode = mediaQuery.matches;
+      
+      const handleChange = (e: MediaQueryListEvent) => {
+        isSystemDarkMode = e.matches;
+      };
+      
+      mediaQuery.addEventListener('change', handleChange);
+      
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }
+  });
+
+  // システムテーマのプレビュー色を動的に決定
+  const systemPreview = $derived(() => {
+    if (isSystemDarkMode) {
+      // システムがダークモード -> ダークテーマの色
+      return {
+        background: 'from-[#0f172a] to-[#0c1220]',
+        surface: 'bg-[#0f172a] border-slate-500',
+        text: 'text-slate-100',
+        textColor: '#f1f5f9',  // slate-100の実際の色値
+        accent: 'bg-orange-400'
+      };
+    } else {
+      // システムがライトモード -> ライトテーマの色
+      return {
+        background: 'from-blue-50 to-blue-100',
+        surface: 'bg-white border-gray-200',
+        text: 'text-slate-900',
+        textColor: '#0f172a',  // slate-900の実際の色値
+        accent: 'bg-blue-500'
+      };
+    }
+  });
+
+  // ===================================================================
+  // テーマオプション定義
+  // ===================================================================
+
   // テーマオプション定義（ThemeToggleと同じ構造）
   // $derivedを使用してリアクティブに言語切り替えに対応
   const themeOptions = $derived<Array<{
@@ -32,6 +84,7 @@
       background: string;
       surface: string;
       text: string;
+      textColor: string;
       accent: string;
     };
   }>>([
@@ -40,12 +93,7 @@
       label: m['settings.theme.systemTheme'](),
       icon: ICONS.COMPUTER,
       description: m['settings.theme.systemDescription'](),
-      preview: {
-        background: 'bg-gradient-themed',
-        surface: 'bg-card border-themed',
-        text: 'text-themed',
-        accent: 'text-primary'
-      }
+      preview: systemPreview()
     },
     {
       mode: 'light',
@@ -53,10 +101,11 @@
       icon: ICONS.LIGHT_MODE,
       description: m['settings.theme.lightDescription'](),
       preview: {
-        background: 'bg-gradient-primary',
-        surface: 'bg-card border-themed',
-        text: 'text-themed',
-        accent: 'text-primary'
+        background: 'from-blue-50 to-blue-100',
+        surface: 'bg-white border-gray-200',
+        text: 'text-slate-900',
+        textColor: '#0f172a',  // slate-900
+        accent: 'bg-blue-500'
       }
     },
     {
@@ -65,10 +114,11 @@
       icon: ICONS.DARK_MODE,
       description: m['settings.theme.darkDescription'](),
       preview: {
-        background: 'bg-gradient-themed',
-        surface: 'bg-card border-themed',
-        text: 'text-themed',
-        accent: 'text-primary'
+        background: 'from-[#0f172a] to-[#0c1220]',
+        surface: 'bg-[#0f172a] border-slate-500',
+        text: 'text-slate-100',
+        textColor: '#f1f5f9',  // slate-100
+        accent: 'bg-orange-400'
       }
     },
     {
@@ -77,10 +127,11 @@
       icon: ICONS.CONTRAST,
       description: m['settings.theme.highContrastDescription'](),
       preview: {
-        background: 'bg-gradient-themed',
-        surface: 'bg-card border-themed border-2',
-        text: 'text-themed',
-        accent: 'text-primary'
+        background: 'from-black to-gray-900',
+        surface: 'bg-black border-white border-2',
+        text: 'text-white',
+        textColor: '#ffffff',  // white
+        accent: 'bg-yellow-400'
       }
     }
   ]);
@@ -245,9 +296,6 @@
             disabled={isLoading}
             onclick={() => handleThemeChange(option.mode)}
           >
-            <!-- プレビュー背景 -->
-            <div class="absolute inset-0 bg-gradient-to-br opacity-10 {option.preview.background}"></div>
-            
             <!-- コンテンツ -->
             <div class="relative z-10">
               <div class="flex items-center justify-between mb-3">
@@ -271,12 +319,12 @@
               
               <!-- プレビューカード -->
               <div class="rounded border p-2 {option.preview.surface}">
-                <div class="text-xs {option.preview.text}">
+                <div class="text-xs">
                   <div class="flex items-center gap-2 mb-1">
                     <div class="w-2 h-2 rounded-full {option.preview.accent}"></div>
-                    <span class="font-medium">{m['settings.theme.sampleText']()}</span>
+                    <span class="font-medium preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color)">{m['settings.theme.sampleText']()}</span>
                   </div>
-                  <div class="opacity-70">{option.description}</div>
+                  <div class="preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color); opacity: 0.7">{option.description}</div>
                 </div>
               </div>
             </div>

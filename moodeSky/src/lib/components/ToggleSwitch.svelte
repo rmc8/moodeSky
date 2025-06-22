@@ -107,7 +107,9 @@
     >
       <!-- サム（丸い部分） -->
       <div 
-        class="{config.thumb} bg-white rounded-full shadow-md transition-all duration-300 absolute {config.top}"
+        class="{config.thumb} rounded-full shadow-md transition-all duration-300 absolute {config.top}"
+        class:bg-white={!checked}
+        class:bg-[var(--color-background)]={checked}
         class:shadow-lg={checked}
         style="transform: translateX({thumbPosition()}px);"
       ></div>

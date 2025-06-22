@@ -126,7 +126,7 @@
         color="themed"
         ariaLabel={t('navigation.compose')}
         decorative={true}
-        class="text-white"
+        class="!text-[var(--color-background)]"
       />
       <span>{t('navigation.post')}</span>
     </button>
@@ -244,7 +244,7 @@
   .side-navigation__compose-button {
     width: 100%;
     background-color: rgb(var(--primary));
-    color: white;
+    color: var(--color-background);
     font-weight: 600;
     padding: 1rem 1.5rem;
     border-radius: 0.75rem;

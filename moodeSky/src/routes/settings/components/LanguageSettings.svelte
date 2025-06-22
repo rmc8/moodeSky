@@ -293,7 +293,7 @@
             disabled={isLoading || i18nStore.currentLanguage === i18nStore.systemLanguage}
             onclick={handleResetToSystemLanguage}
           >
-            <Icon icon={ICONS.COMPUTER} size="sm" color="white" />
+            <Icon icon={ICONS.COMPUTER} size="sm" color="themed" class="!text-[var(--color-background)]" />
             {m['settings.language.resetToSystem']()}
           </button>
         </div>
