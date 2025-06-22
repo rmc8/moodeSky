@@ -51,20 +51,20 @@
     if (isSystemDarkMode) {
       // システムがダークモード -> ダークテーマの色
       return {
-        background: 'from-[#0f172a] to-[#0c1220]',
-        surface: 'bg-[#0f172a] border-slate-500',
-        text: 'text-slate-100',
-        textColor: '#f1f5f9',  // slate-100の実際の色値
-        accent: 'bg-orange-400'
+        background: 'bg-gradient-themed',
+        surface: 'bg-card border-themed',
+        text: 'text-themed',
+        textColor: 'var(--color-foreground)',
+        accent: 'bg-primary'
       };
     } else {
       // システムがライトモード -> ライトテーマの色
       return {
-        background: 'from-blue-50 to-blue-100',
-        surface: 'bg-white border-gray-200',
-        text: 'text-slate-900',
-        textColor: '#0f172a',  // slate-900の実際の色値
-        accent: 'bg-blue-500'
+        background: 'bg-gradient-themed',
+        surface: 'bg-card border-themed',
+        text: 'text-themed',
+        textColor: 'var(--color-foreground)',
+        accent: 'bg-primary'
       };
     }
   });
@@ -101,11 +101,11 @@
       icon: ICONS.LIGHT_MODE,
       description: m['settings.theme.lightDescription'](),
       preview: {
-        background: 'from-blue-50 to-blue-100',
-        surface: 'bg-white border-gray-200',
-        text: 'text-slate-900',
-        textColor: '#0f172a',  // slate-900
-        accent: 'bg-blue-500'
+        background: 'bg-gradient-primary',
+        surface: 'bg-card border-themed',
+        text: 'text-themed',
+        textColor: 'var(--color-foreground)',
+        accent: 'bg-primary'
       }
     },
     {
@@ -114,11 +114,11 @@
       icon: ICONS.DARK_MODE,
       description: m['settings.theme.darkDescription'](),
       preview: {
-        background: 'from-[#0f172a] to-[#0c1220]',
-        surface: 'bg-[#0f172a] border-slate-500',
-        text: 'text-slate-100',
-        textColor: '#f1f5f9',  // slate-100
-        accent: 'bg-orange-400'
+        background: 'bg-gradient-themed',
+        surface: 'bg-card border-themed',
+        text: 'text-themed',
+        textColor: 'var(--color-foreground)',
+        accent: 'bg-primary'
       }
     },
     {
@@ -127,11 +127,11 @@
       icon: ICONS.CONTRAST,
       description: m['settings.theme.highContrastDescription'](),
       preview: {
-        background: 'from-black to-gray-900',
-        surface: 'bg-black border-white border-2',
-        text: 'text-white',
-        textColor: '#ffffff',  // white
-        accent: 'bg-yellow-400'
+        background: 'bg-gradient-themed',
+        surface: 'bg-card border-themed border-2',
+        text: 'text-themed',
+        textColor: 'var(--color-foreground)',
+        accent: 'bg-primary'
       }
     }
   ]);
