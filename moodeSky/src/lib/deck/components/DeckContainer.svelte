@@ -899,7 +899,6 @@
     overflow-x: auto;
     overflow-y: hidden;
     padding: 8px !important; /* 全方向8px均等（上右下左） - デスクトップ最適化（CSS変数より優先） */
-    gap: var(--deck-gap, 16px);
     scroll-behavior: smooth;
     display: flex;
     align-items: stretch; /* 子要素の高さを確実に揃える */
@@ -943,6 +942,12 @@
     height: 100%; /* 親コンテナの高さに合わせる */
     display: flex;
     flex-direction: column;
+    margin-left: var(--deck-gap, 16px); /* 2つ目以降のカラムに左マージン */
+  }
+
+  /* 最初のカラムは左マージンなし */
+  .deck-column-wrapper:first-child {
+    margin-left: 0;
   }
   
   .deck-column-mobile-wrapper {
