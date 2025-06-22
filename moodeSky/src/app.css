@@ -172,9 +172,9 @@
     outline: 2px solid rgb(var(--accent)) !important;
   }
 
-  /* ハイコントラスト時のhover/focus状態での全子要素色修正 */
-  .high-contrast button:hover *,
-  .high-contrast button:focus *,
+  /* ハイコントラスト時のhover/focus状態での全子要素色修正 (プレビューテキスト除く) */
+  .high-contrast button:hover *:not(.preview-text),
+  .high-contrast button:focus *:not(.preview-text),
   .high-contrast button:hover svg,
   .high-contrast button:focus svg {
     color: rgb(var(--background)) !important;
@@ -187,6 +187,12 @@
   .high-contrast button:hover .text-muted,
   .high-contrast button:focus .text-muted {
     color: rgb(var(--background)) !important;
+  }
+
+  /* テーマプレビューテキストの保護 - CSS変数で確実に固定 */
+  .high-contrast button:hover .preview-text,
+  .high-contrast button:focus .preview-text {
+    color: var(--preview-color) !important;
   }
 
 
