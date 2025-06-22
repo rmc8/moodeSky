@@ -97,7 +97,7 @@
       <h2 class="text-error text-2xl font-semibold mb-4">{t('common.error')}</h2>
       <p class="text-error mb-8">{errorMessage}</p>
       <button 
-        class="bg-error hover:bg-error/80 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+        class="bg-error hover:bg-error/80 text-[var(--color-background)] font-semibold py-3 px-6 rounded-lg transition-colors"
         onclick={() => location.reload()}
       >
         {t('common.retry')}
@@ -128,34 +128,34 @@
             <button
               class="px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
               class:bg-primary={activeSection === 'theme'}
-              class:text-white={activeSection === 'theme'}
+              class:text-[var(--color-background)]={activeSection === 'theme'}
               class:text-themed={activeSection !== 'theme'}
               class:hover:bg-muted={activeSection !== 'theme'}
               onclick={() => switchSection('theme')}
             >
-              <Icon icon={ICONS.PALETTE} size="sm" color={activeSection === 'theme' ? 'white' : 'themed'} />
+              <Icon icon={ICONS.PALETTE} size="sm" class={activeSection === 'theme' ? '!text-[var(--color-background)]' : 'text-themed'} />
               {t('settings.tabs.theme')}
             </button>
             <button
               class="px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
               class:bg-primary={activeSection === 'language'}
-              class:text-white={activeSection === 'language'}
+              class:text-[var(--color-background)]={activeSection === 'language'}
               class:text-themed={activeSection !== 'language'}
               class:hover:bg-muted={activeSection !== 'language'}
               onclick={() => switchSection('language')}
             >
-              <Icon icon={ICONS.LANGUAGE} size="sm" color={activeSection === 'language' ? 'white' : 'themed'} />
+              <Icon icon={ICONS.LANGUAGE} size="sm" class={activeSection === 'language' ? '!text-[var(--color-background)]' : 'text-themed'} />
               {t('settings.tabs.language')}
             </button>
             <button
               class="px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
               class:bg-primary={activeSection === 'account'}
-              class:text-white={activeSection === 'account'}
+              class:text-[var(--color-background)]={activeSection === 'account'}
               class:text-themed={activeSection !== 'account'}
               class:hover:bg-muted={activeSection !== 'account'}
               onclick={() => switchSection('account')}
             >
-              <Icon icon={ICONS.PERSON} size="sm" color={activeSection === 'account' ? 'white' : 'themed'} />
+              <Icon icon={ICONS.PERSON} size="sm" class={activeSection === 'account' ? '!text-[var(--color-background)]' : 'text-themed'} />
               {t('settings.tabs.account')}
             </button>
             <button

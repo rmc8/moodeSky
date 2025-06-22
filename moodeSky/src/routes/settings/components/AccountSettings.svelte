@@ -238,7 +238,7 @@
             disabled={isLoading || isMaxAccountsReached()}
             onclick={addAccount}
           >
-            <Icon icon={ICONS.ADD} size="sm" color="white" />
+            <Icon icon={ICONS.ADD} size="sm" color="themed" class="!text-[var(--color-background)]" />
             {m['settings.account.addAccount']()}
           </button>
         </div>
@@ -370,7 +370,7 @@
             {m['common.cancel']()}
           </button>
           <button
-            class="px-4 py-2 bg-error text-white rounded-lg hover:bg-error/80 transition-colors"
+            class="px-4 py-2 bg-error text-[var(--color-background)] rounded-lg hover:bg-error/80 transition-colors"
             onclick={logoutAll}
             disabled={isLoading}
           >
