@@ -51,12 +51,12 @@
 
 <!-- デッキタブバー -->
 <div class="flex-1 flex flex-col min-h-0 bg-card">
-  <div class="flex-1 overflow-y-auto p-2 flex flex-col gap-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/30 hover:scrollbar-thumb-primary/50">
+  <div class="flex-1 overflow-y-auto p-2 flex flex-col gap-1 scrollbar-professional">
     {#if columns.length > 0}
       <!-- 実際のカラムタブ表示 -->
       {#each columns as column}
         <button
-          class="w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ease-out text-left bg-card text-themed border border-transparent hover:bg-primary-hover hover:border-primary-border active:scale-98 focus-visible:outline-2 focus-visible:outline-primary-outline focus-visible:outline-offset-2"
+          class="w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ease-out text-left bg-card text-themed border border-transparent hover:bg-primary-hover hover:border-primary-border active:scale-98 focus-ring-subtle focus-visible:outline-2 focus-visible:outline-primary-outline focus-visible:outline-offset-1"
           class:bg-primary-active={column.id === activeColumnId}
           class:border-primary-border-active={column.id === activeColumnId}
           class:text-primary={column.id === activeColumnId}

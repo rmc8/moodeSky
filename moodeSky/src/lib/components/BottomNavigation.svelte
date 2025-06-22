@@ -100,13 +100,13 @@
 
 <!-- ボトムナビゲーションバー -->
 <nav 
-  class="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-themed/10 shadow-lg"
+  class="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-subtle shadow-lg"
   aria-label={t('navigation.home')}
 >
   <div class="flex justify-around items-center py-0.5 px-2">
     {#each navItems as item}
       <button
-        class="flex flex-col items-center justify-center px-1 py-1.5 rounded-lg transition-all duration-200 active:scale-95 min-w-0 flex-1 focus-visible:outline-2 focus-visible:outline-primary/60 focus-visible:outline-offset-2"
+        class="flex flex-col items-center justify-center px-1 py-1.5 rounded-lg transition-all duration-200 active:scale-95 min-w-0 flex-1 focus-ring-subtle focus-visible:outline-2 focus-visible:outline-primary/60 focus-visible:outline-offset-1"
         class:bg-primary-active={isActive(item.path)}
         class:text-primary={isActive(item.path)}
         class:text-themed={!isActive(item.path)}

@@ -49,7 +49,7 @@
       <!-- 実際のカラムタブ表示 -->
       {#each columns as column}
         <button
-          class="flex-shrink-0 flex items-center justify-center w-9 h-9 mx-1 rounded-xl transition-all duration-200 ease-out active:scale-90 focus-visible:outline-2 focus-visible:outline-primary/60 focus-visible:outline-offset-2"
+          class="flex-shrink-0 flex items-center justify-center w-9 h-9 mx-1 rounded-xl transition-all duration-200 ease-out active:scale-90 focus-ring-subtle focus-visible:outline-2 focus-visible:outline-primary/60 focus-visible:outline-offset-1"
           class:bg-primary-active={column.id === activeColumnId}
           class:shadow-sm={column.id === activeColumnId}
           class:scale-105={column.id === activeColumnId}

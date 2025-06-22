@@ -703,6 +703,15 @@
   --tw-ring-offset-width: 1px;
 }
 
+/* WebKit角丸レンダリング最適化 - 全角丸要素に適用 */
+:global(.rounded),
+:global(.rounded-lg),
+:global(.rounded-xl) {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
 .focus-ring-subtle {
   --tw-ring-offset-width: 1px;
   --tw-ring-width: 2px;

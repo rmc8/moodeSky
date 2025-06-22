@@ -294,12 +294,7 @@
 <style>
   /* DeckColumn TailwindCSS v4移行完了 - 大幅CSS削減達成 */
   
-  /* WebKit角丸レンダリング最適化 */
-  :global(.rounded-lg) {
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    transform: translateZ(0);
-  }
+  /* WebKit角丸レンダリング最適化は app.css に移動済み */
   
   /* モバイル特化調整: レスポンシブ高さ・幅制御 */
   @media (max-width: 767px) {

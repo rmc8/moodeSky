@@ -100,7 +100,7 @@
     
     <!-- トラック -->
     <div 
-      class="{config.track} rounded-full transition-colors duration-300 relative focus-within:outline focus-within:outline-2 focus-within:outline-primary focus-within:outline-offset-2"
+      class="{config.track} rounded-full transition-colors duration-300 relative focus-ring-subtle focus-within:outline focus-within:outline-2 focus-within:outline-primary focus-within:outline-offset-1"
       class:bg-primary={checked}
       class:opacity-50={disabled}
       style="background-color: {checked ? 'rgb(var(--primary))' : 'rgb(var(--foreground) / 0.2)'};"
