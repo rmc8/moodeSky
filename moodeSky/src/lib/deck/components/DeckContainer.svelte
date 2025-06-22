@@ -646,37 +646,37 @@
 </script>
 
 <!-- デッキコンテナ -->
-<div class="deck-container {className}" class:deck-container--loading={isInitializing}>
+<div class="w-full h-full relative flex flex-col flex-1 min-h-0 box-border overflow-hidden {className}" class:loading-overflow-hidden={isInitializing}>
   
   {#if isInitializing}
     <!-- 初期化中 -->
-    <div class="deck-loading">
-      <div class="deck-loading__spinner">
+    <div class="flex flex-col items-center justify-center h-full gap-4">
+      <div class="animate-spin">
         <Icon icon={ICONS.LOADER} size="lg" color="primary" />
       </div>
-      <p class="deck-loading__text text-themed opacity-70">
+      <p class="text-themed opacity-70">
         {m['deck.loading']()}
       </p>
     </div>
     
   {:else if deckStore.isEmpty}
     <!-- 空デッキ状態 -->
-    <div class="deck-empty">
-      <div class="deck-empty__content">
-        <div class="deck-empty__icon">
+    <div class="flex items-center justify-center h-full p-8">
+      <div class="text-center max-w-md">
+        <div class="mb-6 opacity-40">
           <Icon icon={ICONS.COLUMNS} size="xl" color="themed" />
         </div>
         
-        <h2 class="deck-empty__title text-themed">
+        <h2 class="text-themed text-2xl font-bold mb-4">
           {m['deck.empty.title']()}
         </h2>
         
-        <p class="deck-empty__description text-themed opacity-70">
+        <p class="text-themed opacity-70 mb-8 leading-relaxed">
           {m['deck.empty.description']()}
         </p>
         
         <button 
-          class="deck-empty__button button-primary"
+          class="button-primary inline-flex items-center gap-2"
           onclick={handleAddColumn}
         >
           <Icon icon={ICONS.ADD} size="sm" color="themed" />
@@ -717,14 +717,14 @@
         </div>
       </div>
       
-      <div class="deck-mobile-container" bind:this={mobileDeckElement}>
+      <div class="w-full flex-1 overflow-hidden relative min-h-0 box-border p-0 m-0 max-w-full" bind:this={mobileDeckElement}>
         <div 
-          class="deck-columns-track"
-          style="width: {deckStore.columns.length * 100}%; transform: translateX(-{activeColumnIndex * 100 / deckStore.columns.length}%)"
+          class="flex h-full transition-transform duration-150 ease-out will-change-transform"
+          style="width: {deckStore.columns.length * 100}%; transform: translateX(-{activeColumnIndex * 100 / deckStore.columns.length}%); transform-style: preserve-3d;"
         >
           {#each deckStore.columns as column, index (column.id)}
             {console.log('🚨 [RENDER DEBUG] Rendering MOBILE column:', column.id, column.settings.title)}
-            <div class="deck-column-mobile-wrapper">
+            <div class="w-full h-full flex-shrink-0 snap-start min-w-full max-w-full box-border overflow-hidden">
               <DeckColumn
                 {column}
                 {index}
@@ -737,11 +737,11 @@
     {:else}
       <!-- デスクトップ版: 横並び固定幅 -->
       {console.log('🚨 [RENDER DEBUG] Rendering DESKTOP deck')}
-      <div class="deck-desktop-container scrollbar-professional" bind:this={desktopDeckElement}>
+      <div class="h-full w-full flex-1 overflow-x-auto overflow-y-hidden p-2 scroll-smooth flex items-stretch min-h-0 box-border scrollbar-professional" bind:this={desktopDeckElement}>
         {#each deckStore.columns as column, index (column.id)}
           {console.log('🚨 [RENDER DEBUG] Rendering DESKTOP column:', column.id, column.settings.title)}
           <div 
-            class="flex-shrink-0 deck-column-wrapper" 
+            class="flex-shrink-0 h-full flex flex-col ml-0 mr-2" 
             style="width: {column.settings.width ? COLUMN_WIDTHS[column.settings.width].width : COLUMN_WIDTHS.medium.width}px"
           >
             <DeckColumn
