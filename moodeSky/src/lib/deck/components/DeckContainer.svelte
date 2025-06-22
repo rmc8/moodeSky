@@ -382,8 +382,8 @@
     } catch (error) {
       console.error('🚨 [DeckContainer] Desktop features initialization failed:', error);
       console.error('🚨 [DeckContainer] Error details:', {
-        message: error.message,
-        stack: error.stack,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
         elementExists: !!desktopDeckElement,
         columnsLength: deckStore.columns.length
       });
@@ -514,7 +514,7 @@
       clearInterval(stateMonitorInterval);
     }
     
-    stateMonitorInterval = setInterval(() => {
+    stateMonitorInterval = Number(setInterval(() => {
       if (swipeDetector && columnNavigator) {
         updateDebugState();
         
@@ -535,7 +535,7 @@
           updateDebugState();
         }
       }
-    }, 250); // 超高頻度での監視
+    }, 250)); // 超高頻度での監視
     
     console.log('🔍 [Monitor] State monitoring started');
   }

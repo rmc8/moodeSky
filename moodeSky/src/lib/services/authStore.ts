@@ -9,6 +9,7 @@ import type {
   SessionEventHandler,
   STORE_KEYS
 } from '../types/auth.js';
+import { profileService } from './profileService.js';
 
 /**
  * Tauri Store Plugin AuthService
@@ -126,6 +127,7 @@ export class AuthService {
 
   /**
    * アカウントを追加・更新（最大100アカウント制限）
+   * プロフィール統計情報も自動取得・保存
    */
   async saveAccount(
     service: string,
@@ -135,6 +137,9 @@ export class AuthService {
       handle: string;
       displayName?: string;
       avatar?: string;
+      followersCount?: number;
+      followingCount?: number;
+      postsCount?: number;
     }
   ): Promise<AuthResult<Account>> {
     try {
@@ -149,9 +154,38 @@ export class AuthService {
 
       const authStore = storeResult.data!;
       
+      // 統計情報を自動取得（プロフィールに含まれていない場合）
+      let enhancedProfile = { ...profile };
+      if (!profile.followersCount && !profile.followingCount && !profile.postsCount) {
+        console.log('📊 [AuthService] 統計情報が不足しています。自動取得を開始...');
+        try {
+          const statsResult = await profileService.getProfileStats(
+            profile.did,
+            session.accessJwt,
+            service
+          );
+          
+          if (statsResult.success && statsResult.data) {
+            enhancedProfile = {
+              ...profile,
+              followersCount: statsResult.data.followersCount,
+              followingCount: statsResult.data.followingCount,
+              postsCount: statsResult.data.postsCount,
+            };
+            console.log('📊 [AuthService] 統計情報の自動取得に成功:', statsResult.data);
+          } else {
+            console.warn('📊 [AuthService] 統計情報の取得に失敗:', statsResult.error);
+            // 統計情報の取得失敗はエラーとしない（基本プロフィールの保存は継続）
+          }
+        } catch (error) {
+          console.warn('📊 [AuthService] 統計情報取得中にエラー:', error);
+          // 統計情報の取得エラーは基本プロフィールの保存をブロックしない
+        }
+      }
+      
       // 既存アカウントを検索（DIDで一意性を判定）
       const existingAccountIndex = authStore.accounts.findIndex(
-        (account) => account.profile.did === profile.did
+        (account) => account.profile.did === enhancedProfile.did
       );
 
       const now = new Date().toISOString();
@@ -163,7 +197,7 @@ export class AuthService {
           ...authStore.accounts[existingAccountIndex],
           service,
           session,
-          profile,
+          profile: enhancedProfile,
           lastAccessAt: now,
         };
         authStore.accounts[existingAccountIndex] = account;
@@ -184,7 +218,7 @@ export class AuthService {
           id: this.generateId(),
           service,
           session,
-          profile,
+          profile: enhancedProfile,
           createdAt: now,
           lastAccessAt: now,
         };
@@ -621,6 +655,101 @@ export class AuthService {
   }
 
   /**
+   * セッション復元・更新
+   * 既存セッションを検証し、統計情報も更新
+   */
+  async refreshSession(accountId?: string): Promise<AuthResult<Account | Account[]>> {
+    try {
+      // 特定のアカウントまたは全アカウントを対象とする
+      const accountsResult = accountId 
+        ? await this.getAccountById(accountId)
+        : await this.getAllAccounts();
+      
+      if (!accountsResult.success) {
+        return {
+          success: false,
+          error: accountsResult.error,
+        } as AuthResult<Account | Account[]>;
+      }
+
+      const accounts = Array.isArray(accountsResult.data) 
+        ? accountsResult.data 
+        : accountsResult.data ? [accountsResult.data] : [];
+
+      if (accounts.length === 0) {
+        return {
+          success: true,
+          data: accountId ? null : [],
+        } as AuthResult<Account | Account[]>;
+      }
+
+      const { BskyAgent } = await import('@atproto/api');
+      const refreshedAccounts: Account[] = [];
+
+      for (const account of accounts) {
+        try {
+          console.log(`🔄 [AuthService] セッション復元中: ${account.profile.handle}`);
+          
+          // BskyAgentでセッション復元
+          const agent = new BskyAgent({ service: account.service });
+          
+          // resumeSessionを使用してセッション復元
+          await agent.resumeSession(account.session);
+          
+          // プロフィール情報と統計情報を最新取得
+          const profileResult = await agent.getProfile({
+            actor: account.profile.did,
+          });
+
+          let updatedProfile = account.profile;
+          if (profileResult.success) {
+            updatedProfile = {
+              ...account.profile,
+              displayName: profileResult.data.displayName || account.profile.displayName,
+              avatar: profileResult.data.avatar || account.profile.avatar,
+              followersCount: profileResult.data.followersCount,
+              followingCount: profileResult.data.followsCount,
+              postsCount: profileResult.data.postsCount,
+            };
+            console.log(`📊 [AuthService] 統計情報更新: ${account.profile.handle}`, {
+              followers: profileResult.data.followersCount,
+              following: profileResult.data.followsCount,
+              posts: profileResult.data.postsCount,
+            });
+          }
+
+          // アカウント情報を更新保存（統計情報の自動取得はスキップ）
+          const saveResult = await this.saveAccount(
+            account.service,
+            agent.session!,
+            updatedProfile
+          );
+
+          if (saveResult.success && saveResult.data) {
+            refreshedAccounts.push(saveResult.data);
+          }
+        } catch (error) {
+          console.warn(`⚠️ [AuthService] セッション復元に失敗: ${account.profile.handle}`, error);
+          // 個別アカウントの復元失敗は全体を停止しない
+          refreshedAccounts.push(account);
+        }
+      }
+
+      const result = accountId ? refreshedAccounts[0] || null : refreshedAccounts;
+      return { success: true, data: result } as AuthResult<Account | Account[]>;
+    } catch (error) {
+      console.error('🔄 [AuthService] セッション復元処理中にエラー:', error);
+      return {
+        success: false,
+        error: {
+          type: 'SESSION_EXPIRED',
+          message: `Failed to refresh session: ${error}`,
+        },
+      };
+    }
+  }
+
+  /**
    * アカウント再認証
    * 既存のhandleを使用してパスワードのみで認証を更新
    */
@@ -676,6 +805,10 @@ export class AuthService {
           handle: session.handle,
           displayName: profileResult.data.displayName || undefined,
           avatar: profileResult.data.avatar || undefined,
+          // プロフィール取得時に統計情報も含める
+          followersCount: profileResult.data.followersCount,
+          followingCount: profileResult.data.followsCount,
+          postsCount: profileResult.data.postsCount,
         };
       }
 

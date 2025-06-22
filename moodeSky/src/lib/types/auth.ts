@@ -25,6 +25,12 @@ export interface Account {
     displayName?: string;
     /** アバター画像URL */
     avatar?: string;
+    /** フォロワー数 */
+    followersCount?: number;
+    /** フォロー数 */
+    followingCount?: number;
+    /** ポスト数 */
+    postsCount?: number;
   };
   
   /** アカウント作成日時 (ISO 8601) */
@@ -32,6 +38,20 @@ export interface Account {
   
   /** 最終アクセス日時 (ISO 8601) */
   lastAccessAt: string;
+}
+
+/**
+ * プロフィール統計情報
+ */
+export interface ProfileStats {
+  /** フォロワー数 */
+  followersCount: number;
+  /** フォロー中数 */
+  followingCount: number;
+  /** 投稿数 */
+  postsCount: number;
+  /** 最終更新日時 (ISO 8601) */
+  lastUpdated: string;
 }
 
 /**

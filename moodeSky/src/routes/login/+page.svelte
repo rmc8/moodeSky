@@ -50,24 +50,21 @@
       // ログイン成功 - didとハンドル、プロフィール情報を保存
       console.log('ログイン成功:', response);
       
-      // プロフィール情報を取得
-      const profile = await agent.getProfile({ actor: response.data.did });
-      console.log('プロフィール情報:', profile.data);
-      
-      // Store API に認証情報を保存
+      // Store API に認証情報を保存（統計情報も自動取得・保存）
       const sessionData = {
         ...response.data,
         active: response.data.active ?? true  // activeがundefinedの場合はtrueを設定
       };
       
+      // saveAccountが内部でプロフィール情報と統計情報を自動取得するため、
+      // 基本情報のみ渡す（統計情報は自動取得される）
       const saveResult = await authService.saveAccount(
         `https://${host}`,
         sessionData,
         {
           did: response.data.did,
           handle: response.data.handle,
-          displayName: profile.data.displayName,
-          avatar: profile.data.avatar,
+          // displayNameとavatarは自動取得される
         }
       );
       
@@ -78,6 +75,11 @@
       }
       
       console.log('認証情報を正常に保存:', saveResult.data);
+      console.log('📊 プロフィール統計情報:', {
+        フォロワー数: saveResult.data?.profile.followersCount,
+        フォロー数: saveResult.data?.profile.followingCount,
+        ポスト数: saveResult.data?.profile.postsCount,
+      });
       
       // アカウントストアにも追加（リアクティブ更新）
       if (saveResult.data) {

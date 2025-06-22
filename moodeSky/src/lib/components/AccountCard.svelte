@@ -12,9 +12,17 @@
   import ReauthModal from './ReauthModal.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import type { Account } from '$lib/types/auth.js';
-  import { getTokenRemainingSeconds, isTokenExpired } from '$lib/utils/jwt.js';
-  import { calculateTimeRemaining, getWarningLevelClass, getWarningLevelIcon, getNextUpdateInterval } from '$lib/utils/timeUtils.js';
+  import { getTokenRemainingSeconds, isTokenExpired, getTokenExpiration } from '$lib/utils/jwt.js';
+  import { 
+    calculateTimeRemaining, 
+    getWarningLevelClass, 
+    getWarningLevelIcon, 
+    getOptimalUpdateInterval,
+    formatAbsoluteDate,
+    getDetailedExpirationInfo
+  } from '$lib/utils/timeUtils.js';
   import type { TimeRemaining } from '$lib/utils/timeUtils.js';
+  import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
   import * as m from '../../paraglide/messages.js';
 
   // ===================================================================
@@ -49,7 +57,12 @@
   
   // リフレッシュトークン期限管理
   let tokenTimeRemaining = $state<TimeRemaining | null>(null);
+  let expirationDate = $state<Date | null>(null);
   let updateTimer: ReturnType<typeof setTimeout> | null = null;
+  let isPageVisible = $state(true);
+
+  // 翻訳システム
+  const { currentLanguage } = useTranslation();
 
   // 再認証モーダル管理
   let showReauthModal = $state(false);
@@ -116,50 +129,103 @@
   }
 
   /**
-   * プロフィール統計の取得（仮実装）
+   * プロフィール統計の取得（AT Protocol API実装）
    */
   async function loadProfileStats() {
     isLoading = true;
     try {
-      // TODO: AT Protocol API で実際のプロフィール統計を取得
-      // 現在はダミーデータ
-      await new Promise(resolve => setTimeout(resolve, 500));
-      profileStats = {
-        followers: Math.floor(Math.random() * 1000) + 100,
-        following: Math.floor(Math.random() * 500) + 50,
-        posts: Math.floor(Math.random() * 2000) + 200
-      };
+      console.log('📊 [AccountCard] Loading profile stats for account:', account.profile.handle);
+      
+      // 既にキャッシュされたデータがある場合は先に表示
+      if (account.profile.followersCount !== undefined) {
+        profileStats = {
+          followers: account.profile.followersCount,
+          following: account.profile.followingCount || 0,
+          posts: account.profile.postsCount || 0
+        };
+      }
+      
+      // ProfileServiceで実際のデータを取得
+      const { profileService } = await import('$lib/services/profileService.js');
+      
+      if (!account.session?.accessJwt) {
+        console.warn('📊 [AccountCard] No access token available for profile stats');
+        return;
+      }
+      
+      const result = await profileService.getProfileStats(
+        account.profile.did,
+        account.session.accessJwt,
+        account.service
+      );
+      
+      if (result.success && result.data) {
+        profileStats = {
+          followers: result.data.followersCount,
+          following: result.data.followingCount,
+          posts: result.data.postsCount
+        };
+        
+        console.log('📊 [AccountCard] Successfully loaded profile stats:', profileStats);
+      } else {
+        // API失敗時のフォールバック表示
+        console.warn('📊 [AccountCard] Failed to load profile stats:', result.error);
+        
+        // 既存のキャッシュデータがあれば表示を維持
+        if (!profileStats && account.profile.followersCount !== undefined) {
+          profileStats = {
+            followers: account.profile.followersCount,
+            following: account.profile.followingCount || 0,
+            posts: account.profile.postsCount || 0
+          };
+        }
+      }
     } catch (error) {
-      console.error('Failed to load profile stats:', error);
+      console.error('📊 [AccountCard] Error loading profile stats:', error);
+      
+      // エラー時もキャッシュデータがあれば表示
+      if (account.profile.followersCount !== undefined) {
+        profileStats = {
+          followers: account.profile.followersCount,
+          following: account.profile.followingCount || 0,
+          posts: account.profile.postsCount || 0
+        };
+      }
     } finally {
       isLoading = false;
     }
   }
 
   /**
-   * リフレッシュトークンの期限情報を更新
+   * リフレッシュトークンの期限情報を更新（強化版）
    */
   function updateTokenExpiration() {
     try {
       if (!account.session?.refreshJwt) {
         tokenTimeRemaining = null;
+        expirationDate = null;
         return;
       }
 
+      // 残り時間を計算
       const remainingSeconds = getTokenRemainingSeconds(account.session.refreshJwt);
       tokenTimeRemaining = calculateTimeRemaining(remainingSeconds);
 
-      // 次回更新をスケジュール
+      // 絶対期限日時を取得
+      expirationDate = getTokenExpiration(account.session.refreshJwt);
+
+      // 次回更新をスケジュール（リアルタイム更新重視）
       scheduleNextUpdate();
       
     } catch (error) {
       console.warn('Failed to update token expiration:', error);
       tokenTimeRemaining = null;
+      expirationDate = null;
     }
   }
 
   /**
-   * 次回更新をスケジュール
+   * 次回更新をスケジュール（リアルタイム重視 + 省電力対応）
    */
   function scheduleNextUpdate() {
     // 既存のタイマーをクリア
@@ -168,33 +234,82 @@
       updateTimer = null;
     }
 
-    if (!tokenTimeRemaining) return;
+    if (!tokenTimeRemaining || !isPageVisible) return;
 
-    // 更新間隔を決定
-    const interval = getNextUpdateInterval(tokenTimeRemaining);
+    // 最適化された更新間隔を決定
+    const interval = getOptimalUpdateInterval(tokenTimeRemaining);
     
     updateTimer = setTimeout(() => {
-      updateTokenExpiration();
+      // ページが可視状態の場合のみ更新
+      if (isPageVisible) {
+        updateTokenExpiration();
+      } else {
+        // 非可視時は再スケジュール
+        scheduleNextUpdate();
+      }
     }, interval * 1000);
   }
 
   /**
-   * 期限表示用のテキストを生成
+   * ページ可視性の変更を処理
    */
-  function getExpirationDisplayText(timeRemaining: TimeRemaining): string {
+  function handleVisibilityChange() {
+    isPageVisible = !document.hidden;
+    
+    if (isPageVisible) {
+      // ページが表示されたら即座に更新
+      updateTokenExpiration();
+    } else {
+      // ページが非表示になったらタイマーを停止
+      if (updateTimer) {
+        clearTimeout(updateTimer);
+        updateTimer = null;
+      }
+    }
+  }
+
+  /**
+   * 期限表示用のテキストを生成（詳細版）
+   */
+  function getExpirationDisplayText(
+    timeRemaining: TimeRemaining, 
+    showDetailed: boolean = true
+  ): string {
     if (timeRemaining.isExpired) {
       return m['session.expired']();
     }
 
-    switch (timeRemaining.unit) {
-      case 'days':
-        return m['session.daysLeft']({ count: timeRemaining.value });
-      case 'hours':
-        return m['session.hoursLeft']({ count: timeRemaining.value });
-      case 'minutes':
-        return m['session.minutesLeft']({ count: timeRemaining.value });
-      default:
-        return m['session.expired']();
+    if (!showDetailed) {
+      // 簡潔版：従来の表示
+      switch (timeRemaining.unit) {
+        case 'days':
+          return m['session.daysLeft']({ count: timeRemaining.value });
+        case 'hours':
+          return m['session.hoursLeft']({ count: timeRemaining.value });
+        case 'minutes':
+          return m['session.minutesLeft']({ count: timeRemaining.value });
+        default:
+          return m['session.expired']();
+      }
+    }
+
+    // 詳細版：セッション期限 + 相対時間 + 絶対日時
+    const info = getDetailedExpirationInfo(
+      timeRemaining, 
+      expirationDate, 
+      currentLanguage(), 
+      !compact
+    );
+
+    if (compact) {
+      // コンパクト版：「約89日」
+      return `${info.aboutPrefix}${info.relativeText}`;
+    } else if (info.absoluteDate) {
+      // 標準版：「セッション期限: 約89日 (2024年9月18日まで)」
+      return `${m['session.sessionExpiry']()}: ${info.aboutPrefix}${info.relativeText} (${info.absoluteDate}${info.untilSuffix})`;
+    } else {
+      // フォールバック：「セッション期限: 約89日」
+      return `${m['session.sessionExpiry']()}: ${info.aboutPrefix}${info.relativeText}`;
     }
   }
 
@@ -244,6 +359,12 @@
     
     // リフレッシュトークンの期限情報を初期化
     updateTokenExpiration();
+    
+    // ページ可視性APIイベントリスナーを追加
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // 初期状態を設定
+    isPageVisible = !document.hidden;
   });
 
   onDestroy(() => {
@@ -252,6 +373,9 @@
       clearTimeout(updateTimer);
       updateTimer = null;
     }
+    
+    // イベントリスナーを削除
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
   });
 
   // ===================================================================
@@ -326,8 +450,8 @@
             color={tokenTimeRemaining.warningLevel === 'normal' ? 'success' : 
                    tokenTimeRemaining.warningLevel === 'warning' ? 'warning' : 'error'} 
           />
-          <span class="text-xs {getWarningLevelClass(tokenTimeRemaining.warningLevel)}">
-            {getExpirationDisplayText(tokenTimeRemaining)}
+          <span class="text-xs {getWarningLevelClass(tokenTimeRemaining.warningLevel)}" title={expirationDate ? formatAbsoluteDate(expirationDate, currentLanguage(), true) : ''}>
+            {getExpirationDisplayText(tokenTimeRemaining, true)}
           </span>
         </div>
       {/if}
@@ -341,20 +465,28 @@
   </div>
 
   <!-- 統計情報（非コンパクトモード） -->
-  {#if !compact && profileStats}
-    <div class="flex justify-around pt-4 mt-4 border-t border-themed/20">
-      <div class="text-center">
-        <span class="block text-themed font-semibold text-lg">{profileStats.followers.toLocaleString()}</span>
-        <span class="block text-themed opacity-70 text-xs">{m['settings.account.followers']()}</span>
-      </div>
-      <div class="text-center">
-        <span class="block text-themed font-semibold text-lg">{profileStats.following.toLocaleString()}</span>
-        <span class="block text-themed opacity-70 text-xs">{m['settings.account.following']()}</span>
-      </div>
-      <div class="text-center">
-        <span class="block text-themed font-semibold text-lg">{profileStats.posts.toLocaleString()}</span>
-        <span class="block text-themed opacity-70 text-xs">{m['settings.account.posts']()}</span>
-      </div>
+  {#if !compact}
+    <div class="pt-4 mt-4 border-t border-themed/20">
+      {#if profileStats}
+        <div class="flex justify-around">
+          <div class="text-center">
+            <span class="block text-themed font-semibold text-lg">{profileStats.followers.toLocaleString()}</span>
+            <span class="block text-themed opacity-70 text-xs">{m['settings.account.followers']()}</span>
+          </div>
+          <div class="text-center">
+            <span class="block text-themed font-semibold text-lg">{profileStats.following.toLocaleString()}</span>
+            <span class="block text-themed opacity-70 text-xs">{m['settings.account.following']()}</span>
+          </div>
+          <div class="text-center">
+            <span class="block text-themed font-semibold text-lg">{profileStats.posts.toLocaleString()}</span>
+            <span class="block text-themed opacity-70 text-xs">{m['settings.account.posts']()}</span>
+          </div>
+        </div>
+      {:else if !isLoading}
+        <div class="text-center py-2">
+          <span class="text-themed opacity-60 text-sm">{m['settings.account.statsUnavailable']()}</span>
+        </div>
+      {/if}
     </div>
   {/if}
 

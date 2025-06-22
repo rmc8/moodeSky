@@ -339,8 +339,8 @@ export class CircularColumnNavigator {
       
       // 超高速フォールバック
       this.emergencyTimeouts.push(
-        setTimeout(() => this.emergencyCleanup('early'), 180),     // CSS transition完了直後
-        setTimeout(() => this.emergencyCleanup('final'), 250)      // 最終フォールバック
+        Number(setTimeout(() => this.emergencyCleanup('early'), 180)),     // CSS transition完了直後
+        Number(setTimeout(() => this.emergencyCleanup('final'), 250))      // 最終フォールバック
       );
     }
     
