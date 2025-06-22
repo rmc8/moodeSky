@@ -646,37 +646,37 @@
 </script>
 
 <!-- デッキコンテナ -->
-<div class="deck-container {className}" class:deck-container--loading={isInitializing}>
+<div class="w-full h-full relative flex flex-col flex-1 min-h-0 box-border overflow-hidden {className}" class:loading-overflow-hidden={isInitializing}>
   
   {#if isInitializing}
     <!-- 初期化中 -->
-    <div class="deck-loading">
-      <div class="deck-loading__spinner">
+    <div class="flex flex-col items-center justify-center h-full gap-4">
+      <div class="animate-spin">
         <Icon icon={ICONS.LOADER} size="lg" color="primary" />
       </div>
-      <p class="deck-loading__text text-themed opacity-70">
+      <p class="text-themed opacity-70">
         {m['deck.loading']()}
       </p>
     </div>
     
   {:else if deckStore.isEmpty}
     <!-- 空デッキ状態 -->
-    <div class="deck-empty">
-      <div class="deck-empty__content">
-        <div class="deck-empty__icon">
+    <div class="flex items-center justify-center h-full p-8">
+      <div class="text-center max-w-md">
+        <div class="mb-6 opacity-40">
           <Icon icon={ICONS.COLUMNS} size="xl" color="themed" />
         </div>
         
-        <h2 class="deck-empty__title text-themed">
+        <h2 class="text-themed text-2xl font-bold mb-4">
           {m['deck.empty.title']()}
         </h2>
         
-        <p class="deck-empty__description text-themed opacity-70">
+        <p class="text-themed opacity-70 mb-8 leading-relaxed">
           {m['deck.empty.description']()}
         </p>
         
         <button 
-          class="deck-empty__button button-primary"
+          class="button-primary inline-flex items-center gap-2"
           onclick={handleAddColumn}
         >
           <Icon icon={ICONS.ADD} size="sm" color="themed" />
@@ -717,14 +717,14 @@
         </div>
       </div>
       
-      <div class="deck-mobile-container" bind:this={mobileDeckElement}>
+      <div class="w-full flex-1 overflow-hidden relative min-h-0 box-border p-0 m-0 max-w-full" bind:this={mobileDeckElement}>
         <div 
-          class="deck-columns-track"
-          style="width: {deckStore.columns.length * 100}%; transform: translateX(-{activeColumnIndex * 100 / deckStore.columns.length}%)"
+          class="flex h-full transition-transform duration-150 ease-out will-change-transform"
+          style="width: {deckStore.columns.length * 100}%; transform: translateX(-{activeColumnIndex * 100 / deckStore.columns.length}%); transform-style: preserve-3d;"
         >
           {#each deckStore.columns as column, index (column.id)}
             {console.log('🚨 [RENDER DEBUG] Rendering MOBILE column:', column.id, column.settings.title)}
-            <div class="deck-column-mobile-wrapper">
+            <div class="w-full h-full flex-shrink-0 snap-start min-w-full max-w-full box-border overflow-hidden">
               <DeckColumn
                 {column}
                 {index}
@@ -737,11 +737,11 @@
     {:else}
       <!-- デスクトップ版: 横並び固定幅 -->
       {console.log('🚨 [RENDER DEBUG] Rendering DESKTOP deck')}
-      <div class="deck-desktop-container scrollbar-professional" bind:this={desktopDeckElement}>
+      <div class="h-full w-full flex-1 overflow-x-auto overflow-y-hidden p-2 scroll-smooth flex items-stretch min-h-0 box-border scrollbar-professional" bind:this={desktopDeckElement}>
         {#each deckStore.columns as column, index (column.id)}
           {console.log('🚨 [RENDER DEBUG] Rendering DESKTOP column:', column.id, column.settings.title)}
           <div 
-            class="flex-shrink-0 deck-column-wrapper" 
+            class="flex-shrink-0 h-full flex flex-col ml-0 mr-2" 
             style="width: {column.settings.width ? COLUMN_WIDTHS[column.settings.width].width : COLUMN_WIDTHS.medium.width}px"
           >
             <DeckColumn
@@ -767,7 +767,7 @@
 <!-- カラム追加モーダル（仮実装） -->
 {#if showAddColumnModal}
   <button
-    class="modal-overlay" 
+    class="fixed inset-0 bg-foreground/50 flex items-center justify-center z-50 border-none p-0 m-0 cursor-pointer" 
     onclick={handleCloseAddModal}
     onkeydown={(e) => e.key === 'Escape' && handleCloseAddModal()}
     role="dialog" 
@@ -776,16 +776,16 @@
     tabindex="0"
   >
     <div 
-      class="modal-content" 
+      class="bg-card rounded-xl shadow-2xl max-w-md w-full mx-4 border border-subtle" 
       onclick={(e) => e.stopPropagation()}
       role="document"
     >
-      <div class="modal-header">
+      <div class="flex items-center justify-between p-6 border-b border-subtle">
         <h3 class="text-themed text-lg font-semibold">
           {m['deck.addColumn']()}
         </h3>
         <div 
-          class="modal-close"
+          class="w-8 h-8 flex items-center justify-center rounded hover:bg-muted/20 transition-colors cursor-pointer"
           onclick={handleCloseAddModal}
           onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCloseAddModal()}
           role="button"
@@ -796,21 +796,21 @@
         </div>
       </div>
       
-      <div class="modal-body">
+      <div class="p-6">
         <p class="text-themed opacity-70 mb-4">
           {m['deck.selectColumnType']()}
         </p>
         
         <!-- デモ用ホームタイムラインボタン -->
         <div 
-          class="column-type-button"
+          class="w-full p-4 border border-subtle rounded-lg flex items-center gap-3 text-left transition-all duration-200 cursor-pointer hover:border-primary/40 hover:bg-primary/5"
           onclick={handleAddHomeColumn}
           onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleAddHomeColumn()}
           role="button"
           tabindex="0"
         >
           <Icon icon={ICONS.HOME} size="md" color="primary" />
-          <div class="column-type-info">
+          <div class="flex-1">
             <h4 class="text-themed font-medium">ホームタイムライン</h4>
             <p class="text-themed opacity-60 text-sm">フォロー中のユーザーの投稿</p>
           </div>
@@ -821,74 +821,15 @@
 {/if}
 
 <style>
-  .deck-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    /* Flexboxで親の高さを完全に活用 */
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    /* 確実な高さ制御とボックスサイジング */
-    box-sizing: border-box;
-    overflow: hidden; /* 子要素のスクロール制御 */
-  }
+  /* deck-container - TailwindCSS移行完了: w-full h-full relative flex flex-col flex-1 min-h-0 box-border overflow-hidden */
   
-  .deck-container--loading {
+  .loading-overflow-hidden {
     overflow: hidden;
   }
   
-  /* 初期化中 */
-  .deck-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    gap: 1rem;
-  }
+  /* 初期化中 - TailwindCSS移行完了: flex flex-col items-center justify-center h-full gap-4, animate-spin */
   
-  .deck-loading__spinner {
-    animation: spin 1s linear infinite;
-  }
-  
-  /* 空デッキ状態 */
-  .deck-empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    padding: 2rem;
-  }
-  
-  .deck-empty__content {
-    text-align: center;
-    max-width: 28rem;
-  }
-  
-  .deck-empty__icon {
-    margin-bottom: 1.5rem;
-    opacity: 0.4;
-  }
-  
-  .deck-empty__title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-  }
-  
-  .deck-empty__description {
-    font-size: 1rem;
-    margin-bottom: 2rem;
-    line-height: 1.625;
-  }
-  
-  .deck-empty__button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
+  /* 空デッキ状態 - TailwindCSS移行完了: flex items-center justify-center h-full p-8, text-center max-w-md, mb-6 opacity-40, text-2xl font-bold mb-4, mb-8 leading-relaxed, inline-flex items-center gap-2 */
   
   /* デスクトップデッキコンテナ */
   .deck-desktop-container {
@@ -959,125 +900,13 @@
     overflow: hidden; /* 横スクロールを防止 */
   }
   
-  /* カラム追加ボタン */
-  .deck-add-column {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 80px;
-  }
+  /* カラム追加ボタン - TailwindCSS移行完了: flex-shrink-0 flex items-center justify-center min-w-20, w-16 h-16 rounded-full bg-card border-2 border-dashed border-primary/30 flex items-center justify-center transition-all duration-200 hover:border-primary/60 hover:bg-primary/5 */
   
-  .deck-add-column__button {
-    width: 4rem;
-    height: 4rem;
-    border-radius: 9999px;
-    background-color: var(--color-card);
-    border: 2px dashed rgb(var(--primary) / 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 200ms;
-  }
+  /* エラー表示 - TailwindCSS移行完了: fixed bottom-4 right-4 bg-error/10 border border-error/20 rounded-lg p-4 flex items-center gap-3 max-w-sm */
   
-  .deck-add-column__button:hover {
-    border-color: rgb(var(--primary) / 0.6);
-    background-color: rgb(var(--primary) / 0.05);
-  }
+  /* モーダル - TailwindCSS移行完了: fixed inset-0 bg-foreground/50 flex items-center justify-center z-50 border-none p-0 m-0 cursor-pointer, bg-card rounded-xl shadow-2xl max-w-md w-full mx-4 border border-themed, flex items-center justify-between p-6 border-b border-themed/20, w-8 h-8 flex items-center justify-center rounded hover:bg-muted/20 transition-colors cursor-pointer, p-6 */
   
-  /* エラー表示 */
-  .deck-error {
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    background-color: rgb(var(--error) / 0.1);
-    border: 1px solid rgb(var(--error) / 0.2);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    max-width: 24rem;
-  }
-  
-  /* モーダル */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgb(var(--foreground) / 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    border: none;
-    padding: 0;
-    margin: 0;
-    cursor: pointer;
-  }
-  
-  .modal-content {
-    background-color: var(--color-card);
-    border-radius: 0.75rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    max-width: 28rem;
-    width: 100%;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    border: 1px solid var(--color-border);
-  }
-  
-  .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem;
-    border-bottom: 1px solid rgb(var(--border) / 0.2);
-  }
-  
-  .modal-close {
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    transition: background-color 200ms;
-  }
-  
-  .modal-close:hover {
-    background-color: rgb(var(--muted) / 0.2);
-  }
-  
-  .modal-body {
-    padding: 1.5rem;
-  }
-  
-  /* カラムタイプボタン */
-  .column-type-button {
-    width: 100%;
-    padding: 1rem;
-    border: 1px solid rgb(var(--border) / 0.2);
-    border-radius: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    text-align: left;
-    transition: all 200ms;
-    cursor: pointer;
-  }
-  
-  .column-type-button:hover {
-    border-color: rgb(var(--primary) / 0.4);
-    background-color: rgb(var(--primary) / 0.05);
-  }
-  
-  .column-type-info {
-    flex: 1;
-  }
+  /* カラムタイプボタン - TailwindCSS移行完了: w-full p-4 border border-themed/20 rounded-lg flex items-center gap-3 text-left transition-all duration-200 cursor-pointer hover:border-primary/40 hover:bg-primary/5, flex-1 */
   
   /* デバッグ用インデックス表示 */
   .debug-index {

@@ -100,17 +100,17 @@
 
 <!-- ボトムナビゲーションバー -->
 <nav 
-  class="fixed bottom-0 left-0 right-0 z-50 bg-card border-t-2 border-themed shadow-lg"
+  class="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-subtle shadow-lg"
   aria-label={t('navigation.home')}
 >
   <div class="flex justify-around items-center py-0.5 px-2">
     {#each navItems as item}
       <button
-        class="flex flex-col items-center justify-center px-1 py-1.5 rounded-lg transition-all duration-200 active:scale-95 min-w-0 flex-1"
-        style={isActive(item.path) ? "background-color: rgb(var(--primary) / 0.2);" : ""}
+        class="flex flex-col items-center justify-center px-1 py-1.5 rounded-lg transition-all duration-200 active:scale-95 min-w-0 flex-1 focus-ring-subtle focus-visible:outline-2 focus-visible:outline-primary/60 focus-visible:outline-offset-1"
+        class:bg-primary-active={isActive(item.path)}
         class:text-primary={isActive(item.path)}
         class:text-themed={!isActive(item.path)}
-        class:nav-hover={!isActive(item.path)}
+        class:hover:bg-primary-hover={!isActive(item.path)}
         onclick={() => handleNavigation(item.path, item.id)}
         aria-label={item.label}
         aria-current={isActive(item.path) ? 'page' : undefined}
@@ -138,7 +138,7 @@
 <!-- カラム追加モーダル（モバイル用） -->
 {#if showAddColumnModal}
   <button
-    class="modal-overlay" 
+    class="fixed inset-0 bg-foreground/50 flex items-center justify-center z-50 border-none p-0 m-0 cursor-pointer" 
     onclick={handleCloseAddModal}
     onkeydown={(e) => e.key === 'Escape' && handleCloseAddModal()}
     role="dialog" 
@@ -147,16 +147,16 @@
     tabindex="0"
   >
     <div 
-      class="modal-content" 
+      class="bg-card rounded-xl shadow-2xl max-w-md w-full mx-4 border border-themed/20" 
       onclick={(e) => e.stopPropagation()}
       role="document"
     >
-      <div class="modal-header">
+      <div class="flex items-center justify-between p-6 border-b border-themed/20">
         <h3 class="text-themed text-lg font-semibold">
           {m['deck.addColumn']()}
         </h3>
         <div 
-          class="modal-close"
+          class="w-8 h-8 flex items-center justify-center rounded cursor-pointer transition-colors duration-200 hover:bg-primary/10"
           onclick={handleCloseAddModal}
           onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCloseAddModal()}
           role="button"
@@ -167,21 +167,21 @@
         </div>
       </div>
       
-      <div class="modal-body">
+      <div class="p-6">
         <p class="text-themed opacity-70 mb-4">
           {m['deck.selectColumnType']()}
         </p>
         
         <!-- デモ用ホームタイムラインボタン -->
         <div 
-          class="column-type-button"
+          class="w-full p-4 border border-themed/20 rounded-lg flex items-center gap-3 text-left transition-all duration-200 cursor-pointer hover:border-primary/40 hover:bg-primary/5"
           onclick={handleAddHomeColumn}
           onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleAddHomeColumn()}
           role="button"
           tabindex="0"
         >
           <Icon icon={ICONS.HOME} size="md" color="primary" />
-          <div class="column-type-info">
+          <div class="flex-1">
             <h4 class="text-themed font-medium">{t('navigation.home')}</h4>
             <p class="text-themed opacity-60 text-sm">フォロー中のユーザーの投稿</p>
           </div>
@@ -191,87 +191,3 @@
   </button>
 {/if}
 
-<style>
-  .nav-hover:hover {
-    background-color: rgb(var(--primary) / 0.05);
-  }
-  
-  /* モーダル */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgb(var(--foreground) / 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    border: none;
-    padding: 0;
-    margin: 0;
-    cursor: pointer;
-  }
-  
-  .modal-content {
-    background-color: var(--color-card);
-    border-radius: 0.75rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    max-width: 28rem;
-    width: 100%;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    border: 1px solid var(--color-border);
-  }
-  
-  .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem;
-    border-bottom: 1px solid rgb(var(--border) / 0.2);
-  }
-  
-  .modal-close {
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    transition: background-color 200ms;
-  }
-  
-  .modal-close:hover {
-    background-color: rgb(var(--muted) / 0.2);
-  }
-  
-  .modal-body {
-    padding: 1.5rem;
-  }
-  
-  /* カラムタイプボタン */
-  .column-type-button {
-    width: 100%;
-    padding: 1rem;
-    border: 1px solid rgb(var(--border) / 0.2);
-    border-radius: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    text-align: left;
-    transition: all 200ms;
-    cursor: pointer;
-  }
-  
-  .column-type-button:hover {
-    border-color: rgb(var(--primary) / 0.4);
-    background-color: rgb(var(--primary) / 0.05);
-  }
-  
-  .column-type-info {
-    flex: 1;
-  }
-</style>

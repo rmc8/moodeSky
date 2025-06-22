@@ -39,7 +39,7 @@
 
 <!-- モバイルデッキタブバー -->
 <div 
-  class="fixed left-0 right-0 z-40 bg-card border-b-2 border-themed shadow-sm mobile-deck-tabs"
+  class="fixed left-0 right-0 z-40 bg-card border-b border-themed/10 shadow-sm mobile-deck-tabs"
   style="top: env(safe-area-inset-top, 0px);"
   role="tablist"
   aria-label={t('deck.tabs.tabArea')}
@@ -49,7 +49,15 @@
       <!-- 実際のカラムタブ表示 -->
       {#each columns as column}
         <button
-          class="tab-button flex-shrink-0 flex items-center justify-center w-9 h-9 mx-1 rounded-xl transition-all duration-200 active:scale-90 {column.id === activeColumnId ? 'bg-primary/20 shadow-sm' : 'bg-muted/50 hover:bg-muted/70 hover:shadow-sm'}"
+          class="flex-shrink-0 flex items-center justify-center w-9 h-9 mx-1 rounded-xl transition-all duration-200 ease-out active:scale-90 focus-ring-subtle focus-visible:outline-2 focus-visible:outline-primary/60 focus-visible:outline-offset-1"
+          class:bg-primary-active={column.id === activeColumnId}
+          class:shadow-sm={column.id === activeColumnId}
+          class:scale-105={column.id === activeColumnId}
+          class:border={column.id === activeColumnId}
+          class:border-primary-border={column.id === activeColumnId}
+          class:bg-muted={column.id !== activeColumnId}
+          class:hover:bg-muted-hover={column.id !== activeColumnId}
+          class:hover:shadow-sm={column.id !== activeColumnId}
           role="tab"
           aria-selected={column.id === activeColumnId}
           aria-label={column.settings.title}
@@ -62,7 +70,7 @@
             size="md"
             color={column.id === activeColumnId ? 'primary' : 'themed'}
             decorative={true}
-            class="tab-icon {column.id === activeColumnId ? 'opacity-100' : 'opacity-80'}"
+            class="transition-opacity duration-150 ease-in-out {column.id === activeColumnId ? 'opacity-100' : 'opacity-80'}"
           />
         </button>
       {/each}
@@ -85,7 +93,7 @@
 
 <style>
   .mobile-deck-tabs {
-    /* セーフエリア対応でのタブバー高さ - 16px削減 */
+    /* セーフエリア対応でのタブバー高さ */
     height: calc(48px + env(safe-area-inset-top, 0px));
   }
   
@@ -95,40 +103,5 @@
       padding-left: env(safe-area-inset-left);
       padding-right: env(safe-area-inset-right);
     }
-  }
-  
-  /* タブボタンの視覚的強化 */
-  .tab-button {
-    /* より滑らかなアニメーション */
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* タップフィードバック強化 */
-    transform-origin: center;
-    
-    /* ホバー時の微細な変化 */
-    will-change: transform, box-shadow, background-color;
-  }
-  
-  /* アクティブタブの強調 */
-  .tab-button[aria-selected="true"] {
-    transform: scale(1.05);
-    border: 1px solid rgb(var(--primary) / 0.3);
-  }
-  
-  /* アイコンの視認性向上 */
-  .tab-button :global(.tab-icon) {
-    transition: opacity 150ms ease-in-out;
-  }
-  
-  /* パフォーマンス最適化 */
-  .tab-button {
-    backface-visibility: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
-  
-  /* フォーカス状態のアクセシビリティ */
-  .tab-button:focus-visible {
-    outline: 2px solid rgb(var(--primary) / 0.6);
-    outline-offset: 2px;
   }
 </style>

@@ -86,8 +86,8 @@
 </script>
 
 <!-- トグルスイッチ -->
-<div class="toggle-switch {className}">
-  <label class="relative inline-flex items-center cursor-pointer" class:cursor-not-allowed={disabled}>
+<div class="inline-block {className}">
+  <label class="relative inline-flex items-center cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200" class:cursor-not-allowed={disabled} class:hover:scale-100={disabled} class:active:scale-100={disabled}>
     <input
       type="checkbox"
       {checked}
@@ -100,7 +100,7 @@
     
     <!-- トラック -->
     <div 
-      class="{config.track} rounded-full transition-colors duration-300 relative"
+      class="{config.track} rounded-full transition-colors duration-300 relative focus-ring-subtle focus-within:outline focus-within:outline-2 focus-within:outline-primary focus-within:outline-offset-1"
       class:bg-primary={checked}
       class:opacity-50={disabled}
       style="background-color: {checked ? 'rgb(var(--primary))' : 'rgb(var(--foreground) / 0.2)'};"
@@ -108,7 +108,7 @@
       <!-- サム（丸い部分） -->
       <div 
         class="{config.thumb} rounded-full shadow-md transition-all duration-300 absolute {config.top}"
-        class:bg-white={!checked}
+        class:bg-card={!checked}
         class:bg-[var(--color-background)]={checked}
         class:shadow-lg={checked}
         style="transform: translateX({thumbPosition()}px);"
@@ -133,24 +133,6 @@
   </label>
 </div>
 
-<style>
-  .toggle-switch {
-    display: inline-block;
-  }
-  
-  /* フォーカス状態 */
-  .toggle-switch input:focus-visible + div {
-    outline: 2px solid rgb(var(--primary));
-    outline-offset: 2px;
-  }
-  
-  /* ホバー効果 */
-  .toggle-switch label:hover:not(.cursor-not-allowed) div:first-of-type {
-    transform: scale(1.05);
-  }
-  
-  /* アクティブ状態 */
-  .toggle-switch label:active:not(.cursor-not-allowed) div:first-of-type {
-    transform: scale(0.95);
-  }
-</style>
+<!-- 💫 TailwindCSS v4 Tauri最適化完了 - カスタムCSS 100%削減 -->
+<!-- ✨ 置換完了: hover:scale-105, active:scale-95, focus-within:outline -->
+<!-- 🎯 効果: CSSファイルサイズ削減 + TailwindCSS統一 -->
