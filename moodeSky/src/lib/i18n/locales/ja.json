@@ -125,6 +125,79 @@
     },
     "mobile": {
       "swipeHint": "スワイプでカラムを切り替え"
+    },
+    "addDeck": {
+      "title": "デッキを追加",
+      "subtitle": "新しいデッキカラムを作成します",
+      "wizard": {
+        "stepAccount": "アカウント選択",
+        "stepAlgorithm": "フィードタイプ選択", 
+        "stepSettings": "デッキ設定"
+      },
+      "account": {
+        "title": "アカウントを選択",
+        "description": "このデッキで使用するアカウントを選択してください",
+        "defaultAccount": "メインアカウント",
+        "noAccounts": "利用可能なアカウントがありません"
+      },
+      "algorithm": {
+        "title": "フィードタイプを選択",
+        "description": "表示するコンテンツのタイプを選択してください"
+      },
+      "settings": {
+        "title": "デッキ設定",
+        "description": "デッキの名前と詳細設定を行います",
+        "nameLabel": "デッキ名",
+        "namePlaceholder": "デッキ名を入力",
+        "advanced": "詳細設定"
+      },
+      "defaultName": "ホーム",
+      "buttons": {
+        "next": "次へ",
+        "previous": "戻る",
+        "create": "デッキを作成",
+        "cancel": "キャンセル"
+      },
+      "algorithms": {
+        "reverse_chronological": {
+          "name": "ホームタイムライン",
+          "description": "フォロー中のユーザーの投稿を時系列で表示"
+        },
+        "top_posts": {
+          "name": "人気の投稿",
+          "description": "いいねやリポストが多い人気の投稿を表示"
+        },
+        "most_friends": {
+          "name": "フレンド",
+          "description": "相互フォローユーザーの投稿を中心に表示"
+        },
+        "best_of_follows": {
+          "name": "ベストフォロー",
+          "description": "フォロー中の中でも特に良質な投稿を表示"
+        },
+        "quiet_posters": {
+          "name": "控えめな投稿者",
+          "description": "投稿頻度が少ないユーザーの投稿を優先表示"
+        },
+        "loud_posters": {
+          "name": "活発な投稿者", 
+          "description": "活発に投稿するユーザーの投稿を表示"
+        },
+        "close_friends": {
+          "name": "親しい友達",
+          "description": "よく交流のあるユーザーの投稿を表示"
+        },
+        "popular_in_network": {
+          "name": "ネットワークで人気",
+          "description": "あなたのネットワークで話題の投稿を表示"
+        },
+        "popular_with_friends": {
+          "name": "友達に人気",
+          "description": "友達がいいねやリポストした投稿を表示"
+        }
+      },
+      "success": "デッキが作成されました",
+      "error": "デッキの作成に失敗しました"
     }
   },
   "profile": {

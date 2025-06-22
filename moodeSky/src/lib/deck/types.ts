@@ -208,6 +208,122 @@ export function createColumn(
 }
 
 // ===================================================================
+// Add Deck 拡張機能 型定義（moodeSky独自機能）
+// ===================================================================
+
+/**
+ * Add Deck ウィザードのステップ
+ */
+export type AddDeckStep = 'account' | 'algorithm' | 'settings';
+
+/**
+ * Add Deck フォームデータ
+ */
+export interface AddDeckFormData {
+  selectedAccountId: string;
+  selectedAlgorithm: ColumnAlgorithm;
+  deckName: string;
+  settings?: Partial<ColumnSettings>;
+}
+
+/**
+ * アカウント選択用オプション
+ */
+export interface AccountOption {
+  id: string;
+  handle: string;
+  displayName?: string;
+  avatar?: string;
+  isDefault?: boolean;
+}
+
+/**
+ * アルゴリズム選択用オプション
+ */
+export interface AlgorithmOption {
+  algorithm: ColumnAlgorithm;
+  name: string;
+  description: string;
+  icon: string;
+  isDefault?: boolean;
+}
+
+/**
+ * Add Deck モーダルのProps
+ */
+export interface AddDeckModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: (column: Column) => void;
+}
+
+/**
+ * Add Deck 作成結果
+ */
+export interface AddDeckResult {
+  success: boolean;
+  column?: Column;
+  error?: string;
+}
+
+// ===================================================================
+// Add Deck デフォルト設定
+// ===================================================================
+
+/**
+ * Add Deck のデフォルト設定
+ */
+export const ADD_DECK_DEFAULTS = {
+  algorithm: 'reverse_chronological' as ColumnAlgorithm,
+  deckName: 'Home', // 翻訳キーで置き換える: m['deck.addDeck.defaultName']()
+  step: 'account' as AddDeckStep,
+  settings: {
+    title: 'Home',
+    width: 'medium' as ColumnWidth,
+    autoRefresh: false,
+    refreshInterval: 5,
+    showRetweets: true,
+    showReplies: true,
+    showMedia: true,
+    icon: ICONS.HOME,
+    isMinimized: false,
+    isPinned: false,
+    sortOrder: 'newest' as const,
+    filterKeywords: [] as string[]
+  }
+};
+
+/**
+ * アルゴリズムの説明文（翻訳キーと対応）
+ */
+export const ALGORITHM_DESCRIPTIONS: Record<ColumnAlgorithm, string> = {
+  'reverse_chronological': 'deck.addDeck.algorithms.reverse_chronological.description',
+  'top_posts': 'deck.addDeck.algorithms.top_posts.description',
+  'most_friends': 'deck.addDeck.algorithms.most_friends.description',
+  'best_of_follows': 'deck.addDeck.algorithms.best_of_follows.description',
+  'quiet_posters': 'deck.addDeck.algorithms.quiet_posters.description',
+  'loud_posters': 'deck.addDeck.algorithms.loud_posters.description',
+  'close_friends': 'deck.addDeck.algorithms.close_friends.description',
+  'popular_in_network': 'deck.addDeck.algorithms.popular_in_network.description',
+  'popular_with_friends': 'deck.addDeck.algorithms.popular_with_friends.description'
+};
+
+/**
+ * アルゴリズムの表示名（翻訳キーと対応）
+ */
+export const ALGORITHM_NAMES: Record<ColumnAlgorithm, string> = {
+  'reverse_chronological': 'deck.addDeck.algorithms.reverse_chronological.name',
+  'top_posts': 'deck.addDeck.algorithms.top_posts.name',
+  'most_friends': 'deck.addDeck.algorithms.most_friends.name',
+  'best_of_follows': 'deck.addDeck.algorithms.best_of_follows.name',
+  'quiet_posters': 'deck.addDeck.algorithms.quiet_posters.name',
+  'loud_posters': 'deck.addDeck.algorithms.loud_posters.name',
+  'close_friends': 'deck.addDeck.algorithms.close_friends.name',
+  'popular_in_network': 'deck.addDeck.algorithms.popular_in_network.name',
+  'popular_with_friends': 'deck.addDeck.algorithms.popular_with_friends.name'
+};
+
+// ===================================================================
 // カラムアイコンマッピング
 // ===================================================================
 
