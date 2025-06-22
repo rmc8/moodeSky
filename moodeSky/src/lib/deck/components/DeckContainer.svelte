@@ -943,6 +943,7 @@
     display: flex;
     flex-direction: column;
     margin-left: 0; /* 全カラムで左マージンなし - タイトなレイアウト */
+    margin-right: 8px; /* 全カラムで右余白8px */
   }
   
   .deck-column-mobile-wrapper {
