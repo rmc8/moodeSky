@@ -132,7 +132,13 @@
     "handle": "ハンドル",
     "did": "DID",
     "service": "サービス",
-    "lastAccess": "最終アクセス"
+    "lastAccess": "最終アクセス",
+    "stats": {
+      "loading": "統計を読み込み中...",
+      "error": "統計の取得に失敗しました",
+      "retry": "再試行",
+      "loadingShort": "読み込み中..."
+    }
   },
   "login": {
     "title": "Blueskyアカウントでログイン",
@@ -177,6 +183,10 @@
   },
   "session": {
     "expiresIn": "有効期限",
+    "sessionExpiry": "セッション期限",
+    "expiresOn": "期限: {date}",
+    "about": "約",
+    "until": "まで",
     "daysLeft": "{count}日後",
     "hoursLeft": "{count}時間後",
     "minutesLeft": "{count}分後", 
@@ -315,7 +325,8 @@
       "logoutAccount": "ログアウト",
       "logoutAccountConfirm": "このアカウントからログアウトしますか？",
       "logoutAccountSuccess": "アカウントからログアウトしました",
-      "logoutAccountError": "ログアウト処理に失敗しました"
+      "logoutAccountError": "ログアウト処理に失敗しました",
+      "statsUnavailable": "統計情報を取得できません"
     },
     "notifications": {
       "title": "通知設定", 

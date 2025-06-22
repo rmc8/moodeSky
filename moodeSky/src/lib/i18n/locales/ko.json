@@ -131,7 +131,13 @@
     "handle": "핸들",
     "did": "DID",
     "service": "서비스",
-    "lastAccess": "마지막 접속"
+    "lastAccess": "마지막 접속",
+    "stats": {
+      "loading": "통계를 불러오는 중...",
+      "error": "통계 불러오기 실패",
+      "retry": "재시도",
+      "loadingShort": "불러오는 중..."
+    }
   },
   "login": {
     "title": "Bluesky 계정으로 로그인",
@@ -176,6 +182,10 @@
   },
   "session": {
     "expiresIn": "만료까지",
+    "sessionExpiry": "세션 만료",
+    "expiresOn": "기한: {date}",
+    "about": "약",
+    "until": "까지",
     "daysLeft": "{count}일",
     "hoursLeft": "{count}시간",
     "minutesLeft": "{count}분",
@@ -314,7 +324,8 @@
       "logoutAccount": "로그아웃",
       "logoutAccountConfirm": "이 계정에서 로그아웃하시겠습니까?",
       "logoutAccountSuccess": "계정에서 로그아웃했습니다",
-      "logoutAccountError": "로그아웃에 실패했습니다"
+      "logoutAccountError": "로그아웃에 실패했습니다",
+      "statsUnavailable": "프로필 통계를 사용할 수 없습니다"
     },
     "notifications": {
       "title": "알림 설정",

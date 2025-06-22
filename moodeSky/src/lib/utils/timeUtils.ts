@@ -133,8 +133,8 @@ export function getWarningLevelIcon(warningLevel: TimeRemaining['warningLevel'])
 }
 
 /**
- * 次の更新タイミングまでの秒数を計算
- * 期限表示の更新頻度を最適化するため
+ * 次の更新タイミングまでの秒数を計算（最適化版）
+ * リアルタイム更新頻度を改善
  * 
  * @param timeRemaining 残り時間情報
  * @returns 次の更新までの秒数
@@ -146,9 +146,42 @@ export function getNextUpdateInterval(timeRemaining: TimeRemaining): number {
 
   switch (timeRemaining.unit) {
     case 'days':
-      return 3600; // 1時間間隔
+      if (timeRemaining.value >= 30) {
+        return 86400; // 30日以上: 1日間隔
+      } else if (timeRemaining.value >= 7) {
+        return 3600; // 7-29日: 1時間間隔
+      } else {
+        return 1800; // 1-6日: 30分間隔
+      }
     case 'hours':
-      return 300; // 5分間隔
+      if (timeRemaining.value >= 12) {
+        return 1800; // 12時間以上: 30分間隔
+      } else {
+        return 300; // 12時間未満: 5分間隔
+      }
+    case 'minutes':
+      return 60; // 1分間隔
+    default:
+      return 60;
+  }
+}
+
+/**
+ * より適切な更新間隔を計算（リアルタイム重視）
+ * 
+ * @param timeRemaining 残り時間情報
+ * @returns 次の更新までの秒数
+ */
+export function getOptimalUpdateInterval(timeRemaining: TimeRemaining): number {
+  if (timeRemaining.isExpired) {
+    return 60; // 期限切れ時は1分間隔
+  }
+
+  switch (timeRemaining.unit) {
+    case 'days':
+      return timeRemaining.value >= 7 ? 3600 : 1800; // 7日以上: 1時間, 未満: 30分
+    case 'hours':
+      return timeRemaining.value >= 6 ? 300 : 120; // 6時間以上: 5分, 未満: 2分
     case 'minutes':
       return 60; // 1分間隔
     default:
@@ -207,4 +240,153 @@ export function safeCreateDate(timestamp: number): Date | null {
     console.warn('Failed to create date from timestamp:', timestamp, error);
     return null;
   }
+}
+
+/**
+ * 絶対日時を言語に応じてフォーマット
+ * 
+ * @param date 日付オブジェクト
+ * @param language 言語コード (ja, en, pt-BR, de, ko)
+ * @param includeTime 時刻を含めるかどうか
+ * @returns フォーマットされた日付文字列
+ */
+export function formatAbsoluteDate(
+  date: Date, 
+  language: string = 'ja', 
+  includeTime: boolean = false
+): string {
+  try {
+    const options: Intl.DateTimeFormatOptions = includeTime 
+      ? { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric', 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }
+      : { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        };
+
+    // 言語コードの正規化
+    const normalizedLanguage = language.toLowerCase();
+    let locale: string;
+
+    switch (normalizedLanguage) {
+      case 'ja':
+        locale = 'ja-JP';
+        break;
+      case 'en':
+        locale = 'en-US';
+        break;
+      case 'pt-br':
+      case 'pt':
+        locale = 'pt-BR';
+        break;
+      case 'de':
+        locale = 'de-DE';
+        break;
+      case 'ko':
+        locale = 'ko-KR';
+        break;
+      default:
+        locale = 'en-US';
+    }
+
+    return new Intl.DateTimeFormat(locale, options).format(date);
+  } catch (error) {
+    console.warn('Failed to format date:', error);
+    // フォールバック: ISO形式
+    return includeTime 
+      ? date.toLocaleString()
+      : date.toLocaleDateString();
+  }
+}
+
+/**
+ * 詳細な期限表示テキストを生成
+ * 
+ * @param timeRemaining 残り時間情報
+ * @param expirationDate 期限日時
+ * @param language 言語コード
+ * @param includeAbsoluteDate 絶対日時を含めるかどうか
+ * @returns 詳細な期限表示テキスト用のデータ
+ */
+export function getDetailedExpirationInfo(
+  timeRemaining: TimeRemaining,
+  expirationDate: Date | null,
+  language: string = 'ja',
+  includeAbsoluteDate: boolean = true
+): {
+  relativeText: string;
+  absoluteDate: string | null;
+  aboutPrefix: string;
+  untilSuffix: string;
+} {
+  // 相対時間のテキスト（プレフィックスなし）
+  const relativeText = `${timeRemaining.value}${getUnitText(timeRemaining.unit, language)}`;
+  
+  // 絶対日時のフォーマット
+  const absoluteDate = includeAbsoluteDate && expirationDate 
+    ? formatAbsoluteDate(expirationDate, language, false)
+    : null;
+
+  // 言語別のプレフィックス・サフィックス
+  const aboutPrefix = getAboutPrefix(language);
+  const untilSuffix = getUntilSuffix(language);
+
+  return {
+    relativeText,
+    absoluteDate,
+    aboutPrefix,
+    untilSuffix,
+  };
+}
+
+/**
+ * 時間単位のテキストを言語別に取得
+ */
+function getUnitText(unit: TimeUnit, language: string): string {
+  const unitTexts: Record<string, Record<TimeUnit, string>> = {
+    ja: { days: '日', hours: '時間', minutes: '分', expired: '' },
+    en: { days: ' days', hours: ' hours', minutes: ' minutes', expired: '' },
+    'pt-br': { days: ' dias', hours: ' horas', minutes: ' minutos', expired: '' },
+    de: { days: ' Tage', hours: ' Stunden', minutes: ' Minuten', expired: '' },
+    ko: { days: '일', hours: '시간', minutes: '분', expired: '' },
+  };
+
+  const normalizedLang = language.toLowerCase();
+  return unitTexts[normalizedLang]?.[unit] || unitTexts['en'][unit];
+}
+
+/**
+ * 「約」のプレフィックスを言語別に取得
+ */
+function getAboutPrefix(language: string): string {
+  const prefixes: Record<string, string> = {
+    ja: '約',
+    en: '~',
+    'pt-br': '~',
+    de: '~',
+    ko: '약',
+  };
+
+  return prefixes[language.toLowerCase()] || prefixes['en'];
+}
+
+/**
+ * 「まで」のサフィックスを言語別に取得
+ */
+function getUntilSuffix(language: string): string {
+  const suffixes: Record<string, string> = {
+    ja: 'まで',
+    en: 'until',
+    'pt-br': 'até',
+    de: 'bis',
+    ko: '까지',
+  };
+
+  return suffixes[language.toLowerCase()] || suffixes['en'];
 }
