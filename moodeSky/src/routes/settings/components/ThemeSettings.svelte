@@ -128,7 +128,7 @@
       description: m['settings.theme.highContrastDescription'](),
       preview: {
         background: 'from-black to-gray-900',
-        surface: 'bg-black border-white border-2',
+        surface: 'bg-black border-white',
         text: 'text-white',
         textColor: '#ffffff',  // white
         accent: 'bg-yellow-400'
@@ -318,13 +318,34 @@
               </div>
               
               <!-- プレビューカード -->
-              <div class="rounded border p-2 {option.preview.surface}">
-                <div class="text-xs">
-                  <div class="flex items-center gap-2 mb-1">
-                    <div class="w-2 h-2 rounded-full {option.preview.accent}"></div>
-                    <span class="font-medium preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color)">{m['settings.theme.sampleText']()}</span>
+              <div class="rounded border p-3 {option.preview.surface} relative overflow-hidden">
+                <!-- 背景グラデーション -->
+                <div class="absolute inset-0 bg-gradient-to-br {option.preview.background} opacity-20"></div>
+                
+                <!-- プレビューコンテンツ -->
+                <div class="relative z-10 text-xs space-y-2">
+                  <!-- ヘッダー行 -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-2 h-2 rounded-full {option.preview.accent}"></div>
+                      <span class="font-medium preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color)">
+                        {m['settings.theme.sampleText']()}
+                      </span>
+                    </div>
+                    <div class="w-3 h-3 rounded {option.preview.accent} opacity-60"></div>
                   </div>
-                  <div class="preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color); opacity: 0.7">{option.description}</div>
+                  
+                  <!-- 説明テキスト -->
+                  <div class="preview-text" style="--preview-color: {option.preview.textColor}; color: var(--preview-color); opacity: 0.7">
+                    {option.description}
+                  </div>
+                  
+                  <!-- ミニUI要素 -->
+                  <div class="flex items-center gap-2 mt-2">
+                    <div class="w-8 h-1 rounded-full {option.preview.accent} opacity-80"></div>
+                    <div class="w-6 h-1 rounded-full {option.preview.accent} opacity-60"></div>
+                    <div class="w-4 h-1 rounded-full {option.preview.accent} opacity-40"></div>
+                  </div>
                 </div>
               </div>
             </div>
