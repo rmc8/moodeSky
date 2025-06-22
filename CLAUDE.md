@@ -642,6 +642,64 @@ npm run check  # TypeScript validation
 
 **🎯 多言語化の成功の秘訣: 技術基盤 + 翻訳品質 + 継続的改善**
 
+## 🏗 Tauriアーキテクチャ詳細
+
+### ブラウザエンジン仕様
+**Tauriは内蔵ブラウザエンジンを持たず、各OSのシステムWebViewを使用：**
+
+- **Windows**: WebView2 (Chromium-based Edge)
+- **macOS**: WKWebView (WebKit-based)  
+- **Linux**: WebKitGTK (WebKit-based)
+- **Android**: System WebView (Chromium-based)
+- **iOS**: WKWebView (WebKit-based)
+
+### 開発上の重要な影響
+
+#### ✅ **クロスブラウザ対応不要**
+- 各OSで**単一WebViewエンジン**のみをターゲット
+- Electronのようなバンドル型とは根本的に異なる
+- CSSプレフィックス（`-webkit-`, `-moz-`, `-ms-`）は限定的使用
+
+#### ✅ **パフォーマンス優位性**
+- システムWebView利用によるメモリ効率
+- バンドルサイズの劇的削減（180MB→数MB）
+- ネイティブパフォーマンス
+
+#### ⚠️ **開発時の注意点**
+- **WebView2バージョン管理**（Windows）: 最小バージョン要求可能
+- **WebKitGTK依存関係**（Linux）: 開発環境セットアップ必須
+- **システムWebView更新への依存**: OS更新によるWebView機能向上
+
+### ⚡ Tauri固有の最適化
+
+#### **WebView最適化**
+- システムWebViewの特性を活用した実装
+- プラットフォーム固有APIの適切な使用
+- メモリ効率を重視した設計
+
+#### **CSS最適化**
+- 不要なベンダープレフィックス除去
+- システムWebView対応の最新CSS機能活用
+- ファイルサイズ最小化
+
+#### **実装指針**
+```css
+/* ❌ 不要: 従来のクロスブラウザ対応 */
+.element {
+  -webkit-transform: translateX(100px);
+  -moz-transform: translateX(100px);
+  -ms-transform: translateX(100px);
+  transform: translateX(100px);
+}
+
+/* ✅ 推奨: Tauri最適化 */
+.element {
+  /* WebKit系プラットフォーム対応時のみ */
+  -webkit-transform: translateX(100px);
+  transform: translateX(100px);
+}
+```
+
 ## 開発ルール・ドキュメント
 
 ### 詳細ドキュメント (docs/)
@@ -663,11 +721,14 @@ npm run check  # TypeScript validation
 
 **このプロジェクトは TailwindCSS v4 + 統合テーマシステムによるユーティリティファーストスタイリングを採用しています。**
 
-#### 📋 必須ルール
+#### 📋 必須ルール（Tauri最適化）
 1. **カスタムCSSの禁止**: `<style>` タグでのカスタムCSS記述は原則禁止
 2. **統合テーマクラス使用**: `dark:` プレフィックスは使用禁止、テーマクラス必須
 3. **一貫性の維持**: デザインシステムに基づいた統一されたスタイリング
 4. **アクセシビリティ準拠**: WCAG AA基準以上のコントラスト比必須
+5. **システムWebView特化**: プラットフォーム固有の単一エンジン対応
+6. **限定的プレフィックス**: `-webkit-`のみ必要な場合あり（macOS/iOS）
+7. **クロスブラウザ対応不要**: 従来のブラウザ互換性コードは不要
 
 #### 🌈 テーマシステム (TailwindCSS v4対応)
 

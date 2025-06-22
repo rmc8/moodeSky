@@ -105,6 +105,27 @@
   /* Base Styles */
   * {
     box-sizing: border-box;
+    /* 全端末でテキスト選択無効化 - スワイプ動作最適化 */
+    -webkit-user-select: none;  /* Safari/Chrome */
+    -moz-user-select: none;     /* Firefox */
+    -ms-user-select: none;      /* IE/Edge */
+    user-select: none;          /* Standard */
+  }
+
+  /* フォーム要素のテキスト選択は有効化 */
+  input, textarea, select {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important; 
+    -ms-user-select: text !important;
+    user-select: text !important;
+  }
+
+  /* 編集可能要素の選択許可 */
+  [contenteditable="true"] {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important; 
+    user-select: text !important;
   }
 
   html, body {
