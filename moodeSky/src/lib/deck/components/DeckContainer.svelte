@@ -942,12 +942,7 @@
     height: 100%; /* 親コンテナの高さに合わせる */
     display: flex;
     flex-direction: column;
-    margin-left: var(--deck-gap, 16px); /* 2つ目以降のカラムに左マージン */
-  }
-
-  /* 最初のカラムは左マージンなし */
-  .deck-column-wrapper:first-child {
-    margin-left: 0;
+    margin-left: 0; /* 全カラムで左マージンなし - タイトなレイアウト */
   }
   
   .deck-column-mobile-wrapper {
