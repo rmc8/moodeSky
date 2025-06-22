@@ -234,7 +234,7 @@ export interface AccountOption {
   handle: string;
   displayName?: string;
   avatar?: string;
-  isDefault?: boolean;
+  isSelected?: boolean; // 初期選択状態（デフォルトアカウントの概念ではない）
 }
 
 /**

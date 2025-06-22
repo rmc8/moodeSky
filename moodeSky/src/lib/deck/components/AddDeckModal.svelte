@@ -62,7 +62,7 @@
       handle: account.profile.handle,
       displayName: account.profile.displayName,
       avatar: account.profile.avatar,
-      isDefault: index === 0 // 最初のアカウントをデフォルト
+      isSelected: index === 0 // 最初のアカウントを初期選択
     }))
   );
 
@@ -125,6 +125,7 @@
       const result = await authService.getAllAccounts();
       if (result.success && result.data) {
         availableAccounts = result.data;
+        setInitialAccount(); // アカウント読み込み後に初期選択を設定
         console.log('🔄 [AddDeckModal] アカウント読み込み完了:', result.data.length);
       } else {
         console.error('🔄 [AddDeckModal] アカウント読み込み失敗:', result.error);
@@ -141,11 +142,21 @@
    */
   function resetFormData() {
     formData = {
-      selectedAccountId: accountOptions[0]?.id || '',
+      selectedAccountId: '', // 初期は空にして、後でsetDefaultAccount()で設定
       selectedAlgorithm: ADD_DECK_DEFAULTS.algorithm,
       deckName: m['deck.addDeck.defaultName'](), // 翻訳されたデフォルト名
       settings: { ...ADD_DECK_DEFAULTS.settings }
     };
+  }
+
+  /**
+   * 初期アカウントを設定
+   */
+  function setInitialAccount() {
+    if (availableAccounts.length > 0 && !formData.selectedAccountId) {
+      formData.selectedAccountId = availableAccounts[0].id;
+      console.log('🔄 [AddDeckModal] 初期アカウント選択:', availableAccounts[0].profile.handle);
+    }
   }
 
   // ===================================================================
@@ -240,12 +251,11 @@
   const isAccountStep = $derived(currentStep === 'account');
   const isAlgorithmStep = $derived(currentStep === 'algorithm');
   const isSettingsStep = $derived(currentStep === 'settings');
-  const canProceed = $derived(() => {
-    if (isAccountStep) return !!formData.selectedAccountId;
-    if (isAlgorithmStep) return !!formData.selectedAlgorithm;
-    if (isSettingsStep) return !!formData.deckName.trim();
-    return false;
-  });
+  const canProceed = $derived(
+    (isAccountStep && !!formData.selectedAccountId) ||
+    (isAlgorithmStep && !!formData.selectedAlgorithm) ||
+    (isSettingsStep && !!formData.deckName.trim())
+  );
 
   // ステップインジケーター用ヘルパー
   function isStepCompleted(step: string, index: number) {
@@ -335,11 +345,6 @@
                         <div class="font-medium {formData.selectedAccountId === account.id ? 'text-white' : 'text-themed'}">{account.displayName || account.handle}</div>
                         <div class="text-sm {formData.selectedAccountId === account.id ? 'text-white opacity-80' : 'text-themed opacity-60'}">@{account.handle}</div>
                       </div>
-                      {#if account.isDefault}
-                        <span class="text-xs px-2 py-1 rounded {formData.selectedAccountId === account.id ? 'bg-white/20 text-white' : 'bg-primary/20 text-primary'}">
-                          {m['deck.addDeck.account.defaultAccount']()}
-                        </span>
-                      {/if}
                     </div>
                   </div>
                 </label>
@@ -463,7 +468,7 @@
               <button 
                 class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
                 onclick={createDeck}
-                disabled={!canProceed() || isLoading}
+                disabled={!canProceed || isLoading}
               >
                 {#if isLoading}
                   <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -474,7 +479,7 @@
               <button 
                 class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
                 onclick={nextStep}
-                disabled={!canProceed()}
+                disabled={!canProceed}
               >
                 {m['deck.addDeck.buttons.next']()}
               </button>
