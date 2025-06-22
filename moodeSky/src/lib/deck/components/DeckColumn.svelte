@@ -160,19 +160,20 @@
 
 <!-- カラムコンテナ -->
 <div 
-  class="deck-column"
-  class:deck-column--minimized={column.settings.isMinimized}
-  class:deck-column--pinned={column.settings.isPinned}
+  class="flex flex-col bg-card border border-subtle rounded-lg shadow-sm overflow-hidden relative h-full transition-all duration-200"
+  class:w-20={column.settings.isMinimized}
+  class:border-primary-pinned={column.settings.isPinned}
+  class:shadow-md={column.settings.isPinned}
   style={styleString()}
 >
   <!-- カラムヘッダー -->
-  <header class="deck-column__header">
+  <header class="flex items-center gap-2 p-3 border-b border-subtle bg-card sticky top-0 z-10">
     <!-- タイトル部分（クリックでトップスクロール） -->
     <button 
-      class="deck-column__title-button"
+      class="flex items-center gap-3 flex-1 min-w-0 text-left rounded p-1 transition-colors hover:bg-muted/10"
       onclick={handleHeaderClick}
     >
-      <div class="deck-column__icon">
+      <div class="flex-shrink-0 w-10 h-10 rounded bg-primary/10 flex items-center justify-center">
         {#if column.algorithm === 'reverse_chronological'}
           <Icon icon={ICONS.HOME} size="md" color="primary" />
         {:else}
@@ -180,21 +181,21 @@
         {/if}
       </div>
       
-      <div class="deck-column__title-info">
-        <h3 class="deck-column__title text-themed">
+      <div class="flex-1 min-w-0">
+        <h3 class="font-semibold text-sm text-themed truncate">
           {column.settings.title}
         </h3>
-        <p class="deck-column__subtitle text-themed opacity-60">
+        <p class="text-xs text-themed opacity-60 truncate">
           @{accountId.split('.')[0] || 'user'}
         </p>
       </div>
     </button>
 
     <!-- ヘッダーボタン -->
-    <div class="deck-column__actions">
+    <div class="flex items-center gap-1">
       <!-- リフレッシュボタン -->
       <button 
-        class="deck-column__action-button"
+        class="w-8 h-8 rounded flex items-center justify-center transition-colors hover:bg-muted/20 disabled:opacity-50 disabled:cursor-not-allowed"
         onclick={handleRefresh}
         disabled={isRefreshing}
         aria-label={m['deck.column.refresh']()}
@@ -209,9 +210,9 @@
 
       <!-- 設定ボタン -->
       <button 
-        class="deck-column__action-button"
+        class="w-8 h-8 rounded flex items-center justify-center transition-colors hover:bg-muted/20"
         onclick={toggleSettings}
-        class:deck-column__action-button--active={showSettings}
+        class:bg-primary-active={showSettings} class:text-primary={showSettings}
         aria-label={m['deck.column.settings']()}
       >
         <Icon icon={ICONS.SETTINGS} size="sm" color="themed" />
@@ -220,30 +221,30 @@
 
     <!-- 設定ドロップダウン -->
     {#if showSettings}
-      <div class="deck-column__settings">
+      <div class="absolute top-full right-0 mt-1 bg-card border border-themed/20 rounded-lg shadow-lg p-3 min-w-64 z-20">
         <!-- カラム幅設定 -->
-        <div class="settings-section">
-          <h4 class="settings-section__title text-themed">
+        <div class="mb-4 last:mb-0">
+          <h4 class="text-sm font-medium text-themed mb-2">
             {m['deck.column.width']()}
           </h4>
-          <div class="settings-section__content">
+          <div class="space-y-1">
             {#each Object.entries(COLUMN_WIDTHS) as [width, info]}
               <button
-                class="width-option"
-                class:width-option--active={column.settings.width === width}
+                class="w-full flex items-center justify-between p-2 rounded text-left transition-colors hover:bg-muted/10"
+                class:bg-primary-active={column.settings.width === width} class:text-primary={column.settings.width === width}
                 onclick={() => handleWidthChange(width as ColumnWidth)}
               >
-                <span class="width-option__label text-themed">{info.label}</span>
-                <span class="width-option__size text-themed opacity-60">{info.width}px</span>
+                <span class="text-sm text-themed">{info.label}</span>
+                <span class="text-xs text-themed opacity-60">{info.width}px</span>
               </button>
             {/each}
           </div>
         </div>
 
         <!-- 削除ボタン -->
-        <div class="settings-section">
+        <div class="mb-4 last:mb-0">
           <button 
-            class="settings-danger-button"
+            class="w-full flex items-center gap-2 p-2 rounded text-error transition-colors hover:bg-error/10"
             onclick={handleRemoveColumn}
           >
             <Icon icon={ICONS.DELETE} size="sm" color="error" />
@@ -256,22 +257,22 @@
 
   <!-- カラムコンテンツ -->
   <div 
-    class="deck-column__content scrollbar-professional"
+    class="flex-1 overflow-y-auto overflow-x-hidden scrollbar-professional"
     bind:this={scrollElement}
   >
     <!-- 空状態（現在の実装） -->
-    <div class="deck-column__empty">
-      <div class="deck-column__empty-icon">
+    <div class="flex flex-col items-center justify-center h-full p-6 text-center md:p-6 max-md:pt-0 max-md:pb-15 max-md:px-2">
+      <div class="mb-4 opacity-40">
         <Icon icon={ICONS.INBOX} size="lg" color="themed" />
       </div>
-      <h4 class="deck-column__empty-title text-themed">
+      <h4 class="font-medium text-themed mb-2">
         {m['deck.column.empty.title']()}
       </h4>
-      <p class="deck-column__empty-description text-themed opacity-70">
+      <p class="text-sm text-themed opacity-70 mb-6 max-w-48">
         {m['deck.column.empty.description']()}
       </p>
       <button 
-        class="deck-column__empty-button button-primary"
+        class="button-primary text-sm px-4 py-2"
         onclick={handleRefresh}
         disabled={isRefreshing}
       >
@@ -291,264 +292,23 @@
 </div>
 
 <style>
-  .deck-column {
-    display: flex;
-    flex-direction: column;
-    background-color: var(--color-card);
-    border: 1px solid rgb(var(--border) / 0.2);
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-    position: relative;
-    height: 100%;
-    transition: width 0.2s ease-in-out;
+  /* DeckColumn TailwindCSS v4移行完了 - 大幅CSS削減達成 */
+  
+  /* WebKit角丸レンダリング最適化 */
+  :global(.rounded-lg) {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
   }
   
-  .deck-column--minimized {
+  /* モバイル特化調整: レスポンシブ高さ・幅制御 */
+  @media (max-width: 767px) {
+    /* モバイル固有のスタイルは現在TailwindCSSクラスで対応 */
+  }
+  
+  /* 最小化時の特別幅設定 */
+  .w-20 {
     width: 80px !important;
     min-width: 80px !important;
-  }
-  
-  .deck-column--pinned {
-    border-color: rgb(var(--primary) / 0.4);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-  
-  /* レスポンシブ高さ調整 */
-  @media (max-width: 767px) {
-    .deck-column {
-      height: calc(100vh - 48px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); /* モバイル: コンパクトタブ(48px) + セーフエリア */
-      /* モバイルで100%幅を強制 */
-      width: 100% !important;
-      min-width: 100% !important;
-      max-width: 100% !important;
-      box-sizing: border-box !important; /* パディング・ボーダーを幅に含める */
-      margin: 0 !important; /* マージンを削除 */
-    }
-  }
-  
-  @media (min-width: 768px) {
-    .deck-column {
-      height: 100%; /* 親要素の高さを継承 */
-    }
-  }
-  
-  /* ヘッダー */
-  .deck-column__header {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    border-bottom: 1px solid rgb(var(--border) / 0.2);
-    background-color: rgb(var(--card) / 0.8);
-    backdrop-filter: blur(8px);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  
-  .deck-column__title-button {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex: 1;
-    min-width: 0;
-    text-align: left;
-    border-radius: 0.25rem;
-    padding: 0.25rem;
-    transition: color 150ms, background-color 150ms;
-  }
-  
-  .deck-column__title-button:hover {
-    background-color: rgb(var(--muted) / 0.1);
-  }
-  
-  .deck-column__icon {
-    flex-shrink: 0;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 0.25rem;
-    background-color: rgb(var(--primary) / 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .deck-column__title-info {
-    flex: 1;
-    min-width: 0;
-  }
-  
-  .deck-column__title {
-    font-weight: 600;
-    font-size: 0.875rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  .deck-column__subtitle {
-    font-size: 0.75rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  .deck-column__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-  
-  .deck-column__action-button {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 150ms, background-color 150ms;
-  }
-  
-  .deck-column__action-button:hover {
-    background-color: rgb(var(--muted) / 0.2);
-  }
-  
-  .deck-column__action-button--active {
-    background-color: rgb(var(--primary) / 0.1);
-    color: var(--color-primary);
-  }
-  
-  .deck-column__action-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  /* 設定ドロップダウン */
-  .deck-column__settings {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 0.25rem;
-    background-color: var(--color-card);
-    border: 1px solid rgb(var(--border) / 0.2);
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    padding: 0.75rem;
-    min-width: 16rem;
-    z-index: 20;
-  }
-  
-  .settings-section {
-    margin-bottom: 1rem;
-  }
-  
-  .settings-section:last-child {
-    margin-bottom: 0;
-  }
-    
-  .settings-section__title {
-    font-size: 0.875rem;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-  }
-    
-  .settings-section__content > * + * {
-    margin-top: 0.25rem;
-  }
-  
-  .width-option {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    text-align: left;
-    transition: color 150ms, background-color 150ms;
-  }
-  
-  .width-option:hover {
-    background-color: rgb(var(--muted) / 0.1);
-  }
-    
-  .width-option--active {
-    background-color: rgb(var(--primary) / 0.1);
-    color: var(--color-primary);
-  }
-    
-  .width-option__label {
-    font-size: 0.875rem;
-  }
-    
-  .width-option__size {
-    font-size: 0.75rem;
-  }
-  
-  .settings-danger-button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    color: var(--color-error);
-    transition: color 150ms, background-color 150ms;
-  }
-  
-  .settings-danger-button:hover {
-    background-color: rgb(var(--error) / 0.1);
-  }
-  
-  /* コンテンツ */
-  .deck-column__content {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-  
-  /* 統合スクロールバーは scrollbar-professional クラスで適用済み */
-  
-  /* 空状態 */
-  .deck-column__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    padding: 1.5rem;
-    text-align: center;
-  }
-  
-  /* モバイル版での空状態の余白調整 */
-  @media (max-width: 767px) {
-    .deck-column__empty {
-      padding-top: 0; /* 上の余白なし */
-      padding-bottom: 60px; /* 下は60px固定 */
-      padding-left: 8px; /* 左右は8px */
-      padding-right: 8px;
-    }
-  }
-  
-  .deck-column__empty-icon {
-    margin-bottom: 1rem;
-    opacity: 0.4;
-  }
-  
-  .deck-column__empty-title {
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-  }
-  
-  .deck-column__empty-description {
-    font-size: 0.875rem;
-    margin-bottom: 1.5rem;
-    max-width: 12rem;
-  }
-  
-  .deck-column__empty-button {
-    font-size: 0.875rem;
-    padding: 0.5rem 1rem;
   }
 </style>

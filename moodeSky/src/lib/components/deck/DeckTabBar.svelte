@@ -49,128 +49,17 @@
   
 </script>
 
-<style>
-  /* DeckTabBar ベーススタイル */
-  .deck-tab-bar {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0; /* flexboxの高さ制御 */
-  }
-  
-  .deck-tab-bar__content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    /* スクロールバーのスタイル適用 */
-    scrollbar-width: thin;
-    scrollbar-color: rgb(var(--primary) / 0.3) transparent;
-  }
-  
-  .deck-tab-bar__content::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .deck-tab-bar__content::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .deck-tab-bar__content::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--primary) / 0.3);
-    border-radius: 3px;
-  }
-  
-  .deck-tab-bar__content::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(var(--primary) / 0.5);
-  }
-  
-  /* タブボタン */
-  .deck-tab-bar__button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    text-align: left;
-    background-color: var(--color-card);
-    color: var(--color-foreground);
-    border: 1px solid transparent;
-  }
-  
-  .deck-tab-bar__button:hover {
-    background-color: rgb(var(--primary) / 0.05);
-    border-color: rgb(var(--primary) / 0.1);
-  }
-  
-  .deck-tab-bar__button--active {
-    background-color: rgb(var(--primary) / 0.1);
-    border-color: rgb(var(--primary) / 0.3);
-    color: rgb(var(--primary));
-  }
-  
-  .deck-tab-bar__button:active {
-    transform: scale(0.98);
-  }
-  
-  .deck-tab-bar__label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: inherit;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-  }
-  
-  /* 空状態 */
-  .deck-tab-bar__empty {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
-    text-align: center;
-    gap: 1rem;
-  }
-  
-  .deck-tab-bar__empty-icon {
-    opacity: 0.6;
-  }
-  
-  .deck-tab-bar__empty-text {
-    font-size: 0.875rem;
-    color: var(--color-foreground);
-    opacity: 0.6;
-  }
-  
-  /* フォーカス状態 */
-  .deck-tab-bar__button:focus-visible {
-    outline: 2px solid rgb(var(--primary) / 0.6);
-    outline-offset: 2px;
-  }
-  
-  /* パフォーマンス最適化 */
-  .deck-tab-bar__button {
-    backface-visibility: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
-</style>
-
 <!-- デッキタブバー -->
-<div class="deck-tab-bar bg-card border-t border-themed">
-  <div class="deck-tab-bar__content">
+<div class="flex-1 flex flex-col min-h-0 bg-card">
+  <div class="flex-1 overflow-y-auto p-2 flex flex-col gap-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/30 hover:scrollbar-thumb-primary/50">
     {#if columns.length > 0}
       <!-- 実際のカラムタブ表示 -->
       {#each columns as column}
         <button
-          class="deck-tab-bar__button"
-          class:deck-tab-bar__button--active={column.id === activeColumnId}
+          class="w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ease-out text-left bg-card text-themed border border-transparent hover:bg-primary-hover hover:border-primary-border active:scale-98 focus-visible:outline-2 focus-visible:outline-primary-outline focus-visible:outline-offset-2"
+          class:bg-primary-active={column.id === activeColumnId}
+          class:border-primary-border-active={column.id === activeColumnId}
+          class:text-primary={column.id === activeColumnId}
           role="tab"
           aria-selected={column.id === activeColumnId}
           aria-label={column.settings.title}
@@ -185,14 +74,14 @@
           />
           
           <!-- タブ名 -->
-          <span class="deck-tab-bar__label">
+          <span class="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis flex-1">
             {column.settings.title}
           </span>
         </button>
       {/each}
     {:else}
       <!-- カラムがない場合のメッセージ -->
-      <div class="deck-tab-bar__empty">
+      <div class="flex-1 flex flex-col items-center justify-center p-8 px-4 text-center gap-4">
         <Icon 
           icon={ICONS.INBOX}
           size="lg"
@@ -200,7 +89,7 @@
           decorative={true}
           class="deck-tab-bar__empty-icon"
         />
-        <p class="deck-tab-bar__empty-text">カラムがありません</p>
+        <p class="text-sm text-themed opacity-60">カラムがありません</p>
       </div>
     {/if}
   </div>

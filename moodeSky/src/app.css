@@ -36,8 +36,8 @@
     --secondary: 37 99 235;         /* blue-600 */
     --accent: 56 189 248;           /* sky-400 */
     --muted: 248 250 252;           /* slate-50 - 背景専用 */
-    --border: 229 231 235;          /* gray-200 */
-    --input: 229 231 235;           /* gray-200 */
+    --border: 226 232 240;          /* slate-200 - より薄い控えめな境界 */
+    --input: 241 245 249;           /* slate-100 - 境界と統一 */
     --card: 255 255 255;            /* white */
     --ring: 59 130 246;             /* blue-500 */
     --success: 34 197 94;           /* green-500 */
@@ -55,8 +55,8 @@
     --secondary: 249 115 22;        /* orange-500 */
     --accent: 254 215 170;          /* orange-200 */
     --muted: 226 232 240;           /* slate-200 - 背景専用 */
-    --border: 100 116 139;          /* slate-500 (コントラスト改善) */
-    --input: 100 116 139;           /* slate-500 (コントラスト改善) */
+    --border: 51 65 85;             /* slate-600 - より薄い控えめな境界 */
+    --input: 30 41 59;              /* slate-800 - 境界と統一 */
     --card: 51 65 85;               /* slate-600 (読みやすさ改善) */
     --ring: 251 146 60;             /* orange-400 */
     --success: 74 222 128;          /* green-400 */
@@ -87,8 +87,8 @@
   .dark {
     --background: 15 23 42;
     --foreground: 248 250 252;
-    --border: 71 85 105;
-    --input: 71 85 105;
+    --border: 30 41 59;
+    --input: 30 41 59;
     --card: 30 41 59;
     --muted: 51 65 85;
   }
@@ -96,8 +96,8 @@
   .light {
     --background: 255 255 255;
     --foreground: 15 23 42;
-    --border: 229 231 235;
-    --input: 229 231 235;
+    --border: 241 245 249;
+    --input: 241 245 249;
     --card: 255 255 255;
     --muted: 248 250 252;
   }
@@ -249,6 +249,12 @@
   --color-text-secondary: rgb(var(--text-secondary));
   --color-text-inactive: rgb(var(--text-inactive));
 
+  /* TailwindCSS v4 透明度対応カスタム色 */
+  --color-themed: var(--foreground);
+  
+  /* 境界線専用色 */
+  --color-border-subtle: rgb(var(--border) / 0.15);
+
   /* Alpha variations */
   --color-primary-50: rgb(var(--primary) / 0.05);
   --color-primary-100: rgb(var(--primary) / 0.1);
@@ -398,6 +404,35 @@
     color: var(--color-muted);
   }
 
+  /* 🎨 カスタムプライマリ色バリエーション - Svelte構文エラー回避 */
+  .bg-primary-active {
+    background-color: rgb(var(--primary) / 0.2);
+  }
+
+  .bg-primary-hover {
+    background-color: rgb(var(--primary) / 0.05);
+  }
+
+  .bg-muted-hover {
+    background-color: rgb(var(--muted) / 0.7);
+  }
+
+  .border-primary-border {
+    border-color: rgb(var(--primary) / 0.25);
+  }
+
+  .border-primary-border-active {
+    border-color: rgb(var(--primary) / 0.6);
+  }
+
+  .border-primary-pinned {
+    border-color: rgb(var(--primary) / 0.4);
+  }
+
+  .focus-visible\:outline-primary-outline:focus-visible {
+    outline-color: rgb(var(--primary) / 0.6);
+  }
+
   /* ✅ 推奨: 専用セカンダリテキスト色 */
   .text-secondary {
     color: rgb(var(--text-secondary));
@@ -445,6 +480,12 @@
   /* Border Colors */
   .border-themed {
     border-color: var(--color-border);
+  }
+
+  /* 控えめな境界線専用クラス */
+  .border-subtle {
+    border-color: rgb(var(--border) / 0.15);
+    border-width: 1px;
   }
 
   .border-primary {
@@ -642,8 +683,8 @@
   :root:not([data-theme]):not(.light):not(.dark):not(.high-contrast) {
     --background: 15 23 42;
     --foreground: 248 250 252;
-    --border: 71 85 105;
-    --input: 71 85 105;
+    --border: 30 41 59;
+    --input: 30 41 59;
     --card: 30 41 59;
     --muted: 51 65 85;
   }
@@ -655,6 +696,17 @@
   .theme-transitions * {
     transition: none !important;
   }
+}
+
+/* TailwindCSSフォーカスリングの調整 */
+:root {
+  --tw-ring-offset-width: 1px;
+}
+
+.focus-ring-subtle {
+  --tw-ring-offset-width: 1px;
+  --tw-ring-width: 2px;
+  --tw-ring-opacity: 0.3;
 }
 
 /* High Contrast Media Query Support */

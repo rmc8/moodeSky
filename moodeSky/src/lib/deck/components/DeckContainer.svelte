@@ -776,11 +776,11 @@
     tabindex="0"
   >
     <div 
-      class="bg-card rounded-xl shadow-2xl max-w-md w-full mx-4 border border-themed" 
+      class="bg-card rounded-xl shadow-2xl max-w-md w-full mx-4 border border-subtle" 
       onclick={(e) => e.stopPropagation()}
       role="document"
     >
-      <div class="flex items-center justify-between p-6 border-b border-themed/20">
+      <div class="flex items-center justify-between p-6 border-b border-subtle">
         <h3 class="text-themed text-lg font-semibold">
           {m['deck.addColumn']()}
         </h3>
@@ -803,7 +803,7 @@
         
         <!-- デモ用ホームタイムラインボタン -->
         <div 
-          class="w-full p-4 border border-themed/20 rounded-lg flex items-center gap-3 text-left transition-all duration-200 cursor-pointer hover:border-primary/40 hover:bg-primary/5"
+          class="w-full p-4 border border-subtle rounded-lg flex items-center gap-3 text-left transition-all duration-200 cursor-pointer hover:border-primary/40 hover:bg-primary/5"
           onclick={handleAddHomeColumn}
           onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleAddHomeColumn()}
           role="button"
