@@ -122,13 +122,14 @@
     }
   });
 
-  // 推奨デッキ名の自動設定
-  $effect(() => {
-    const suggested = suggestedDeckName();
-    if (suggested && !deckName) {
-      deckName = suggested;
-    }
-  });
+  // 推奨デッキ名の自動設定を無効化
+  // ユーザビリティ向上のため、自動入力を停止し、プレースホルダーのみ表示
+  // $effect(() => {
+  //   const suggested = suggestedDeckName();
+  //   if (suggested && !deckName) {
+  //     deckName = suggested;
+  //   }
+  // });
 
   // ===================================================================
   // Event Handlers
@@ -159,8 +160,8 @@
         name: deckName
       });
 
-      // 設定の構築
-      const finalTitle = deckName || suggestedDeckName();
+      // 設定の構築 - 空の場合のみデフォルト名を生成
+      const finalTitle = deckName.trim() || suggestedDeckName();
       const settings = {
         title: finalTitle,
         icon: getFeedTypeIcon(feedType.id),
@@ -287,7 +288,7 @@
             placeholder={suggestedDeckName()}
           />
           <p class="text-secondary text-sm mt-2">
-            空欄の場合は「{suggestedDeckName()}」が使用されます
+            空欄の場合は「{suggestedDeckName()}」が自動生成されます
           </p>
         </div>
       </div>
