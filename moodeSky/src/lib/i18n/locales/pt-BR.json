@@ -124,6 +124,79 @@
     "mobile": {
       "swipeHint": "Deslize para alternar colunas"
     },
+    "addDeck": {
+      "title": "Adicionar Painel",
+      "subtitle": "Criar uma nova coluna de painel",
+      "wizard": {
+        "stepAccount": "Seleção de Conta",
+        "stepAlgorithm": "Seleção de Tipo de Feed",
+        "stepSettings": "Configurações do Painel"
+      },
+      "account": {
+        "title": "Selecionar Conta",
+        "description": "Escolha a conta para usar neste painel",
+        "defaultAccount": "Conta Principal",
+        "noAccounts": "Nenhuma conta disponível"
+      },
+      "algorithm": {
+        "title": "Selecionar Tipo de Feed",
+        "description": "Escolha o tipo de conteúdo a ser exibido"
+      },
+      "settings": {
+        "title": "Configurações do Painel",
+        "description": "Configure o nome e configurações do painel",
+        "nameLabel": "Nome do Painel",
+        "namePlaceholder": "Digite o nome do painel",
+        "advanced": "Configurações Avançadas"
+      },
+      "defaultName": "Início",
+      "buttons": {
+        "next": "Próximo",
+        "previous": "Anterior",
+        "create": "Criar Painel",
+        "cancel": "Cancelar"
+      },
+      "algorithms": {
+        "reverse_chronological": {
+          "name": "Linha do Tempo Principal",
+          "description": "Posts de usuários que você segue em ordem cronológica"
+        },
+        "top_posts": {
+          "name": "Posts Populares",
+          "description": "Posts com alto engajamento (curtidas e reposts)"
+        },
+        "most_friends": {
+          "name": "Amigos",
+          "description": "Posts de usuários seguidos mutuamente"
+        },
+        "best_of_follows": {
+          "name": "Melhores Seguindo",
+          "description": "Posts de alta qualidade de usuários que você segue"
+        },
+        "quiet_posters": {
+          "name": "Postadores Discretos",
+          "description": "Prioriza posts de usuários que postam com menos frequência"
+        },
+        "loud_posters": {
+          "name": "Postadores Ativos",
+          "description": "Posts de usuários que postam frequentemente"
+        },
+        "close_friends": {
+          "name": "Amigos Próximos",
+          "description": "Posts de usuários com os quais você interage frequentemente"
+        },
+        "popular_in_network": {
+          "name": "Popular na Rede",
+          "description": "Posts em tendência dentro da sua rede"
+        },
+        "popular_with_friends": {
+          "name": "Popular entre Amigos",
+          "description": "Posts que seus amigos curtiram ou repostaram"
+        }
+      },
+      "success": "Painel criado com sucesso",
+      "error": "Falha ao criar painel"
+    },
     "noColumns": "No columns"
   },
   "profile": {

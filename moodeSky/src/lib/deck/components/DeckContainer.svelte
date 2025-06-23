@@ -12,6 +12,7 @@
   import { deckStore } from '../store.svelte.js';
   import type { Column } from '../types.js';
   import DeckColumn from './DeckColumn.svelte';
+  import AddDeckModal from './AddDeckModal.svelte';
   // import ColumnIndicators from './ColumnIndicators.svelte'; // 上部タブに統一のため削除
   import { SwipeDetector, CircularColumnNavigator, ColumnIntersectionObserver } from '../utils/swipeDetector.js';
   import { COLUMN_WIDTHS } from '../types.js';
@@ -24,16 +25,21 @@
   interface Props {
     accountId: string;
     className?: string;
+    showAddDeckModal?: boolean;
+    onCloseAddDeckModal?: () => void;
   }
 
-  const { accountId, className = '' }: Props = $props();
+  const { accountId, className = '', showAddDeckModal: externalShowAddDeckModal = false, onCloseAddDeckModal }: Props = $props();
 
   // ===================================================================
   // 状態管理
   // ===================================================================
 
   let isInitializing = $state(true);
-  let showAddColumnModal = $state(false);
+  
+  // モーダル状態は外部プロップまたは内部状態を使用
+  let internalShowAddDeckModal = $state(false);
+  const showAddDeckModal = $derived(externalShowAddDeckModal || internalShowAddDeckModal);
   
   // レスポンシブ状態管理
   let isMobile = $state(false);
@@ -140,45 +146,42 @@
   // ===================================================================
 
   /**
-   * カラム追加モーダルを開く
+   * Add Deck モーダルを開く
    */
-  function handleAddColumn() {
-    showAddColumnModal = true;
+  function handleAddDeck() {
+    internalShowAddDeckModal = true;
   }
 
   /**
-   * カラム追加モーダルを閉じる
+   * Add Deck モーダルを閉じる
    */
-  function handleCloseAddModal() {
-    showAddColumnModal = false;
-  }
-
-  /**
-   * デモ用のホームタイムラインカラムを追加
-   */
-  async function handleAddHomeColumn() {
-    try {
-      if (!accountId) {
-        console.warn('🎛️ [DeckContainer] accountId not provided, cannot add column');
-        return;
-      }
-      
-      await deckStore.addColumn(accountId, 'reverse_chronological', {
-        title: 'ホームタイムライン',
-        subtitle: 'フォロー中のユーザーの投稿'
-      });
-      showAddColumnModal = false;
-      console.log('🎛️ [DeckContainer] Home column added');
-      
-      // デッキ機能を再初期化
-      setTimeout(() => {
-        if (deckStore.columns.length > 0) {
-          initializeDeckFeatures();
-        }
-      }, 100);
-    } catch (error) {
-      console.error('🎛️ [DeckContainer] Failed to add home column:', error);
+  function handleCloseAddDeckModal() {
+    if (onCloseAddDeckModal) {
+      // 外部のコールバックが提供されている場合は使用
+      onCloseAddDeckModal();
+    } else {
+      // 内部状態の場合は直接操作
+      internalShowAddDeckModal = false;
     }
+  }
+
+  /**
+   * Add Deck モーダルでデッキ作成成功時のコールバック
+   */
+  function handleDeckCreated(column: Column) {
+    console.log('🎛️ [DeckContainer] New deck created:', column);
+    
+    // デッキ機能を再初期化
+    setTimeout(() => {
+      if (deckStore.columns.length > 0) {
+        initializeDeckFeatures();
+        
+        // モバイルデッキ機能の初期化
+        if (isMobile) {
+          startStateMonitoring();
+        }
+      }
+    }, 100);
   }
   
   /**
@@ -677,7 +680,7 @@
         
         <button 
           class="button-primary inline-flex items-center gap-2"
-          onclick={handleAddColumn}
+          onclick={handleAddDeck}
         >
           <Icon icon={ICONS.ADD} size="sm" color="themed" />
           {m['deck.empty.addFirstColumn']()}
@@ -765,60 +768,12 @@
 </div>
 
 <!-- カラム追加モーダル（仮実装） -->
-{#if showAddColumnModal}
-  <button
-    class="fixed inset-0 bg-foreground/50 flex items-center justify-center z-50 border-none p-0 m-0 cursor-pointer" 
-    onclick={handleCloseAddModal}
-    onkeydown={(e) => e.key === 'Escape' && handleCloseAddModal()}
-    role="dialog" 
-    aria-modal="true"
-    aria-label={m['common.close']()}
-    tabindex="0"
-  >
-    <div 
-      class="bg-card rounded-xl shadow-2xl max-w-md w-full mx-4 border border-subtle" 
-      onclick={(e) => e.stopPropagation()}
-      role="document"
-    >
-      <div class="flex items-center justify-between p-6 border-b border-subtle">
-        <h3 class="text-themed text-lg font-semibold">
-          {m['deck.addColumn']()}
-        </h3>
-        <div 
-          class="w-8 h-8 flex items-center justify-center rounded hover:bg-muted/20 transition-colors cursor-pointer"
-          onclick={handleCloseAddModal}
-          onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCloseAddModal()}
-          role="button"
-          tabindex="0"
-          aria-label={m['common.close']()}
-        >
-          <Icon icon={ICONS.CLOSE} size="md" color="themed" />
-        </div>
-      </div>
-      
-      <div class="p-6">
-        <p class="text-themed opacity-70 mb-4">
-          {m['deck.selectColumnType']()}
-        </p>
-        
-        <!-- デモ用ホームタイムラインボタン -->
-        <div 
-          class="w-full p-4 border border-subtle rounded-lg flex items-center gap-3 text-left transition-all duration-200 cursor-pointer hover:border-primary/40 hover:bg-primary/5"
-          onclick={handleAddHomeColumn}
-          onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleAddHomeColumn()}
-          role="button"
-          tabindex="0"
-        >
-          <Icon icon={ICONS.HOME} size="md" color="primary" />
-          <div class="flex-1">
-            <h4 class="text-themed font-medium">ホームタイムライン</h4>
-            <p class="text-themed opacity-60 text-sm">フォロー中のユーザーの投稿</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </button>
-{/if}
+<!-- Add Deck Modal -->
+<AddDeckModal 
+  isOpen={showAddDeckModal}
+  onClose={handleCloseAddDeckModal}
+  onSuccess={handleDeckCreated}
+/>
 
 <style>
   /* deck-container - TailwindCSS移行完了: w-full h-full relative flex flex-col flex-1 min-h-0 box-border overflow-hidden */

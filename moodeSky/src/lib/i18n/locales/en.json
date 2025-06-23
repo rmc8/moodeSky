@@ -124,6 +124,79 @@
     "mobile": {
       "swipeHint": "Swipe to switch columns"
     },
+    "addDeck": {
+      "title": "Add Deck",
+      "subtitle": "Create a new deck column",
+      "wizard": {
+        "stepAccount": "Account Selection",
+        "stepAlgorithm": "Feed Type Selection",
+        "stepSettings": "Deck Settings"
+      },
+      "account": {
+        "title": "Select Account",
+        "description": "Choose the account to use for this deck",
+        "defaultAccount": "Main Account",
+        "noAccounts": "No accounts available"
+      },
+      "algorithm": {
+        "title": "Select Feed Type",
+        "description": "Choose the type of content to display"
+      },
+      "settings": {
+        "title": "Deck Settings",
+        "description": "Configure deck name and settings",
+        "nameLabel": "Deck Name",
+        "namePlaceholder": "Enter deck name",
+        "advanced": "Advanced Settings"
+      },
+      "defaultName": "Home",
+      "buttons": {
+        "next": "Next",
+        "previous": "Previous",
+        "create": "Create Deck",
+        "cancel": "Cancel"
+      },
+      "algorithms": {
+        "reverse_chronological": {
+          "name": "Home Timeline",
+          "description": "Posts from users you follow in chronological order"
+        },
+        "top_posts": {
+          "name": "Popular Posts",
+          "description": "Posts with high engagement (likes and reposts)"
+        },
+        "most_friends": {
+          "name": "Friends",
+          "description": "Posts from mutually followed users"
+        },
+        "best_of_follows": {
+          "name": "Best of Follows",
+          "description": "High-quality posts from users you follow"
+        },
+        "quiet_posters": {
+          "name": "Quiet Posters",
+          "description": "Prioritizes posts from users who post less frequently"
+        },
+        "loud_posters": {
+          "name": "Active Posters",
+          "description": "Posts from users who post frequently"
+        },
+        "close_friends": {
+          "name": "Close Friends",
+          "description": "Posts from users you interact with frequently"
+        },
+        "popular_in_network": {
+          "name": "Popular in Network",
+          "description": "Trending posts within your network"
+        },
+        "popular_with_friends": {
+          "name": "Popular with Friends",
+          "description": "Posts that your friends have liked or reposted"
+        }
+      },
+      "success": "Deck created successfully",
+      "error": "Failed to create deck"
+    },
     "noColumns": "No columns"
   },
   "profile": {

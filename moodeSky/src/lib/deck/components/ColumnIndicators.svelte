@@ -9,6 +9,7 @@
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import type { Column } from '../types.js';
+  import { getFeedTypeIcon } from '../types.js';
   import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
@@ -60,18 +61,7 @@
    * カラムアイコンを取得
    */
   function getColumnIcon(column: Column): string {
-    switch (column.algorithm) {
-      case 'reverse_chronological': return ICONS.HOME;
-      case 'top_posts': return ICONS.FAVORITE;
-      case 'most_friends': return ICONS.PEOPLE;
-      case 'best_of_follows': return ICONS.AUTO_AWESOME;
-      case 'quiet_posters': return ICONS.VOLUME_DOWN;
-      case 'loud_posters': return ICONS.VOLUME_UP;
-      case 'close_friends': return ICONS.FAVORITE_BORDER;
-      case 'popular_in_network': return ICONS.PUBLIC;
-      case 'popular_with_friends': return ICONS.GROUP;
-      default: return ICONS.FEED;
-    }
+    return getFeedTypeIcon(column.algorithm);
   }
 </script>
 

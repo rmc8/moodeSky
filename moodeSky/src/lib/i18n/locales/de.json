@@ -124,6 +124,79 @@
     "mobile": {
       "swipeHint": "Wischen, um Spalten zu wechseln"
     },
+    "addDeck": {
+      "title": "Deck hinzufügen",
+      "subtitle": "Eine neue Deck-Spalte erstellen",
+      "wizard": {
+        "stepAccount": "Konto-Auswahl",
+        "stepAlgorithm": "Feed-Typ-Auswahl",
+        "stepSettings": "Deck-Einstellungen"
+      },
+      "account": {
+        "title": "Konto auswählen",
+        "description": "Wählen Sie das Konto für dieses Deck",
+        "defaultAccount": "Haupt-Konto",
+        "noAccounts": "Keine Konten verfügbar"
+      },
+      "algorithm": {
+        "title": "Feed-Typ auswählen",
+        "description": "Wählen Sie den anzuzeigenden Inhaltstyp"
+      },
+      "settings": {
+        "title": "Deck-Einstellungen",
+        "description": "Deck-Name und Einstellungen konfigurieren",
+        "nameLabel": "Deck-Name",
+        "namePlaceholder": "Deck-Name eingeben",
+        "advanced": "Erweiterte Einstellungen"
+      },
+      "defaultName": "Startseite",
+      "buttons": {
+        "next": "Weiter",
+        "previous": "Zurück",
+        "create": "Deck erstellen",
+        "cancel": "Abbrechen"
+      },
+      "algorithms": {
+        "reverse_chronological": {
+          "name": "Home-Timeline",
+          "description": "Posts von Nutzern, denen Sie folgen, in chronologischer Reihenfolge"
+        },
+        "top_posts": {
+          "name": "Beliebte Posts",
+          "description": "Posts mit hohem Engagement (Likes und Reposts)"
+        },
+        "most_friends": {
+          "name": "Freunde",
+          "description": "Posts von gegenseitig gefolgten Nutzern"
+        },
+        "best_of_follows": {
+          "name": "Beste Follows",
+          "description": "Hochwertige Posts von Nutzern, denen Sie folgen"
+        },
+        "quiet_posters": {
+          "name": "Ruhige Poster",
+          "description": "Priorisiert Posts von Nutzern, die seltener posten"
+        },
+        "loud_posters": {
+          "name": "Aktive Poster",
+          "description": "Posts von Nutzern, die häufig posten"
+        },
+        "close_friends": {
+          "name": "Enge Freunde",
+          "description": "Posts von Nutzern, mit denen Sie häufig interagieren"
+        },
+        "popular_in_network": {
+          "name": "Beliebt im Netzwerk",
+          "description": "Trending Posts in Ihrem Netzwerk"
+        },
+        "popular_with_friends": {
+          "name": "Beliebt bei Freunden",
+          "description": "Posts, die Ihre Freunde geliked oder repostet haben"
+        }
+      },
+      "success": "Deck erfolgreich erstellt",
+      "error": "Deck-Erstellung fehlgeschlagen"
+    },
     "noColumns": "No columns"
   },
   "profile": {

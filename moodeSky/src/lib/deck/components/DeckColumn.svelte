@@ -11,7 +11,7 @@
   import { ICONS } from '$lib/types/icon.js';
   import { deckStore } from '../store.svelte.js';
   import type { Column, ColumnWidth } from '../types.js';
-  import { COLUMN_WIDTHS } from '../types.js';
+  import { COLUMN_WIDTHS, getFeedTypeIcon } from '../types.js';
   import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
@@ -174,11 +174,7 @@
       onclick={handleHeaderClick}
     >
       <div class="flex-shrink-0 w-10 h-10 rounded bg-primary/10 flex items-center justify-center">
-        {#if column.algorithm === 'reverse_chronological'}
-          <Icon icon={ICONS.HOME} size="md" color="primary" />
-        {:else}
-          <Icon icon={ICONS.FEED} size="md" color="primary" />
-        {/if}
+        <Icon icon={getFeedTypeIcon(column.algorithm)} size="md" color="primary" />
       </div>
       
       <div class="flex-1 min-w-0">

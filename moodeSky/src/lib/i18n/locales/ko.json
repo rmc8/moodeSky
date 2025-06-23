@@ -124,6 +124,79 @@
     "mobile": {
       "swipeHint": "스와이프하여 컴럼 전환"
     },
+    "addDeck": {
+      "title": "덱 추가",
+      "subtitle": "새로운 덱 컬럼 생성",
+      "wizard": {
+        "stepAccount": "계정 선택",
+        "stepAlgorithm": "피드 타입 선택",
+        "stepSettings": "덱 설정"
+      },
+      "account": {
+        "title": "계정 선택",
+        "description": "이 덱에 사용할 계정을 선택하세요",
+        "defaultAccount": "메인 계정",
+        "noAccounts": "사용 가능한 계정이 없습니다"
+      },
+      "algorithm": {
+        "title": "피드 타입 선택",
+        "description": "표시할 콘텐츠 타입을 선택하세요"
+      },
+      "settings": {
+        "title": "덱 설정",
+        "description": "덱 이름과 설정을 구성하세요",
+        "nameLabel": "덱 이름",
+        "namePlaceholder": "덱 이름을 입력하세요",
+        "advanced": "고급 설정"
+      },
+      "defaultName": "홈",
+      "buttons": {
+        "next": "다음",
+        "previous": "이전",
+        "create": "덱 생성",
+        "cancel": "취소"
+      },
+      "algorithms": {
+        "reverse_chronological": {
+          "name": "홈 타임라인",
+          "description": "팔로우하는 사용자들의 게시물을 시간순으로 표시"
+        },
+        "top_posts": {
+          "name": "인기 게시물",
+          "description": "높은 참여도(좋아요 및 리포스트)를 가진 게시물"
+        },
+        "most_friends": {
+          "name": "친구",
+          "description": "서로 팔로우하는 사용자들의 게시물"
+        },
+        "best_of_follows": {
+          "name": "베스트 팔로우",
+          "description": "팔로우하는 사용자들의 고품질 게시물"
+        },
+        "quiet_posters": {
+          "name": "조용한 포스터",
+          "description": "게시 빈도가 낮은 사용자들의 게시물 우선 표시"
+        },
+        "loud_posters": {
+          "name": "활발한 포스터",
+          "description": "자주 게시하는 사용자들의 게시물"
+        },
+        "close_friends": {
+          "name": "가까운 친구",
+          "description": "자주 상호작용하는 사용자들의 게시물"
+        },
+        "popular_in_network": {
+          "name": "네트워크에서 인기",
+          "description": "당신의 네트워크에서 트렌딩 중인 게시물"
+        },
+        "popular_with_friends": {
+          "name": "친구들에게 인기",
+          "description": "친구들이 좋아요나 리포스트한 게시물"
+        }
+      },
+      "success": "덱이 성공적으로 생성되었습니다",
+      "error": "덱 생성에 실패했습니다"
+    },
     "noColumns": "No columns"
   },
   "profile": {

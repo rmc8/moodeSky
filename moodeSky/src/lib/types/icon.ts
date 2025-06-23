@@ -139,11 +139,14 @@ export const ICONS = {
   // ソーシャルメディア拡張
   BOOKMARK: 'material-symbols:bookmark',
   HEART: 'material-symbols:favorite',
-  AT: 'material-symbols:alternate-email',
+  ALTERNATE_EMAIL: 'material-symbols:alternate-email',
   LIST: 'material-symbols:list',
-  HASHTAG: 'material-symbols:tag',
+  TAG: 'material-symbols:tag',
   THREAD: 'material-symbols:forum',
   FEED: 'material-symbols:dynamic-feed',
+  RSS_FEED: 'material-symbols:rss-feed',
+  TRENDING_UP: 'material-symbols:trending-up',
+  STAR: 'material-symbols:star',
   
   // モバイル・スワイプ
   SWIPE_HORIZONTAL: 'material-symbols:swipe',
