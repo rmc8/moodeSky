@@ -125,9 +125,19 @@ export class DeckStore {
   async addColumn(
     accountId: string,
     algorithm: ColumnAlgorithm,
-    settings?: Partial<ColumnSettings>
+    settings?: Partial<ColumnSettings>,
+    algorithmConfig?: any
   ): Promise<Column> {
     const column = createColumn(accountId, algorithm, settings);
+    
+    // アルゴリズム設定を追加
+    if (algorithmConfig) {
+      column.algorithmConfig = {
+        type: algorithm === 'home' ? 'home' : 'custom',
+        name: column.settings.title,
+        ...algorithmConfig
+      };
+    }
     
     this.state.layout.columns.push(column);
     this.state.activeColumnId = column.id;

@@ -103,7 +103,7 @@
           console.log('🔍 [DEBUG] No columns found, creating default column');
           await deckStore.addColumn(
             activeAccount.profile.handle,
-            'reverse_chronological',
+            'home',
             {
               title: t('navigation.home'),
               subtitle: 'フォロー中のユーザーの投稿'
