@@ -36,7 +36,7 @@
   // 内部状態管理
   // ===================================================================
 
-  let inputElement: HTMLInputElement | HTMLTextAreaElement;
+  let inputElement = $state<HTMLInputElement | HTMLTextAreaElement>();
   let isFocused = $state(false);
   let uniqueId = $state(`input-${Math.random().toString(36).substr(2, 9)}`);
 

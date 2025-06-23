@@ -85,10 +85,19 @@
 
   /**
    * 最終的なクラス文字列
+   * パフォーマンス最適化版
    */
-  const finalClasses = $derived(() => 
-    `${baseClasses} ${variantClasses()} ${sizeClasses()} ${stateClasses()} ${additionalClass}`.trim()
-  );
+  const finalClasses = $derived(() => {
+    const classes = [
+      baseClasses,
+      variantClasses(),
+      sizeClasses(),
+      stateClasses(),
+      additionalClass
+    ].filter(Boolean);
+    
+    return classes.join(' ');
+  });
 
   // ===================================================================
   // ハイコントラスト対応（セカンダリボタン用）
@@ -128,10 +137,19 @@
 
   /**
    * クリックイベント処理
+   * エラーハンドリング付き
    */
   const handleClick = () => {
     if (disabled || loading) return;
-    onclick?.();
+    
+    try {
+      onclick?.();
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Button click error:', error);
+      }
+      // プロダクション環境でのエラーレポーティング拡張余地
+    }
   };
 
   /**
