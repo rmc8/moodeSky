@@ -482,7 +482,7 @@ export const FEED_TYPE_CONFIGS: FeedTypeConfig[] = [
     id: 'following',
     name: 'フォロー中',
     description: 'フォローしているユーザー一覧を表示',
-    icon: ICONS.PEOPLE,
+    icon: ICONS.PERSON_ADD,
     category: 'user',
     supportsAllAccounts: false,
     recommendedFor: 'フォロー関係の管理に最適'
@@ -515,7 +515,7 @@ export const FEED_TYPE_CONFIGS: FeedTypeConfig[] = [
     id: 'custom_feed',
     name: 'カスタムフィード',
     description: '外部のカスタムフィードを表示',
-    icon: ICONS.RSS_FEED,
+    icon: ICONS.TAG,
     category: 'custom',
     supportsAllAccounts: false,
     requiresAdditionalInput: true,
@@ -560,12 +560,12 @@ export const COLUMN_ALGORITHM_ICONS: Record<ColumnAlgorithm, string> = {
   'trending': ICONS.TRENDING_UP,
   
   // ユーザー関連
-  'following': ICONS.PEOPLE,
+  'following': ICONS.PERSON_ADD,
   'followers': ICONS.GROUP,
   
   // カスタム機能
   'list': ICONS.LIST,
-  'custom_feed': ICONS.RSS_FEED,
+  'custom_feed': ICONS.TAG,
 };
 
 /**

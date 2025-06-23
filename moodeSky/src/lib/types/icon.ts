@@ -100,6 +100,8 @@ export const ICONS = {
   NOTIFICATIONS: 'material-symbols:notifications',
   PERSON: 'material-symbols:person',
   ACCOUNT_CIRCLE: 'material-symbols:account-circle',
+  ARROW_BACK: 'material-symbols:arrow-back',
+  ARROW_FORWARD: 'material-symbols:arrow-forward',
   
   // アクション
   MORE_HORIZ: 'material-symbols:more-horiz',
@@ -117,6 +119,7 @@ export const ICONS = {
   // ユーザー・アカウント
   PEOPLE: 'material-symbols:people',
   GROUP: 'material-symbols:group',
+  PERSON_ADD: 'material-symbols:person-add',
   SECURITY: 'material-symbols:security',
   
   // 未来・開発
