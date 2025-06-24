@@ -8,6 +8,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
+  import ConfirmationModal from '$lib/components/ui/ConfirmationModal.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { deckStore } from '../store.svelte.js';
   import type { Column, ColumnWidth } from '../types.js';
@@ -33,6 +34,7 @@
   let scrollElement: HTMLElement;
   let showSettings = $state(false);
   let isRefreshing = $state(false);
+  let showDeleteConfirmation = $state(false);
 
   // ===================================================================
   // カラム幅の動的スタイル
@@ -100,17 +102,42 @@
   }
 
   /**
-   * カラムを削除
+   * カラム削除の確認ダイアログを表示
    */
-  async function handleRemoveColumn() {
-    if (confirm(m['deck.column.confirmDelete']())) {
-      try {
-        await deckStore.removeColumn(column.id);
-        console.log('🎛️ [DeckColumn] Column removed:', column.id);
-      } catch (error) {
-        console.error('🎛️ [DeckColumn] Failed to remove column:', error);
-      }
+  function handleRemoveColumn() {
+    console.log('🎛️ [DeckColumn] Delete button clicked for column:', column.id);
+    showDeleteConfirmation = true;
+    showSettings = false; // 設定メニューを閉じる
+  }
+
+  /**
+   * 削除確認 - 確認時の処理
+   */
+  async function handleDeleteConfirm() {
+    console.log('🎛️ [DeckColumn] User confirmed deletion for column:', column.id);
+    
+    try {
+      await deckStore.removeColumn(column.id);
+      console.log('🎛️ [DeckColumn] Column removed successfully:', column.id);
+      showDeleteConfirmation = false;
+      
+      // 成功通知は deckStore または上位コンポーネントで処理
+      // アプリケーション統一のトーストシステムがある場合はそちらを使用
+    } catch (error) {
+      console.error('🎛️ [DeckColumn] Failed to remove column:', error);
+      showDeleteConfirmation = false;
+      
+      // エラー時は簡易的にアラートを表示（将来的にはトーストシステムに移行）
+      alert(`カラムの削除に失敗しました: ${error.message}`);
     }
+  }
+
+  /**
+   * 削除確認 - キャンセル時の処理
+   */
+  function handleDeleteCancel() {
+    console.log('🎛️ [DeckColumn] User cancelled deletion for column:', column.id);
+    showDeleteConfirmation = false;
   }
 
   /**
@@ -217,7 +244,7 @@
 
     <!-- 設定ドロップダウン -->
     {#if showSettings}
-      <div class="absolute top-full right-0 mt-1 bg-card border border-themed/20 rounded-lg shadow-lg p-3 min-w-64 z-20">
+      <div class="absolute top-full right-0 mt-1 bg-card border border-themed/5 rounded-lg shadow-lg p-3 min-w-64 z-20">
         <!-- カラム幅設定 -->
         <div class="mb-4 last:mb-0">
           <h4 class="text-sm font-medium text-themed mb-2">
@@ -286,6 +313,19 @@
     {/if} -->
   </div>
 </div>
+
+<!-- 削除確認モーダル -->
+<ConfirmationModal
+  isOpen={showDeleteConfirmation}
+  variant="danger"
+  title={m['deck.column.delete']()}
+  message={m['deck.column.confirmDelete']()}
+  confirmText={m['common.delete']()}
+  cancelText={m['common.cancel']()}
+  onConfirm={handleDeleteConfirm}
+  onCancel={handleDeleteCancel}
+  zIndex={9999}
+/>
 
 <style>
   /* DeckColumn TailwindCSS v4移行完了 - 大幅CSS削減達成 */

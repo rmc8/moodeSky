@@ -61,22 +61,28 @@
   });
 
   /**
-   * z-index スタイル
+   * z-index スタイル（tokimekibluesky参考）
    */
-  const zIndexStyle = $derived(() => `z-${zIndex}`);
+  const zIndexStyle = $derived(() => {
+    // tokimekiblueskyの階層に合わせた高いz-index値を使用
+    if (zIndex >= 9999) {
+      return 'z-[9999]'; // トップレベルモーダル
+    }
+    return `z-${zIndex}`;
+  });
 
   /**
-   * オーバーレイクラス
+   * オーバーレイクラス（tokimekibluesky参考の配置戦略）
    */
   const overlayClasses = $derived(() => 
-    `fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center ${zIndexStyle()} p-4 transition-all duration-300`
+    `fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center ${zIndexStyle()} p-4 transition-all duration-300`
   );
 
   /**
-   * モーダルコンテナクラス
+   * モーダルコンテナクラス（tokimekibluesky参考の配置最適化）
    */
   const containerClasses = $derived(() => 
-    `bg-card rounded-2xl shadow-2xl ${sizeClasses()} w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-all duration-300 scale-100`
+    `bg-card rounded-2xl shadow-2xl ${sizeClasses()} w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-all duration-300 scale-100 mx-auto my-auto`
   );
 
   // ===================================================================

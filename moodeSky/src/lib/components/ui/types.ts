@@ -277,3 +277,47 @@ export type ResponsiveValue<T> = T | {
   lg?: T;
   xl?: T;
 };
+
+// ===================================================================
+// ConfirmationModal コンポーネント型定義
+// ===================================================================
+
+/**
+ * 確認ダイアログのバリアント
+ * danger: 危険な操作（削除等）- エラー色
+ * warning: 警告（重要な変更等）- 警告色
+ * info: 情報確認（保存等）- プライマリ色
+ */
+export type ConfirmationVariant = 'danger' | 'warning' | 'info';
+
+/**
+ * 確認ダイアログコンポーネントのProps
+ */
+export interface ConfirmationModalProps {
+  /** モーダル表示状態 */
+  isOpen: boolean;
+  
+  /** 確認タイトル */
+  title?: string;
+  
+  /** 確認メッセージ */
+  message: string;
+  
+  /** 確認ボタンテキスト（カスタム） */
+  confirmText?: string;
+  
+  /** キャンセルボタンテキスト（カスタム） */
+  cancelText?: string;
+  
+  /** 危険度レベル */
+  variant?: ConfirmationVariant;
+  
+  /** 確認アイコン表示フラグ */
+  showIcon?: boolean;
+  
+  /** 確認時のコールバック */
+  onConfirm: () => void;
+  
+  /** キャンセル時のコールバック */
+  onCancel: () => void;
+}
