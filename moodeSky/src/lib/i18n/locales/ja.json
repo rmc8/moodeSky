@@ -115,6 +115,7 @@
       "width": "カラム幅",
       "delete": "カラムを削除",
       "confirmDelete": "このカラムを削除しますか？",
+      "confirmDeleteWithName": "カラム「{columnName}」を削除しますか？",
       "loading": "読み込み中...",
       "loadContent": "コンテンツを読み込み",
       "empty": {
@@ -197,7 +198,141 @@
         }
       },
       "success": "デッキが作成されました",
-      "error": "デッキの作成に失敗しました"
+      "error": "デッキの作成に失敗しました",
+      "feedConfig": {
+        "title": "{feedType}の設定",
+        "accountSelection": "アカウント選択",
+        "advancedSettings": "詳細設定",
+        "allAccounts": "全アカウント",
+        "allAccountsDescription": "全アカウント対応",
+        "validation": {
+          "missingInfo": "必要な情報が不足しています",
+          "createFailed": "デッキの作成に失敗しました"
+        },
+        "helpText": "空欄の場合は「{suggestedName}」が自動生成されます"
+      },
+      "accountSelector": {
+        "allAccounts": "全アカウント",
+        "allAccountsDescription": "すべてのアカウントの情報を統合して表示",
+        "recommended": "推奨",
+        "multiAccountFeed": "全アカウント対応フィード",
+        "multiAccountDescription": "このフィードタイプは複数のアカウントからの情報を統合表示できます。「全アカウント」を選択すると、ログイン中の全アカウントの情報がまとめて表示されます。",
+        "singleAccountFeed": "単一アカウント専用フィード",
+        "singleAccountDescription": "このフィードタイプは特定のアカウントに紐づく情報を表示します。表示したいアカウントを1つ選択してください。"
+      }
+    }
+  },
+  "feeds": {
+    "categories": {
+      "basic": {
+        "name": "基本フィード",
+        "description": "日常的に使用する基本的なフィード"
+      },
+      "discovery": {
+        "name": "発見・検索",
+        "description": "新しいコンテンツや話題を発見するフィード"
+      },
+      "user": {
+        "name": "ユーザー関連",
+        "description": "ユーザーとのつながりやアクティビティ関連のフィード"
+      },
+      "custom": {
+        "name": "カスタム機能",
+        "description": "カスタマイズ可能な高度なフィード"
+      }
+    },
+    "types": {
+      "home": {
+        "name": "ホーム",
+        "description": "フォローしているユーザーの投稿を時系列で表示",
+        "recommendation": "日常的な情報収集に最適"
+      },
+      "notifications": {
+        "name": "通知",
+        "description": "いいね、リポスト、フォロー、リプライなどの通知",
+        "recommendation": "アクティビティの確認に便利"
+      },
+      "mentions": {
+        "name": "メンション",
+        "description": "自分への言及を含む投稿を表示",
+        "recommendation": "会話の追跡に最適"
+      },
+      "search": {
+        "name": "検索",
+        "description": "特定のキーワードで投稿を検索",
+        "inputLabel": "検索キーワード",
+        "inputPlaceholder": "検索したいキーワードを入力",
+        "recommendation": "特定の話題や情報の追跡に最適"
+      },
+      "hashtag": {
+        "name": "ハッシュタグ",
+        "description": "指定したハッシュタグを含む投稿を表示",
+        "inputLabel": "ハッシュタグ",
+        "inputPlaceholder": "#を除いて入力 (例: 技術)",
+        "recommendation": "特定のジャンルやトピックの追跡に最適"
+      },
+      "trending": {
+        "name": "トレンド",
+        "description": "今話題になっている人気の投稿",
+        "recommendation": "最新のトレンドや話題の把握に最適"
+      },
+      "following": {
+        "name": "フォロー中",
+        "description": "フォローしているユーザー一覧を表示",
+        "recommendation": "フォロー関係の管理に最適"
+      },
+      "followers": {
+        "name": "フォロワー",
+        "description": "自分をフォローしているユーザー一覧を表示",
+        "recommendation": "フォロワーの確認や管理に最適"
+      },
+      "list": {
+        "name": "リスト",
+        "description": "特定のユーザーリストの投稿を表示",
+        "inputLabel": "リストID",
+        "inputPlaceholder": "リストのIDまたはURIを入力",
+        "recommendation": "特定のグループやジャンルの追跡に最適"
+      },
+      "customFeed": {
+        "name": "カスタムフィード",
+        "description": "外部のカスタムフィードを表示",
+        "inputLabel": "フィードURI",
+        "inputPlaceholder": "at://did:plc:...またはhttps://...",
+        "recommendation": "コミュニティ作成の特別なフィードの利用に最適"
+      }
+    },
+    "settings": {
+      "searchKeywords": "検索キーワード",
+      "searchPlaceholder": "検索したいキーワードを入力",
+      "searchHelp": "複数のキーワードを入力する場合はスペースで区切ってください",
+      "searchPreview": "検索プレビュー",
+      "searchPreviewText": "「{query}」を含む投稿を検索します",
+      "hashtagLabel": "ハッシュタグ",
+      "hashtagExample": "技術",
+      "hashtagHelp": "#は自動で追加されます。日本語・英語のハッシュタグに対応しています",
+      "hashtagPreview": "ハッシュタグプレビュー",
+      "hashtagPreviewText": "#{hashtag} を含む投稿を表示します",
+      "listIdLabel": "リストID",
+      "listIdPlaceholder": "at://did:plc:example.../app.bsky.graph.list/...",
+      "listIdHelp": "BlueskyのリストIDまたはURIを入力してください",
+      "listNameLabel": "リスト名（任意）",
+      "listNamePlaceholder": "例: 技術者リスト",
+      "listNameHelp": "デッキ名に使用されます。空欄の場合は「リスト」が使用されます",
+      "listPreview": "リストプレビュー",
+      "listPreviewText": "{listName}の投稿を表示します",
+      "feedUriLabel": "フィードURI",
+      "feedUriPlaceholder": "at://did:plc:example.../app.bsky.feed.generator/...",
+      "feedUriHelp": "at:// または https:// で始まるフィードURIを入力してください",
+      "feedNameLabel": "フィード名（任意）",
+      "feedNamePlaceholder": "例: 日本語フィード",
+      "feedNameHelp": "デッキ名に使用されます。空欄の場合は「カスタムフィード」が使用されます",
+      "customFeedPreview": "カスタムフィードプレビュー",
+      "customFeedPreviewText": "{feedName}を表示します",
+      "settingsComplete": "設定が完了しました",
+      "requiredFields": "必須項目を入力してください",
+      "allAccountsSupport": "全アカウント対応",
+      "configRequired": "設定が必要",
+      "addButtonLabel": "追加"
     }
   },
   "profile": {

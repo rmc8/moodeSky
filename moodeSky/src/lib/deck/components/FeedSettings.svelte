@@ -7,6 +7,7 @@
 <script lang="ts">
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
+  import * as m from '../../../paraglide/messages.js';
   import type { FeedTypeConfig } from '../types.js';
 
   // ===================================================================
@@ -120,27 +121,27 @@
     <div class="space-y-4">
       <div>
         <label for="search-query" class="block text-sm font-medium text-themed mb-2">
-          検索キーワード <span class="text-error">*</span>
+          {m['feeds.settings.searchKeywords']()} <span class="text-error">*</span>
         </label>
         <input 
           id="search-query"
           type="text"
           class="input-themed"
           bind:value={searchQuery}
-          placeholder="検索したいキーワードを入力"
+          placeholder={m['feeds.settings.searchPlaceholder']()}
           required
         />
         <p class="text-xs text-secondary mt-2">
-          複数のキーワードを入力する場合はスペースで区切ってください
+          {m['feeds.settings.searchHelp']()}
         </p>
       </div>
       
       <!-- プレビュー -->
       {#if searchQuery.trim()}
         <div class="p-3 bg-primary/5 border border-primary/20 rounded-lg">
-          <p class="text-sm text-primary font-medium">検索プレビュー</p>
+          <p class="text-sm text-primary font-medium">{m['feeds.settings.searchPreview']()}</p>
           <p class="text-xs text-secondary mt-1">
-            「{searchQuery.trim()}」を含む投稿を検索します
+            {m['feeds.settings.searchPreviewText']({ query: searchQuery.trim() })}
           </p>
         </div>
       {/if}
@@ -151,7 +152,7 @@
     <div class="space-y-4">
       <div>
         <label for="hashtag-input" class="block text-sm font-medium text-themed mb-2">
-          ハッシュタグ <span class="text-error">*</span>
+          {m['feeds.settings.hashtagLabel']()} <span class="text-error">*</span>
         </label>
         <div class="relative">
           <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary font-medium">#</div>
@@ -161,21 +162,21 @@
             class="input-themed pl-8"
             bind:value={hashtag}
             oninput={handleHashtagInput}
-            placeholder="技術"
+            placeholder={m['feeds.settings.hashtagExample']()}
             required
           />
         </div>
         <p class="text-xs text-secondary mt-2">
-          #は自動で追加されます。日本語・英語のハッシュタグに対応しています
+          {m['feeds.settings.hashtagHelp']()}
         </p>
       </div>
       
       <!-- プレビュー -->
       {#if hashtag.trim()}
         <div class="p-3 bg-primary/5 border border-primary/20 rounded-lg">
-          <p class="text-sm text-primary font-medium">ハッシュタグプレビュー</p>
+          <p class="text-sm text-primary font-medium">{m['feeds.settings.hashtagPreview']()}</p>
           <p class="text-xs text-secondary mt-1">
-            #{hashtag.trim()} を含む投稿を表示します
+            {m['feeds.settings.hashtagPreviewText']({ hashtag: hashtag.trim() })}
           </p>
         </div>
       {/if}
@@ -186,43 +187,43 @@
     <div class="space-y-4">
       <div>
         <label for="list-id" class="block text-sm font-medium text-themed mb-2">
-          リストID <span class="text-error">*</span>
+          {m['feeds.settings.listIdLabel']()} <span class="text-error">*</span>
         </label>
         <input 
           id="list-id"
           type="text"
           class="input-themed"
           bind:value={listId}
-          placeholder="at://did:plc:example.../app.bsky.graph.list/..."
+          placeholder={m['feeds.settings.listIdPlaceholder']()}
           required
         />
         <p class="text-xs text-secondary mt-2">
-          BlueskyのリストIDまたはURIを入力してください
+          {m['feeds.settings.listIdHelp']()}
         </p>
       </div>
       
       <div>
         <label for="list-name" class="block text-sm font-medium text-themed mb-2">
-          リスト名（任意）
+          {m['feeds.settings.listNameLabel']()}
         </label>
         <input 
           id="list-name"
           type="text"
           class="input-themed"
           bind:value={listName}
-          placeholder="例: 技術者リスト"
+          placeholder={m['feeds.settings.listNamePlaceholder']()}
         />
         <p class="text-xs text-secondary mt-2">
-          デッキ名に使用されます。空欄の場合は「リスト」が使用されます
+          {m['feeds.settings.listNameHelp']()}
         </p>
       </div>
       
       <!-- プレビュー -->
       {#if listId.trim()}
         <div class="p-3 bg-primary/5 border border-primary/20 rounded-lg">
-          <p class="text-sm text-primary font-medium">リストプレビュー</p>
+          <p class="text-sm text-primary font-medium">{m['feeds.settings.listPreview']()}</p>
           <p class="text-xs text-secondary mt-1">
-            {listName.trim() || 'リスト'}の投稿を表示します
+            {m['feeds.settings.listPreviewText']({ listName: listName.trim() || m['feeds.types.list.name']() })}
           </p>
         </div>
       {/if}
@@ -233,43 +234,43 @@
     <div class="space-y-4">
       <div>
         <label for="feed-uri" class="block text-sm font-medium text-themed mb-2">
-          フィードURI <span class="text-error">*</span>
+          {m['feeds.settings.feedUriLabel']()} <span class="text-error">*</span>
         </label>
         <input 
           id="feed-uri"
           type="text"
           class="input-themed"
           bind:value={customFeedUri}
-          placeholder="at://did:plc:example.../app.bsky.feed.generator/..."
+          placeholder={m['feeds.settings.feedUriPlaceholder']()}
           required
         />
         <p class="text-xs text-secondary mt-2">
-          at:// または https:// で始まるフィードURIを入力してください
+          {m['feeds.settings.feedUriHelp']()}
         </p>
       </div>
       
       <div>
         <label for="feed-name" class="block text-sm font-medium text-themed mb-2">
-          フィード名（任意）
+          {m['feeds.settings.feedNameLabel']()}
         </label>
         <input 
           id="feed-name"
           type="text"
           class="input-themed"
           bind:value={feedName}
-          placeholder="例: 日本語フィード"
+          placeholder={m['feeds.settings.feedNamePlaceholder']()}
         />
         <p class="text-xs text-secondary mt-2">
-          デッキ名に使用されます。空欄の場合は「カスタムフィード」が使用されます
+          {m['feeds.settings.feedNameHelp']()}
         </p>
       </div>
       
       <!-- プレビュー -->
       {#if customFeedUri.trim()}
         <div class="p-3 bg-primary/5 border border-primary/20 rounded-lg">
-          <p class="text-sm text-primary font-medium">カスタムフィードプレビュー</p>
+          <p class="text-sm text-primary font-medium">{m['feeds.settings.customFeedPreview']()}</p>
           <p class="text-xs text-secondary mt-1">
-            {feedName.trim() || 'カスタムフィード'}を表示します
+            {m['feeds.settings.customFeedPreviewText']({ feedName: feedName.trim() || m['feeds.types.customFeed.name']() })}
           </p>
         </div>
       {/if}
@@ -281,10 +282,10 @@
     <div class="flex items-center gap-2 pt-2">
       {#if isValid()}
         <Icon icon={ICONS.CHECK_CIRCLE} size="sm" color="success" />
-        <span class="text-sm text-success">設定が完了しました</span>
+        <span class="text-sm text-success">{m['feeds.settings.settingsComplete']()}</span>
       {:else}
         <Icon icon={ICONS.ERROR} size="sm" color="error" />
-        <span class="text-sm text-error">必須項目を入力してください</span>
+        <span class="text-sm text-error">{m['feeds.settings.requiredFields']()}</span>
       {/if}
     </div>
   {/if}

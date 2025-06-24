@@ -113,6 +113,7 @@
       "width": "Largura da Coluna",
       "delete": "Excluir Coluna",
       "confirmDelete": "Tem certeza de que deseja excluir esta coluna?",
+      "confirmDeleteWithName": "Tem certeza de que deseja excluir a coluna \"{columnName}\"?",
       "loading": "Carregando...",
       "loadContent": "Carregar Conteúdo",
       "empty": {
@@ -195,9 +196,143 @@
         }
       },
       "success": "Painel criado com sucesso",
-      "error": "Falha ao criar painel"
+      "error": "Falha ao criar painel",
+      "feedConfig": {
+        "title": "Configurações de {feedType}",
+        "accountSelection": "Seleção de Conta",
+        "advancedSettings": "Configurações Avançadas",
+        "allAccounts": "Todas as Contas",
+        "allAccountsDescription": "Suporte a Todas as Contas",
+        "validation": {
+          "missingInfo": "Informações obrigatórias estão faltando",
+          "createFailed": "Falha ao criar painel"
+        },
+        "helpText": "Se deixado em branco, \"{suggestedName}\" será gerado automaticamente"
+      },
+      "accountSelector": {
+        "allAccounts": "Todas as Contas",
+        "allAccountsDescription": "Exibir informações integradas de todas as contas",
+        "recommended": "Recomendado",
+        "multiAccountFeed": "Feed Multi-Conta",
+        "multiAccountDescription": "Este tipo de feed pode exibir informações integradas de múltiplas contas. Selecionar \"Todas as Contas\" mostrará informações de todas as contas logadas juntas.",
+        "singleAccountFeed": "Feed de Conta Única",
+        "singleAccountDescription": "Este tipo de feed exibe informações vinculadas a uma conta específica. Por favor, selecione uma conta que deseja exibir."
+      }
     },
-    "noColumns": "No columns"
+    "noColumns": "Nenhuma coluna"
+  },
+  "feeds": {
+    "categories": {
+      "basic": {
+        "name": "Feeds Básicos",
+        "description": "Feeds essenciais para uso diário"
+      },
+      "discovery": {
+        "name": "Descoberta e Busca",
+        "description": "Feeds para descobrir novos conteúdos e tópicos"
+      },
+      "user": {
+        "name": "Relacionados ao Usuário",
+        "description": "Feeds relacionados a conexões e atividades do usuário"
+      },
+      "custom": {
+        "name": "Recursos Personalizados",
+        "description": "Feeds avançados personalizáveis"
+      }
+    },
+    "types": {
+      "home": {
+        "name": "Início",
+        "description": "Exibir posts de usuários que você segue em ordem cronológica",
+        "recommendation": "Perfeito para coleta diária de informações"
+      },
+      "notifications": {
+        "name": "Notificações",
+        "description": "Curtidas, reposts, seguidores, respostas e outras notificações",
+        "recommendation": "Conveniente para verificar atividades"
+      },
+      "mentions": {
+        "name": "Menções",
+        "description": "Exibir posts que mencionam você",
+        "recommendation": "Perfeito para rastrear conversas"
+      },
+      "search": {
+        "name": "Busca",
+        "description": "Buscar posts por palavras-chave específicas",
+        "inputLabel": "Palavras-chave de Busca",
+        "inputPlaceholder": "Digite palavras-chave para buscar",
+        "recommendation": "Perfeito para rastrear tópicos ou informações específicas"
+      },
+      "hashtag": {
+        "name": "Hashtag",
+        "description": "Exibir posts contendo hashtags especificadas",
+        "inputLabel": "Hashtag",
+        "inputPlaceholder": "Digite sem # (ex: tech)",
+        "recommendation": "Perfeito para rastrear gêneros ou tópicos específicos"
+      },
+      "trending": {
+        "name": "Tendências",
+        "description": "Posts populares que estão em alta no momento",
+        "recommendation": "Perfeito para acompanhar as últimas tendências e tópicos"
+      },
+      "following": {
+        "name": "Seguindo",
+        "description": "Exibir lista de usuários que você segue",
+        "recommendation": "Perfeito para gerenciar relacionamentos de seguimento"
+      },
+      "followers": {
+        "name": "Seguidores",
+        "description": "Exibir lista de usuários que seguem você",
+        "recommendation": "Perfeito para verificar e gerenciar seguidores"
+      },
+      "list": {
+        "name": "Lista",
+        "description": "Exibir posts de uma lista específica de usuários",
+        "inputLabel": "ID da Lista",
+        "inputPlaceholder": "Digite o ID ou URI da lista",
+        "recommendation": "Perfeito para rastrear grupos ou gêneros específicos"
+      },
+      "customFeed": {
+        "name": "Feed Personalizado",
+        "description": "Exibir feeds personalizados externos",
+        "inputLabel": "URI do Feed",
+        "inputPlaceholder": "at://did:plc:... ou https://...",
+        "recommendation": "Perfeito para usar feeds especiais criados pela comunidade"
+      }
+    },
+    "settings": {
+      "searchKeywords": "Palavras-chave de Busca",
+      "searchPlaceholder": "Digite palavras-chave para buscar",
+      "searchHelp": "Use espaços para separar múltiplas palavras-chave",
+      "searchPreview": "Visualização da Busca",
+      "searchPreviewText": "Buscar posts contendo \"{query}\"",
+      "hashtagLabel": "Hashtag",
+      "hashtagExample": "tech",
+      "hashtagHelp": "# será adicionado automaticamente. Suporta hashtags em português e inglês",
+      "hashtagPreview": "Visualização da Hashtag",
+      "hashtagPreviewText": "Exibir posts contendo #{hashtag}",
+      "listIdLabel": "ID da Lista",
+      "listIdPlaceholder": "at://did:plc:example.../app.bsky.graph.list/...",
+      "listIdHelp": "Digite o ID ou URI da lista do Bluesky",
+      "listNameLabel": "Nome da Lista (Opcional)",
+      "listNamePlaceholder": "ex: Entusiastas de Tecnologia",
+      "listNameHelp": "Usado para o nome do deck. Se vazio, \"Lista\" será usado",
+      "listPreview": "Visualização da Lista",
+      "listPreviewText": "Exibir posts de {listName}",
+      "feedUriLabel": "URI do Feed",
+      "feedUriPlaceholder": "at://did:plc:example.../app.bsky.feed.generator/...",
+      "feedUriHelp": "Digite URI do feed começando com at:// ou https://",
+      "feedNameLabel": "Nome do Feed (Opcional)",
+      "feedNamePlaceholder": "ex: Feed Brasileiro",
+      "feedNameHelp": "Usado para o nome do deck. Se vazio, \"Feed Personalizado\" será usado",
+      "customFeedPreview": "Visualização do Feed Personalizado",
+      "customFeedPreviewText": "Exibir {feedName}",
+      "settingsComplete": "Configuração concluída",
+      "requiredFields": "Por favor, preencha os campos obrigatórios",
+      "allAccountsSupport": "Suporte a Todas as Contas",
+      "configRequired": "Configuração Obrigatória",
+      "addButtonLabel": "Adicionar"
+    }
   },
   "profile": {
     "displayName": "Nome de exibição",

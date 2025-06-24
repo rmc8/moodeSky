@@ -6,6 +6,7 @@
 <script lang="ts">
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
+  import * as m from '../../../paraglide/messages.js';
   import FeedConfigModal from './FeedConfigModal.svelte';
   import type { 
     FeedTypeConfig, 
@@ -15,8 +16,8 @@
     Column
   } from '../types.js';
   import {
-    FEED_TYPE_CONFIGS,
-    FEED_CATEGORIES,
+    getFeedCategories,
+    getFeedTypeConfigs,
     getFeedTypesByCategory,
     getFeedTypeConfig,
     getDefaultDeckName,
@@ -38,9 +39,9 @@
   // Data Preparation
   // ===================================================================
 
-  // カテゴリ別フィード種類
+  // カテゴリ別フィード種類（国際化対応）
   const feedTypesByCategory = $derived(
-    FEED_CATEGORIES.map(category => ({
+    getFeedCategories().map(category => ({
       category,
       feedTypes: getFeedTypesByCategory(category.id)
     }))
@@ -109,13 +110,13 @@
                 {#if feedType.supportsAllAccounts}
                   <div class="inline-flex items-center gap-1 text-[11px] font-medium text-primary bg-primary/10 px-2 py-1 rounded-md w-fit">
                     <Icon icon={ICONS.GROUP} size="xs" />
-                    全アカウント対応
+                    {m['feeds.settings.allAccountsSupport']()}
                   </div>
                 {/if}
                 {#if feedType.requiresAdditionalInput}
                   <div class="inline-flex items-center gap-1 text-[11px] font-medium text-secondary bg-primary/10 px-2 py-1 rounded-md w-fit">
                     <Icon icon={ICONS.EDIT} size="xs" />
-                    設定が必要
+                    {m['feeds.settings.configRequired']()}
                   </div>
                 {/if}
               </div>
@@ -124,7 +125,7 @@
             <button 
               class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg border-2 border-primary text-primary transition-all duration-150 hover:bg-primary hover:text-white hover:scale-105 group"
               onclick={() => handleFeedClick(feedType)}
-              aria-label="追加"
+              aria-label={m['feeds.settings.addButtonLabel']()}
             >
               <Icon icon={ICONS.ADD} size="md" color="primary" class="group-hover:text-white transition-colors duration-150" />
             </button>

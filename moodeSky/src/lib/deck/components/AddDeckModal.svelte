@@ -8,6 +8,7 @@
   import { Modal, Button } from '$lib/components/ui';
   import SimpleFeedAdder from './SimpleFeedAdder.svelte';
   import type { AddDeckModalProps, Column } from '../types.js';
+  import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
   // Props
@@ -41,7 +42,7 @@
 <!-- 統一UIコンポーネントシステム -->
 <Modal 
   {isOpen}
-  title="デッキを追加"
+  title={m['deck.addDeck.title']()}
   onClose={handleClose}
   showFooter={true}
   size="lg"
@@ -49,7 +50,7 @@
   <!-- ヘッダーサブタイトル -->
   <svelte:fragment slot="header">
     <p class="text-secondary text-lg leading-relaxed">
-      追加したいフィードを選択してください
+      {m['deck.addDeck.subtitle']()}
     </p>
   </svelte:fragment>
 
@@ -64,7 +65,7 @@
         onclick={handleClose}
         size="md"
       >
-        閉じる
+        {m['deck.addDeck.buttons.cancel']()}
       </Button>
     </div>
   </svelte:fragment>

@@ -41,7 +41,7 @@
   // 削除確認メッセージを動的生成
   const deleteConfirmationMessage = $derived(
     deletingColumn 
-      ? `カラム「${deletingColumn.settings.title}」を削除しますか？`
+      ? m['deck.column.confirmDeleteWithName']({ columnName: deletingColumn.settings.title })
       : m['deck.column.confirmDelete']()
   );
   
@@ -179,7 +179,7 @@
           decorative={true}
           class="deck-tab-bar__empty-icon"
         />
-        <p class="text-sm text-themed opacity-60">カラムがありません</p>
+        <p class="text-sm text-themed opacity-60">{m['deck.noColumns']()}</p>
       </div>
     {/if}
   </div>
