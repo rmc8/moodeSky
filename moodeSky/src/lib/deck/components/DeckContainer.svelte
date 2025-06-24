@@ -16,8 +16,8 @@
   // import ColumnIndicators from './ColumnIndicators.svelte'; // 上部タブに統一のため削除
   import { SwipeDetector, CircularColumnNavigator, ColumnIntersectionObserver } from '../utils/swipeDetector.js';
   import { COLUMN_WIDTHS } from '../types.js';
-  import { debugLog, debugWarn, debugError, debugOnly } from '$lib/utils/debugUtils.js';
-  import { SWIPE_CONFIG, NAVIGATION_CONFIG, INTERSECTION_CONFIG } from '../config/swipeConfig.js';
+  import { debugLog, debugError } from '$lib/utils/debugUtils.js';
+  import { SWIPE_CONFIG, NAVIGATION_CONFIG } from '../config/swipeConfig.js';
   import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
@@ -54,7 +54,7 @@
   let columnNavigator: CircularColumnNavigator | undefined;
   let intersectionObserver: ColumnIntersectionObserver | undefined;
   let stateMonitorInterval: number | undefined;
-  let debugState = $state({ canSwipe: true, isAnimating: false, timeSinceLastSwipe: 0 });
+  // let debugState = $state({ canSwipe: true, isAnimating: false, timeSinceLastSwipe: 0 }); // 未使用のため削除
   let isSwipeInProgress = $state(false); // スワイプ中フラグ（IntersectionObserver制御用）
 
   // ===================================================================
@@ -523,8 +523,8 @@
           
           console.log('✅ [DeckContainer] Transition complete, swipe re-enabled');
           
-          // デバッグ状態更新
-          updateDebugState();
+          // デバッグ状態更新（未使用のため削除）
+          // updateDebugState();
         }
       }
     );
@@ -580,36 +580,36 @@
     console.log('🎛️ [DeckContainer] Mobile features initialized for', deckStore.columns.length, 'columns');
   }
   
-  /**
-   * カラムインジケーターからの選択
-   */
-  function handleColumnSelect(index: number) {
-    columnNavigator?.scrollToColumn(index);
-  }
+  // /**
+  //  * カラムインジケーターからの選択 - 未使用のため削除
+  //  */
+  // function handleColumnSelect(index: number) {
+  //   columnNavigator?.scrollToColumn(index);
+  // }
 
-  /**
-   * デバッグ状態の更新
-   */
-  function updateDebugState() {
-    if (swipeDetector) {
-      const state = swipeDetector.getDebugState() as any;
-      debugState = {
-        canSwipe: state.canSwipe,
-        isAnimating: state.isAnimating,
-        timeSinceLastSwipe: state.timeSinceLastSwipe
-      };
-    }
-  }
+  // /**
+  //  * デバッグ状態の更新 - 未使用のため削除
+  //  */
+  // function updateDebugState() {
+  //   if (swipeDetector) {
+  //     const state = swipeDetector.getDebugState() as any;
+  //     debugState = {
+  //       canSwipe: state.canSwipe,
+  //       isAnimating: state.isAnimating,
+  //       timeSinceLastSwipe: state.timeSinceLastSwipe
+  //     };
+  //   }
+  // }
 
-  /**
-   * 手動リセット機能
-   */
-  function handleManualReset() {
-    console.log('🔧 [Manual Reset] Forcing swipe system reset');
-    swipeDetector?.forceReset();
-    columnNavigator?.forceReset();
-    updateDebugState();
-  }
+  // /**
+  //  * 手動リセット機能 - 未使用のため削除
+  //  */
+  // function handleManualReset() {
+  //   console.log('🔧 [Manual Reset] Forcing swipe system reset');
+  //   swipeDetector?.forceReset();
+  //   columnNavigator?.forceReset();
+  //   updateDebugState();
+  // }
 
   /**
    * 自動監視システムの開始
@@ -621,7 +621,7 @@
     
     stateMonitorInterval = Number(setInterval(() => {
       if (swipeDetector && columnNavigator) {
-        updateDebugState();
+        // updateDebugState(); // 未使用のため削除
         
         const swipeState = swipeDetector.getDebugState() as any;
         const navState = columnNavigator.isCurrentlyTransitioning();
@@ -637,7 +637,7 @@
           
           swipeDetector.forceReset();
           columnNavigator.forceReset();
-          updateDebugState();
+          // updateDebugState(); // 未使用のため削除
         }
       }
     }, 250)); // 超高頻度での監視
