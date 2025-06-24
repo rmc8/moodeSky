@@ -7,6 +7,7 @@
  */
 
 import { ICONS } from '$lib/types/icon.js';
+import * as m from '../../paraglide/messages.js';
 
 // ===================================================================
 // カラム幅設定（tokimekibluesky参考）
@@ -343,27 +344,27 @@ export const ADD_DECK_DEFAULTS = {
 export function getDefaultDeckName(feedType: ColumnAlgorithm, additionalConfig?: any): string {
   switch (feedType) {
     case 'home':
-      return 'ホーム';
+      return m['feeds.types.home.name']();
     case 'notifications':
-      return '通知';
+      return m['feeds.types.notifications.name']();
     case 'mentions':
-      return 'メンション';
+      return m['feeds.types.mentions.name']();
     case 'search':
-      return additionalConfig?.searchQuery ? `検索: ${additionalConfig.searchQuery}` : '検索';
+      return additionalConfig?.searchQuery ? `${m['feeds.types.search.name']()}: ${additionalConfig.searchQuery}` : m['feeds.types.search.name']();
     case 'hashtag':
-      return additionalConfig?.hashtag ? `#${additionalConfig.hashtag}` : 'ハッシュタグ';
+      return additionalConfig?.hashtag ? `#${additionalConfig.hashtag}` : m['feeds.types.hashtag.name']();
     case 'trending':
-      return 'トレンド';
+      return m['feeds.types.trending.name']();
     case 'following':
-      return 'フォロー中';
+      return m['feeds.types.following.name']();
     case 'followers':
-      return 'フォロワー';
+      return m['feeds.types.followers.name']();
     case 'list':
-      return additionalConfig?.listName ? `リスト: ${additionalConfig.listName}` : 'リスト';
+      return additionalConfig?.listName ? `${m['feeds.types.list.name']()}: ${additionalConfig.listName}` : m['feeds.types.list.name']();
     case 'custom_feed':
-      return additionalConfig?.feedName ? `${additionalConfig.feedName}` : 'カスタムフィード';
+      return additionalConfig?.feedName ? `${additionalConfig.feedName}` : m['feeds.types.customFeed.name']();
     default:
-      return 'カラム';
+      return m['deck.column.defaultSubtitle']();
   }
 }
 
@@ -374,6 +375,44 @@ export function getDefaultDeckName(feedType: ColumnAlgorithm, additionalConfig?:
 
 /**
  * フィードタイプカテゴリ一覧
+ * 国際化対応: 翻訳関数を使用してリアクティブに名前と説明を取得
+ */
+export function getFeedCategories(): FeedCategory[] {
+  return [
+    {
+      id: 'basic',
+      name: m['feeds.categories.basic.name'](),
+      description: m['feeds.categories.basic.description'](),
+      icon: ICONS.HOME,
+      order: 1
+    },
+    {
+      id: 'discovery',
+      name: m['feeds.categories.discovery.name'](),
+      description: m['feeds.categories.discovery.description'](),
+      icon: ICONS.SEARCH,
+      order: 2
+    },
+    {
+      id: 'user',
+      name: m['feeds.categories.user.name'](),
+      description: m['feeds.categories.user.description'](),
+      icon: ICONS.PEOPLE,
+      order: 3
+    },
+    {
+      id: 'custom',
+      name: m['feeds.categories.custom.name'](),
+      description: m['feeds.categories.custom.description'](),
+      icon: ICONS.SETTINGS,
+      order: 4
+    }
+  ];
+}
+
+/**
+ * 後方互換性のため、静的な配列も維持
+ * @deprecated getFeedCategories()関数を使用してください
  */
 export const FEED_CATEGORIES: FeedCategory[] = [
   {
@@ -408,7 +447,129 @@ export const FEED_CATEGORIES: FeedCategory[] = [
 
 /**
  * フィードタイプ設定一覧（purpose-first flow用）
- * Bluesky公式機能のみに簡素化
+ * 国際化対応: 翻訳関数を使用してリアクティブに取得
+ */
+export function getFeedTypeConfigs(): FeedTypeConfig[] {
+  return [
+    // 基本フィード
+    {
+      id: 'home',
+      name: m['feeds.types.home.name'](),
+      description: m['feeds.types.home.description'](),
+      icon: ICONS.HOME,
+      category: 'basic',
+      supportsAllAccounts: false,
+      recommendedFor: m['feeds.types.home.recommendation']()
+    },
+    {
+      id: 'notifications',
+      name: m['feeds.types.notifications.name'](),
+      description: m['feeds.types.notifications.description'](),
+      icon: ICONS.NOTIFICATIONS,
+      category: 'basic',
+      supportsAllAccounts: true,
+      recommendedFor: m['feeds.types.notifications.recommendation']()
+    },
+    {
+      id: 'mentions',
+      name: m['feeds.types.mentions.name'](),
+      description: m['feeds.types.mentions.description'](),
+      icon: ICONS.ALTERNATE_EMAIL,
+      category: 'basic',
+      supportsAllAccounts: true,
+      recommendedFor: m['feeds.types.mentions.recommendation']()
+    },
+    
+    // 発見・検索フィード
+    {
+      id: 'search',
+      name: m['feeds.types.search.name'](),
+      description: m['feeds.types.search.description'](),
+      icon: ICONS.SEARCH,
+      category: 'discovery',
+      supportsAllAccounts: false,
+      requiresAdditionalInput: true,
+      inputType: 'search',
+      inputLabel: m['feeds.types.search.inputLabel'](),
+      inputPlaceholder: m['feeds.types.search.inputPlaceholder'](),
+      recommendedFor: m['feeds.types.search.recommendation']()
+    },
+    {
+      id: 'hashtag',
+      name: m['feeds.types.hashtag.name'](),
+      description: m['feeds.types.hashtag.description'](),
+      icon: ICONS.TAG,
+      category: 'discovery',
+      supportsAllAccounts: false,
+      requiresAdditionalInput: true,
+      inputType: 'hashtag',
+      inputLabel: m['feeds.types.hashtag.inputLabel'](),
+      inputPlaceholder: m['feeds.types.hashtag.inputPlaceholder'](),
+      recommendedFor: m['feeds.types.hashtag.recommendation']()
+    },
+    {
+      id: 'trending',
+      name: m['feeds.types.trending.name'](),
+      description: m['feeds.types.trending.description'](),
+      icon: ICONS.TRENDING_UP,
+      category: 'discovery',
+      supportsAllAccounts: false,
+      recommendedFor: m['feeds.types.trending.recommendation']()
+    },
+    
+    // ユーザー関連フィード
+    {
+      id: 'following',
+      name: m['feeds.types.following.name'](),
+      description: m['feeds.types.following.description'](),
+      icon: ICONS.PERSON_ADD,
+      category: 'user',
+      supportsAllAccounts: false,
+      recommendedFor: m['feeds.types.following.recommendation']()
+    },
+    {
+      id: 'followers',
+      name: m['feeds.types.followers.name'](),
+      description: m['feeds.types.followers.description'](),
+      icon: ICONS.GROUP,
+      category: 'user',
+      supportsAllAccounts: false,
+      recommendedFor: m['feeds.types.followers.recommendation']()
+    },
+    
+    // カスタム機能
+    {
+      id: 'list',
+      name: m['feeds.types.list.name'](),
+      description: m['feeds.types.list.description'](),
+      icon: ICONS.LIST,
+      category: 'custom',
+      supportsAllAccounts: false,
+      requiresAdditionalInput: true,
+      inputType: 'list',
+      inputLabel: m['feeds.types.list.inputLabel'](),
+      inputPlaceholder: m['feeds.types.list.inputPlaceholder'](),
+      recommendedFor: m['feeds.types.list.recommendation']()
+    },
+    {
+      id: 'custom_feed',
+      name: m['feeds.types.customFeed.name'](),
+      description: m['feeds.types.customFeed.description'](),
+      icon: ICONS.TAG,
+      category: 'custom',
+      supportsAllAccounts: false,
+      requiresAdditionalInput: true,
+      inputType: 'custom_feed',
+      inputLabel: m['feeds.types.customFeed.inputLabel'](),
+      inputPlaceholder: m['feeds.types.customFeed.inputPlaceholder'](),
+      recommendedFor: m['feeds.types.customFeed.recommendation']()
+    }
+  ];
+}
+
+/**
+ * 後方互換性のため、静的な配列も維持
+ * @deprecated getFeedTypeConfigs()関数を使用してください
  */
 export const FEED_TYPE_CONFIGS: FeedTypeConfig[] = [
   // 基本フィード
@@ -530,7 +691,7 @@ export const FEED_TYPE_CONFIGS: FeedTypeConfig[] = [
  * カテゴリ別フィードタイプ取得
  */
 export function getFeedTypesByCategory(category: 'basic' | 'discovery' | 'user' | 'custom'): FeedTypeConfig[] {
-  return FEED_TYPE_CONFIGS.filter(config => config.category === category);
+  return getFeedTypeConfigs().filter(config => config.category === category);
 }
 
 
@@ -538,7 +699,7 @@ export function getFeedTypesByCategory(category: 'basic' | 'discovery' | 'user' 
  * フィードタイプ設定取得
  */
 export function getFeedTypeConfig(id: ColumnAlgorithm): FeedTypeConfig | undefined {
-  return FEED_TYPE_CONFIGS.find(config => config.id === id);
+  return getFeedTypeConfigs().find(config => config.id === id);
 }
 
 // ===================================================================

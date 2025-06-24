@@ -113,6 +113,7 @@
       "width": "Column Width",
       "delete": "Delete Column",
       "confirmDelete": "Are you sure you want to delete this column?",
+      "confirmDeleteWithName": "Are you sure you want to delete column \"{columnName}\"?",
       "loading": "Loading...",
       "loadContent": "Load Content",
       "empty": {
@@ -195,9 +196,143 @@
         }
       },
       "success": "Deck created successfully",
-      "error": "Failed to create deck"
+      "error": "Failed to create deck",
+      "feedConfig": {
+        "title": "{feedType} Settings",
+        "accountSelection": "Account Selection",
+        "advancedSettings": "Advanced Settings",
+        "allAccounts": "All Accounts",
+        "allAccountsDescription": "All Accounts Support",
+        "validation": {
+          "missingInfo": "Required information is missing",
+          "createFailed": "Failed to create deck"
+        },
+        "helpText": "If left blank, \"{suggestedName}\" will be auto-generated"
+      },
+      "accountSelector": {
+        "allAccounts": "All Accounts",
+        "allAccountsDescription": "Display integrated information from all accounts",
+        "recommended": "Recommended",
+        "multiAccountFeed": "Multi-Account Feed",
+        "multiAccountDescription": "This feed type can display integrated information from multiple accounts. Selecting \"All Accounts\" will show information from all logged-in accounts together.",
+        "singleAccountFeed": "Single Account Feed",
+        "singleAccountDescription": "This feed type displays information tied to a specific account. Please select one account you want to display."
+      }
     },
     "noColumns": "No columns"
+  },
+  "feeds": {
+    "categories": {
+      "basic": {
+        "name": "Basic Feeds",
+        "description": "Essential feeds for daily use"
+      },
+      "discovery": {
+        "name": "Discovery & Search",
+        "description": "Feeds for discovering new content and topics"
+      },
+      "user": {
+        "name": "User Related",
+        "description": "Feeds related to user connections and activities"
+      },
+      "custom": {
+        "name": "Custom Features",
+        "description": "Advanced customizable feeds"
+      }
+    },
+    "types": {
+      "home": {
+        "name": "Home",
+        "description": "Display posts from users you follow in chronological order",
+        "recommendation": "Perfect for daily information gathering"
+      },
+      "notifications": {
+        "name": "Notifications",
+        "description": "Likes, reposts, follows, replies and other notifications",
+        "recommendation": "Convenient for checking activities"
+      },
+      "mentions": {
+        "name": "Mentions",
+        "description": "Display posts that mention you",
+        "recommendation": "Perfect for tracking conversations"
+      },
+      "search": {
+        "name": "Search",
+        "description": "Search posts by specific keywords",
+        "inputLabel": "Search Keywords",
+        "inputPlaceholder": "Enter keywords to search",
+        "recommendation": "Perfect for tracking specific topics or information"
+      },
+      "hashtag": {
+        "name": "Hashtag",
+        "description": "Display posts containing specified hashtags",
+        "inputLabel": "Hashtag",
+        "inputPlaceholder": "Enter without # (e.g., tech)",
+        "recommendation": "Perfect for tracking specific genres or topics"
+      },
+      "trending": {
+        "name": "Trending",
+        "description": "Popular posts that are currently trending",
+        "recommendation": "Perfect for staying up with latest trends and topics"
+      },
+      "following": {
+        "name": "Following",
+        "description": "Display list of users you follow",
+        "recommendation": "Perfect for managing follow relationships"
+      },
+      "followers": {
+        "name": "Followers",
+        "description": "Display list of users who follow you",
+        "recommendation": "Perfect for checking and managing followers"
+      },
+      "list": {
+        "name": "List",
+        "description": "Display posts from a specific user list",
+        "inputLabel": "List ID",
+        "inputPlaceholder": "Enter list ID or URI",
+        "recommendation": "Perfect for tracking specific groups or genres"
+      },
+      "customFeed": {
+        "name": "Custom Feed",
+        "description": "Display external custom feeds",
+        "inputLabel": "Feed URI",
+        "inputPlaceholder": "at://did:plc:... or https://...",
+        "recommendation": "Perfect for using special community-created feeds"
+      }
+    },
+    "settings": {
+      "searchKeywords": "Search Keywords",
+      "searchPlaceholder": "Enter keywords to search",
+      "searchHelp": "Use spaces to separate multiple keywords",
+      "searchPreview": "Search Preview",
+      "searchPreviewText": "Search posts containing \"{query}\"",
+      "hashtagLabel": "Hashtag",
+      "hashtagExample": "tech",
+      "hashtagHelp": "# will be added automatically. Supports Japanese and English hashtags",
+      "hashtagPreview": "Hashtag Preview",
+      "hashtagPreviewText": "Display posts containing #{hashtag}",
+      "listIdLabel": "List ID",
+      "listIdPlaceholder": "at://did:plc:example.../app.bsky.graph.list/...",
+      "listIdHelp": "Enter Bluesky list ID or URI",
+      "listNameLabel": "List Name (Optional)",
+      "listNamePlaceholder": "e.g., Tech Enthusiasts",
+      "listNameHelp": "Used for deck name. If blank, \"List\" will be used",
+      "listPreview": "List Preview",
+      "listPreviewText": "Display posts from {listName}",
+      "feedUriLabel": "Feed URI",
+      "feedUriPlaceholder": "at://did:plc:example.../app.bsky.feed.generator/...",
+      "feedUriHelp": "Enter feed URI starting with at:// or https://",
+      "feedNameLabel": "Feed Name (Optional)",
+      "feedNamePlaceholder": "e.g., Japanese Feed",
+      "feedNameHelp": "Used for deck name. If blank, \"Custom Feed\" will be used",
+      "customFeedPreview": "Custom Feed Preview",
+      "customFeedPreviewText": "Display {feedName}",
+      "settingsComplete": "Configuration completed",
+      "requiredFields": "Please fill in required fields",
+      "allAccountsSupport": "All Accounts Support",
+      "configRequired": "Configuration Required",
+      "addButtonLabel": "Add"
+    }
   },
   "profile": {
     "displayName": "Display Name",

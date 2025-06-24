@@ -8,6 +8,7 @@
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { Modal, Button, Input } from '$lib/components/ui';
+  import * as m from '../../../paraglide/messages.js';
   import AccountSelector from './AccountSelector.svelte';
   import FeedSettings from './FeedSettings.svelte';
   import type { 
@@ -67,8 +68,8 @@
         session: null as any,
         profile: {
           did: '',
-          handle: '全アカウント',
-          displayName: '全アカウント対応',
+          handle: m['deck.addDeck.feedConfig.allAccounts'](),
+          displayName: m['deck.addDeck.feedConfig.allAccountsDescription'](),
           avatar: ''
         },
         createdAt: '',
@@ -146,7 +147,7 @@
 
   async function handleCreate() {
     if (!feedType || !selectedAccountId) {
-      errorMessage = '必要な情報が不足しています';
+      errorMessage = m['deck.addDeck.feedConfig.validation.missingInfo']();
       return;
     }
 
@@ -196,7 +197,7 @@
 
     } catch (error) {
       console.error('🔧 [FeedConfigModal] デッキ作成エラー:', error);
-      errorMessage = 'デッキの作成に失敗しました';
+      errorMessage = m['deck.addDeck.feedConfig.validation.createFailed']();
     } finally {
       isLoading = false;
     }
@@ -240,7 +241,7 @@
   <div class="mb-8">
     <h3 class="text-lg font-semibold text-themed mb-4 flex items-center gap-2">
       <Icon icon={ICONS.PERSON} size="sm" color="themed" />
-      アカウント選択
+      {m['deck.addDeck.feedConfig.accountSelection']()}
     </h3>
     <AccountSelector 
       accounts={accountOptions()}
@@ -255,7 +256,7 @@
     <div class="mb-8">
       <h3 class="text-lg font-semibold text-themed mb-4 flex items-center gap-2">
         <Icon icon={ICONS.SETTINGS} size="sm" color="themed" />
-        詳細設定
+        {m['deck.addDeck.feedConfig.advancedSettings']()}
       </h3>
       <FeedSettings 
         feedType={feedType}
@@ -269,13 +270,13 @@
   <div class="mb-6">
     <h3 class="text-lg font-semibold text-themed mb-4 flex items-center gap-2">
       <Icon icon={ICONS.EDIT} size="sm" color="themed" />
-      デッキ名
+      {m['deck.addDeck.settings.nameLabel']()}
     </h3>
     <Input 
       type="text"
       bind:value={deckName}
       placeholder={suggestedDeckName()}
-      helpText="空欄の場合は「{suggestedDeckName()}」が自動生成されます"
+      helpText={m['deck.addDeck.feedConfig.helpText']({ suggestedName: suggestedDeckName() })}
     />
   </div>
 
@@ -288,7 +289,7 @@
         leftIcon={ICONS.ARROW_BACK}
         size="md"
       >
-        戻る
+        {m['deck.addDeck.buttons.previous']()}
       </Button>
       
       <div class="flex gap-3">
@@ -297,7 +298,7 @@
           onclick={handleClose}
           size="md"
         >
-          キャンセル
+          {m['deck.addDeck.buttons.cancel']()}
         </Button>
         <Button 
           variant="primary" 
@@ -307,7 +308,7 @@
           leftIcon={isLoading ? undefined : ICONS.ADD}
           size="md"
         >
-          作成
+          {m['deck.addDeck.buttons.create']()}
         </Button>
       </div>
     </div>
