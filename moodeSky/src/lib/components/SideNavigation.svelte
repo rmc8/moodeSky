@@ -13,6 +13,7 @@
   import { ICONS } from '$lib/types/icon.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
   import { deckStore } from '$lib/deck/store.svelte.js';
+  import { debugLog } from '$lib/utils/debugUtils.js';
   import * as m from '../../paraglide/messages.js';
   
   // リアクティブ翻訳システム
@@ -26,7 +27,7 @@
   }>();
   
   // デバッグログ追加
-  console.log('🔍 [SideNavigation] Component mounted, currentPath:', currentPath);
+  debugLog('🔍 [SideNavigation] Component mounted, currentPath:', currentPath);
   
   // カラム追加モーダル状態は親コンポーネントで管理するため削除
   
@@ -78,7 +79,7 @@
   
   function handleCompose() {
     // TODO: 投稿作成モーダル/ページを開く
-    console.log('投稿作成機能（未実装）');
+    debugLog('投稿作成機能（未実装）');
   }
 </script>
 
