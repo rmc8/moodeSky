@@ -11,7 +11,9 @@
   import { deckStore } from '$lib/deck/store.svelte.js';
   import { getColumnIcon } from '$lib/deck/types.js';
   import Icon from '$lib/components/Icon.svelte';
+  import ConfirmationModal from '$lib/components/ui/ConfirmationModal.svelte';
   import { ICONS } from '$lib/types/icon.js';
+  import * as m from '../../../paraglide/messages.js';
   
   // リアクティブ翻訳システム
   const { t } = useTranslation();
@@ -19,6 +21,69 @@
   // デッキストアから実際のカラムデータを取得（リアクティブ）
   const columns = $derived(deckStore.columns);
   const activeColumnId = $derived(deckStore.state.activeColumnId);
+  
+  // ===================================================================
+  // 削除機能用状態管理
+  // ===================================================================
+  
+  // hover状態管理（各タブのhover状態）
+  let hoveredColumnId = $state<string | null>(null);
+  
+  // 削除確認モーダル状態
+  let showDeleteConfirmation = $state(false);
+  let deletingColumnId = $state<string | null>(null);
+  
+  // 削除対象カラムの情報を取得
+  const deletingColumn = $derived(
+    deletingColumnId ? columns.find(col => col.id === deletingColumnId) : null
+  );
+  
+  // 削除確認メッセージを動的生成
+  const deleteConfirmationMessage = $derived(
+    deletingColumn 
+      ? `カラム「${deletingColumn.settings.title}」を削除しますか？`
+      : m['deck.column.confirmDelete']()
+  );
+  
+  // ===================================================================
+  // 削除機能
+  // ===================================================================
+  
+  // 削除確認モーダルを開く
+  function openDeleteConfirmation(columnId: string) {
+    deletingColumnId = columnId;
+    showDeleteConfirmation = true;
+  }
+  
+  // 削除確認モーダルを閉じる
+  function closeDeleteConfirmation() {
+    showDeleteConfirmation = false;
+    deletingColumnId = null;
+  }
+  
+  // 個別カラム削除の実行
+  async function handleDeleteColumn() {
+    if (!deletingColumnId) return;
+    
+    try {
+      // 指定されたカラムのみを削除
+      await deckStore.removeColumn(deletingColumnId);
+      console.log('🗑️ [DeckTabBar] Column deleted:', deletingColumnId);
+      
+      closeDeleteConfirmation();
+      
+      // エッジケース処理: 削除後に空になった場合
+      // 親コンポーネント(deck page)の空状態検出ロジックに委ねる
+      if (deckStore.isEmpty) {
+        console.log('🗑️ [DeckTabBar] Deck is now empty after column deletion - parent component should handle default column creation');
+      }
+    } catch (error) {
+      console.error('🗑️ [DeckTabBar] Failed to delete column:', error);
+      // エラーの詳細表示（将来的にはtoastシステムに変更）
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`カラムの削除に失敗しました: ${errorMessage}`);
+    }
+  }
   
   // デスクトップでは表示/非表示の切り替え（将来機能）
   // 現在はモバイル互換のためactiveColumnIdを更新
@@ -55,29 +120,54 @@
     {#if columns.length > 0}
       <!-- 実際のカラムタブ表示 -->
       {#each columns as column}
-        <button
-          class="w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ease-out text-left bg-card text-themed border border-transparent hover:bg-primary-hover hover:border-primary-border active:scale-98 focus-ring-subtle focus-visible:outline-2 focus-visible:outline-primary-outline focus-visible:outline-offset-1"
-          class:bg-primary-active={column.id === activeColumnId}
-          class:border-primary-border-active={column.id === activeColumnId}
-          class:text-primary={column.id === activeColumnId}
-          role="tab"
-          aria-selected={column.id === activeColumnId}
-          aria-label={column.settings.title}
-          onclick={() => switchColumn(column.id)}
+        <div 
+          class="relative w-full group"
+          role="group"
+          onmouseenter={() => hoveredColumnId = column.id}
+          onmouseleave={() => hoveredColumnId = null}
         >
-          <!-- アイコン -->
-          <Icon 
-            icon={getColumnIcon(column)}
-            size="md"
-            color={column.id === activeColumnId ? 'primary' : 'themed'}
-            decorative={true}
-          />
+          <button
+            class="w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ease-out text-left bg-card text-themed border border-transparent hover:bg-primary-hover hover:border-primary-border active:scale-98 focus-ring-subtle focus-visible:outline-2 focus-visible:outline-primary-outline focus-visible:outline-offset-1"
+            class:bg-primary-active={column.id === activeColumnId}
+            class:border-primary-border-active={column.id === activeColumnId}
+            class:text-primary={column.id === activeColumnId}
+            role="tab"
+            aria-selected={column.id === activeColumnId}
+            aria-label={column.settings.title}
+            onclick={() => switchColumn(column.id)}
+          >
+            <!-- アイコン -->
+            <Icon 
+              icon={getColumnIcon(column)}
+              size="md"
+              color={column.id === activeColumnId ? 'primary' : 'themed'}
+              decorative={true}
+            />
+            
+            <!-- タブ名 -->
+            <span class="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis flex-1">
+              {column.settings.title}
+            </span>
+          </button>
           
-          <!-- タブ名 -->
-          <span class="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis flex-1">
-            {column.settings.title}
-          </span>
-        </button>
+          <!-- 削除ボタン (hover + active条件で表示) -->
+          {#if hoveredColumnId === column.id && column.id === activeColumnId}
+            <button
+              class="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-md bg-error/10 hover:bg-error/20 text-error hover:text-error/80 transition-all duration-150 ease-out opacity-0 group-hover:opacity-100 z-10"
+              onclick={(e) => { e.stopPropagation(); openDeleteConfirmation(column.id); }}
+              aria-label={m['deck.column.delete']()} 
+              title={m['deck.column.delete']()}
+            >
+              <Icon 
+                icon={ICONS.DELETE}
+                size="xs"
+                color="themed"
+                decorative={true}
+                class="!text-error"
+              />
+            </button>
+          {/if}
+        </div>
       {/each}
     {:else}
       <!-- カラムがない場合のメッセージ -->
@@ -94,3 +184,17 @@
     {/if}
   </div>
 </div>
+
+<!-- 削除確認モーダル -->
+<ConfirmationModal
+  isOpen={showDeleteConfirmation}
+  title={m['deck.column.delete']()}
+  message={deleteConfirmationMessage}
+  confirmText={m['common.delete']()}
+  cancelText={m['common.cancel']()}
+  variant="danger"
+  showIcon={true}
+  zIndex={9999}
+  onConfirm={handleDeleteColumn}
+  onCancel={closeDeleteConfirmation}
+/>

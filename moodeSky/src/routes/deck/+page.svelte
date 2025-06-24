@@ -142,6 +142,32 @@
     };
   });
   
+  // ===================================================================
+  // エッジケース処理: デッキが空になった場合の自動復旧
+  // ===================================================================
+  
+  // デッキが空になったことを検出して自動的にデフォルトカラムを作成
+  $effect(() => {
+    // 初期化完了後で、ログイン済みで、デッキが空の場合
+    if (deckStore.isInitialized && !isLoading && activeAccount && deckStore.isEmpty) {
+      console.log('🔍 [DEBUG] Deck became empty, creating default home column');
+      
+      // 非同期でデフォルトカラムを作成
+      deckStore.addColumn(
+        activeAccount.profile.handle,
+        'home',
+        {
+          title: t('navigation.home'),
+          subtitle: 'フォロー中のユーザーの投稿'
+        }
+      ).then(() => {
+        console.log('🔍 [DEBUG] Default column created after deck became empty');
+      }).catch((error) => {
+        console.error('🔍 [DEBUG] Failed to create default column:', error);
+      });
+    }
+  });
+  
 </script>
 
 {#if isLoading}
