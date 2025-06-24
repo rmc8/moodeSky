@@ -1,19 +1,19 @@
-# Bluesky AT Protocol統合ガイド
+# Bluesky AT Protocol Integration Guide
 
-## AT Protocol概要
+## AT Protocol Overview
 
-**AT Protocol (Authenticated Transfer Protocol)** は、Blueskyが開発した分散型ソーシャルネットワーキングプロトコルです。
+**AT Protocol (Authenticated Transfer Protocol)** is a decentralized social networking protocol developed by Bluesky.
 
-### 主要概念
-- **DID (Decentralized Identifier)**: ユーザーの分散型識別子
-- **Handle**: ユーザーフレンドリーな識別子 (例: @alice.bsky.social)
-- **Repository**: ユーザーのデータストレージ
-- **Lexicon**: API スキーマ定義
-- **XRPC**: AT Protocol の RPC システム
+### Key Concepts
+- **DID (Decentralized Identifier)**: User's decentralized identifier
+- **Handle**: User-friendly identifier (e.g., @alice.bsky.social)
+- **Repository**: User's data storage
+- **Lexicon**: API schema definitions
+- **XRPC**: AT Protocol's RPC system
 
-## 認証システム
+## Authentication System
 
-### 1. 認証フロー
+### 1. Authentication Flow
 ```rust
 // src-tauri/src/auth.rs
 use atrium_api::client::AtpServiceClient;
@@ -36,7 +36,7 @@ async fn bluesky_login(
             password,
         })
         .await
-        .map_err(|e| format!("認証エラー: {}", e))?;
+        .map_err(|e| format!("Authentication error: {}", e))?;
     
     Ok(AuthSession {
         access_jwt: session.access_jwt,
@@ -47,7 +47,7 @@ async fn bluesky_login(
 }
 ```
 
-### 2. セッション管理
+### 2. Session Management
 ```rust
 // src-tauri/src/session.rs
 use serde::{Deserialize, Serialize};
@@ -67,7 +67,7 @@ async fn refresh_session(
 ) -> Result<AuthSession, String> {
     let client = AtpServiceClient::new("https://bsky.social".to_string());
     
-    // JWTトークンリフレッシュ
+    // JWT token refresh
     let refreshed = client
         .service
         .com
@@ -75,7 +75,7 @@ async fn refresh_session(
         .server
         .refresh_session(session.refresh_jwt)
         .await
-        .map_err(|e| format!("セッション更新エラー: {}", e))?;
+        .map_err(|e| format!("Session refresh error: {}", e))?;
     
     Ok(AuthSession {
         access_jwt: refreshed.access_jwt,
@@ -87,13 +87,13 @@ async fn refresh_session(
 
 #[tauri::command]
 async fn logout(app_handle: AppHandle) -> Result<(), String> {
-    // セッション情報削除
+    // Clear session information
     app_handle.manage(Option::<AuthSession>::None);
     Ok(())
 }
 ```
 
-### 3. セキュアストレージ
+### 3. Secure Storage
 ```rust
 // src-tauri/src/storage.rs
 use keyring::Entry;
@@ -103,35 +103,35 @@ const USERNAME: &str = "bluesky_session";
 
 pub fn save_session(session: &AuthSession) -> Result<(), String> {
     let entry = Entry::new(SERVICE_NAME, USERNAME)
-        .map_err(|e| format!("キーリングエラー: {}", e))?;
+        .map_err(|e| format!("Keyring error: {}", e))?;
     
     let session_json = serde_json::to_string(session)
-        .map_err(|e| format!("シリアライズエラー: {}", e))?;
+        .map_err(|e| format!("Serialization error: {}", e))?;
     
     entry.set_password(&session_json)
-        .map_err(|e| format!("パスワード保存エラー: {}", e))?;
+        .map_err(|e| format!("Password save error: {}", e))?;
     
     Ok(())
 }
 
 pub fn load_session() -> Result<Option<AuthSession>, String> {
     let entry = Entry::new(SERVICE_NAME, USERNAME)
-        .map_err(|e| format!("キーリングエラー: {}", e))?;
+        .map_err(|e| format!("Keyring error: {}", e))?;
     
     match entry.get_password() {
         Ok(session_json) => {
             let session: AuthSession = serde_json::from_str(&session_json)
-                .map_err(|e| format!("デシリアライズエラー: {}", e))?;
+                .map_err(|e| format!("Deserialization error: {}", e))?;
             Ok(Some(session))
         }
-        Err(_) => Ok(None), // セッション未保存
+        Err(_) => Ok(None), // Session not saved
     }
 }
 ```
 
-## コンテンツ操作
+## Content Operations
 
-### 1. タイムライン取得
+### 1. Timeline Retrieval
 ```rust
 // src-tauri/src/timeline.rs
 use atrium_api::app::bsky::feed::{get_timeline, FeedViewPost};
@@ -154,7 +154,7 @@ async fn fetch_timeline(
             cursor,
         })
         .await
-        .map_err(|e| format!("タイムライン取得エラー: {}", e))?;
+        .map_err(|e| format!("Timeline fetch error: {}", e))?;
     
     Ok(TimelineResponse {
         posts: timeline.feed.into_iter().map(|item| Post::from(item.post)).collect(),
@@ -182,7 +182,7 @@ pub struct Post {
 }
 ```
 
-### 2. 投稿作成
+### 2. Post Creation
 ```rust
 // src-tauri/src/post.rs
 use atrium_api::app::bsky::feed::post::{RecordData as PostRecord};
@@ -201,11 +201,11 @@ async fn create_post(
         text,
         created_at: chrono::Utc::now().to_rfc3339(),
         reply: reply_to.map(|r| r.into()),
-        embed: None, // TODO: 画像・リンク埋め込み対応
+        embed: None, // TODO: Image/link embed support
         langs: Some(vec!["ja".to_string()]),
         labels: None,
         tags: None,
-        facets: None, // TODO: メンション・ハッシュタグ対応
+        facets: None, // TODO: Mention/hashtag support
     };
     
     let result = client
@@ -221,7 +221,7 @@ async fn create_post(
             validate: Some(true),
         })
         .await
-        .map_err(|e| format!("投稿作成エラー: {}", e))?;
+        .map_err(|e| format!("Post creation error: {}", e))?;
     
     Ok(PostResult {
         uri: result.uri,
@@ -236,7 +236,7 @@ pub struct PostResult {
 }
 ```
 
-### 3. いいね・リポスト
+### 3. Likes & Reposts
 ```rust
 // src-tauri/src/interactions.rs
 use atrium_api::app::bsky::feed::like::{RecordData as LikeRecord};
@@ -272,7 +272,7 @@ async fn like_post(
             validate: Some(true),
         })
         .await
-        .map_err(|e| format!("いいねエラー: {}", e))?;
+        .map_err(|e| format!("Like error: {}", e))?;
     
     Ok(result.uri)
 }
@@ -307,15 +307,15 @@ async fn repost(
             validate: Some(true),
         })
         .await
-        .map_err(|e| format!("リポストエラー: {}", e))?;
+        .map_err(|e| format!("Repost error: {}", e))?;
     
     Ok(result.uri)
 }
 ```
 
-## 通知システム
+## Notification System
 
-### 1. 通知取得
+### 1. Notification Retrieval
 ```rust
 // src-tauri/src/notifications.rs
 use atrium_api::app::bsky::notification::list_notifications;
@@ -338,7 +338,7 @@ async fn fetch_notifications(
             seen_at: None,
         })
         .await
-        .map_err(|e| format!("通知取得エラー: {}", e))?;
+        .map_err(|e| format!("Notification fetch error: {}", e))?;
     
     Ok(NotificationsResponse {
         notifications: notifications.notifications.into_iter()
@@ -360,7 +360,7 @@ pub struct Notification {
 }
 ```
 
-### 2. プッシュ通知 (モバイル)
+### 2. Push Notifications (Mobile)
 ```rust
 // src-tauri/src/push_notifications.rs
 #[cfg(mobile)]
@@ -369,12 +369,12 @@ use tauri_plugin_notification::NotificationExt;
 #[cfg(mobile)]
 #[tauri::command]
 async fn setup_push_notifications(app: AppHandle) -> Result<(), String> {
-    // プッシュ通知設定
+    // Push notification setup
     app.notification()
         .permission()
         .request()
         .await
-        .map_err(|e| format!("通知権限エラー: {}", e))?;
+        .map_err(|e| format!("Notification permission error: {}", e))?;
     
     Ok(())
 }
@@ -391,15 +391,15 @@ async fn show_notification(
         .title(title)
         .body(body)
         .show()
-        .map_err(|e| format!("通知表示エラー: {}", e))?;
+        .map_err(|e| format!("Notification display error: {}", e))?;
     
     Ok(())
 }
 ```
 
-## リアルタイム更新
+## Real-time Updates
 
-### 1. WebSocket接続
+### 1. WebSocket Connection
 ```rust
 // src-tauri/src/realtime.rs
 use tokio_tungstenite::{connect_async, tungstenite::Message};
@@ -414,20 +414,20 @@ async fn start_realtime_connection(
     
     let (ws_stream, _) = connect_async(ws_url)
         .await
-        .map_err(|e| format!("WebSocket接続エラー: {}", e))?;
+        .map_err(|e| format!("WebSocket connection error: {}", e))?;
     
     let (mut write, mut read) = ws_stream.split();
     
-    // WebSocket メッセージ受信ループ
+    // WebSocket message receiving loop
     tokio::spawn(async move {
         while let Some(message) = read.next().await {
             match message {
                 Ok(Message::Text(text)) => {
-                    // リアルタイム更新をフロントエンドに送信
+                    // Send real-time updates to frontend
                     app.emit_all("realtime-update", text).unwrap();
                 }
                 Ok(Message::Binary(data)) => {
-                    // バイナリデータ処理
+                    // Binary data processing
                     handle_car_file(&data).await;
                 }
                 _ => {}
@@ -439,12 +439,12 @@ async fn start_realtime_connection(
 }
 
 async fn handle_car_file(data: &[u8]) {
-    // CAR (Content Addressable aRchive) ファイル処理
-    // AT Protocolの更新データを解析
+    // CAR (Content Addressable aRchive) file processing
+    // Parse AT Protocol update data
 }
 ```
 
-### 2. フロントエンド統合
+### 2. Frontend Integration
 ```typescript
 // src/lib/realtime.ts
 import { invoke } from '@tauri-apps/api/core';
@@ -454,19 +454,19 @@ export class RealtimeManager {
     private unlistenFn?: () => void;
     
     async start() {
-        // リアルタイム接続開始
+        // Start real-time connection
         await invoke('start_realtime_connection');
         
-        // イベントリスナー設定
+        // Set up event listener
         this.unlistenFn = await listen('realtime-update', (event) => {
             this.handleRealtimeUpdate(event.payload);
         });
     }
     
     private handleRealtimeUpdate(data: any) {
-        // タイムライン更新
-        // 通知更新
-        // UI再描画トリガー
+        // Timeline updates
+        // Notification updates
+        // UI re-render triggers
     }
     
     async stop() {
@@ -477,9 +477,9 @@ export class RealtimeManager {
 }
 ```
 
-## 画像・メディア処理
+## Image & Media Processing
 
-### 1. 画像アップロード
+### 1. Image Upload
 ```rust
 // src-tauri/src/media.rs
 use atrium_api::com::atproto::repo::upload_blob;
@@ -493,7 +493,7 @@ async fn upload_image(
     client.set_auth_token(session.access_jwt);
     
     let image_data = std::fs::read(&image_path)
-        .map_err(|e| format!("画像読み込みエラー: {}", e))?;
+        .map_err(|e| format!("Image read error: {}", e))?;
     
     let blob = client
         .com
@@ -501,7 +501,7 @@ async fn upload_image(
         .repo
         .upload_blob(image_data)
         .await
-        .map_err(|e| format!("画像アップロードエラー: {}", e))?;
+        .map_err(|e| format!("Image upload error: {}", e))?;
     
     Ok(BlobRef {
         link: blob.blob.r#ref.link,
@@ -518,9 +518,9 @@ pub struct BlobRef {
 }
 ```
 
-### 2. 画像付き投稿
+### 2. Posts with Images
 ```rust
-// src-tauri/src/post.rs (拡張)
+// src-tauri/src/post.rs (extended)
 use atrium_api::app::bsky::embed::images::{Image as EmbedImage, RecordData as ImagesEmbed};
 
 #[tauri::command]
@@ -536,8 +536,8 @@ async fn create_post_with_images(
         Some(ImagesEmbed {
             images: image_refs.into_iter().map(|img| EmbedImage {
                 image: img.into(),
-                alt: "".to_string(), // TODO: alt text対応
-                aspect_ratio: None,  // TODO: アスペクト比自動検出
+                alt: "".to_string(), // TODO: alt text support
+                aspect_ratio: None,  // TODO: automatic aspect ratio detection
             }).collect(),
         }.into())
     } else {
@@ -555,68 +555,68 @@ async fn create_post_with_images(
         facets: None,
     };
     
-    // 投稿作成処理...
+    // Post creation processing...
 }
 ```
 
-## エラーハンドリング
+## Error Handling
 
-### 1. AT Protocol エラー
+### 1. AT Protocol Errors
 ```rust
 // src-tauri/src/errors.rs
 use atrium_api::error::Error as AtriumError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum BlueskyError {
-    #[error("認証エラー: {0}")]
+    #[error("Authentication error: {0}")]
     AuthError(String),
     
-    #[error("レート制限: {0}")]
+    #[error("Rate limit: {0}")]
     RateLimit(String),
     
-    #[error("ネットワークエラー: {0}")]
+    #[error("Network error: {0}")]
     NetworkError(String),
     
-    #[error("APIエラー: {0}")]
+    #[error("API error: {0}")]
     ApiError(String),
 }
 
 impl From<AtriumError> for BlueskyError {
     fn from(error: AtriumError) -> Self {
         match error {
-            AtriumError::AuthRequired => BlueskyError::AuthError("ログインが必要です".to_string()),
-            AtriumError::RateLimit => BlueskyError::RateLimit("レート制限に達しました".to_string()),
+            AtriumError::AuthRequired => BlueskyError::AuthError("Login required".to_string()),
+            AtriumError::RateLimit => BlueskyError::RateLimit("Rate limit reached".to_string()),
             _ => BlueskyError::ApiError(error.to_string()),
         }
     }
 }
 ```
 
-### 2. フロントエンド エラー処理
+### 2. Frontend Error Handling
 ```typescript
 // src/lib/error-handler.ts
 export class ErrorHandler {
     static handle(error: string): string {
-        if (error.includes('認証エラー')) {
-            return 'ログインが必要です。再度ログインしてください。';
+        if (error.includes('Authentication error')) {
+            return 'Login required. Please log in again.';
         }
         
-        if (error.includes('レート制限')) {
-            return 'リクエストが多すぎます。しばらく待ってから再試行してください。';
+        if (error.includes('Rate limit')) {
+            return 'Too many requests. Please wait and try again.';
         }
         
-        if (error.includes('ネットワークエラー')) {
-            return 'インターネット接続を確認してください。';
+        if (error.includes('Network error')) {
+            return 'Please check your internet connection.';
         }
         
-        return 'エラーが発生しました。再試行してください。';
+        return 'An error occurred. Please try again.';
     }
 }
 ```
 
-## 設定・カスタマイズ
+## Configuration & Customization
 
-### 1. ユーザー設定
+### 1. User Settings
 ```rust
 // src-tauri/src/settings.rs
 use serde::{Deserialize, Serialize};
@@ -648,20 +648,20 @@ pub struct NotificationSettings {
 
 #[tauri::command]
 async fn save_settings(settings: UserSettings) -> Result<(), String> {
-    // 設定保存
+    // Save settings
     Ok(())
 }
 
 #[tauri::command]
 async fn load_settings() -> Result<UserSettings, String> {
-    // 設定読み込み
+    // Load settings
     Ok(UserSettings::default())
 }
 ```
 
-## パフォーマンス最適化
+## Performance Optimization
 
-### 1. キャッシュ戦略
+### 1. Caching Strategy
 ```rust
 // src-tauri/src/cache.rs
 use std::collections::HashMap;
@@ -691,7 +691,7 @@ impl PostCache {
 }
 ```
 
-### 2. バックグラウンド同期
+### 2. Background Synchronization
 ```rust
 // src-tauri/src/sync.rs
 use tokio::time::{interval, Duration};
@@ -702,7 +702,7 @@ pub async fn start_background_sync(app: AppHandle) {
     loop {
         interval.tick().await;
         
-        // バックグラウンドでデータ同期
+        // Background data synchronization
         if let Ok(session) = get_current_session(&app).await {
             sync_notifications(&session).await;
             sync_timeline(&session).await;

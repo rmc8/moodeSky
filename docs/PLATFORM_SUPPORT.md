@@ -1,27 +1,27 @@
-# プラットフォーム対応戦略
+# Platform Support Strategy
 
-## 対応プラットフォーム
+## Supported Platforms
 
-### デスクトップ (Tauri 2.0)
+### Desktop (Tauri 2.0)
 - **macOS**: Intel (x86_64) / Apple Silicon (aarch64)
 - **Windows**: x64 / ARM64  
 - **Linux**: x86_64 / ARM64
 
-### モバイル (Tauri Mobile Alpha)
+### Mobile (Tauri Mobile Alpha)
 - **iOS**: 12.0+ (iPhone/iPad)
 - **Android**: API Level 24+ (Android 7.0+)
 
-## 開発フェーズ
+## Development Phases
 
-### Phase 1: デスクトップ先行開発
-**目標**: 安定したデスクトップ版の完成
+### Phase 1: Desktop-First Development
+**Goal**: Complete stable desktop version
 
-#### 優先順位
-1. **macOS** - 主要開発環境
-2. **Windows** - ユーザーベース大
-3. **Linux** - オープンソースコミュニティ
+#### Priority Order
+1. **macOS** - Primary development environment
+2. **Windows** - Large user base
+3. **Linux** - Open source community
 
-#### 技術的考慮事項
+#### Technical Considerations
 ```json
 // tauri.conf.json
 {
@@ -31,52 +31,52 @@
 }
 ```
 
-### Phase 2: モバイル対応導入
-**目標**: Tauri Mobile Alphaでモバイル版実装
+### Phase 2: Mobile Integration
+**Goal**: Implement mobile version with Tauri Mobile Alpha
 
-#### セットアップ手順
+#### Setup Procedure
 ```bash
-# Tauri Mobile CLI インストール
+# Install Tauri Mobile CLI
 cargo install tauri-cli --version "2.0.0-alpha"
 
-# Android 開発環境
+# Android development environment
 # - Android Studio
 # - Android SDK/NDK
 # - Java 11/17
 
-# iOS 開発環境 (macOS のみ)
+# iOS development environment (macOS only)
 # - Xcode 14+
 # - iOS Simulator
 
-# プロジェクト初期化
-npm run tauri android init
-npm run tauri ios init
+# Project initialization
+pnpm run tauri android init
+pnpm run tauri ios init
 ```
 
-#### 開発コマンド
+#### Development Commands
 ```bash
 # Android
-npm run tauri android dev    # エミュレータで開発
-npm run tauri android build  # APK/AAB生成
+pnpm run tauri android dev    # Develop on emulator
+pnpm run tauri android build  # Generate APK/AAB
 
 # iOS  
-npm run tauri ios dev        # シミュレータで開発
-npm run tauri ios build      # IPA生成
+pnpm run tauri ios dev        # Develop on simulator
+pnpm run tauri ios build      # Generate IPA
 ```
 
-## プラットフォーム別最適化
+## Platform-Specific Optimizations
 
-### デスクトップ共通
+### Desktop Common
 ```rust
 // src-tauri/src/lib.rs
 #[cfg(desktop)]
 #[tauri::command]
 async fn desktop_specific_feature() -> Result<String, String> {
-    // デスクトップ専用機能
+    // Desktop-specific functionality
 }
 ```
 
-#### ウィンドウ管理
+#### Window Management
 ```json
 // tauri.conf.json
 {
@@ -96,14 +96,14 @@ async fn desktop_specific_feature() -> Result<String, String> {
 }
 ```
 
-### macOS 最適化
-#### ネイティブ統合
-- **システムメニュー** 統合
-- **Dock Badge** 通知数表示
-- **Touch Bar** 対応検討
-- **macOS Big Sur+** デザイン準拠
+### macOS Optimization
+#### Native Integration
+- **System Menu** integration
+- **Dock Badge** notification count display
+- **Touch Bar** support consideration
+- **macOS Big Sur+** design compliance
 
-#### 権限要求
+#### Permission Requests
 ```json
 // tauri.conf.json
 {
@@ -118,14 +118,14 @@ async fn desktop_specific_feature() -> Result<String, String> {
 }
 ```
 
-### Windows 最適化
-#### システム統合
-- **Windows 11** Fluent Design対応
-- **システム通知** (WinRT)
-- **タスクバー** 統合
-- **Windows Store** 配布準備
+### Windows Optimization
+#### System Integration
+- **Windows 11** Fluent Design support
+- **System Notifications** (WinRT)
+- **Taskbar** integration
+- **Windows Store** distribution preparation
 
-#### MSI パッケージング
+#### MSI Packaging
 ```json
 {
   "bundle": {
@@ -138,48 +138,48 @@ async fn desktop_specific_feature() -> Result<String, String> {
 }
 ```
 
-### Linux 最適化
-#### デスクトップ環境対応
-- **GNOME/KDE** テーマ適応
-- **D-Bus** 通知システム
-- **AppImage/Flatpak** 配布
-- **Wayland/X11** 対応
+### Linux Optimization
+#### Desktop Environment Support
+- **GNOME/KDE** theme adaptation
+- **D-Bus** notification system
+- **AppImage/Flatpak** distribution
+- **Wayland/X11** support
 
-### モバイル共通
+### Mobile Common
 ```rust
 // src-tauri/src/lib.rs
 #[cfg(mobile)]
 #[tauri::command]
-unsafe fn mobile_specific_feature() -> Result<String, String> {
-    // モバイル専用機能
+async fn mobile_specific_feature() -> Result<String, String> {
+    // Mobile-specific functionality
 }
 ```
 
-### iOS 最適化
-#### ネイティブ統合
-- **iOS 12+** サポート  
-- **Safe Arae** 対応
-- **SwiftUI** ブリッジ検討
-- **App Store** 申請準備
+### iOS Optimization
+#### Native Integration
+- **iOS 12+** support  
+- **Safe Area** support
+- **SwiftUI** bridge consideration
+- **App Store** submission preparation
 
-#### 権限・機能
+#### Permissions & Features
 ```xml
 <!-- src-tauri/gen/apple/Info.plist -->
 <key>NSCameraUsageDescription</key>
-<string>QRコード読み取りに使用</string>
+<string>Used for QR code scanning</string>
 
 <key>NSPhotoLibraryUsageDescription</key>
-<string>画像投稿に使用</string>
+<string>Used for image posting</string>
 ```
 
-### Android 最適化
-#### ネイティブ統合
-- **Material Design 3** 準拠
-- **Android 7.0+** サポート
-- **Kotlin** ブリッジ検討
-- **Google Play** 申請準備
+### Android Optimization
+#### Native Integration
+- **Material Design 3** compliance
+- **Android 7.0+** support
+- **Kotlin** bridge consideration
+- **Google Play** submission preparation
 
-#### 権限・機能
+#### Permissions & Features
 ```xml
 <!-- src-tauri/gen/android/app/src/main/AndroidManifest.xml -->
 <uses-permission android:name="android.permission.INTERNET" />
@@ -187,9 +187,9 @@ unsafe fn mobile_specific_feature() -> Result<String, String> {
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 ```
 
-## レスポンシブデザイン戦略
+## Responsive Design Strategy
 
-### ブレークポイント設計
+### Breakpoint Design
 ```css
 /* src/app.css */
 :root {
@@ -200,19 +200,19 @@ unsafe fn mobile_specific_feature() -> Result<String, String> {
 }
 
 @media (max-width: 768px) {
-  /* モバイル特化UI */
+  /* Mobile-specific UI */
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-  /* タブレット最適化 */
+  /* Tablet optimization */
 }
 
 @media (min-width: 1025px) {
-  /* デスクトップUI */
+  /* Desktop UI */
 }
 ```
 
-### コンポーネント設計
+### Component Design
 ```svelte
 <!-- src/lib/components/AdaptiveLayout.svelte -->
 <script lang="ts">
@@ -243,9 +243,9 @@ unsafe fn mobile_specific_feature() -> Result<String, String> {
 {/if}
 ```
 
-## ビルド・CI/CD 戦略
+## Build & CI/CD Strategy
 
-### GitHub Actions 設定
+### GitHub Actions Configuration
 ```yaml
 # .github/workflows/build.yml
 name: Build and Test
@@ -267,26 +267,26 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       
       - name: Install dependencies
-        run: npm ci
+        run: pnpm ci
         
       - name: Build desktop app
-        run: npm run tauri build
+        run: pnpm run tauri build
 
   mobile:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       
-      # iOS ビルド
+      # iOS build
       - name: Build iOS
-        run: npm run tauri ios build
+        run: pnpm run tauri ios build
         
-      # Android ビルド要 Linux runner
+      # Android build requires Linux runner
       - name: Build Android
-        run: npm run tauri android build
+        run: pnpm run tauri android build
 ```
 
-### リリース自動化
+### Release Automation
 ```yaml
 # .github/workflows/release.yml
 name: Release
@@ -308,9 +308,9 @@ jobs:
           releaseId: ${{ steps.create_release.outputs.id }}
 ```
 
-## テスト戦略
+## Testing Strategy
 
-### プラットフォーム別テスト
+### Platform-Specific Testing
 ```rust
 // src-tauri/src/tests/platform_tests.rs
 #[cfg(test)]
@@ -320,44 +320,44 @@ mod tests {
     #[cfg(desktop)]
     #[test]
     fn test_desktop_features() {
-        // デスクトップ専用機能テスト
+        // Desktop-specific feature tests
     }
 
     #[cfg(mobile)]  
     #[test]
     fn test_mobile_features() {
-        // モバイル専用機能テスト
+        // Mobile-specific feature tests
     }
 }
 ```
 
-### E2E テスト
+### E2E Testing
 ```typescript
 // tests/cross-platform.spec.ts
 import { test, expect } from '@playwright/test';
 
 test.describe('Cross-platform functionality', () => {
   test('login works on all platforms', async ({ page }) => {
-    // 全プラットフォーム共通テスト
+    // Cross-platform common tests
   });
 });
 ```
 
-## デプロイ・ストア申請
+## Deployment & Store Submission
 
 ### App Store (iOS)
-1. **Apple Developer Program** 登録
-2. **App Store Connect** 設定
-3. **TestFlight** ベータテスト
-4. **審査申請** 
+1. **Apple Developer Program** registration
+2. **App Store Connect** setup
+3. **TestFlight** beta testing
+4. **Review submission** 
 
 ### Google Play (Android)  
-1. **Google Play Console** 設定
-2. **内部テスト** → **クローズドテスト** → **オープンテスト**
-3. **リリース**
+1. **Google Play Console** setup
+2. **Internal testing** → **Closed testing** → **Open testing**
+3. **Release**
 
-### デスクトップ配布
-- **GitHub Releases**: メイン配布チャネル
-- **Homebrew**: macOS パッケージ管理
-- **Chocolatey**: Windows パッケージ管理
-- **AUR**: Arch Linux ユーザーリポジトリ
+### Desktop Distribution
+- **GitHub Releases**: Main distribution channel
+- **Homebrew**: macOS package management
+- **Chocolatey**: Windows package management
+- **AUR**: Arch Linux User Repository

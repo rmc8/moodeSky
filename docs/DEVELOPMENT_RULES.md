@@ -1,82 +1,82 @@
-# moodeSky 開発ルール
+# moodeSky Development Rules
 
-## プロジェクト概要
+## Project Overview
 
-**moodeSky**は、Tauriを使用したマルチプラットフォーム対応のBlueskyクライアントアプリケーションです。
+**moodeSky** is a multi-platform Bluesky client application built with Tauri.
 
-### 対象プラットフォーム
-- **デスクトップ**: macOS, Windows, Linux
-- **モバイル**: iOS, Android (Tauri Mobile Alpha使用)
+### Target Platforms
+- **Desktop**: macOS, Windows, Linux
+- **Mobile**: iOS, Android (using Tauri Mobile Alpha)
 
-### 技術スタック
-- **フロントエンド**: SvelteKit + TypeScript (SPA構成)
-- **バックエンド**: Rust (Tauri 2.0)
-- **開発支援**: dev_rag (RAGツール)
+### Technology Stack
+- **Frontend**: SvelteKit + TypeScript (SPA configuration)
+- **Backend**: Rust (Tauri 2.0)
+- **Development Support**: dev_rag (RAG tool)
 
-## 開発ワークフロー
+## Development Workflow
 
-### 1. 開発環境セットアップ
+### 1. Development Environment Setup
 
 ```bash
-# プロジェクトクローン後
+# After cloning the project
 cd moodeSky
 
-# 依存関係インストール
-npm install
+# Install dependencies
+pnpm install
 
-# 開発サーバー起動（推奨）
-npm run tauri dev  # フロントエンド + バックエンド
+# Start development server (recommended)
+pnpm run tauri dev  # Frontend + Backend
 
-# フロントエンドのみ開発
-npm run dev  # Tauri機能不要な場合
+# Frontend-only development
+pnpm run dev  # When Tauri features not needed
 ```
 
-### 2. 開発優先順位
+### 2. Development Priority
 
-1. **デスクトップ版先行開発** - Mac/Windows/Linux対応
-2. **コア機能実装** - AT Protocol統合、基本UI/UX
-3. **モバイル対応** - Tauri Mobile Alpha導入
-4. **プラットフォーム最適化** - レスポンシブデザイン調整
+1. **Desktop Version First** - Mac/Windows/Linux support
+2. **Core Feature Implementation** - AT Protocol integration, basic UI/UX
+3. **Mobile Support** - Tauri Mobile Alpha integration
+4. **Platform Optimization** - Responsive design adjustments
 
-### 3. 品質管理
+### 3. Quality Management
 
-#### 必須チェック項目
+#### Required Checks
 ```bash
-# TypeScript型チェック
-npm run check
+# TypeScript type checking
+pnpm run check
 
-# Rust コードチェック (src-tauri/ディレクトリで)
+# Rust code checking (in src-tauri/ directory)
 cd src-tauri
 cargo check
 cargo test
 ```
 
-#### コードスタイル
-- **TypeScript**: Prettier + ESLint (SvelteKit標準)
+#### Code Style
+- **TypeScript**: Prettier + ESLint (SvelteKit standard)
 - **Rust**: rustfmt + clippy
-- **コミット前**: 型チェック・テスト必須実行
+- **Pre-commit**: Type checking and tests are mandatory
 
-## アーキテクチャガイドライン
+## Architecture Guidelines
 
-### 1. フロントエンド設計
+### 1. Frontend Design
 
-#### ディレクトリ構造
+#### Directory Structure
 ```
 src/
-├── routes/           # SvelteKitルーティング
-├── lib/              # 共通コンポーネント・ユーティリティ
-├── stores/           # Svelte stores (状態管理)
-└── types/            # TypeScript型定義
+├── routes/           # SvelteKit routing
+├── lib/              # Shared components and utilities
+├── stores/           # Svelte stores (state management)
+└── types/            # TypeScript type definitions
 ```
 
-#### 状態管理
-- **Svelte stores**使用
-- **AT Protocol データ**はRust側で処理、フロントエンドは描画に集中
-- **リアクティブプログラミング**パターン採用
+#### State Management
+- Use **Svelte stores**
+- **AT Protocol data** processed on Rust side, frontend focuses on rendering
+- Adopt **reactive programming** patterns
 
-### 2. バックエンド設計
+### 2. Backend Design
 
-#### Tauri コマンド設計
+#### Tauri Command Design
 ```rust
 #[tauri::command]
 async fn bluesky_login(handle: String, password: String) -> Result<AuthSession, String>
@@ -88,107 +88,107 @@ async fn fetch_timeline(session: AuthSession) -> Result<Vec<Post>, String>
 async fn create_post(session: AuthSession, text: String) -> Result<PostResult, String>
 ```
 
-#### データ層
-- **AT Protocol Client**実装（Rust）
-- **オフライン対応**検討（ローカルDB使用）
-- **エラーハンドリング**統一
+#### Data Layer
+- **AT Protocol Client** implementation (Rust)
+- **Offline support** consideration (using local DB)
+- **Unified error handling**
 
-### 3. プラットフォーム対応戦略
+### 3. Platform Support Strategy
 
-#### デスクトップ
-- **ネイティブメニュー**統合
-- **システム通知**対応
-- **ウィンドウ管理**最適化
+#### Desktop
+- **Native menu** integration
+- **System notifications** support
+- **Window management** optimization
 
-#### モバイル
-- **タッチUI**最適化
-- **ジェスチャー**対応
-- **プッシュ通知**実装
+#### Mobile
+- **Touch UI** optimization
+- **Gesture** support
+- **Push notifications** implementation
 
-## AT Protocol統合
+## AT Protocol Integration
 
-### 1. 認証フロー
-1. **ユーザー認証** (handle + password or App Password)
-2. **セッション管理** (Rust側で安全に保存)
-3. **API呼び出し** (atrium-api使用)
+### 1. Authentication Flow
+1. **User authentication** (handle + password or App Password)
+2. **Session management** (securely stored on Rust side)
+3. **API calls** (using atrium-api)
 
-### 2. 主要機能実装順
-1. **ログイン・ログアウト**
-2. **タイムライン表示**
-3. **投稿作成・削除**
-4. **いいね・リポスト**
-5. **通知機能**
-6. **プロフィール管理**
+### 2. Implementation Order of Major Features
+1. **Login/Logout**
+2. **Timeline display**
+3. **Post creation/deletion**
+4. **Likes/Reposts**
+5. **Notification system**
+6. **Profile management**
 
-### 3. データ同期
-- **リアルタイム更新** (WebSocket or polling)
-- **オフライン対応** (ローカルキャッシュ)
-- **同期エラー処理**
+### 3. Data Synchronization
+- **Real-time updates** (WebSocket or polling)
+- **Offline support** (local cache)
+- **Sync error handling**
 
-## 開発支援ツール (dev_rag)
+## Development Support Tools (dev_rag)
 
-### RAGツール活用
+### RAG Tool Usage
 ```bash
 cd dev_rag
 
-# ドキュメント vectorization
-uv run dev-rag vec_tauri      # Tauri ドキュメント
-uv run dev-rag vec_bluesky    # Bluesky ドキュメント  
-uv run dev-rag vec_sveltekit  # SvelteKit ドキュメント
-uv run dev-rag vec_moode      # ローカルプロジェクト
+# Document vectorization
+uv run dev-rag vec_tauri      # Tauri documentation
+uv run dev-rag vec_bluesky    # Bluesky documentation  
+uv run dev-rag vec_sveltekit  # SvelteKit documentation
+uv run dev-rag vec_moode      # Local project
 
-# 全部一括
+# All at once
 uv run dev-rag vector_all
 
-# 検索
+# Search
 uv run dev-rag search "Tauri mobile iOS setup"
 ```
 
-### MCP統合
-- **Bluesky MCP**: AT Protocol API統合支援
-- **Context7**: ライブラリドキュメント検索
-- **Tavily**: 最新情報リサーチ
+### MCP Integration
+- **Bluesky MCP**: AT Protocol API integration support
+- **Context7**: Library documentation search
+- **Tavily**: Latest information research
 
-## テスト戦略
+## Testing Strategy
 
-### 1. フロントエンド
-- **Vitest**: ユニットテスト
-- **Playwright**: E2Eテスト
-- **Svelte Testing Library**: コンポーネントテスト
+### 1. Frontend
+- **Vitest**: Unit testing
+- **Playwright**: E2E testing
+- **Svelte Testing Library**: Component testing
 
-### 2. バックエンド
-- **Rust標準テスト**: ユニット・統合テスト
-- **AT Protocol**: モックサーバー使用
+### 2. Backend
+- **Rust standard testing**: Unit and integration tests
+- **AT Protocol**: Using mock server
 
-### 3. クロスプラットフォーム
+### 3. Cross-platform
 - **CI/CD**: GitHub Actions
-- **自動ビルド**: 全プラットフォーム対応
+- **Automated builds**: All platform support
 
-## デプロイ・配布
+## Deployment & Distribution
 
-### 1. ビルド
+### 1. Build
 ```bash
-# デスクトップ
-npm run tauri build
+# Desktop
+pnpm run tauri build
 
-# 特定プラットフォーム
-npm run tauri build --target x86_64-apple-darwin  # macOS Intel
-npm run tauri build --target aarch64-apple-darwin # macOS ARM
+# Specific platform
+pnpm run tauri build --target x86_64-apple-darwin  # macOS Intel
+pnpm run tauri build --target aarch64-apple-darwin # macOS ARM
 ```
 
-### 2. 配布
-- **GitHub Releases**: デスクトップ版配布
-- **App Store**: iOS版申請準備
-- **Google Play**: Android版申請準備
+### 2. Distribution
+- **GitHub Releases**: Desktop version distribution
+- **App Store**: iOS version submission preparation
+- **Google Play**: Android version submission preparation
 
-## セキュリティ考慮事項
+## Security Considerations
 
-### 1. 認証情報管理
-- **App Passwords**使用推奨
-- **セッション暗号化**保存
-- **機密情報ログ出力禁止**
+### 1. Authentication Information Management
+- **App Passwords** usage recommended
+- **Session encryption** storage
+- **Sensitive information logging prohibited**
 
-### 2. CSP設定
+### 2. CSP Configuration
 ```json
 {
   "security": {
@@ -197,34 +197,34 @@ npm run tauri build --target aarch64-apple-darwin # macOS ARM
 }
 ```
 
-### 3. プライバシー
-- **最小限データ収集**
-- **ローカルデータ暗号化**
-- **通信TLS必須**
+### 3. Privacy
+- **Minimal data collection**
+- **Local data encryption**
+- **TLS mandatory for communication**
 
-## パフォーマンス最適化
+## Performance Optimization
 
-### 1. フロントエンド
-- **コード分割** (SvelteKit)
-- **画像最適化**
-- **仮想スクロール** (大量データ)
+### 1. Frontend
+- **Code splitting** (SvelteKit)
+- **Image optimization**
+- **Virtual scrolling** (for large datasets)
 
-### 2. バックエンド
-- **非同期処理** (tokio)
-- **接続プール**
-- **キャッシュ戦略**
+### 2. Backend
+- **Asynchronous processing** (tokio)
+- **Connection pooling**
+- **Caching strategy**
 
-## 今後の拡張計画
+## Future Expansion Plans
 
-### Phase 1: コア機能
-- AT Protocol基本機能実装
-- デスクトップ版安定化
+### Phase 1: Core Features
+- AT Protocol basic functionality implementation
+- Desktop version stabilization
 
-### Phase 2: モバイル対応
-- Tauri Mobile導入
-- タッチUI最適化
+### Phase 2: Mobile Support
+- Tauri Mobile integration
+- Touch UI optimization
 
-### Phase 3: 高度機能
-- マルチアカウント対応
-- カスタムフィード
-- 高度な通知機能
+### Phase 3: Advanced Features
+- Multi-account support
+- Custom feeds
+- Advanced notification features
