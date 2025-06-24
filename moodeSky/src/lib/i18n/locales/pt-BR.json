@@ -380,6 +380,8 @@
       "noAccounts": "Nenhuma conta logada",
       "logoutAll": "Sair de Todas as Contas",
       "logoutAllConfirm": "Sair de todas as contas?",
+      "logoutAllDescription": "Sair de todas as contas e retornar à tela de login",
+      "logoutAllConfirmDescription": "Sair de todas as contas e retornar à tela de login.\nEsta ação não pode ser desfeita.",
       "logoutAllSuccess": "Saiu de todas as contas",
       "logoutAllError": "Falha ao sair",
       "accountDetails": "Detalhes da Conta",

@@ -380,6 +380,8 @@
       "noAccounts": "로그인된 계정이 없습니다",
       "logoutAll": "모든 계정에서 로그아웃",
       "logoutAllConfirm": "모든 계정에서 로그아웃하시겠습니까?",
+      "logoutAllDescription": "모든 계정에서 로그아웃하고 로그인 화면으로 돌아갑니다",
+      "logoutAllConfirmDescription": "모든 계정에서 로그아웃하고 로그인 화면으로 돌아갑니다.\n이 작업은 되돌릴 수 없습니다.",
       "logoutAllSuccess": "모든 계정에서 로그아웃했습니다",
       "logoutAllError": "로그아웃에 실패했습니다",
       "accountDetails": "계정 세부정보",

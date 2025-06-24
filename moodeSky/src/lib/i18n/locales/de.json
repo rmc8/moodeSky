@@ -380,6 +380,8 @@
       "noAccounts": "Keine angemeldeten Konten",
       "logoutAll": "Von allen Konten abmelden",
       "logoutAllConfirm": "Von allen Konten abmelden?",
+      "logoutAllDescription": "Von allen Konten abmelden und zum Anmeldebildschirm zurückkehren",
+      "logoutAllConfirmDescription": "Von allen Konten abmelden und zum Anmeldebildschirm zurückkehren.\nDiese Aktion kann nicht rückgängig gemacht werden.",
       "logoutAllSuccess": "Von allen Konten abgemeldet",
       "logoutAllError": "Abmeldung fehlgeschlagen",
       "accountDetails": "Kontodetails",
