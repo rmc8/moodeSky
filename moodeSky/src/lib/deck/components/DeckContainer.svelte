@@ -63,7 +63,7 @@
 
   onMount(async () => {
     try {
-      console.log('🎛️ [DeckContainer] Initializing for account:', accountId);
+      debugLog('🎛️ [DeckContainer] Initializing for account:', accountId);
       
       // レスポンシブ判定の初期化
       updateResponsiveState();
@@ -72,7 +72,7 @@
       window.addEventListener('resize', updateResponsiveState);
       
       await deckStore.initialize(accountId);
-      console.log('🎛️ [DeckContainer] Deck store initialized, columns:', deckStore.columns.length);
+      debugLog('🎛️ [DeckContainer] Deck store initialized, columns:', deckStore.columns.length);
       
       // デッキ機能の初期化
       if (deckStore.columns.length > 0) {
@@ -87,7 +87,7 @@
         }, 100);
       }
     } catch (error) {
-      console.error('🎛️ [DeckContainer] Failed to initialize deck store:', error);
+      debugError('🎛️ [DeckContainer] Failed to initialize deck store:', error);
     } finally {
       isInitializing = false;
     }
