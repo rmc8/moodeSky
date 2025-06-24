@@ -16,8 +16,8 @@
   // import ColumnIndicators from './ColumnIndicators.svelte'; // 上部タブに統一のため削除
   import { SwipeDetector, CircularColumnNavigator, ColumnIntersectionObserver } from '../utils/swipeDetector.js';
   import { COLUMN_WIDTHS } from '../types.js';
-  import { debugLog, debugWarn, debugError, debugOnly } from '$lib/utils/debugUtils.js';
-  import { SWIPE_CONFIG, NAVIGATION_CONFIG, INTERSECTION_CONFIG } from '../config/swipeConfig.js';
+  import { debugLog, debugError, debugWarn } from '$lib/utils/debugUtils.js';
+  import { SWIPE_CONFIG, NAVIGATION_CONFIG } from '../config/swipeConfig.js';
   import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
@@ -54,7 +54,7 @@
   let columnNavigator: CircularColumnNavigator | undefined;
   let intersectionObserver: ColumnIntersectionObserver | undefined;
   let stateMonitorInterval: number | undefined;
-  let debugState = $state({ canSwipe: true, isAnimating: false, timeSinceLastSwipe: 0 });
+  // let debugState = $state({ canSwipe: true, isAnimating: false, timeSinceLastSwipe: 0 }); // 未使用のため削除
   let isSwipeInProgress = $state(false); // スワイプ中フラグ（IntersectionObserver制御用）
 
   // ===================================================================
@@ -63,7 +63,7 @@
 
   onMount(async () => {
     try {
-      console.log('🎛️ [DeckContainer] Initializing for account:', accountId);
+      debugLog('🎛️ [DeckContainer] Initializing for account:', accountId);
       
       // レスポンシブ判定の初期化
       updateResponsiveState();
@@ -72,7 +72,7 @@
       window.addEventListener('resize', updateResponsiveState);
       
       await deckStore.initialize(accountId);
-      console.log('🎛️ [DeckContainer] Deck store initialized, columns:', deckStore.columns.length);
+      debugLog('🎛️ [DeckContainer] Deck store initialized, columns:', deckStore.columns.length);
       
       // デッキ機能の初期化
       if (deckStore.columns.length > 0) {
@@ -87,7 +87,7 @@
         }, 100);
       }
     } catch (error) {
-      console.error('🎛️ [DeckContainer] Failed to initialize deck store:', error);
+      debugError('🎛️ [DeckContainer] Failed to initialize deck store:', error);
     } finally {
       isInitializing = false;
     }
@@ -115,7 +115,7 @@
   function updateResponsiveState() {
     const newIsMobile = window.innerWidth < 768;
     if (newIsMobile !== isMobile) {
-      console.log('🎛️ [DeckContainer] Responsive state changed:', { 
+      debugLog('🎛️ [DeckContainer] Responsive state changed:', { 
         from: isMobile ? 'mobile' : 'desktop', 
         to: newIsMobile ? 'mobile' : 'desktop',
         windowWidth: window.innerWidth 
@@ -141,7 +141,7 @@
     swipeDetector = undefined;
     columnNavigator = undefined;
     intersectionObserver = undefined;
-    console.log('🎛️ [DeckContainer] Deck features cleaned up');
+    debugLog('🎛️ [DeckContainer] Deck features cleaned up');
   }
 
   // ===================================================================
@@ -172,7 +172,7 @@
    * Add Deck モーダルでデッキ作成成功時のコールバック
    */
   function handleDeckCreated(column: Column) {
-    console.log('🎛️ [DeckContainer] New deck created:', column);
+    debugLog('🎛️ [DeckContainer] New deck created:', column);
     
     // デッキ機能を再初期化
     setTimeout(() => {
@@ -191,9 +191,9 @@
    * デッキ機能の統合初期化（レスポンシブ対応）
    */
   function initializeDeckFeatures() {
-    console.log('🎛️ [DeckContainer] Initializing deck features, isMobile:', isMobile);
-    console.log('🎛️ [DeckContainer] Window size:', window.innerWidth, 'x', window.innerHeight);
-    console.log('🎛️ [DeckContainer] Available elements:', { 
+    debugLog('🎛️ [DeckContainer] Initializing deck features, isMobile:', isMobile);
+    debugLog('🎛️ [DeckContainer] Window size:', `${window.innerWidth}x${window.innerHeight}`);
+    debugLog('🎛️ [DeckContainer] Available elements:', { 
       mobile: !!mobileDeckElement, 
       desktop: !!desktopDeckElement 
     });
@@ -210,18 +210,18 @@
    */
   function initializeDesktopFeatures() {
     if (!desktopDeckElement) {
-      console.warn('🎛️ [DeckContainer] desktopDeckElement not available');
+      debugWarn('🎛️ [DeckContainer] desktopDeckElement not available');
       return;
     }
     
     try {
-      console.log('🎛️ [DeckContainer] Starting desktop features initialization...');
-      console.log('🎛️ [DeckContainer] Columns available:', deckStore.columns.length);
-      console.log('🎛️ [DeckContainer] Current activeColumnId:', deckStore.state.activeColumnId);
+      debugLog('🎛️ [DeckContainer] Starting desktop features initialization...');
+      debugLog('🎛️ [DeckContainer] Columns available:', deckStore.columns.length);
+      debugLog('🎛️ [DeckContainer] Current activeColumnId:', deckStore.state.activeColumnId);
       
       // 1. デスクトップでは activeColumnId の概念を削除
       // モバイルとは異なり、全カラムが同時に表示されるため不要
-      console.log('🎛️ [DeckContainer] Desktop mode: activeColumnId concept not needed');
+      debugLog('🎛️ [DeckContainer] Desktop mode: activeColumnId concept not needed');
       
       // 2. 水平スクロール制御
       if (desktopDeckElement) {
@@ -229,7 +229,7 @@
         desktopDeckElement.scrollLeft = 0;
         
         // 要素の詳細な可視性チェック
-        console.log('🚨 [VISIBILITY DEBUG] Desktop element details:', {
+        debugLog('🚨 [VISIBILITY DEBUG] Desktop element details:', {
           element: desktopDeckElement,
           className: desktopDeckElement.className,
           offsetWidth: desktopDeckElement.offsetWidth,
@@ -243,7 +243,7 @@
         // 親要素の高さ確認
         const parentElement = desktopDeckElement.parentElement;
         if (parentElement) {
-          console.log('🚨 [HEIGHT DEBUG] Parent element:', {
+          debugLog('🚨 [HEIGHT DEBUG] Parent element:', {
             tagName: parentElement.tagName,
             className: parentElement.className,
             offsetHeight: parentElement.offsetHeight,
@@ -254,7 +254,7 @@
         
         // Computed Styleの詳細確認
         const computedStyle = window.getComputedStyle(desktopDeckElement);
-        console.log('🚨 [VISIBILITY DEBUG] Computed styles:', {
+        debugLog('🚨 [VISIBILITY DEBUG] Computed styles:', {
           display: computedStyle.display,
           visibility: computedStyle.visibility,
           opacity: computedStyle.opacity,
@@ -277,7 +277,7 @@
         let level = 1;
         while (parent && level <= 5) {
           const parentStyle = window.getComputedStyle(parent);
-          console.log(`🚨 [VISIBILITY DEBUG] Parent level ${level}:`, {
+          debugLog(`🚨 [VISIBILITY DEBUG] Parent level ${level}:`, {
             tagName: parent.tagName,
             className: parent.className,
             display: parentStyle.display,
@@ -293,12 +293,12 @@
         
         // 3. DOM要素の状態確認
         const columnElements = desktopDeckElement.querySelectorAll('.deck-column-wrapper');
-        console.log('🚨 [VISIBILITY DEBUG] Column elements found:', columnElements.length);
+        debugLog('🚨 [VISIBILITY DEBUG] Column elements found:', columnElements.length);
         
         columnElements.forEach((element, index) => {
           const rect = element.getBoundingClientRect();
           const computedColumnStyle = window.getComputedStyle(element);
-          console.log(`🚨 [VISIBILITY DEBUG] Column ${index} details:`, {
+          debugLog(`🚨 [VISIBILITY DEBUG] Column ${index} details:`, {
             element: element,
             boundingRect: {
               width: rect.width,
@@ -328,7 +328,7 @@
           const deckColumnEl = element.querySelector('.deck-column');
           if (deckColumnEl) {
             const deckColumnStyle = window.getComputedStyle(deckColumnEl);
-            console.log(`🚨 [VISIBILITY DEBUG] DeckColumn ${index} child:`, {
+            debugLog(`🚨 [VISIBILITY DEBUG] DeckColumn ${index} child:`, {
               display: deckColumnStyle.display,
               visibility: deckColumnStyle.visibility,
               width: deckColumnStyle.width,
@@ -341,7 +341,7 @@
         const sideNav = document.querySelector('nav[aria-label]');
         if (sideNav) {
           const sideNavStyle = window.getComputedStyle(sideNav);
-          console.log('🚨 [VISIBILITY DEBUG] SideNavigation:', {
+          debugLog('🚨 [VISIBILITY DEBUG] SideNavigation:', {
             element: sideNav,
             display: sideNavStyle.display,
             visibility: sideNavStyle.visibility,
@@ -351,11 +351,11 @@
             zIndex: sideNavStyle.zIndex
           });
         } else {
-          console.warn('🚨 [VISIBILITY DEBUG] SideNavigation not found!');
+          debugWarn('🚨 [VISIBILITY DEBUG] SideNavigation not found!');
         }
         
         // 5. 高さ計算の詳細確認
-        console.log('🚨 [HEIGHT DEBUG] Page structure:', {
+        debugLog('🚨 [HEIGHT DEBUG] Page structure:', {
           viewportHeight: window.innerHeight,
           documentHeight: document.documentElement.clientHeight,
           bodyHeight: document.body.clientHeight,
@@ -364,7 +364,7 @@
         });
         
         // 6. hidden/flexクラスの動作確認
-        console.log('🚨 [CLASS DEBUG] Desktop deck element classes:', {
+        debugLog('🚨 [CLASS DEBUG] Desktop deck element classes:', {
           classList: desktopDeckElement.classList.toString(),
           hasHidden: desktopDeckElement.classList.contains('hidden'),
           hasFlex: desktopDeckElement.classList.contains('flex'),
@@ -374,8 +374,8 @@
       }
       
       // 5. 初期化完了確認
-      console.log('🎛️ [DeckContainer] Desktop features initialization completed');
-      console.log('🎛️ [DeckContainer] Final diagnostic:', {
+      debugLog('🎛️ [DeckContainer] Desktop features initialization completed');
+      debugLog('🎛️ [DeckContainer] Final diagnostic:', {
         columnsCount: deckStore.columns.length,
         desktopElementExists: !!desktopDeckElement,
         windowWidth: window.innerWidth,
@@ -386,8 +386,8 @@
       });
       
     } catch (error) {
-      console.error('🚨 [DeckContainer] Desktop features initialization failed:', error);
-      console.error('🚨 [DeckContainer] Error details:', {
+      debugError('🚨 [DeckContainer] Desktop features initialization failed:', error);
+      debugError('🚨 [DeckContainer] Error details:', {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
         elementExists: !!desktopDeckElement,
@@ -401,12 +401,12 @@
    */
   function initializeMobileFeatures() {
     if (!isMobile) {
-      console.log('🎛️ [DeckContainer] Skipping mobile features on desktop');
+      debugLog('🎛️ [DeckContainer] Skipping mobile features on desktop');
       return;
     }
     
     if (!mobileDeckElement) {
-      console.warn('🎛️ [DeckContainer] mobileDeckElement not available, waiting...');
+      debugWarn('🎛️ [DeckContainer] mobileDeckElement not available, waiting...');
       // DOM要素の準備を再度待つ
       setTimeout(() => {
         if (mobileDeckElement) {
@@ -521,10 +521,10 @@
           swipeDetector?.notifyAnimationComplete();
           swipeDetector?.forceReset(); // 追加の安全策
           
-          console.log('✅ [DeckContainer] Transition complete, swipe re-enabled');
+          debugLog('✅ [DeckContainer] Transition complete, swipe re-enabled');
           
-          // デバッグ状態更新
-          updateDebugState();
+          // デバッグ状態更新（未使用のため削除）
+          // updateDebugState();
         }
       }
     );
@@ -577,39 +577,39 @@
     const columnElements = swipeTarget.querySelectorAll('.deck-column-mobile-wrapper') as NodeListOf<HTMLElement>;
     intersectionObserver.observeColumns(Array.from(columnElements));
     
-    console.log('🎛️ [DeckContainer] Mobile features initialized for', deckStore.columns.length, 'columns');
+    debugLog('🎛️ [DeckContainer] Mobile features initialized for', `${deckStore.columns.length} columns`);
   }
   
-  /**
-   * カラムインジケーターからの選択
-   */
-  function handleColumnSelect(index: number) {
-    columnNavigator?.scrollToColumn(index);
-  }
+  // /**
+  //  * カラムインジケーターからの選択 - 未使用のため削除
+  //  */
+  // function handleColumnSelect(index: number) {
+  //   columnNavigator?.scrollToColumn(index);
+  // }
 
-  /**
-   * デバッグ状態の更新
-   */
-  function updateDebugState() {
-    if (swipeDetector) {
-      const state = swipeDetector.getDebugState() as any;
-      debugState = {
-        canSwipe: state.canSwipe,
-        isAnimating: state.isAnimating,
-        timeSinceLastSwipe: state.timeSinceLastSwipe
-      };
-    }
-  }
+  // /**
+  //  * デバッグ状態の更新 - 未使用のため削除
+  //  */
+  // function updateDebugState() {
+  //   if (swipeDetector) {
+  //     const state = swipeDetector.getDebugState() as any;
+  //     debugState = {
+  //       canSwipe: state.canSwipe,
+  //       isAnimating: state.isAnimating,
+  //       timeSinceLastSwipe: state.timeSinceLastSwipe
+  //     };
+  //   }
+  // }
 
-  /**
-   * 手動リセット機能
-   */
-  function handleManualReset() {
-    console.log('🔧 [Manual Reset] Forcing swipe system reset');
-    swipeDetector?.forceReset();
-    columnNavigator?.forceReset();
-    updateDebugState();
-  }
+  // /**
+  //  * 手動リセット機能 - 未使用のため削除
+  //  */
+  // function handleManualReset() {
+  //   debugLog('🔧 [Manual Reset] Forcing swipe system reset');
+  //   swipeDetector?.forceReset();
+  //   columnNavigator?.forceReset();
+  //   updateDebugState();
+  // }
 
   /**
    * 自動監視システムの開始
@@ -621,15 +621,15 @@
     
     stateMonitorInterval = Number(setInterval(() => {
       if (swipeDetector && columnNavigator) {
-        updateDebugState();
+        // updateDebugState(); // 未使用のため削除
         
         const swipeState = swipeDetector.getDebugState() as any;
         const navState = columnNavigator.isCurrentlyTransitioning();
         
         // 超積極的な異常状態の検出と自動回復
         if (swipeState.timeSinceLastSwipe > 400 && (swipeState.isAnimating || navState)) {
-          console.warn('🚨 [Auto-Recovery] Stuck state detected, forcing reset');
-          console.warn('🚨 [Auto-Recovery] State:', { 
+          debugWarn('🚨 [Auto-Recovery] Stuck state detected, forcing reset');
+          debugWarn('🚨 [Auto-Recovery] State:', { 
             swipeAnimating: swipeState.isAnimating, 
             navTransitioning: navState,
             timeSinceLastSwipe: swipeState.timeSinceLastSwipe 
@@ -637,12 +637,12 @@
           
           swipeDetector.forceReset();
           columnNavigator.forceReset();
-          updateDebugState();
+          // updateDebugState(); // 未使用のため削除
         }
       }
     }, 250)); // 超高頻度での監視
     
-    console.log('🔍 [Monitor] State monitoring started');
+    debugLog('🔍 [Monitor] State monitoring started');
   }
   
   /**
@@ -717,7 +717,7 @@
           columnNavigator.scrollToColumn(columnIndex);
         }
         
-        console.log('🎛️ [DeckContainer] Tab switch received, index:', columnIndex);
+        debugLog('🎛️ [DeckContainer] Tab switch received, index:', columnIndex);
       }
     };
     
@@ -742,7 +742,7 @@
         behavior: 'smooth'
       });
       
-      console.log('🎛️ [DeckContainer] Desktop scroll to column:', columnIndex, 'scrollLeft:', scrollLeft);
+      debugLog('🎛️ [DeckContainer] Desktop scroll to column:', { columnIndex, scrollLeft });
     };
     
     window.addEventListener('desktopScrollToColumn', handleDesktopScroll as EventListener);
@@ -792,17 +792,17 @@
     
   {:else}
     <!-- デッキカラム表示 -->
-    {console.log('🚨 [RENDER DEBUG] Rendering deck columns section')}
-    {console.log('🚨 [RENDER DEBUG] isMobile:', isMobile)}
-    {console.log('🚨 [RENDER DEBUG] deckStore.columns:', deckStore.columns)}
-    {console.log('🚨 [RENDER DEBUG] deckStore.isEmpty:', deckStore.isEmpty)}
-    {console.log('🚨 [RENDER DEBUG] isInitializing:', isInitializing)}
+    {debugLog('🚨 [RENDER DEBUG] Rendering deck columns section')}
+    {debugLog('🚨 [RENDER DEBUG] isMobile:', isMobile)}
+    {debugLog('🚨 [RENDER DEBUG] deckStore.columns:', deckStore.columns)}
+    {debugLog('🚨 [RENDER DEBUG] deckStore.isEmpty:', deckStore.isEmpty)}
+    {debugLog('🚨 [RENDER DEBUG] isInitializing:', isInitializing)}
     
     {#if isMobile}
       <!-- モバイル版: 100%幅スワイプ切り替え -->
-      {console.log('🚨 [RENDER DEBUG] Rendering MOBILE deck')}
-      {console.log('🎯 [TRANSFORM DEBUG] activeColumnIndex:', activeColumnIndex)}
-      {console.log('🎯 [TRANSFORM DEBUG] transform value:', `translateX(-${activeColumnIndex * 100}%)`)}
+      {debugLog('🚨 [RENDER DEBUG] Rendering MOBILE deck')}
+      {debugLog('🎯 [TRANSFORM DEBUG] activeColumnIndex:', activeColumnIndex)}
+      {debugLog('🎯 [TRANSFORM DEBUG] transform value:', `translateX(-${activeColumnIndex * 100}%)`)}
       
       <!-- デバッグ用インデックス表示 -->
       <!-- <div class="debug-index">
@@ -830,7 +830,7 @@
           style="width: 100%; transform: translateX(-{activeColumnIndex * 100}%); transform-style: preserve-3d;"
         >
           {#each deckStore.columns as column, index (column.id)}
-            {console.log('🚨 [RENDER DEBUG] Rendering MOBILE column:', column.id, column.settings.title)}
+            {debugLog('🚨 [RENDER DEBUG] Rendering MOBILE column:', { id: column.id, title: column.settings.title })}
             <div class="deck-column-mobile-wrapper w-full h-full flex-shrink-0 snap-start min-w-full max-w-full box-border overflow-hidden">
               <DeckColumn
                 {column}
@@ -843,10 +843,10 @@
       </div>
     {:else}
       <!-- デスクトップ版: 横並び固定幅 -->
-      {console.log('🚨 [RENDER DEBUG] Rendering DESKTOP deck')}
+      {debugLog('🚨 [RENDER DEBUG] Rendering DESKTOP deck')}
       <div class="h-full w-full flex-1 overflow-x-auto overflow-y-hidden p-2 scroll-smooth flex items-stretch min-h-0 box-border scrollbar-professional" bind:this={desktopDeckElement}>
         {#each deckStore.columns as column, index (column.id)}
-          {console.log('🚨 [RENDER DEBUG] Rendering DESKTOP column:', column.id, column.settings.title)}
+          {debugLog('🚨 [RENDER DEBUG] Rendering DESKTOP column:', { id: column.id, title: column.settings.title })}
           <div 
             class="flex-shrink-0 h-full flex flex-col ml-0 mr-2" 
             style="width: {column.settings.width ? COLUMN_WIDTHS[column.settings.width].width : COLUMN_WIDTHS.medium.width}px"
