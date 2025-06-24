@@ -31,8 +31,8 @@
   // 内部状態管理
   // ===================================================================
 
-  let modalElement: HTMLDivElement;
-  let overlayElement: HTMLDivElement;
+  let modalElement = $state<HTMLDivElement>();
+  let overlayElement = $state<HTMLDivElement>();
   let focusableElements: HTMLElement[] = [];
   let previousActiveElement: HTMLElement | null = null;
 
@@ -136,11 +136,28 @@
 
   /**
    * フォーカス復元
+   * エラーハンドリング付き
    */
   const restoreFocus = () => {
     if (previousActiveElement) {
-      previousActiveElement.focus();
-      previousActiveElement = null;
+      try {
+        // DOM要素がまだ存在するかチェック
+        if (previousActiveElement.isConnected) {
+          previousActiveElement.focus();
+        }
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.warn('Focus restoration failed:', error);
+        }
+        // フォーカス復元失敗時のフォールバック
+        try {
+          document.body.focus();
+        } catch {
+          // フォールバックも失敗した場合は無視
+        }
+      } finally {
+        previousActiveElement = null;
+      }
     }
   };
 
@@ -239,9 +256,11 @@
     bind:this={overlayElement}
     class={overlayClasses()}
     onclick={handleOverlayClick}
+    onkeydown={handleKeyDown}
     role="dialog"
     aria-modal="true"
     aria-labelledby={title ? 'modal-title' : undefined}
+    tabindex="-1"
   >
     <!-- モーダルコンテナ -->
     <div
