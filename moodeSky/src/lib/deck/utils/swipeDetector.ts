@@ -29,54 +29,109 @@ export class SwipeDetector {
   private cooldownPeriod = 100; // クールダウン期間(ms) - 超高速応答
   
   private options: SwipeOptions = {
-    threshold: 30,      // 超高感度 - 軽いタッチで即反応
-    velocity: 0.2,      // より軽いスワイプでも検出
+    threshold: 15,      // 更に高感度 - 非常に軽いタッチで反応
+    velocity: 0.1,      // 更に低速度でも検出
     enableCircular: true
   };
   
   private callbacks: SwipeCallbacks = {};
   private element: HTMLElement;
 
+  // イベントハンドラーの参照を保存（確実な削除のため）
+  private boundTouchStart: (e: TouchEvent) => void;
+  private boundTouchMove: (e: TouchEvent) => void;
+  private boundTouchEnd: (e: TouchEvent) => void;
+  private boundMouseDown: (e: MouseEvent) => void;
+  private boundMouseMove: (e: MouseEvent) => void;
+  private boundMouseUp: (e: MouseEvent) => void;
+
   constructor(element: HTMLElement, callbacks: SwipeCallbacks, options?: Partial<SwipeOptions>) {
     this.element = element;
     this.callbacks = callbacks;
     this.options = { ...this.options, ...options };
     
+    // bound参照を初期化
+    this.boundTouchStart = this.handleTouchStart.bind(this);
+    this.boundTouchMove = this.handleTouchMove.bind(this);
+    this.boundTouchEnd = this.handleTouchEnd.bind(this);
+    this.boundMouseDown = this.handleMouseDown.bind(this);
+    this.boundMouseMove = this.handleMouseMove.bind(this);
+    this.boundMouseUp = this.handleMouseUp.bind(this);
+    
     this.attachListeners();
   }
 
   private attachListeners(): void {
-    // タッチイベント
-    this.element.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
-    this.element.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: true });
-    this.element.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
+    // タッチイベント（WebView環境での改善: passive: false で preventDefault可能にする）
+    this.element.addEventListener('touchstart', this.boundTouchStart, { passive: false });
+    this.element.addEventListener('touchmove', this.boundTouchMove, { passive: false });
+    this.element.addEventListener('touchend', this.boundTouchEnd, { passive: false });
     
     // マウスイベント（デスクトップでのテスト用）
-    this.element.addEventListener('mousedown', this.handleMouseDown.bind(this));
-    this.element.addEventListener('mousemove', this.handleMouseMove.bind(this));
-    this.element.addEventListener('mouseup', this.handleMouseUp.bind(this));
+    this.element.addEventListener('mousedown', this.boundMouseDown);
+    this.element.addEventListener('mousemove', this.boundMouseMove);
+    this.element.addEventListener('mouseup', this.boundMouseUp);
+    
+    // console.log('🎯 [SwipeDetector] Event listeners attached to element:', {
+    //   element: this.element,
+    //   tagName: this.element.tagName,
+    //   className: this.element.className,
+    //   boundReferences: 'using bound references for reliable cleanup'
+    // });
   }
 
   private handleTouchStart(e: TouchEvent): void {
-    if (e.touches.length !== 1) return;
+    // console.log('👆 [TouchEvent] touchstart detected', {
+    //   touchCount: e.touches.length,
+    //   clientX: e.touches[0]?.clientX,
+    //   clientY: e.touches[0]?.clientY,
+    //   target: e.target?.constructor.name
+    // });
+    
+    if (e.touches.length !== 1) {
+      // console.log('❌ [TouchEvent] Multiple touches, ignoring');
+      return;
+    }
     
     this.startTracking(e.touches[0].clientX, e.touches[0].clientY);
   }
 
   private handleTouchMove(e: TouchEvent): void {
-    if (!this.isTracking || e.touches.length !== 1) return;
+    if (!this.isTracking || e.touches.length !== 1) {
+      // if (!this.isTracking) console.log('❌ [TouchEvent] touchmove: not tracking');
+      // if (e.touches.length !== 1) console.log('❌ [TouchEvent] touchmove: multiple touches');
+      return;
+    }
     
     // 縦スクロールの場合は無視
     const deltaY = Math.abs(e.touches[0].clientY - this.startY);
     const deltaX = Math.abs(e.touches[0].clientX - this.startX);
     
+    // console.log('🤏 [TouchEvent] touchmove', {
+    //   deltaX: Math.round(deltaX),
+    //   deltaY: Math.round(deltaY),
+    //   ratio: deltaY > deltaX ? 'vertical' : 'horizontal'
+    // });
+    
     if (deltaY > deltaX) {
+      // console.log('📱 [TouchEvent] Vertical scroll detected, stopping tracking');
       this.stopTracking();
     }
   }
 
   private handleTouchEnd(e: TouchEvent): void {
-    if (!this.isTracking || e.changedTouches.length !== 1) return;
+    // console.log('🏁 [TouchEvent] touchend detected', {
+    //   isTracking: this.isTracking,
+    //   changedTouchCount: e.changedTouches.length,
+    //   clientX: e.changedTouches[0]?.clientX,
+    //   clientY: e.changedTouches[0]?.clientY
+    // });
+    
+    if (!this.isTracking || e.changedTouches.length !== 1) {
+      // if (!this.isTracking) console.log('❌ [TouchEvent] touchend: not tracking');
+      // if (e.changedTouches.length !== 1) console.log('❌ [TouchEvent] touchend: multiple touches');
+      return;
+    }
     
     this.endTracking(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
   }
@@ -108,23 +163,31 @@ export class SwipeDetector {
     const currentTime = Date.now();
     const timeSinceLastSwipe = currentTime - this.lastSwipeTime;
     
+    // console.log(`🎯 [SwipeDetector] Attempting to start tracking`, {
+    //   isAnimating: this.isAnimating,
+    //   timeSinceLastSwipe,
+    //   cooldownPeriod: this.cooldownPeriod,
+    //   x: Math.round(x),
+    //   y: Math.round(y)
+    // });
+    
     if (this.isAnimating || timeSinceLastSwipe < this.cooldownPeriod) {
       // 80ms以上経過している場合は強制的に開始（高速連続操作対応）
       if (timeSinceLastSwipe > 80) {
-        console.log(`🚀 [SwipeDetector] Force start - ignoring animation state`);
+        // console.log(`🚀 [SwipeDetector] Force start - ignoring animation state`);
         this.forceReset();
       } else {
-        console.log(`🚫 [SwipeDetector] Start tracking blocked`, {
-          isAnimating: this.isAnimating,
-          timeSinceLastSwipe,
-          cooldownPeriod: this.cooldownPeriod,
-          reason: this.isAnimating ? 'animation in progress' : 'cooldown period'
-        });
+        // console.log(`🚫 [SwipeDetector] Start tracking blocked`, {
+        //   isAnimating: this.isAnimating,
+        //   timeSinceLastSwipe,
+        //   cooldownPeriod: this.cooldownPeriod,
+        //   reason: this.isAnimating ? 'animation in progress' : 'cooldown period'
+        // });
         return;
       }
     }
     
-    console.log(`👆 [SwipeDetector] Start tracking at (${Math.round(x)}, ${Math.round(y)})`);
+    // console.log(`✅ [SwipeDetector] Start tracking SUCCESS at (${Math.round(x)}, ${Math.round(y)})`);
     
     this.startX = x;
     this.startY = y;
@@ -157,24 +220,34 @@ export class SwipeDetector {
       this.isAnimating = true; // アニメーション開始フラグ
       
       const direction = deltaX > 0 ? 'RIGHT' : 'LEFT';
-      console.log(`🚀 [SwipeDetector] ${direction} swipe executed`, {
-        deltaX: Math.round(deltaX),
-        velocity: velocity.toFixed(2),
-        threshold: this.options.threshold
-      });
+      // console.log(`🚀 [SwipeDetector] ${direction} swipe executed`, {
+      //   deltaX: Math.round(deltaX),
+      //   velocity: velocity.toFixed(2),
+      //   threshold: this.options.threshold
+      // });
       
+      // スワイプ実行
       if (deltaX > 0) {
         this.callbacks.onSwipeRight?.(); // 右スワイプ（前へ）
       } else {
         this.callbacks.onSwipeLeft?.();  // 左スワイプ（次へ）
       }
+      
+      // 即座にリセット（100ms後に自動解除 - 短すぎる可能性があるため延長）
+      setTimeout(() => {
+        if (this.isAnimating) {
+          // console.log('🔄 [SwipeDetector] Auto-reset after swipe completion');
+          this.isAnimating = false;
+        }
+      }, 100);
+      
     } else {
-      console.log(`❌ [SwipeDetector] Swipe rejected`, {
-        deltaX: Math.round(deltaX),
-        velocity: velocity.toFixed(2),
-        threshold: this.options.threshold,
-        reason: Math.abs(deltaX) <= this.options.threshold ? 'insufficient distance' : 'insufficient velocity'
-      });
+      // console.log(`❌ [SwipeDetector] Swipe rejected`, {
+      //   deltaX: Math.round(deltaX),
+      //   velocity: velocity.toFixed(2),
+      //   threshold: this.options.threshold,
+      //   reason: Math.abs(deltaX) <= this.options.threshold ? 'insufficient distance' : 'insufficient velocity'
+      // });
     }
     
     this.stopTracking();
@@ -192,7 +265,7 @@ export class SwipeDetector {
    */
   public notifyAnimationComplete(): void {
     this.isAnimating = false;
-    console.log('✅ [SwipeDetector] Animation complete notified');
+    // console.log('✅ [SwipeDetector] Animation complete notified');
   }
   
   /**
@@ -209,7 +282,7 @@ export class SwipeDetector {
     this.isAnimating = false;
     this.isTracking = false;
     this.lastSwipeTime = 0;
-    console.log('🔄 [SwipeDetector] Force reset completed');
+    // console.log('🔄 [SwipeDetector] Force reset completed');
   }
   
   /**
@@ -227,13 +300,20 @@ export class SwipeDetector {
   }
 
   public destroy(): void {
-    // イベントリスナーを削除
-    this.element.removeEventListener('touchstart', this.handleTouchStart.bind(this));
-    this.element.removeEventListener('touchmove', this.handleTouchMove.bind(this));
-    this.element.removeEventListener('touchend', this.handleTouchEnd.bind(this));
-    this.element.removeEventListener('mousedown', this.handleMouseDown.bind(this));
-    this.element.removeEventListener('mousemove', this.handleMouseMove.bind(this));
-    this.element.removeEventListener('mouseup', this.handleMouseUp.bind(this));
+    // console.log('🧹 [SwipeDetector] Destroying SwipeDetector and removing all event listeners');
+    
+    // 状態をリセット
+    this.forceReset();
+    
+    // イベントリスナーを確実に削除（bind済みの参照を使用）
+    this.element.removeEventListener('touchstart', this.boundTouchStart);
+    this.element.removeEventListener('touchmove', this.boundTouchMove);
+    this.element.removeEventListener('touchend', this.boundTouchEnd);
+    this.element.removeEventListener('mousedown', this.boundMouseDown);
+    this.element.removeEventListener('mousemove', this.boundMouseMove);
+    this.element.removeEventListener('mouseup', this.boundMouseUp);
+    
+    // console.log('✅ [SwipeDetector] All event listeners removed successfully');
   }
 }
 
@@ -273,7 +353,7 @@ export class CircularColumnNavigator {
     
     // 確実な循環: 最後から最初へも滑らかに移動
     const nextIndex = (this.currentIndex + 1) % this.totalColumns;
-    console.log(`🔄 [Swipe] Next: ${this.currentIndex} → ${nextIndex} (total: ${this.totalColumns})`);
+    // console.log(`🔄 [Swipe] Next: ${this.currentIndex} → ${nextIndex} (total: ${this.totalColumns})`);
     this.scrollToColumnSafe(nextIndex);
   }
 
@@ -285,19 +365,22 @@ export class CircularColumnNavigator {
     
     // 確実な循環: 最初から最後へも滑らかに移動
     const prevIndex = (this.currentIndex - 1 + this.totalColumns) % this.totalColumns;
-    console.log(`🔄 [Swipe] Previous: ${this.currentIndex} → ${prevIndex} (total: ${this.totalColumns})`);
+    // console.log(`🔄 [Swipe] Previous: ${this.currentIndex} → ${prevIndex} (total: ${this.totalColumns})`);
     this.scrollToColumnSafe(prevIndex);
   }
 
   /**
-   * 安全な指定カラムへの移動（排他制御付き）
+   * 安全な指定カラムへの移動（DeckContainer側CSS管理に対応）
    */
   private scrollToColumnSafe(index: number): void {
+    // console.log(`🔍 [Navigator] scrollToColumnSafe called with index: ${index}`);
+    
     // インデックスを正規化（循環対応）
     const normalizedIndex = ((index % this.totalColumns) + this.totalColumns) % this.totalColumns;
+    // console.log(`🔍 [Navigator] Index normalized: ${index} → ${normalizedIndex} (total: ${this.totalColumns})`);
     
     if (this.isTransitioning) {
-      console.log(`🚫 [Navigator] Already transitioning, skipping move to ${normalizedIndex}`);
+      // console.log(`🚫 [Navigator] Already transitioning, skipping move to ${normalizedIndex}`);
       return;
     }
     
@@ -305,47 +388,33 @@ export class CircularColumnNavigator {
     this.forceCompleteAnyTransition();
     
     this.isTransitioning = true;
-    console.log(`🎯 [Navigator] Starting transition to index: ${normalizedIndex}`);
+    // console.log(`🎯 [Navigator] Starting transition to index: ${normalizedIndex}`);
     
-    // CSS transform を使用してより確実な移動を実行
-    const track = this.containerElement.querySelector('.deck-columns-track') as HTMLElement;
-    if (track) {
-      // 循環を考慮したtransform計算
-      const transformValue = -((normalizedIndex * 100) / this.totalColumns);
+    try {
+      // インデックス更新と通知（DeckContainer側でCSS管理）
+      // console.log(`🔄 [Navigator] Updating current index: ${this.currentIndex} → ${normalizedIndex}`);
+      this.currentIndex = normalizedIndex;
       
-      // 既存のイベントリスナーを削除
-      if (this.currentTransitionHandler) {
-        track.removeEventListener('transitionend', this.currentTransitionHandler);
-      }
+      // console.log(`📞 [Navigator] Calling onColumnChange callback with index: ${normalizedIndex}`);
+      this.callbacks.onColumnChange?.(normalizedIndex);
+      // console.log(`✅ [Navigator] onColumnChange callback executed`);
       
-      // 新しいハンドラーを設定
-      this.currentTransitionHandler = () => {
-        this.cleanupTransition();
-      };
-      
-      track.addEventListener('transitionend', this.currentTransitionHandler, { once: true });
-      
-      // Transform実行
-      track.style.transform = `translateX(${transformValue}%)`;
-      console.log(`🎯 [Transform] Applied: ${transformValue}%`);
-      
-      // 超高速アニメーション完了検出
+      // アニメーション完了後にクリーンアップ（循環移動対応）
       setTimeout(() => {
         if (this.isTransitioning) {
-          console.log('🔄 [Navigator] Proactive cleanup after 170ms');
+          // console.log('🔄 [Navigator] Standard cleanup after 300ms');
           this.cleanupTransition();
         }
-      }, 170); // CSS transition(150ms) + 20ms余裕
+      }, 300); // 循環移動のために延長
       
-      // 超高速フォールバック
-      this.emergencyTimeouts.push(
-        Number(setTimeout(() => this.emergencyCleanup('early'), 180)),     // CSS transition完了直後
-        Number(setTimeout(() => this.emergencyCleanup('final'), 250))      // 最終フォールバック
-      );
+    } catch (error) {
+      console.error(`💥 [Navigator] Error in scrollToColumnSafe:`, error);
+      // エラー時でもコールバックを実行
+      // console.log(`📞 [Navigator] Executing callback despite error`);
+      this.currentIndex = normalizedIndex;
+      this.callbacks.onColumnChange?.(normalizedIndex);
+      this.isTransitioning = false;
     }
-    
-    this.currentIndex = normalizedIndex;
-    this.callbacks.onColumnChange?.(normalizedIndex);
   }
 
   /**
@@ -353,7 +422,7 @@ export class CircularColumnNavigator {
    */
   private forceCompleteAnyTransition(): void {
     if (this.isTransitioning) {
-      console.warn('🔧 [Navigator] Force completing existing transition');
+      // console.warn('🔧 [Navigator] Force completing existing transition');
       this.cleanupTransition();
     }
   }
@@ -381,7 +450,7 @@ export class CircularColumnNavigator {
     
     // 完了コールバック
     this.callbacks.onTransitionComplete?.();
-    console.log('✅ [Navigator] Transition cleanup completed');
+    // console.log('✅ [Navigator] Transition cleanup completed');
   }
 
   /**
@@ -389,7 +458,7 @@ export class CircularColumnNavigator {
    */
   private emergencyCleanup(type: string): void {
     if (this.isTransitioning) {
-      console.warn(`⚠️ [Navigator] Emergency cleanup (${type}) triggered`);
+      // console.warn(`⚠️ [Navigator] Emergency cleanup (${type}) triggered`);
       this.cleanupTransition();
     }
   }
@@ -438,7 +507,7 @@ export class CircularColumnNavigator {
    * 強制リセット機能（デバッグ・緊急時用）
    */
   public forceReset(): void {
-    console.warn('🔧 [Navigator] Force reset called');
+    // console.warn('🔧 [Navigator] Force reset called');
     this.forceCompleteAnyTransition();
   }
 }
@@ -450,6 +519,8 @@ export class ColumnIntersectionObserver {
   private observer: IntersectionObserver;
   private columnElements: HTMLElement[] = [];
   private onActiveColumnChange: (index: number) => void;
+  private lastUpdateTime = 0;
+  private debounceDelay = 300; // 300ms以内の連続更新を防ぐ
 
   constructor(onActiveColumnChange: (index: number) => void) {
     this.onActiveColumnChange = onActiveColumnChange;
@@ -459,7 +530,7 @@ export class ColumnIntersectionObserver {
       {
         root: null,
         rootMargin: '0px',
-        threshold: 0.5 // 50%以上表示されているカラムをアクティブとする
+        threshold: 0.8 // 80%以上表示されているカラムをアクティブとする（誤検出防止）
       }
     );
   }
@@ -477,10 +548,22 @@ export class ColumnIntersectionObserver {
   }
 
   private handleIntersection(entries: IntersectionObserverEntry[]): void {
+    const currentTime = Date.now();
+    
+    // デバウンス処理：短時間の連続更新を防ぐ
+    if (currentTime - this.lastUpdateTime < this.debounceDelay) {
+      // console.log('🚫 [IntersectionObserver] Skipping update due to debounce', {
+      //   timeSinceLastUpdate: currentTime - this.lastUpdateTime,
+      //   debounceDelay: this.debounceDelay
+      // });
+      return;
+    }
+    
     entries.forEach(entry => {
-      if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.8) {
         const index = this.columnElements.indexOf(entry.target as HTMLElement);
         if (index !== -1) {
+          this.lastUpdateTime = currentTime;
           this.onActiveColumnChange(index);
         }
       }

@@ -53,6 +53,7 @@
   let intersectionObserver: ColumnIntersectionObserver | undefined;
   let stateMonitorInterval: number | undefined;
   let debugState = $state({ canSwipe: true, isAnimating: false, timeSinceLastSwipe: 0 });
+  let isSwipeInProgress = $state(false); // スワイプ中フラグ（IntersectionObserver制御用）
 
   // ===================================================================
   // ライフサイクル・初期化
@@ -413,33 +414,70 @@
       return;
     }
     
-    // 既存のインスタンスをクリーンアップ
-    swipeDetector?.destroy();
-    intersectionObserver?.destroy();
+    // 既存のインスタンスを確実にクリーンアップ（重複登録防止）
+    if (swipeDetector) {
+      console.log('🧹 [DeckContainer] Cleaning up existing SwipeDetector');
+      swipeDetector.destroy();
+      swipeDetector = undefined;
+    }
+    if (intersectionObserver) {
+      console.log('🧹 [DeckContainer] Cleaning up existing IntersectionObserver');
+      intersectionObserver.destroy();
+      intersectionObserver = undefined;
+    }
+    if (columnNavigator) {
+      console.log('🧹 [DeckContainer] Cleaning up existing ColumnNavigator');
+      columnNavigator.forceReset();
+      columnNavigator = undefined;
+    }
     
     // モバイル用のスワイプ対象要素を取得
     const swipeTarget = mobileDeckElement.querySelector('.deck-columns-track') as HTMLElement;
     if (!swipeTarget) {
-      console.warn('🎛️ [DeckContainer] Mobile swipe target not found');
+      console.error('🎛️ [DeckContainer] Mobile swipe target not found!', {
+        mobileDeckElement,
+        elementExists: !!mobileDeckElement,
+        innerHTML: mobileDeckElement?.innerHTML?.substring(0, 100)
+      });
       return;
     }
+    
+    console.log('✅ [DeckContainer] Swipe target found successfully', {
+      swipeTarget,
+      tagName: swipeTarget.tagName,
+      className: swipeTarget.className,
+      style: swipeTarget.style.cssText,
+      boundingRect: swipeTarget.getBoundingClientRect()
+    });
     
     // スワイプ検出
     swipeDetector = new SwipeDetector(
       swipeTarget,
       {
         onSwipeLeft: () => {
-          // CircularColumnNavigator を使用して確実に1つ隣に移動
+          // 左スワイプ = 次のページへ（標準的なUI慣習）
+          isSwipeInProgress = true;
           columnNavigator?.moveNext();
+          // 循環移動のために長めの遅延
+          setTimeout(() => {
+            isSwipeInProgress = false;
+            console.log('🔄 [DeckContainer] Swipe progress flag cleared');
+          }, 500);
         },
         onSwipeRight: () => {
-          // CircularColumnNavigator を使用して確実に1つ隣に移動
+          // 右スワイプ = 前のページへ（標準的なUI慣習）
+          isSwipeInProgress = true;
           columnNavigator?.movePrevious();
+          // 循環移動のために長めの遅延
+          setTimeout(() => {
+            isSwipeInProgress = false;
+            console.log('🔄 [DeckContainer] Swipe progress flag cleared');
+          }, 500);
         }
       },
       {
-        threshold: 30,  // 超高感度 - 軽いタッチで即反応
-        velocity: 0.2,  // より軽いスワイプでも検出
+        threshold: 15,  // 更に高感度 - 非常に軽いタッチで反応
+        velocity: 0.1,  // 更に低速度でも検出
         enableCircular: true
       }
     );
@@ -450,7 +488,31 @@
       deckStore.columns.length,
       {
         onColumnChange: (index) => {
+          console.log('🔄 [DeckContainer] onColumnChange called', {
+            oldIndex: activeColumnIndex,
+            newIndex: index,
+            totalColumns: deckStore.columns.length
+          });
+          
+          // Svelte 5 runesでの確実なState更新
+          const oldIndex = activeColumnIndex;
           activeColumnIndex = index;
+          
+          console.log('✅ [DeckContainer] activeColumnIndex updated', {
+            oldIndex,
+            newIndex: activeColumnIndex,
+            stateUpdated: activeColumnIndex === index,
+            isCircular: (oldIndex === 2 && index === 0) || (oldIndex === 0 && index === 2),
+            totalColumns: deckStore.columns.length
+          });
+          
+          // DeckStoreのactiveColumnIdも同期更新
+          if (deckStore.columns[index]) {
+            deckStore.state.activeColumnId = deckStore.columns[index].id;
+            console.log('🔄 [DeckContainer] deckStore.activeColumnId synced', {
+              columnId: deckStore.state.activeColumnId
+            });
+          }
         },
         onTransitionComplete: () => {
           // アニメーション完了をスワイプ検出器に通知
@@ -465,10 +527,48 @@
       }
     );
     
-    // インターセクション監視
+    // インターセクション監視（循環スワイプとの競合回避）
     intersectionObserver = new ColumnIntersectionObserver((index) => {
-      activeColumnIndex = index;
-      columnNavigator?.updateCurrentIndex(index);
+      console.log('👁️ [IntersectionObserver] Column visibility changed', {
+        oldIndex: activeColumnIndex,
+        newIndex: index,
+        totalColumns: deckStore.columns.length,
+        isNavigatorTransitioning: columnNavigator?.isCurrentlyTransitioning(),
+        isSwipeInProgress,
+        wouldBeCircular: (activeColumnIndex === 2 && index === 0) || (activeColumnIndex === 0 && index === 2)
+      });
+      
+      // CircularNavigator遷移中またはスワイプ中は干渉を避ける
+      if (columnNavigator?.isCurrentlyTransitioning() || isSwipeInProgress) {
+        console.log('🚫 [IntersectionObserver] Skipping update during transition/swipe', {
+          navigatorTransitioning: columnNavigator?.isCurrentlyTransitioning(),
+          swipeInProgress: isSwipeInProgress
+        });
+        return;
+      }
+      
+      // CircularColumnNavigatorと同期
+      if (columnNavigator && columnNavigator.getCurrentIndex() !== index) {
+        console.log('🔄 [IntersectionObserver] Syncing NavigatorIndex', {
+          navigatorIndex: columnNavigator.getCurrentIndex(),
+          intersectionIndex: index
+        });
+        columnNavigator.updateCurrentIndex(index);
+      }
+      
+      // DeckContainerのactiveColumnIndexも更新
+      if (activeColumnIndex !== index) {
+        console.log('🔄 [IntersectionObserver] Updating activeColumnIndex', {
+          oldIndex: activeColumnIndex,
+          newIndex: index
+        });
+        activeColumnIndex = index;
+        
+        // DeckStoreとも同期
+        if (deckStore.columns[index]) {
+          deckStore.state.activeColumnId = deckStore.columns[index].id;
+        }
+      }
     });
     
     // モバイルカラム要素を監視
@@ -699,14 +799,16 @@
     {#if isMobile}
       <!-- モバイル版: 100%幅スワイプ切り替え -->
       {console.log('🚨 [RENDER DEBUG] Rendering MOBILE deck')}
+      {console.log('🎯 [TRANSFORM DEBUG] activeColumnIndex:', activeColumnIndex)}
+      {console.log('🎯 [TRANSFORM DEBUG] transform value:', `translateX(-${activeColumnIndex * 100}%)`)}
       
       <!-- デバッグ用インデックス表示 -->
-      <div class="debug-index">
+      <!-- <div class="debug-index">
         {activeColumnIndex + 1} / {deckStore.columns.length}
-      </div>
+      </div> -->
 
       <!-- デバッグコントロール -->
-      <div class="debug-controls">
+      <!-- <div class="debug-controls">
         <button 
           class="debug-reset-button"
           onclick={handleManualReset}
@@ -718,7 +820,7 @@
           {debugState.canSwipe ? '✅' : '🚫'} 
           {debugState.isAnimating ? 'ANIM' : 'READY'}
         </div>
-      </div>
+      </div> -->
       
       <div class="w-full flex-1 overflow-hidden relative min-h-0 box-border p-0 m-0 max-w-full" bind:this={mobileDeckElement}>
         <div 
@@ -920,6 +1022,12 @@
     pointer-events: none;
   }
   
+  /* デバッグ表示を復活（スワイプ動作確認のため） */
+  .debug-index,
+  .debug-controls {
+    display: block;
+  }
+
   /* デスクトップでは非表示 */
   @media (min-width: 768px) {
     .debug-index,
