@@ -722,12 +722,12 @@
       
       <div class="w-full flex-1 overflow-hidden relative min-h-0 box-border p-0 m-0 max-w-full" bind:this={mobileDeckElement}>
         <div 
-          class="flex h-full transition-transform duration-150 ease-out will-change-transform"
-          style="width: {deckStore.columns.length * 100}%; transform: translateX(-{activeColumnIndex * 100 / deckStore.columns.length}%); transform-style: preserve-3d;"
+          class="deck-columns-track flex h-full transition-transform duration-150 ease-out will-change-transform"
+          style="width: 100%; transform: translateX(-{activeColumnIndex * 100}%); transform-style: preserve-3d;"
         >
           {#each deckStore.columns as column, index (column.id)}
             {console.log('🚨 [RENDER DEBUG] Rendering MOBILE column:', column.id, column.settings.title)}
-            <div class="w-full h-full flex-shrink-0 snap-start min-w-full max-w-full box-border overflow-hidden">
+            <div class="deck-column-mobile-wrapper w-full h-full flex-shrink-0 snap-start min-w-full max-w-full box-border overflow-hidden">
               <DeckColumn
                 {column}
                 {index}
@@ -843,16 +843,18 @@
   }
   
   .deck-column-mobile-wrapper {
-    /* スワイプ機能のための幅設定: 画面幅に対する相対値 */
-    width: 100vw; /* ビューポート幅100% */
+    /* スワイプ機能のための幅設定: 画面幅100%で統一 */
+    width: 100% !important; /* 親コンテナの100%を確実に取得 */
     height: 100%;
     flex-shrink: 0;
     scroll-snap-align: start;
-    /* 確実な幅制御 */
-    min-width: 100vw;
-    max-width: 100vw;
+    /* 確実な幅制御と溢れ防止 */
+    min-width: 100%;
+    max-width: 100%;
     box-sizing: border-box; /* パディング・ボーダーを幅に含める */
     overflow: hidden; /* 横スクロールを防止 */
+    padding: 0; /* 余計なパディングを削除 */
+    margin: 0; /* 余計なマージンを削除 */
   }
   
   /* カラム追加ボタン - TailwindCSS移行完了: flex-shrink-0 flex items-center justify-center min-w-20, w-16 h-16 rounded-full bg-card border-2 border-dashed border-primary/30 flex items-center justify-center transition-all duration-200 hover:border-primary/60 hover:bg-primary/5 */

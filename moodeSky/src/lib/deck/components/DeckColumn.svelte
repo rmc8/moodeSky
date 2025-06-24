@@ -48,10 +48,12 @@
     const isMobile = windowWidth < 768;
     
     if (isMobile) {
-      return 'width: 100%; min-width: 100%;'; // モバイル: 強制100%
+      // モバイル: インラインスタイルを一切適用しない（CSSクラスの100%幅を優先）
+      return '';
     } else {
+      // デスクトップ: 従来通りの固定幅
       const width = COLUMN_WIDTHS[column.settings.width];
-      return `width: ${width.width}px; min-width: ${width.width}px;`; // デスクトップ: 設定幅
+      return `width: ${width.width}px; min-width: ${width.width}px;`;
     }
   });
 
@@ -128,7 +130,8 @@
       showDeleteConfirmation = false;
       
       // エラー時は簡易的にアラートを表示（将来的にはトーストシステムに移行）
-      alert(`カラムの削除に失敗しました: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`カラムの削除に失敗しました: ${errorMessage}`);
     }
   }
 
@@ -187,14 +190,26 @@
 
 <!-- カラムコンテナ -->
 <div 
-  class="flex flex-col bg-card border border-subtle rounded-lg shadow-sm overflow-hidden relative h-full transition-all duration-200"
+  class="flex flex-col bg-card overflow-hidden relative h-full transition-all duration-200 w-full min-w-0"
   class:w-20={column.settings.isMinimized}
   class:border-primary-pinned={column.settings.isPinned}
   class:shadow-md={column.settings.isPinned}
+  class:border={windowWidth >= 768}
+  class:border-subtle={windowWidth >= 768}
+  class:rounded-lg={windowWidth >= 768}
+  class:shadow-sm={windowWidth >= 768}
+  class:mobile-column-width={windowWidth < 768}
   style={styleString()}
 >
   <!-- カラムヘッダー -->
-  <header class="flex items-center gap-2 p-3 border-b border-subtle bg-card sticky top-0 z-10">
+  <header 
+    class="flex items-center gap-2 bg-card sticky top-0 z-10 w-full min-w-0 max-w-full overflow-hidden"
+    class:border-b={windowWidth >= 768}
+    class:border-subtle={windowWidth >= 768}
+    class:p-3={windowWidth >= 768}
+    class:px-4={windowWidth < 768}
+    class:py-2={windowWidth < 768}
+  >
     <!-- タイトル部分（クリックでトップスクロール） -->
     <button 
       class="flex items-center gap-3 flex-1 min-w-0 text-left rounded p-1 transition-colors hover:bg-muted/10"
@@ -244,7 +259,12 @@
 
     <!-- 設定ドロップダウン -->
     {#if showSettings}
-      <div class="absolute top-full right-0 mt-1 bg-card border border-themed/5 rounded-lg shadow-lg p-3 min-w-64 z-20">
+      <div 
+        class="absolute top-full right-0 mt-1 bg-card border border-themed/5 rounded-lg shadow-lg p-3 z-20"
+        class:min-w-64={windowWidth >= 768}
+        class:min-w-48={windowWidth < 768}
+        class:max-w-xs={windowWidth < 768}
+      >
         <!-- カラム幅設定 -->
         <div class="mb-4 last:mb-0">
           <h4 class="text-sm font-medium text-themed mb-2">
@@ -280,11 +300,11 @@
 
   <!-- カラムコンテンツ -->
   <div 
-    class="flex-1 overflow-y-auto overflow-x-hidden scrollbar-professional"
+    class="flex-1 overflow-y-auto overflow-x-hidden scrollbar-professional w-full min-w-0 max-w-full"
     bind:this={scrollElement}
   >
     <!-- 空状態（現在の実装） -->
-    <div class="flex flex-col items-center justify-center h-full p-6 text-center md:p-6 max-md:pt-0 max-md:pb-15 max-md:px-2">
+    <div class="flex flex-col items-center justify-center h-full text-center w-full min-w-0 max-w-full" class:p-6={windowWidth >= 768} class:px-4={windowWidth < 768} class:py-6={windowWidth < 768}>
       <div class="mb-4 opacity-40">
         <Icon icon={ICONS.INBOX} size="lg" color="themed" />
       </div>
@@ -332,9 +352,14 @@
   
   /* WebKit角丸レンダリング最適化は app.css に移動済み */
   
-  /* モバイル特化調整: レスポンシブ高さ・幅制御 */
-  @media (max-width: 767px) {
-    /* モバイル固有のスタイルは現在TailwindCSSクラスで対応 */
+  /* モバイル特化調整: 完全100%幅制御 */
+  .mobile-column-width {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
   
   /* 最小化時の特別幅設定 */
