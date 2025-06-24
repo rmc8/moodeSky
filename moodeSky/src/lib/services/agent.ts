@@ -6,6 +6,7 @@ import type {
   AgentResult
 } from '../types/agent.js';
 import type { Account } from '../types/auth.js';
+import { authService } from './authStore.js';
 
 /**
  * Bluesky Agent のラッパークラス
@@ -23,9 +24,10 @@ export class Agent implements IAgent {
     this.account = account;
     this.lastUsedAt = new Date().toISOString();
     
-    // BskyAgent を初期化（セッション付き）
+    // BskyAgent を初期化（セッション付き、persistSession対応）
     this.agent = new BskyAgent({
-      service: account.service
+      service: account.service,
+      persistSession: authService.createPersistSessionHandler(account.id)
     });
     
     // セッション情報を復元（resumeSession を使用）
