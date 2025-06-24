@@ -1,5 +1,5 @@
 import { Store } from '@tauri-apps/plugin-store';
-import type { AtpSessionData } from '@atproto/api';
+import type { AtpSessionData, AtpSessionEvent } from '@atproto/api';
 import type {
   Account,
   AuthStore,
@@ -23,6 +23,252 @@ export class AuthService {
 
   constructor(sessionEventHandler?: SessionEventHandler) {
     this.sessionEventHandler = sessionEventHandler;
+  }
+
+  /**
+   * persistSession用のハンドラー
+   * @atproto/api の自動セッション更新時に呼び出される
+   */
+  createPersistSessionHandler = (accountId?: string) => {
+    return async (evt: AtpSessionEvent, sess?: AtpSessionData) => {
+      try {
+        console.log(`🔄 [AuthService] SessionEvent: ${evt}`, { accountId, session: sess });
+
+        if (evt === 'update' && sess) {
+          // 既存のアカウント情報を取得してrefreshJwtを比較
+          let oldRefreshJwt: string | undefined;
+          let oldRefreshJwtExpiration: Date | null = null;
+          
+          if (accountId) {
+            const accountResult = await this.getAccountById(accountId);
+            if (accountResult.success && accountResult.data) {
+              oldRefreshJwt = accountResult.data.session?.refreshJwt;
+              if (oldRefreshJwt) {
+                const { getTokenExpiration, getTokenIssuedAt } = await import('../utils/jwt.js');
+                oldRefreshJwtExpiration = getTokenExpiration(oldRefreshJwt);
+                const oldIssuedAt = getTokenIssuedAt(oldRefreshJwt);
+                console.log('📊 [AuthService] 旧RefreshJwt情報:', {
+                  accountId,
+                  handle: accountResult.data.profile.handle,
+                  tokenLength: oldRefreshJwt.length,
+                  issuedAt: oldIssuedAt?.toISOString(),
+                  expiresAt: oldRefreshJwtExpiration?.toISOString(),
+                  remainingDays: oldRefreshJwtExpiration ? Math.ceil((oldRefreshJwtExpiration.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 'N/A'
+                });
+              }
+            }
+          }
+
+          // 新しいrefreshJwtの情報を分析
+          if (sess.refreshJwt) {
+            const { getTokenExpiration, getTokenIssuedAt } = await import('../utils/jwt.js');
+            const newRefreshJwtExpiration = getTokenExpiration(sess.refreshJwt);
+            const newIssuedAt = getTokenIssuedAt(sess.refreshJwt);
+            
+            console.log('🆕 [AuthService] 新RefreshJwt情報:', {
+              accountId,
+              handle: sess.handle,
+              tokenLength: sess.refreshJwt.length,
+              issuedAt: newIssuedAt?.toISOString(),
+              expiresAt: newRefreshJwtExpiration?.toISOString(),
+              remainingDays: newRefreshJwtExpiration ? Math.ceil((newRefreshJwtExpiration.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 'N/A'
+            });
+
+            // refreshJwtが実際に更新されたかチェック
+            const isRefreshJwtUpdated = oldRefreshJwt !== sess.refreshJwt;
+            const isExpirationUpdated = oldRefreshJwtExpiration?.getTime() !== newRefreshJwtExpiration?.getTime();
+            
+            console.log('🔄 [AuthService] RefreshJwt更新状況:', {
+              accountId,
+              isRefreshJwtUpdated,
+              isExpirationUpdated,
+              oldExpiration: oldRefreshJwtExpiration?.toISOString(),
+              newExpiration: newRefreshJwtExpiration?.toISOString(),
+              message: isRefreshJwtUpdated ? '✅ RefreshJwt が更新されました' : '⚠️ RefreshJwt は更新されませんでした（accessJwtのみ更新）'
+            });
+          }
+
+          // セッション更新時の処理
+          await this.updateAccountSession(accountId, sess);
+        } else if (evt === 'create' && sess) {
+          // セッション作成時の処理（通常のログイン時は別経路なので、ここは自動更新用）
+          console.log('🆕 [AuthService] Session created via persistSession');
+          
+          if (sess.refreshJwt) {
+            const { getTokenExpiration, getTokenIssuedAt } = await import('../utils/jwt.js');
+            const refreshJwtExpiration = getTokenExpiration(sess.refreshJwt);
+            const issuedAt = getTokenIssuedAt(sess.refreshJwt);
+            
+            console.log('🆕 [AuthService] 新規作成RefreshJwt情報:', {
+              accountId,
+              handle: sess.handle,
+              tokenLength: sess.refreshJwt.length,
+              issuedAt: issuedAt?.toISOString(),
+              expiresAt: refreshJwtExpiration?.toISOString(),
+              remainingDays: refreshJwtExpiration ? Math.ceil((refreshJwtExpiration.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 'N/A'
+            });
+          }
+        } else if (evt === 'expired') {
+          // セッション期限切れ時の処理
+          console.warn('⚠️ [AuthService] Session expired:', accountId);
+          if (accountId) {
+            await this.markAccountSessionExpired(accountId);
+          }
+        }
+
+        // 外部ハンドラーがあれば実行
+        if (this.sessionEventHandler) {
+          await this.sessionEventHandler(evt, sess);
+        }
+      } catch (error) {
+        console.error('❌ [AuthService] persistSession handler error:', error);
+      }
+    };
+  };
+
+  /**
+   * アカウントのセッション情報を更新
+   */
+  private async updateAccountSession(accountId: string | undefined, session: AtpSessionData): Promise<void> {
+    try {
+      if (!accountId) {
+        // accountIdが指定されていない場合、セッションのDIDから検索
+        const allAccountsResult = await this.getAllAccounts();
+        if (!allAccountsResult.success || !allAccountsResult.data) {
+          console.warn('⚠️ [AuthService] Failed to get accounts for session update');
+          return;
+        }
+
+        const matchingAccount = allAccountsResult.data.find(
+          account => account.profile.did === session.did
+        );
+
+        if (!matchingAccount) {
+          console.warn('⚠️ [AuthService] No matching account found for session update:', session.did);
+          return;
+        }
+
+        accountId = matchingAccount.id;
+      }
+
+      // アカウント情報を取得
+      const accountResult = await this.getAccountById(accountId);
+      if (!accountResult.success || !accountResult.data) {
+        console.warn('⚠️ [AuthService] Account not found for session update:', accountId);
+        return;
+      }
+
+      const account = accountResult.data;
+
+      // セッション情報を更新
+      const updatedAccount: Account = {
+        ...account,
+        session,
+        lastAccessAt: new Date().toISOString(),
+      };
+
+      // ストアに保存
+      const storeResult = await this.loadAuthStore();
+      if (!storeResult.success || !storeResult.data) {
+        console.error('❌ [AuthService] Failed to load store for session update');
+        return;
+      }
+
+      const authStore = storeResult.data;
+      const accountIndex = authStore.accounts.findIndex(acc => acc.id === accountId);
+      
+      if (accountIndex >= 0) {
+        authStore.accounts[accountIndex] = updatedAccount;
+        await this.saveAuthStore(authStore);
+        console.log('✅ [AuthService] Session updated successfully for account:', account.profile.handle);
+      }
+    } catch (error) {
+      console.error('❌ [AuthService] Failed to update account session:', error);
+    }
+  }
+
+  /**
+   * アカウントのセッションを期限切れとしてマーク
+   */
+  private async markAccountSessionExpired(accountId: string): Promise<void> {
+    try {
+      console.log('⚠️ [AuthService] Marking session as expired for account:', accountId);
+      
+      // 実装としては、セッションの有効性フラグを設定するか、
+      // または期限切れを示すメタデータを追加することができます
+      // 現在の実装では、セッション期限は JWT の exp から判定されるため、
+      // 特別な処理は不要ですが、ログを出力して監視可能にします
+      
+      const accountResult = await this.getAccountById(accountId);
+      if (accountResult.success && accountResult.data) {
+        console.warn(`⚠️ [AuthService] Session expired for ${accountResult.data.profile.handle}`);
+      }
+    } catch (error) {
+      console.error('❌ [AuthService] Failed to mark session as expired:', error);
+    }
+  }
+
+  /**
+   * アカウントのセッションが実際に有効かテスト
+   * refreshToken を使用して実際にAPI呼び出しを試行
+   */
+  async validateAccountSession(accountId: string): Promise<AuthResult<boolean>> {
+    try {
+      const accountResult = await this.getAccountById(accountId);
+      if (!accountResult.success || !accountResult.data) {
+        return {
+          success: false,
+          error: {
+            type: 'ACCOUNT_NOT_FOUND',
+            message: 'Account not found for session validation'
+          }
+        };
+      }
+
+      const account = accountResult.data;
+      const { BskyAgent } = await import('@atproto/api');
+
+      // BskyAgentでセッション復元を試行
+      const agent = new BskyAgent({ 
+        service: account.service,
+        persistSession: this.createPersistSessionHandler(account.id)
+      });
+
+      try {
+        // resumeSessionを試行
+        await agent.resumeSession(account.session);
+        
+        // 軽いAPI呼び出しでセッションの有効性を確認
+        await agent.api.app.bsky.actor.getPreferences();
+        
+        console.log(`✅ [AuthService] Session validation successful for ${account.profile.handle}`);
+        return { success: true, data: true };
+      } catch (error: any) {
+        console.warn(`⚠️ [AuthService] Session validation failed for ${account.profile.handle}:`, error);
+        
+        // セッション期限切れまたは無効
+        if (error?.status === 401 || error?.error === 'ExpiredToken') {
+          return { success: true, data: false };
+        }
+        
+        // その他のエラー（ネットワークエラーなど）
+        return {
+          success: false,
+          error: {
+            type: 'NETWORK_ERROR',
+            message: `Session validation error: ${error}`
+          }
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          type: 'SESSION_EXPIRED',
+          message: `Failed to validate session: ${error}`
+        }
+      };
+    }
   }
 
   /**
@@ -655,6 +901,104 @@ export class AuthService {
   }
 
   /**
+   * 強制的にrefreshJwt更新をテスト
+   * デバッグ用：実際にrefreshJwtが更新されるかを検証
+   */
+  async testRefreshJwtUpdate(accountId: string): Promise<AuthResult<{ 
+    beforeRefreshJwt: string; 
+    afterRefreshJwt: string; 
+    isUpdated: boolean; 
+    beforeExpiration: Date | null;
+    afterExpiration: Date | null;
+  }>> {
+    try {
+      const accountResult = await this.getAccountById(accountId);
+      if (!accountResult.success || !accountResult.data) {
+        return {
+          success: false,
+          error: {
+            type: 'ACCOUNT_NOT_FOUND',
+            message: 'Account not found for refresh test'
+          }
+        };
+      }
+
+      const account = accountResult.data;
+      const { BskyAgent } = await import('@atproto/api');
+      const { getTokenExpiration } = await import('../utils/jwt.js');
+
+      // 更新前のrefreshJwt情報を記録
+      const beforeRefreshJwt = account.session.refreshJwt;
+      const beforeExpiration = getTokenExpiration(beforeRefreshJwt);
+
+      console.log('🧪 [AuthService] RefreshJwt更新テスト開始:', {
+        accountId,
+        handle: account.profile.handle,
+        beforeTokenLength: beforeRefreshJwt.length,
+        beforeExpiration: beforeExpiration?.toISOString()
+      });
+
+      // BskyAgentでセッション復元を試行
+      const agent = new BskyAgent({ 
+        service: account.service,
+        persistSession: this.createPersistSessionHandler(account.id)
+      });
+
+      await agent.resumeSession(account.session);
+
+      // 軽いAPI呼び出しでセッション更新をトリガー
+      await agent.api.app.bsky.actor.getPreferences();
+
+      // 更新後の状態を確認
+      const updatedAccountResult = await this.getAccountById(accountId);
+      if (!updatedAccountResult.success || !updatedAccountResult.data) {
+        return {
+          success: false,
+          error: {
+            type: 'ACCOUNT_NOT_FOUND',
+            message: 'Failed to get updated account'
+          }
+        };
+      }
+
+      const afterRefreshJwt = updatedAccountResult.data.session.refreshJwt;
+      const afterExpiration = getTokenExpiration(afterRefreshJwt);
+      const isUpdated = beforeRefreshJwt !== afterRefreshJwt;
+
+      console.log('🧪 [AuthService] RefreshJwt更新テスト結果:', {
+        accountId,
+        handle: account.profile.handle,
+        beforeTokenLength: beforeRefreshJwt.length,
+        afterTokenLength: afterRefreshJwt.length,
+        isUpdated,
+        beforeExpiration: beforeExpiration?.toISOString(),
+        afterExpiration: afterExpiration?.toISOString(),
+        conclusion: isUpdated ? '✅ RefreshJwtが更新されました' : '⚠️ RefreshJwtは更新されませんでした'
+      });
+
+      return {
+        success: true,
+        data: {
+          beforeRefreshJwt,
+          afterRefreshJwt,
+          isUpdated,
+          beforeExpiration,
+          afterExpiration
+        }
+      };
+    } catch (error) {
+      console.error('❌ [AuthService] RefreshJwt更新テストエラー:', error);
+      return {
+        success: false,
+        error: {
+          type: 'SESSION_EXPIRED',
+          message: `Failed to test refresh JWT update: ${error}`
+        }
+      };
+    }
+  }
+
+  /**
    * セッション復元・更新
    * 既存セッションを検証し、統計情報も更新
    */
@@ -690,8 +1034,11 @@ export class AuthService {
         try {
           console.log(`🔄 [AuthService] セッション復元中: ${account.profile.handle}`);
           
-          // BskyAgentでセッション復元
-          const agent = new BskyAgent({ service: account.service });
+          // BskyAgentでセッション復元（persistSession対応）
+          const agent = new BskyAgent({ 
+            service: account.service,
+            persistSession: this.createPersistSessionHandler(account.id)
+          });
           
           // resumeSessionを使用してセッション復元
           await agent.resumeSession(account.session);
@@ -770,9 +1117,10 @@ export class AuthService {
       const existingAccount = accountResult.data;
       const { BskyAgent } = await import('@atproto/api');
 
-      // 新しいAgentを作成して認証
+      // 新しいAgentを作成して認証（persistSession対応）
       const agent = new BskyAgent({
         service: existingAccount.service,
+        persistSession: this.createPersistSessionHandler(accountId)
       });
 
       // ハンドルとパスワードで認証
@@ -864,5 +1212,5 @@ export class AuthService {
   }
 }
 
-// シングルトンインスタンス
+// シングルトンインスタンス（persistSession対応）
 export const authService = new AuthService();

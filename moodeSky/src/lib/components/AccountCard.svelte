@@ -12,7 +12,7 @@
   import ReauthModal from './ReauthModal.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import type { Account } from '$lib/types/auth.js';
-  import { getTokenRemainingSeconds, isTokenExpired, getTokenExpiration } from '$lib/utils/jwt.js';
+  import { getTokenRemainingSeconds, isTokenExpired, getTokenExpiration, getTokenIssuedAt } from '$lib/utils/jwt.js';
   import { 
     calculateTimeRemaining, 
     getWarningLevelClass, 
@@ -49,6 +49,7 @@
 
   let isLoading = $state(false);
   let showDetails = $state(false);
+  let sessionValidationStatus = $state<'checking' | 'valid' | 'invalid' | 'error' | null>(null);
   let profileStats = $state<{
     followers: number;
     following: number;
@@ -72,13 +73,20 @@
   // 算出プロパティ
   // ===================================================================
 
-  // セッション状態を判定
+  // セッション状態を判定（JWTと実際のセッション有効性を組み合わせ）
   const sessionStatus = $derived(() => {
     if (!account.session || !account.session.refreshJwt) return 'expired';
     
     // リフレッシュトークンの有効期限チェック
     const isExpired = isTokenExpired(account.session.refreshJwt);
-    return isExpired ? 'expired' : 'active';
+    if (isExpired) return 'expired';
+    
+    // 実際のセッション検証結果を考慮
+    if (sessionValidationStatus === 'checking') return 'checking';
+    if (sessionValidationStatus === 'invalid') return 'expired';
+    if (sessionValidationStatus === 'error') return 'error';
+    
+    return 'active';
   });
 
   // 表示名またはハンドルを取得
@@ -123,6 +131,59 @@
       }
     } catch (error) {
       console.error('Error logging out account:', error);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  /**
+   * セッションの実際の有効性を検証
+   */
+  async function validateSession() {
+    try {
+      sessionValidationStatus = 'checking';
+      
+      const { authService } = await import('$lib/services/authStore.js');
+      const result = await authService.validateAccountSession(account.id);
+      
+      if (result.success) {
+        sessionValidationStatus = result.data ? 'valid' : 'invalid';
+        if (!result.data) {
+          console.warn('🔒 [AccountCard] Session validation failed for:', account.profile.handle);
+        }
+      } else {
+        sessionValidationStatus = 'error';
+        console.error('❌ [AccountCard] Session validation error:', result.error);
+      }
+    } catch (error) {
+      sessionValidationStatus = 'error';
+      console.error('❌ [AccountCard] Session validation exception:', error);
+    }
+  }
+
+  /**
+   * RefreshJwt更新テストを実行
+   */
+  async function testRefreshJwtUpdate() {
+    try {
+      isLoading = true;
+      
+      const { authService } = await import('$lib/services/authStore.js');
+      const result = await authService.testRefreshJwtUpdate(account.id);
+      
+      if (result.success && result.data) {
+        console.log('🧪 [AccountCard] RefreshJwt更新テスト完了:', result.data);
+        alert(`RefreshJwt更新テスト結果:\n${result.data.isUpdated ? '✅ 更新されました' : '⚠️ 更新されませんでした'}\n詳細はコンソールを確認してください。`);
+        
+        // トークン期限情報を再更新
+        updateTokenExpiration();
+      } else {
+        console.error('❌ [AccountCard] RefreshJwt更新テストエラー:', result.error);
+        alert(`RefreshJwt更新テストエラー:\n${result.error?.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('❌ [AccountCard] RefreshJwt更新テスト例外:', error);
+      alert(`RefreshJwt更新テスト例外:\n${error}`);
     } finally {
       isLoading = false;
     }
@@ -202,10 +263,29 @@
   function updateTokenExpiration() {
     try {
       if (!account.session?.refreshJwt) {
+        console.log('📊 [AccountCard] RefreshJwt not found for account:', account.profile.handle);
         tokenTimeRemaining = null;
         expirationDate = null;
         return;
       }
+
+      // RefreshJwtの詳細情報をデバッグ出力
+      import('$lib/utils/jwt.js').then(({ getTokenIssuedAt, getTokenInfo }) => {
+        const tokenInfo = getTokenInfo(account.session.refreshJwt);
+        const issuedAt = getTokenIssuedAt(account.session.refreshJwt);
+        
+        console.log('📊 [AccountCard] RefreshJwt詳細情報:', {
+          handle: account.profile.handle,
+          accountId: account.id,
+          isValid: tokenInfo.isValid,
+          isExpired: tokenInfo.isExpired,
+          issuedAt: issuedAt?.toISOString(),
+          expiresAt: tokenInfo.expiresAt?.toISOString(),
+          remainingSeconds: tokenInfo.remainingSeconds,
+          remainingDays: tokenInfo.expiresAt ? Math.ceil((tokenInfo.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 'N/A',
+          lastAccessAt: account.lastAccessAt
+        });
+      });
 
       // 残り時間を計算
       const remainingSeconds = getTokenRemainingSeconds(account.session.refreshJwt);
@@ -213,6 +293,14 @@
 
       // 絶対期限日時を取得
       expirationDate = getTokenExpiration(account.session.refreshJwt);
+      
+      console.log('📊 [AccountCard] 期限計算結果:', {
+        handle: account.profile.handle,
+        remainingSeconds,
+        tokenTimeRemaining,
+        expirationDate: expirationDate?.toISOString(),
+        displayText: tokenTimeRemaining ? getExpirationDisplayText(tokenTimeRemaining, true) : 'N/A'
+      });
 
       // 次回更新をスケジュール（リアルタイム更新重視）
       scheduleNextUpdate();
@@ -269,7 +357,7 @@
   }
 
   /**
-   * 期限表示用のテキストを生成（詳細版）
+   * 期限表示用のテキストを生成（相対日時のみ）
    */
   function getExpirationDisplayText(
     timeRemaining: TimeRemaining, 
@@ -279,37 +367,22 @@
       return m['session.expired']();
     }
 
-    if (!showDetailed) {
-      // 簡潔版：従来の表示
-      switch (timeRemaining.unit) {
-        case 'days':
-          return m['session.daysLeft']({ count: timeRemaining.value });
-        case 'hours':
-          return m['session.hoursLeft']({ count: timeRemaining.value });
-        case 'minutes':
-          return m['session.minutesLeft']({ count: timeRemaining.value });
-        default:
-          return m['session.expired']();
-      }
-    }
-
-    // 詳細版：セッション期限 + 相対時間 + 絶対日時
-    const info = getDetailedExpirationInfo(
-      timeRemaining, 
-      expirationDate, 
-      currentLanguage(), 
-      !compact
-    );
-
-    if (compact) {
-      // コンパクト版：「約89日」
-      return `${info.aboutPrefix}${info.relativeText}`;
-    } else if (info.absoluteDate) {
-      // 標準版：「セッション期限: 約89日 (2024年9月18日まで)」
-      return `${m['session.sessionExpiry']()}: ${info.aboutPrefix}${info.relativeText} (${info.absoluteDate}${info.untilSuffix})`;
-    } else {
-      // フォールバック：「セッション期限: 約89日」
-      return `${m['session.sessionExpiry']()}: ${info.aboutPrefix}${info.relativeText}`;
+    // 相対時間のみの表示
+    switch (timeRemaining.unit) {
+      case 'days':
+        return compact 
+          ? m['session.daysLeft']({ count: timeRemaining.value })
+          : `${m['session.sessionExpiry']()}: ${m['session.daysLeft']({ count: timeRemaining.value })}`;
+      case 'hours':
+        return compact 
+          ? m['session.hoursLeft']({ count: timeRemaining.value })
+          : `${m['session.sessionExpiry']()}: ${m['session.hoursLeft']({ count: timeRemaining.value })}`;
+      case 'minutes':
+        return compact 
+          ? m['session.minutesLeft']({ count: timeRemaining.value })
+          : `${m['session.sessionExpiry']()}: ${m['session.minutesLeft']({ count: timeRemaining.value })}`;
+      default:
+        return m['session.expired']();
     }
   }
 
@@ -360,6 +433,9 @@
     // リフレッシュトークンの期限情報を初期化
     updateTokenExpiration();
     
+    // セッションの実際の有効性を検証
+    validateSession();
+    
     // ページ可視性APIイベントリスナーを追加
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
@@ -395,7 +471,7 @@
   <!-- メインコンテンツ -->
   <div class="flex items-start gap-4">
     <!-- プロフィール情報 -->
-    <div class="flex items-start flex-1 {compact ? 'gap-2' : 'gap-3'}">
+    <div class="flex items-start flex-1 min-w-0 {compact ? 'gap-2' : 'gap-3'}">
       <Avatar
         src={account.profile.avatar || ''}
         displayName={displayName()}
@@ -405,54 +481,59 @@
       
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 mb-1">
-          <h3 class="text-themed font-semibold">
+          <h3 class="text-themed font-semibold truncate">
             {displayName()}
           </h3>
           {#if isActive}
-            <span class="flex items-center gap-1 px-2 py-1 bg-success/10 rounded-full">
+            <span class="flex items-center gap-1 px-2 py-1 bg-success/10 rounded-full flex-shrink-0">
               <Icon icon={ICONS.CHECK} size="sm" color="success" />
               <span class="text-success text-xs font-medium">{m['settings.account.sessionActive']()}</span>
             </span>
           {/if}
         </div>
         
-        <p class="text-themed opacity-70 text-sm">
+        <p class="text-themed opacity-70 text-sm truncate">
           @{account.profile.handle}
         </p>
         
-        {#if account.profile.displayName && !compact}
-          <p class="text-themed opacity-60 text-xs mt-1">
-            DID: {account.profile.did || 'N/A'}
-          </p>
-        {/if}
       </div>
     </div>
 
     <!-- セッション情報 -->
-    <div class="flex flex-col items-end text-right">
+    <div class="flex flex-col items-end text-right flex-shrink-0">
       <div class="flex items-center gap-2">
         <Icon 
-          icon={sessionStatus() === 'active' ? ICONS.CHECK : ICONS.WARNING} 
+          icon={sessionStatus() === 'active' ? ICONS.CHECK : 
+                sessionStatus() === 'checking' ? ICONS.REFRESH :
+                sessionStatus() === 'error' ? ICONS.WARNING : ICONS.WARNING} 
           size="sm" 
-          color={sessionStatus() === 'active' ? 'success' : 'warning'} 
+          color={sessionStatus() === 'active' ? 'success' : 
+                 sessionStatus() === 'checking' ? 'primary' :
+                 sessionStatus() === 'error' ? 'error' : 'warning'} 
         />
         <span class="text-themed text-sm">
-          {sessionStatus() === 'active' ? m['settings.account.sessionActive']() : m['settings.account.sessionExpired']()}
+          {sessionStatus() === 'active' ? m['settings.account.sessionActive']() : 
+           sessionStatus() === 'checking' ? '検証中...' :
+           sessionStatus() === 'error' ? 'エラー' : 
+           m['settings.account.sessionExpired']()}
         </span>
       </div>
       
       <!-- リフレッシュトークン期限表示 -->
       {#if tokenTimeRemaining}
-        <div class="flex items-center gap-1 mt-1">
-          <Icon 
-            icon={getWarningLevelIcon(tokenTimeRemaining.warningLevel)} 
-            size="sm" 
-            color={tokenTimeRemaining.warningLevel === 'normal' ? 'success' : 
-                   tokenTimeRemaining.warningLevel === 'warning' ? 'warning' : 'error'} 
-          />
-          <span class="text-xs {getWarningLevelClass(tokenTimeRemaining.warningLevel)}" title={expirationDate ? formatAbsoluteDate(expirationDate, currentLanguage(), true) : ''}>
-            {getExpirationDisplayText(tokenTimeRemaining, true)}
-          </span>
+        <div class="flex flex-col gap-1 mt-1">
+          <div class="flex items-center gap-1">
+            <Icon 
+              icon={getWarningLevelIcon(tokenTimeRemaining.warningLevel)} 
+              size="sm" 
+              color={tokenTimeRemaining.warningLevel === 'normal' ? 'success' : 
+                     tokenTimeRemaining.warningLevel === 'warning' ? 'warning' : 'error'} 
+            />
+            <span class="text-xs {getWarningLevelClass(tokenTimeRemaining.warningLevel)}" title={expirationDate ? formatAbsoluteDate(expirationDate, currentLanguage(), true) : ''}>
+              {getExpirationDisplayText(tokenTimeRemaining, true)}
+            </span>
+          </div>
+          
         </div>
       {/if}
       
@@ -520,6 +601,20 @@
     <div class="mt-4 pt-4 border-t border-themed/20">
       <!-- セッション期限切れ時のアクション（再認証 + ログアウト） -->
       {#if sessionStatus() === 'expired'}
+        <div class="mb-3 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+          <div class="flex items-center gap-2 mb-2">
+            <Icon icon={ICONS.WARNING} size="sm" color="warning" />
+            <span class="text-warning text-sm font-medium">
+              {sessionValidationStatus === 'invalid' ? 'RefreshToken期限切れ' : 'セッション期限切れ'}
+            </span>
+          </div>
+          <p class="text-themed text-xs opacity-70">
+            {sessionValidationStatus === 'invalid' 
+              ? 'RefreshTokenの有効期限が切れています。再認証が必要です。' 
+              : 'セッションの有効期限が切れています。再認証またはログアウトを選択してください。'}
+          </p>
+        </div>
+        
         <div class="flex flex-col sm:flex-row gap-2">
           <button
             class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30 flex-1"
@@ -538,6 +633,43 @@
             <Icon icon={ICONS.LOGOUT} size="sm" color="error" />
             <span>{m['settings.account.logoutAccount']()}</span>
           </button>
+        </div>
+      {:else if sessionStatus() === 'error'}
+        <!-- セッション検証エラー時のアクション -->
+        <div class="mb-3 p-3 bg-error/10 border border-error/20 rounded-lg">
+          <div class="flex items-center gap-2 mb-2">
+            <Icon icon={ICONS.WARNING} size="sm" color="error" />
+            <span class="text-error text-sm font-medium">セッション検証エラー</span>
+          </div>
+          <p class="text-themed text-xs opacity-70">
+            ネットワーク接続を確認するか、再認証を試してください。
+          </p>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button
+            class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30 flex-1"
+            onclick={validateSession}
+            disabled={isLoading}
+          >
+            <Icon icon={ICONS.REFRESH} size="sm" color="primary" />
+            <span>再検証</span>
+          </button>
+          
+          <button
+            class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30 flex-1"
+            onclick={openReauthModal}
+            disabled={isLoading}
+          >
+            <Icon icon={ICONS.REFRESH} size="sm" color="primary" />
+            <span>{m['reauth.button']()}</span>
+          </button>
+        </div>
+      {:else if sessionStatus() === 'checking'}
+        <!-- セッション検証中の表示 -->
+        <div class="flex items-center justify-center gap-2 py-3">
+          <div class="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+          <span class="text-themed text-sm">セッション検証中...</span>
         </div>
       {:else}
         <!-- セッション正常時のアクション（詳細表示 + ログアウト） -->

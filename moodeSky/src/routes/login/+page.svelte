@@ -33,9 +33,10 @@
     errorMessage = '';
     
     try {
-      // AT Protocol AgentでBlueSkyにログイン
+      // AT Protocol AgentでBlueSkyにログイン（persistSession対応）
       const agent = new AtpAgent({
-        service: `https://${host}`
+        service: `https://${host}`,
+        persistSession: authService.createPersistSessionHandler()
       });
       
       // ハンドル形式の処理

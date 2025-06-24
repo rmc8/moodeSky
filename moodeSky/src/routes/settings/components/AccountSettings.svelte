@@ -292,7 +292,7 @@
                 {m['settings.account.logoutAll']()}
               </h3>
               <p class="text-error opacity-80">
-                全てのアカウントからログアウトし、ログイン画面に戻ります
+                {m['settings.account.logoutAllDescription']()}
               </p>
             </div>
             
@@ -358,8 +358,7 @@
         </h3>
         
         <p class="text-themed opacity-80 mb-6">
-          全てのアカウントからサインアウトし、ログイン画面に戻ります。<br>
-          この操作は取り消せません。
+          {m['settings.account.logoutAllConfirmDescription']()}
         </p>
         
         <div class="flex gap-3 justify-end">
