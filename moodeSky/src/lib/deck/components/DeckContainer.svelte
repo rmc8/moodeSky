@@ -16,6 +16,8 @@
   // import ColumnIndicators from './ColumnIndicators.svelte'; // 上部タブに統一のため削除
   import { SwipeDetector, CircularColumnNavigator, ColumnIntersectionObserver } from '../utils/swipeDetector.js';
   import { COLUMN_WIDTHS } from '../types.js';
+  import { debugLog, debugWarn, debugError, debugOnly } from '$lib/utils/debugUtils.js';
+  import { SWIPE_CONFIG, NAVIGATION_CONFIG, INTERSECTION_CONFIG } from '../config/swipeConfig.js';
   import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
@@ -416,17 +418,17 @@
     
     // 既存のインスタンスを確実にクリーンアップ（重複登録防止）
     if (swipeDetector) {
-      console.log('🧹 [DeckContainer] Cleaning up existing SwipeDetector');
+      debugLog('🧹 [DeckContainer] Cleaning up existing SwipeDetector');
       swipeDetector.destroy();
       swipeDetector = undefined;
     }
     if (intersectionObserver) {
-      console.log('🧹 [DeckContainer] Cleaning up existing IntersectionObserver');
+      debugLog('🧹 [DeckContainer] Cleaning up existing IntersectionObserver');
       intersectionObserver.destroy();
       intersectionObserver = undefined;
     }
     if (columnNavigator) {
-      console.log('🧹 [DeckContainer] Cleaning up existing ColumnNavigator');
+      debugLog('🧹 [DeckContainer] Cleaning up existing ColumnNavigator');
       columnNavigator.forceReset();
       columnNavigator = undefined;
     }
@@ -434,7 +436,7 @@
     // モバイル用のスワイプ対象要素を取得
     const swipeTarget = mobileDeckElement.querySelector('.deck-columns-track') as HTMLElement;
     if (!swipeTarget) {
-      console.error('🎛️ [DeckContainer] Mobile swipe target not found!', {
+      debugError('🎛️ [DeckContainer] Mobile swipe target not found!', {
         mobileDeckElement,
         elementExists: !!mobileDeckElement,
         innerHTML: mobileDeckElement?.innerHTML?.substring(0, 100)
@@ -442,7 +444,7 @@
       return;
     }
     
-    console.log('✅ [DeckContainer] Swipe target found successfully', {
+    debugLog('✅ [DeckContainer] Swipe target found successfully', {
       swipeTarget,
       tagName: swipeTarget.tagName,
       className: swipeTarget.className,
@@ -461,8 +463,8 @@
           // 循環移動のために長めの遅延
           setTimeout(() => {
             isSwipeInProgress = false;
-            console.log('🔄 [DeckContainer] Swipe progress flag cleared');
-          }, 500);
+            debugLog('🔄 [DeckContainer] Swipe progress flag cleared');
+          }, NAVIGATION_CONFIG.TRANSITION_PROTECT_MS);
         },
         onSwipeRight: () => {
           // 右スワイプ = 前のページへ（標準的なUI慣習）
@@ -471,13 +473,13 @@
           // 循環移動のために長めの遅延
           setTimeout(() => {
             isSwipeInProgress = false;
-            console.log('🔄 [DeckContainer] Swipe progress flag cleared');
-          }, 500);
+            debugLog('🔄 [DeckContainer] Swipe progress flag cleared');
+          }, NAVIGATION_CONFIG.TRANSITION_PROTECT_MS);
         }
       },
       {
-        threshold: 15,  // 更に高感度 - 非常に軽いタッチで反応
-        velocity: 0.1,  // 更に低速度でも検出
+        threshold: SWIPE_CONFIG.TOUCH_THRESHOLD_PX,
+        velocity: SWIPE_CONFIG.MIN_VELOCITY,
         enableCircular: true
       }
     );
@@ -488,7 +490,7 @@
       deckStore.columns.length,
       {
         onColumnChange: (index) => {
-          console.log('🔄 [DeckContainer] onColumnChange called', {
+          debugLog('🔄 [DeckContainer] onColumnChange called', {
             oldIndex: activeColumnIndex,
             newIndex: index,
             totalColumns: deckStore.columns.length
@@ -498,7 +500,7 @@
           const oldIndex = activeColumnIndex;
           activeColumnIndex = index;
           
-          console.log('✅ [DeckContainer] activeColumnIndex updated', {
+          debugLog('✅ [DeckContainer] activeColumnIndex updated', {
             oldIndex,
             newIndex: activeColumnIndex,
             stateUpdated: activeColumnIndex === index,
@@ -509,7 +511,7 @@
           // DeckStoreのactiveColumnIdも同期更新
           if (deckStore.columns[index]) {
             deckStore.state.activeColumnId = deckStore.columns[index].id;
-            console.log('🔄 [DeckContainer] deckStore.activeColumnId synced', {
+            debugLog('🔄 [DeckContainer] deckStore.activeColumnId synced', {
               columnId: deckStore.state.activeColumnId
             });
           }
@@ -529,7 +531,7 @@
     
     // インターセクション監視（循環スワイプとの競合回避）
     intersectionObserver = new ColumnIntersectionObserver((index) => {
-      console.log('👁️ [IntersectionObserver] Column visibility changed', {
+      debugLog('👁️ [IntersectionObserver] Column visibility changed', {
         oldIndex: activeColumnIndex,
         newIndex: index,
         totalColumns: deckStore.columns.length,
@@ -540,7 +542,7 @@
       
       // CircularNavigator遷移中またはスワイプ中は干渉を避ける
       if (columnNavigator?.isCurrentlyTransitioning() || isSwipeInProgress) {
-        console.log('🚫 [IntersectionObserver] Skipping update during transition/swipe', {
+        debugLog('🚫 [IntersectionObserver] Skipping update during transition/swipe', {
           navigatorTransitioning: columnNavigator?.isCurrentlyTransitioning(),
           swipeInProgress: isSwipeInProgress
         });
@@ -549,7 +551,7 @@
       
       // CircularColumnNavigatorと同期
       if (columnNavigator && columnNavigator.getCurrentIndex() !== index) {
-        console.log('🔄 [IntersectionObserver] Syncing NavigatorIndex', {
+        debugLog('🔄 [IntersectionObserver] Syncing NavigatorIndex', {
           navigatorIndex: columnNavigator.getCurrentIndex(),
           intersectionIndex: index
         });
@@ -558,7 +560,7 @@
       
       // DeckContainerのactiveColumnIndexも更新
       if (activeColumnIndex !== index) {
-        console.log('🔄 [IntersectionObserver] Updating activeColumnIndex', {
+        debugLog('🔄 [IntersectionObserver] Updating activeColumnIndex', {
           oldIndex: activeColumnIndex,
           newIndex: index
         });

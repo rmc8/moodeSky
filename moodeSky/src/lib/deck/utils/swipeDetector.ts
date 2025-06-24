@@ -6,6 +6,10 @@
  * 右端→左端、左端→右端の循環対応
  */
 
+import { debugLog, debugWarn, debugError } from '$lib/utils/debugUtils.js';
+import { SWIPE_CONFIG, NAVIGATION_CONFIG, INTERSECTION_CONFIG } from '../config/swipeConfig.js';
+import { swipeErrorHandler, SwipeErrorType, CommonRecoveryStrategies } from './errorHandler.js';
+
 export interface SwipeOptions {
   threshold: number;      // スワイプ感度（px）
   velocity: number;       // スワイプ速度しきい値
@@ -26,11 +30,11 @@ export class SwipeDetector {
   private isTracking = false;
   private isAnimating = false; // アニメーション中フラグ
   private lastSwipeTime = 0;   // 最後のスワイプ時刻
-  private cooldownPeriod = 100; // クールダウン期間(ms) - 超高速応答
+  private cooldownPeriod = SWIPE_CONFIG.COOLDOWN_MS;
   
   private options: SwipeOptions = {
-    threshold: 15,      // 更に高感度 - 非常に軽いタッチで反応
-    velocity: 0.1,      // 更に低速度でも検出
+    threshold: SWIPE_CONFIG.TOUCH_THRESHOLD_PX,
+    velocity: SWIPE_CONFIG.MIN_VELOCITY,
     enableCircular: true
   };
   
@@ -172,17 +176,17 @@ export class SwipeDetector {
     // });
     
     if (this.isAnimating || timeSinceLastSwipe < this.cooldownPeriod) {
-      // 80ms以上経過している場合は強制的に開始（高速連続操作対応）
-      if (timeSinceLastSwipe > 80) {
-        // console.log(`🚀 [SwipeDetector] Force start - ignoring animation state`);
+      // 高速連続操作対応のしきい値以上経過している場合は強制的に開始
+      if (timeSinceLastSwipe > SWIPE_CONFIG.FORCE_START_THRESHOLD_MS) {
+        debugLog(`🚀 [SwipeDetector] Force start - ignoring animation state`);
         this.forceReset();
       } else {
-        // console.log(`🚫 [SwipeDetector] Start tracking blocked`, {
-        //   isAnimating: this.isAnimating,
-        //   timeSinceLastSwipe,
-        //   cooldownPeriod: this.cooldownPeriod,
-        //   reason: this.isAnimating ? 'animation in progress' : 'cooldown period'
-        // });
+        debugLog(`🚫 [SwipeDetector] Start tracking blocked`, {
+          isAnimating: this.isAnimating,
+          timeSinceLastSwipe,
+          cooldownPeriod: this.cooldownPeriod,
+          reason: this.isAnimating ? 'animation in progress' : 'cooldown period'
+        });
         return;
       }
     }
@@ -233,13 +237,13 @@ export class SwipeDetector {
         this.callbacks.onSwipeLeft?.();  // 左スワイプ（次へ）
       }
       
-      // 即座にリセット（100ms後に自動解除 - 短すぎる可能性があるため延長）
+      // 即座にリセット（設定時間後に自動解除）
       setTimeout(() => {
         if (this.isAnimating) {
-          // console.log('🔄 [SwipeDetector] Auto-reset after swipe completion');
+          debugLog('🔄 [SwipeDetector] Auto-reset after swipe completion');
           this.isAnimating = false;
         }
-      }, 100);
+      }, SWIPE_CONFIG.ANIMATION_RESET_MS);
       
     } else {
       // console.log(`❌ [SwipeDetector] Swipe rejected`, {
@@ -402,18 +406,32 @@ export class CircularColumnNavigator {
       // アニメーション完了後にクリーンアップ（循環移動対応）
       setTimeout(() => {
         if (this.isTransitioning) {
-          // console.log('🔄 [Navigator] Standard cleanup after 300ms');
+          debugLog('🔄 [Navigator] Standard cleanup after configured timeout');
           this.cleanupTransition();
         }
-      }, 300); // 循環移動のために延長
+      }, NAVIGATION_CONFIG.CLEANUP_TIMEOUT_MS);
       
     } catch (error) {
-      console.error(`💥 [Navigator] Error in scrollToColumnSafe:`, error);
-      // エラー時でもコールバックを実行
-      // console.log(`📞 [Navigator] Executing callback despite error`);
-      this.currentIndex = normalizedIndex;
-      this.callbacks.onColumnChange?.(normalizedIndex);
-      this.isTransitioning = false;
+      // 構造化エラーハンドリング
+      swipeErrorHandler.handleError(
+        error,
+        {
+          type: SwipeErrorType.NAVIGATION_FAILED,
+          context: 'scrollToColumnSafe',
+          data: {
+            targetIndex: normalizedIndex,
+            currentIndex: this.currentIndex,
+            totalColumns: this.totalColumns
+          },
+          userAction: 'column_navigation'
+        },
+        CommonRecoveryStrategies.resetState(() => {
+          debugLog(`📞 [Navigator] Executing fallback callback`);
+          this.currentIndex = normalizedIndex;
+          this.callbacks.onColumnChange?.(normalizedIndex);
+          this.isTransitioning = false;
+        })
+      );
     }
   }
 
@@ -520,7 +538,7 @@ export class ColumnIntersectionObserver {
   private columnElements: HTMLElement[] = [];
   private onActiveColumnChange: (index: number) => void;
   private lastUpdateTime = 0;
-  private debounceDelay = 300; // 300ms以内の連続更新を防ぐ
+  private debounceDelay = INTERSECTION_CONFIG.DEBOUNCE_DELAY_MS;
 
   constructor(onActiveColumnChange: (index: number) => void) {
     this.onActiveColumnChange = onActiveColumnChange;
@@ -530,7 +548,7 @@ export class ColumnIntersectionObserver {
       {
         root: null,
         rootMargin: '0px',
-        threshold: 0.8 // 80%以上表示されているカラムをアクティブとする（誤検出防止）
+        threshold: INTERSECTION_CONFIG.VISIBILITY_THRESHOLD
       }
     );
   }
@@ -560,7 +578,7 @@ export class ColumnIntersectionObserver {
     }
     
     entries.forEach(entry => {
-      if (entry.isIntersecting && entry.intersectionRatio >= 0.8) {
+      if (entry.isIntersecting && entry.intersectionRatio >= INTERSECTION_CONFIG.VISIBILITY_THRESHOLD) {
         const index = this.columnElements.indexOf(entry.target as HTMLElement);
         if (index !== -1) {
           this.lastUpdateTime = currentTime;
