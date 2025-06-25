@@ -35,6 +35,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Generate Paraglide-JS files
+        run: |
+          echo "🔄 Generating Paraglide-JS files..."
+          # Paraglide-JSをインストールして実行
+          pnpm add -D @inlang/paraglide-js
+          pnpm exec paraglide-js compile --project ./project.inlang --outdir ./src/paraglide
+          echo "✅ Paraglide files generated"
+        continue-on-error: true
+
       - name: TypeScript type check
         run: pnpm run check
 
