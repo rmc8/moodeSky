@@ -8,9 +8,14 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import Icon from './Icon.svelte';
+  import AddDeckModal from '$lib/deck/components/AddDeckModal.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
   import { deckStore } from '$lib/deck/store.svelte.js';
+  import { debugLog } from '$lib/utils/debugUtils.js';
+  import { authService } from '$lib/services/authStore.js';
+  import type { Account } from '$lib/types/auth.js';
+  import type { Column } from '$lib/deck/types.js';
   import * as m from '../../paraglide/messages.js';
   
   // リアクティブ翻訳システム
@@ -23,7 +28,17 @@
     onAddDeck?: () => void;
   }>();
   
-  // カラム追加モーダル状態は親コンポーネントで管理するため削除
+  // グローバルなデッキ追加モーダル状態管理
+  let showAddDeckModal = $state(false);
+  let activeAccount = $state<Account | null>(null);
+  
+  // アクティブアカウントを取得
+  $effect(async () => {
+    const result = await authService.getActiveAccount();
+    if (result.success && result.data) {
+      activeAccount = result.data;
+    }
+  });
   
   interface NavItem {
     id: string;
@@ -63,11 +78,32 @@
   
   function handleNavigation(path: string, itemId: string) {
     if (itemId === 'deck-add') {
-      // デッキ追加ボタンの場合は親コンポーネントのコールバックを呼び出し
-      onAddDeck?.();
+      // デッキ追加ボタンの場合はグローバルモーダルを開く
+      debugLog('🎛️ [BottomNavigation] Opening global Add Deck modal');
+      showAddDeckModal = true;
     } else {
       // その他のナビゲーション
       goto(path);
+    }
+  }
+
+  /**
+   * デッキ追加モーダルを閉じる
+   */
+  function handleCloseAddDeckModal() {
+    debugLog('🎛️ [BottomNavigation] Closing global Add Deck modal');
+    showAddDeckModal = false;
+  }
+
+  /**
+   * デッキ追加成功時の処理
+   */
+  function handleDeckAddSuccess(column: Column) {
+    debugLog('🎛️ [BottomNavigation] Deck added successfully:', column.settings.title);
+    showAddDeckModal = false;
+    // 必要に応じてホーム画面に遷移
+    if (currentPath !== '/deck') {
+      goto('/deck');
     }
   }
   
@@ -108,6 +144,16 @@
     {/each}
   </div>
 </nav>
+
+<!-- グローバルなデッキ追加モーダル -->
+{#if showAddDeckModal && activeAccount}
+  <AddDeckModal
+    isOpen={showAddDeckModal}
+    onClose={handleCloseAddDeckModal}
+    onSuccess={handleDeckAddSuccess}
+    zIndex={9999}
+  />
+{/if}
 
 
 

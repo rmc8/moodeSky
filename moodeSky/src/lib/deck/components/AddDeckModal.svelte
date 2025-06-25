@@ -14,7 +14,7 @@
   // Props
   // ===================================================================
 
-  const { isOpen, onClose, onSuccess }: AddDeckModalProps = $props();
+  const { isOpen, onClose, onSuccess, zIndex = 50 }: AddDeckModalProps = $props();
 
   // ===================================================================
   // Event Handlers
@@ -42,6 +42,7 @@
 <!-- 統一UIコンポーネントシステム -->
 <Modal 
   {isOpen}
+  {zIndex}
   title={m['deck.addDeck.title']()}
   onClose={handleClose}
   showFooter={true}
