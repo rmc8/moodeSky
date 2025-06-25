@@ -102,6 +102,8 @@ export const ICONS = {
   ACCOUNT_CIRCLE: 'material-symbols:account-circle',
   ARROW_BACK: 'material-symbols:arrow-back',
   ARROW_FORWARD: 'material-symbols:arrow-forward',
+  ARROW_LEFT: 'material-symbols:arrow-back',
+  ARROW_RIGHT: 'material-symbols:arrow-forward',
   
   // アクション
   MORE_HORIZ: 'material-symbols:more-horiz',
@@ -121,6 +123,8 @@ export const ICONS = {
   GROUP: 'material-symbols:group',
   PERSON_ADD: 'material-symbols:person-add',
   SECURITY: 'material-symbols:security',
+  EMAIL: 'material-symbols:email',
+  HELP_CIRCLE: 'material-symbols:help',
   
   // 未来・開発
   FUTURE: 'material-symbols:auto-awesome',
