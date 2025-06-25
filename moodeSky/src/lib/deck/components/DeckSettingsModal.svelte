@@ -14,6 +14,7 @@
   import type { ColumnWidth } from '../types.js';
   import { COLUMN_WIDTHS } from '../types.js';
   import * as m from '../../../paraglide/messages.js';
+import { message } from '@tauri-apps/plugin-dialog';
 
   // ===================================================================
   // Props
@@ -69,7 +70,7 @@
       onClose();
     } catch (error) {
       console.error('🎛️ [DeckSettings] Failed to save deck name:', error);
-      alert('デッキ名の変更に失敗しました');
+      await message(m['deck.settings.error.saveName'](), { title: m['common.error'](), kind: 'error' });
     } finally {
       isSaving = false;
     }
@@ -90,7 +91,7 @@
       onClose();
     } catch (error) {
       console.error('🎛️ [DeckSettings] Failed to delete deck:', error);
-      alert('デッキの削除に失敗しました');
+      await message(m['deck.settings.error.deleteItem'](), { title: m['common.error'](), kind: 'error' });
     } finally {
       isDeleting = false;
       showDeleteConfirmation = false;
@@ -112,7 +113,7 @@
       currentDeckSize = size;
     } catch (error) {
       console.error('🎛️ [DeckSettings] Failed to save deck size:', error);
-      alert('デッキサイズの変更に失敗しました');
+      await message(m['deck.settings.error.changeSize'](), { title: m['common.error'](), kind: 'error' });
     } finally {
       isSavingSize = false;
     }
@@ -179,7 +180,7 @@
 <Modal
   {isOpen}
   {onClose}
-  title="{deckTitle} の設定"
+  title={m['deck.settings.title']()}
   size="md"
   {zIndex}
 >
@@ -187,7 +188,7 @@
     <!-- デッキ名変更 -->
     <div>
       <label for="deck-name" class="block text-sm font-medium text-themed mb-3">
-        デッキ名
+        {m['deck.settings.nameLabel']()}
       </label>
       <div class="relative">
         <input
@@ -195,13 +196,13 @@
           type="text"
           bind:value={deckName}
           class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-card text-themed placeholder-secondary transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none hover:border-primary/50"
-          placeholder="デッキ名を入力"
+          placeholder={m['deck.settings.namePlaceholder']()}
           maxlength="50"
         />
         <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 transition-opacity duration-200 pointer-events-none focus-within:opacity-100"></div>
       </div>
       <p class="text-xs text-secondary mt-2">
-        このデッキの表示名を設定します
+        {m['deck.settings.nameDescription']()}
       </p>
       {#if nameChanged}
         <div class="mt-3 flex gap-2">
@@ -212,17 +213,17 @@
           >
             {#if isSaving}
               <Icon icon={ICONS.LOADER} size="sm" class="animate-spin mr-2" />
-              保存中...
+              {m['deck.settings.saving']()}
             {:else}
               <Icon icon={ICONS.CHECK} size="sm" class="mr-2" />
-              名前を変更
+              {m['deck.settings.changeName']()}
             {/if}
           </button>
           <button
             class="text-secondary hover:text-themed transition-colors px-4 py-2 text-sm"
             onclick={() => deckName = originalDeckName}
           >
-            キャンセル
+            {m['common.cancel']()}
           </button>
         </div>
       {/if}
@@ -232,10 +233,10 @@
     {#if windowWidth >= 768}
       <div>
         <label for="deck-size" class="block text-sm font-medium text-themed mb-3">
-          デッキサイズ
+          {m['deck.settings.sizeLabel']()}
         </label>
         <p class="text-xs text-secondary mb-4">
-          デスクトップでのカラム幅を選択
+          {m['deck.settings.sizeDescription']()}
         </p>
         <div class="relative">
           <select
@@ -257,7 +258,7 @@
         {#if isSavingSize}
           <div class="mt-3 flex items-center gap-2 text-sm text-secondary">
             <Icon icon={ICONS.LOADER} size="sm" class="animate-spin" />
-            サイズを変更中...
+            {m['deck.settings.changingSize']()}
           </div>
         {/if}
       </div>
@@ -267,8 +268,8 @@
     <div class="pt-6 border-t border-gray-200">
       <div class="flex items-start justify-between">
         <div class="flex-1">
-          <h4 class="text-sm font-medium text-themed mb-1">デッキの削除</h4>
-          <p class="text-xs text-secondary">このデッキを削除します。この操作は取り消せません。</p>
+          <h4 class="text-sm font-medium text-themed mb-1">{m['deck.settings.deleteSection']()}</h4>
+          <p class="text-xs text-secondary">{m['deck.settings.deleteDescription']()}</p>
         </div>
         
         <div class="ml-4 flex-shrink-0">
@@ -277,7 +278,7 @@
               class="px-4 py-2 bg-error hover:bg-error/90 text-white text-sm font-medium rounded-lg transition-all duration-200 hover:shadow-md"
               onclick={() => showDeleteConfirmation = true}
             >
-              削除
+              {m['common.delete']()}
             </button>
           {:else}
             <div class="flex gap-2">
@@ -288,15 +289,16 @@
               >
                 {#if isDeleting}
                   <Icon icon={ICONS.LOADER} size="sm" class="animate-spin" />
+                  {m['deck.settings.deleting']()}
                 {:else}
-                  削除する
+                  {m['common.delete']()}
                 {/if}
               </button>
               <button
                 class="px-4 py-2 text-secondary hover:text-themed text-sm font-medium rounded-lg transition-colors"
                 onclick={() => showDeleteConfirmation = false}
               >
-                キャンセル
+                {m['common.cancel']()}
               </button>
             </div>
           {/if}
@@ -306,7 +308,7 @@
       {#if showDeleteConfirmation}
         <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p class="text-sm text-red-600">
-            「{deckTitle}」を削除しますか？この操作は取り消せません。
+            {m['deck.settings.deleteConfirmation']({ name: deckTitle })}
           </p>
         </div>
       {/if}

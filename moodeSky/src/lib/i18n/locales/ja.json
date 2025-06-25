@@ -127,6 +127,26 @@
     "mobile": {
       "swipeHint": "スワイプでカラムを切り替え"
     },
+    "settings": {
+      "title": "デッキ設定",
+      "nameLabel": "デッキ名",
+      "namePlaceholder": "デッキ名を入力",
+      "nameDescription": "このデッキの表示名を設定します",
+      "sizeLabel": "デッキサイズ",
+      "sizeDescription": "デスクトップでのカラム幅を選択",
+      "deleteSection": "デッキの削除",
+      "deleteDescription": "このデッキを削除します。この操作は取り消せません。",
+      "deleteConfirmation": "「{name}」を削除しますか？この操作は取り消せません。",
+      "saving": "保存中...",
+      "changeName": "名前を変更",
+      "deleting": "削除中...",
+      "changingSize": "サイズを変更中...",
+      "error": {
+        "saveName": "デッキ名の変更に失敗しました",
+        "deleteItem": "デッキの削除に失敗しました",
+        "changeSize": "デッキサイズの変更に失敗しました"
+      }
+    },
     "addDeck": {
       "title": "デッキを追加",
       "subtitle": "新しいデッキカラムを作成します",

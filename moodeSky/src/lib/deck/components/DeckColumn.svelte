@@ -8,11 +8,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
-  import Avatar from '$lib/components/Avatar.svelte';
+  import AvatarGroup from '$lib/components/AvatarGroup.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { deckStore } from '../store.svelte.js';
   import { accountsStore } from '$lib/stores/accounts.svelte.js';
   import type { Column, ColumnWidth } from '../types.js';
+  import type { Account } from '$lib/types/auth.js';
   import { COLUMN_WIDTHS, getFeedTypeIcon } from '../types.js';
   import * as m from '../../../paraglide/messages.js';
 
@@ -43,42 +44,25 @@
   // ===================================================================
   
   /**
-   * 表示用アカウント情報を取得
-   * accountId が 'all' の場合は全アカウント、そうでなければ対象アカウント
+   * 表示用アカウント情報を取得（DIDベースの型安全な検索）
+   * accountId が 'all' の場合は全アカウント、そうでなければDIDで検索
    */
-  const displayAccounts = $derived.by(() => {
-    console.log('🔍 [DeckColumn] Debug - accountId:', accountId);
-    console.log('🔍 [DeckColumn] Debug - accountsStore.allAccounts:', accountsStore.allAccounts);
-    
-    if (accountId === 'all') {
-      return accountsStore.allAccounts;
-    } else {
-      // ハンドル、DID、idの複数パターンで検索
-      const targetAccount = accountsStore.allAccounts.find(acc => 
-        acc.id === accountId || 
-        acc.profile.handle === accountId ||
+  const displayAccounts = $derived.by((): Account[] => {
+    try {
+      if (accountId === 'all') {
+        return accountsStore.allAccounts;
+      }
+      
+      // DIDベースでの厳密な検索
+      const targetAccount = accountsStore.allAccounts.find((acc: Account) => 
         acc.profile.did === accountId
       );
       
-      console.log('🔍 [DeckColumn] Debug - targetAccount:', targetAccount);
       return targetAccount ? [targetAccount] : [];
+    } catch (error) {
+      console.error('DeckColumn: Error retrieving accounts:', error);
+      return [];
     }
-  });
-
-  /**
-   * アバター表示用のアカウント情報（最大4つまで）
-   */
-  const avatarAccounts = $derived.by(() => {
-    const accounts = displayAccounts.slice(0, 4);
-    console.log('🔍 [DeckColumn] Debug - avatarAccounts:', accounts);
-    return accounts;
-  });
-
-  /**
-   * 4つを超過するアカウントがあるかどうか
-   */
-  const hasMoreAccounts = $derived.by(() => {
-    return displayAccounts.length > 4;
   });
 
   // ===================================================================
@@ -208,86 +192,11 @@
       </div>
       
       <!-- アカウントアバター表示 -->
-      <div class="flex-shrink-0 w-8 h-8 relative">
-        {#if avatarAccounts.length === 0}
-          <!-- フォールバック：アカウントが見つからない場合 -->
-          <div class="w-8 h-8 rounded-full bg-muted/20 flex items-center justify-center">
-            <Icon icon={ICONS.PERSON} size="sm" color="secondary" />
-          </div>
-        {:else if avatarAccounts.length === 1}
-          <!-- 単一アカウント -->
-          <Avatar 
-            src={avatarAccounts[0].profile.avatar} 
-            displayName={avatarAccounts[0].profile.displayName}
-            handle={avatarAccounts[0].profile.handle}
-            size="sm" 
-          />
-        {:else if avatarAccounts.length === 2}
-          <!-- 2アカウント：左右分割 -->
-          <div class="w-8 h-8 flex">
-            <Avatar 
-              src={avatarAccounts[0].profile.avatar} 
-              displayName={avatarAccounts[0].profile.displayName}
-              handle={avatarAccounts[0].profile.handle}
-              size="sm" 
-              class="w-4 h-8 rounded-r-none"
-            />
-            <Avatar 
-              src={avatarAccounts[1].profile.avatar} 
-              displayName={avatarAccounts[1].profile.displayName}
-              handle={avatarAccounts[1].profile.handle}
-              size="sm" 
-              class="w-4 h-8 rounded-l-none -ml-px"
-            />
-          </div>
-        {:else if avatarAccounts.length === 3}
-          <!-- 3アカウント：上1つ、下2つ -->
-          <div class="w-8 h-8 flex flex-col">
-            <Avatar 
-              src={avatarAccounts[0].profile.avatar} 
-              displayName={avatarAccounts[0].profile.displayName}
-              handle={avatarAccounts[0].profile.handle}
-              size="sm" 
-              class="w-8 h-4 rounded-b-none"
-            />
-            <div class="flex h-4">
-              <Avatar 
-                src={avatarAccounts[1].profile.avatar} 
-                displayName={avatarAccounts[1].profile.displayName}
-                handle={avatarAccounts[1].profile.handle}
-                size="sm" 
-                class="w-4 h-4 rounded-t-none rounded-r-none"
-              />
-              <Avatar 
-                src={avatarAccounts[2].profile.avatar} 
-                displayName={avatarAccounts[2].profile.displayName}
-                handle={avatarAccounts[2].profile.handle}
-                size="sm" 
-                class="w-4 h-4 rounded-t-none rounded-l-none -ml-px"
-              />
-            </div>
-          </div>
-        {:else}
-          <!-- 4+アカウント：2x2グリッド -->
-          <div class="w-8 h-8 grid grid-cols-2 grid-rows-2">
-            {#each avatarAccounts as account, i}
-              <Avatar 
-                src={account.profile.avatar} 
-                displayName={account.profile.displayName}
-                handle={account.profile.handle}
-                size="sm" 
-                class="w-4 h-4 {i === 0 ? 'rounded-r-none rounded-b-none' : i === 1 ? 'rounded-l-none rounded-b-none -ml-px' : i === 2 ? 'rounded-r-none rounded-t-none -mt-px' : 'rounded-l-none rounded-t-none -ml-px -mt-px'}"
-              />
-            {/each}
-          </div>
-          {#if hasMoreAccounts}
-            <!-- 4つ超過の場合の追加表示インジケーター -->
-            <div class="absolute -bottom-1 -right-1 w-2 h-2 bg-primary rounded-full border border-card flex items-center justify-center">
-              <span class="text-white text-xs font-bold leading-none">+</span>
-            </div>
-          {/if}
-        {/if}
-      </div>
+      <AvatarGroup 
+        accounts={displayAccounts} 
+        size="sm" 
+        maxDisplay={4}
+      />
       
       <div class="flex-1 min-w-0">
         <h3 class="font-semibold text-sm text-themed truncate">

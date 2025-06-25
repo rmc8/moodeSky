@@ -11,6 +11,7 @@
     "store:default",
     "sql:default",
     "os:default",
-    "os:allow-locale"
+    "os:allow-locale",
+    "dialog:default"
   ]
 }

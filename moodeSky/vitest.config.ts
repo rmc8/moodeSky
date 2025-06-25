@@ -32,5 +32,9 @@ export default defineConfig({
     // ブラウザ環境であることを明示
     'import.meta.env.SSR': false,
     'import.meta.env.DEV': true
+  },
+  // Svelte 5対応の追加設定
+  resolve: {
+    conditions: ['browser']
   }
 });
