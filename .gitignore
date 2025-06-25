@@ -133,3 +133,5 @@ mcp_logs/
 # バンドラー関連
 .rollup.cache/
 .turbo/
+
+.gemini/settings.json
