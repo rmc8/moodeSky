@@ -707,22 +707,51 @@
   // タブからの切り替えイベントを受信（モバイル用）
   $effect(() => {
     const handleTabSwitch = (event: CustomEvent) => {
+      console.log('🔄 [DeckContainer] Tab switch event received:', event.detail);
+      
       const { columnId } = event.detail;
       const columnIndex = deckStore.columns.findIndex(col => col.id === columnId);
+      
+      console.log('🔄 [DeckContainer] Column lookup:', { 
+        columnId, 
+        columnIndex, 
+        totalColumns: deckStore.columns.length,
+        currentActiveIndex: activeColumnIndex,
+        columns: deckStore.columns.map(col => ({ id: col.id, title: col.settings.title }))
+      });
+      
       if (columnIndex !== -1 && columnIndex !== activeColumnIndex) {
+        const oldIndex = activeColumnIndex;
         activeColumnIndex = columnIndex;
+        
+        console.log('✅ [DeckContainer] activeColumnIndex updated:', { 
+          from: oldIndex, 
+          to: columnIndex,
+          columnId: columnId
+        });
         
         // スワイプ用のスムーズ移動を実行
         if (columnNavigator && window.innerWidth < 768) {
           columnNavigator.scrollToColumn(columnIndex);
+          console.log('🏃 [DeckContainer] Column navigator scroll triggered for index:', columnIndex);
         }
         
         debugLog('🎛️ [DeckContainer] Tab switch received, index:', columnIndex);
+      } else {
+        console.log('⚠️ [DeckContainer] No sync needed:', { 
+          columnIndex, 
+          activeColumnIndex,
+          reason: columnIndex === -1 ? 'Column not found' : 'Already active'
+        });
       }
     };
     
+    console.log('🎧 [DeckContainer] Tab switch event listener registered');
     window.addEventListener('tabColumnSwitch', handleTabSwitch as EventListener);
-    return () => window.removeEventListener('tabColumnSwitch', handleTabSwitch as EventListener);
+    return () => {
+      console.log('🎧 [DeckContainer] Tab switch event listener removed');
+      window.removeEventListener('tabColumnSwitch', handleTabSwitch as EventListener);
+    };
   });
   
   // デスクトップ用スクロールイベントを受信

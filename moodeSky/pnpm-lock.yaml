@@ -38,6 +38,9 @@ importers:
       '@tauri-apps/plugin-store':
         specifier: ^2.2.0
         version: 2.2.0
+      svelte-dnd-action:
+        specifier: ^0.9.61
+        version: 0.9.61(svelte@5.34.3)
       tailwindcss:
         specifier: ^4.1.10
         version: 4.1.10
@@ -1274,6 +1277,11 @@ packages:
     peerDependencies:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
+
+  svelte-dnd-action@0.9.61:
+    resolution: {integrity: sha512-xj0jZNdV44MAMbdGIAuBYEombmK7A7ticemOtdR5ErWw0f3IxcfcnrRjlYEK0rRjsahVsU+VdGUMwjPVyXrSrA==}
+    peerDependencies:
+      svelte: '>=3.23.0 || ^5.0.0-next.0'
 
   svelte@5.34.3:
     resolution: {integrity: sha512-Y0QKP2rfWD+ARKe91c4JgZgc/nXa2BfOnVBUjYUMB819m7VyPszihkjdzXPIV0qlGRZYEukpgNq7hgbzTbopJw==}
@@ -2538,6 +2546,10 @@ snapshots:
       typescript: 5.6.3
     transitivePeerDependencies:
       - picomatch
+
+  svelte-dnd-action@0.9.61(svelte@5.34.3):
+    dependencies:
+      svelte: 5.34.3
 
   svelte@5.34.3:
     dependencies:
