@@ -41,22 +41,22 @@
   // ===================================================================
 
   /**
-   * サイズ別クラス
+   * サイズ別クラス（モバイルレスポンシブ対応）
    */
   const sizeClasses = $derived(() => {
     switch (size) {
       case 'sm':
-        return 'max-w-md';
+        return 'max-w-[calc(100vw-1rem)] sm:max-w-md';
       case 'md':
-        return 'max-w-2xl';
+        return 'max-w-[calc(100vw-1rem)] sm:max-w-2xl';
       case 'lg':
-        return 'max-w-4xl';
+        return 'max-w-[calc(100vw-1rem)] sm:max-w-4xl';
       case 'xl':
-        return 'max-w-6xl';
+        return 'max-w-[calc(100vw-1rem)] sm:max-w-6xl';
       case 'full':
         return 'max-w-none mx-4';
       default:
-        return 'max-w-4xl';
+        return 'max-w-[calc(100vw-1rem)] sm:max-w-4xl';
     }
   });
 
@@ -72,10 +72,10 @@
   });
 
   /**
-   * オーバーレイクラス（tokimekibluesky参考の配置戦略）
+   * オーバーレイクラス（モバイル最適化パディング）
    */
   const overlayClasses = $derived(() => 
-    `fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center ${zIndexStyle()} p-4 transition-all duration-300`
+    `fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center ${zIndexStyle()} p-2 sm:p-4 transition-all duration-300`
   );
 
   /**

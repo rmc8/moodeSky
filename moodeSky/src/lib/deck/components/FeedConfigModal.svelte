@@ -218,7 +218,7 @@
   title={feedType ? `${feedType.name}の設定` : ''}
   onClose={handleClose}
   showFooter={true}
-  size="xl"
+  size="lg"
 >
   <!-- ヘッダーサブタイトル -->
   <svelte:fragment slot="header">
