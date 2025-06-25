@@ -562,6 +562,24 @@
       "title": "通知設定", 
       "description": "通知設定機能は準備中です"
     },
+    "deckManagement": {
+      "title": "デッキ管理",
+      "description": "デッキカラムとその設定を管理します。",
+      "loading": "デッキを読み込み中...",
+      "addDeck": "デッキを追加",
+      "existingDecks": "既存のデッキ",
+      "algorithm": "アルゴリズム",
+      "createdAt": "作成日",
+      "settings": "設定",
+      "delete": "削除",
+      "noDecks": "デッキが見つかりません",
+      "noDecksDescription": "まだデッキを作成していません。追加して始めましょう！",
+      "addFirstDeck": "最初のデッキを追加",
+      "addSuccess": "デッキ「{name}」を追加しました。",
+      "deleteConfirmation": "デッキ「{name}」を本当に削除しますか？",
+      "deleteSuccess": "デッキ「{name}」を削除しました。",
+      "deleteError": "デッキの削除に失敗しました。"
+    },
     "authRequired": "認証が必要です",
     "closeMessage": "メッセージを閉じる"
   },

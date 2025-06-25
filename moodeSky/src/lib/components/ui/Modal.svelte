@@ -5,6 +5,7 @@
   既存モーダル構造の統一 + slot-based設計 + 完全アクセシビリティ対応
 -->
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { onMount } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
@@ -24,8 +25,11 @@
     showCloseButton = true,
     onClose,
     onEscapeKey,
-    zIndex = 50
-  }: ModalProps = $props();
+    zIndex = 50,
+    children,
+    header,
+    footer
+  }: ModalProps & { children: Snippet; header?: Snippet; footer?: Snippet } = $props();
 
   // ===================================================================
   // 内部状態管理
@@ -288,7 +292,9 @@
               {/if}
               
               <!-- ヘッダースロット -->
-              <slot name="header" />
+              {#if header}
+                {@render header()}
+              {/if}
             </div>
 
             <!-- 閉じるボタン -->
@@ -309,13 +315,15 @@
 
       <!-- コンテンツエリア -->
       <div class="p-8 overflow-y-auto flex-1 custom-scrollbar">
-        <slot />
+        {@render children()}
       </div>
 
       <!-- フッター -->
       {#if showFooter}
         <div class="bg-gradient-to-r from-muted/5 to-muted/10 px-8 py-6">
-          <slot name="footer" />
+          {#if footer}
+            {@render footer()}
+          {/if}
         </div>
       {/if}
     </div>

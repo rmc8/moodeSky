@@ -5,6 +5,7 @@
   4バリアント × 3サイズ × 状態管理 + ハイコントラスト対応
 -->
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import type { ButtonProps } from './types.js';
@@ -23,8 +24,9 @@
     type = 'button',
     onclick,
     ariaLabel,
-    class: additionalClass = ''
-  }: ButtonProps = $props();
+    class: additionalClass = '',
+    children
+  }: ButtonProps & { children: Snippet } = $props();
 
   // ===================================================================
   // 動的スタイル生成（$derived）
@@ -224,7 +226,7 @@
   {/if}
 
   <!-- ボタンテキスト -->
-  <slot />
+  {@render children()}
 
   <!-- 右アイコン -->
   {#if rightIcon && !loading}

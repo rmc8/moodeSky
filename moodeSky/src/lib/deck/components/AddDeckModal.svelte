@@ -47,27 +47,29 @@
   onClose={handleClose}
   showFooter={true}
   size="lg"
+  header={headerSnippet}
+  footer={footerSnippet}
 >
-  <!-- ヘッダーサブタイトル -->
-  <svelte:fragment slot="header">
-    <p class="text-secondary text-lg leading-relaxed">
-      {m['deck.addDeck.subtitle']()}
-    </p>
-  </svelte:fragment>
 
   <!-- メインコンテンツ -->
   <SimpleFeedAdder onSuccess={handleSuccess} />
 
-  <!-- フッターボタン -->
-  <svelte:fragment slot="footer">
-    <div class="flex justify-end">
-      <Button 
-        variant="secondary" 
-        onclick={handleClose}
-        size="md"
-      >
-        {m['deck.addDeck.buttons.cancel']()}
-      </Button>
-    </div>
-  </svelte:fragment>
 </Modal>
+
+{#snippet headerSnippet()}
+  <p class="text-secondary text-lg leading-relaxed">
+    {m['deck.addDeck.subtitle']()}
+  </p>
+{/snippet}
+
+{#snippet footerSnippet()}
+  <div class="flex justify-end">
+    <Button 
+      variant="secondary" 
+      onclick={handleClose}
+      size="md"
+    >
+      {m['deck.addDeck.buttons.cancel']()}
+    </Button>
+  </div>
+{/snippet}

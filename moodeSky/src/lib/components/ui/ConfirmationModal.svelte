@@ -158,6 +158,7 @@
   onClose={handleCancel}
   onEscapeKey={handleEscapeKey}
   {zIndex}
+  footer={footerSnippet}
 >
   <!-- メインコンテンツ -->
   <div class="text-center space-y-6 py-4">
@@ -187,31 +188,31 @@
     </div>
   </div>
 
-  <!-- フッター（ボタンエリア） -->
-  <svelte:fragment slot="footer">
-    <div class="flex flex-col-reverse sm:flex-row gap-3 justify-center sm:justify-end">
-      <!-- キャンセルボタン -->
-      <Button
-        variant="secondary"
-        size="lg"
-        onclick={handleCancel}
-        class="flex-1 sm:flex-initial sm:min-w-24"
-      >
-        {displayTexts().cancelText}
-      </Button>
-
-      <!-- 確認ボタン -->
-      <Button
-        variant={variantConfig().confirmButtonVariant}
-        size="lg"
-        onclick={handleConfirm}
-        class="flex-1 sm:flex-initial sm:min-w-24 {variantConfig().confirmButtonClass}"
-      >
-        {displayTexts().confirmText}
-      </Button>
-    </div>
-  </svelte:fragment>
 </Modal>
+
+{#snippet footerSnippet()}
+  <div class="flex flex-col-reverse sm:flex-row gap-3 justify-center sm:justify-end">
+    <!-- キャンセルボタン -->
+    <Button
+      variant="secondary"
+      size="lg"
+      onclick={handleCancel}
+      class="flex-1 sm:flex-initial sm:min-w-24"
+    >
+      {displayTexts().cancelText}
+    </Button>
+
+    <!-- 確認ボタン -->
+    <Button
+      variant={variantConfig().confirmButtonVariant}
+      size="lg"
+      onclick={handleConfirm}
+      class="flex-1 sm:flex-initial sm:min-w-24 {variantConfig().confirmButtonClass}"
+    >
+      {displayTexts().confirmText}
+    </Button>
+  </div>
+{/snippet}
 
 <!--
   使用例:
