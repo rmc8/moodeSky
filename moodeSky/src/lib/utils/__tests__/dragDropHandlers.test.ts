@@ -28,7 +28,10 @@ const mockDeckStore = {
       columns: [] as Column[]
     }
   },
-  save: vi.fn()
+  save: vi.fn(),
+  getActiveColumnIndex: vi.fn(() => 0),
+  syncActiveColumnIndex: vi.fn(() => 0),
+  setActiveColumnByIndex: vi.fn()
 };
 
 const mockColumns: Column[] = [
