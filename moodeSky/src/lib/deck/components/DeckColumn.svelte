@@ -23,9 +23,10 @@
     column: Column;
     index: number;
     accountId: string;
+    onScrollElementUpdate?: (columnId: string, element: HTMLElement | undefined) => void;
   }
 
-  const { column, index, accountId }: Props = $props();
+  const { column, index, accountId, onScrollElementUpdate }: Props = $props();
 
   // ===================================================================
   // 状態管理
@@ -62,9 +63,9 @@
   // ===================================================================
 
   onMount(() => {
-    // スクロール要素を登録
-    if (scrollElement) {
-      column.scrollElement = scrollElement;
+    // スクロール要素を登録（コールバック経由）
+    if (scrollElement && onScrollElementUpdate) {
+      onScrollElementUpdate(column.id, scrollElement);
     }
 
     // 初期画面幅設定
@@ -86,9 +87,9 @@
   });
 
   onDestroy(() => {
-    // クリーンアップ
-    if (column.scrollElement) {
-      column.scrollElement = undefined;
+    // クリーンアップ（コールバック経由）
+    if (onScrollElementUpdate) {
+      onScrollElementUpdate(column.id, undefined);
     }
   });
 

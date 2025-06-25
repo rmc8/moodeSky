@@ -12,8 +12,11 @@
   import { getColumnIcon } from '$lib/deck/types.js';
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
-  import { dndzone } from 'svelte-dnd-action';
+  import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
   import { flip } from 'svelte/animate';
+  import type { ColumnDndEvent } from '$lib/types/dragDrop.js';
+  import { createDragDropHandlers, createColumnSwitcher, DRAG_DROP_CONFIG } from '$lib/utils/dragDropHandlers.js';
+  import { debugLog } from '$lib/utils/debugUtils.js';
   
   // リアクティブ翻訳システム
   const { t } = useTranslation();
@@ -22,68 +25,40 @@
   const columns = $derived(deckStore.columns);
   const activeColumnId = $derived(deckStore.state.activeColumnId);
   
-  // ドラッグ&ドロップ設定
-  const flipDurationMs = 200;
-  
-  // カラムを切り替える
-  function switchColumn(columnId: string) {
-    deckStore.state.activeColumnId = columnId;
-    
-    // カスタムイベントを発行してDeckContainerに通知
-    const event = new CustomEvent('tabColumnSwitch', {
-      detail: { columnId },
-      bubbles: true
-    });
-    window.dispatchEvent(event);
-    
-    console.log('🎛️ [MobileDeckTabs] Switched to column:', columnId);
-  }
-  
-  // ドラッグ中のハンドラ（onconsider用）
-  function handleConsider(e: CustomEvent<any>) {
-    const newColumns = e.detail.items;
-    const info = e.detail.info;
-    
-    console.log('🔄 [MobileDeckTabs] Consider event:', { trigger: info?.trigger, id: info?.id });
-    
-    // deckStoreのカラム順序を更新
-    deckStore.state.layout.columns = newColumns;
-    
-    // ドラッグ中のタブをアクティブに設定
-    if (info && info.trigger === 'draggedEntered') {
-      const draggedColumn = newColumns.find((col: any) => col.id === info.id);
-      if (draggedColumn) {
-        deckStore.state.activeColumnId = draggedColumn.id;
-        console.log('🎯 [MobileDeckTabs] Active column changed during drag:', draggedColumn.id);
-      }
+  // ドラッグ&ドロップハンドラーの初期化（条件付き有効化対応）
+  const dragHandlers = createDragDropHandlers(
+    deckStore,
+    'MobileDeckTabs',
+    {
+      onFinalizeExtra: () => {
+        // モバイルでの触覚フィードバック
+        if ('vibrate' in navigator) {
+          navigator.vibrate([50, 30, 50]);
+        }
+      },
+      enableAutoRollback: true
     }
-  }
+  );
   
-  // ドラッグ完了時のハンドラ（onfinalize用）
-  function handleFinalize(e: CustomEvent<any>) {
-    const newColumns = e.detail.items;
-    const info = e.detail.info;
-    
-    console.log('✅ [MobileDeckTabs] Finalize event:', { trigger: info?.trigger, id: info?.id, activeColumnId: deckStore.state.activeColumnId });
-    
-    // deckStoreのカラム順序を更新
-    deckStore.state.layout.columns = newColumns;
-    
-    // 保存処理（非同期で実行）
-    deckStore.save().catch(error => {
-      console.error('🎛️ [MobileDeckTabs] Failed to save column order:', error);
-    });
-    
-    // 必ず同期イベントを発火（ドラッグ完了時）
-    const syncEvent = new CustomEvent('tabColumnSwitch', {
-      detail: { columnId: deckStore.state.activeColumnId },
-      bubbles: true
-    });
-    window.dispatchEvent(syncEvent);
-    console.log('🔄 [MobileDeckTabs] Sync event dispatched for activeColumnId:', deckStore.state.activeColumnId);
-    
-    console.log('🎛️ [MobileDeckTabs] Columns reordered and sync completed');
-  }
+  const { handleConsider, handleFinalize, zoneId, isAllowed } = dragHandlers;
+  
+  // ドラッグ有効/無効の判定（リアクティブ）
+  const isDragEnabled = $derived(isAllowed() && columns.length > 1);
+  
+  // ドラッグ無効時のメッセージ（デバッグ用）
+  $effect(() => {
+    if (!isAllowed()) {
+      debugLog(`🚫 [MobileDeckTabs] Drag disabled - not allowed on current device`);
+    } else if (columns.length <= 1) {
+      debugLog(`🚫 [MobileDeckTabs] Drag disabled - insufficient columns (${columns.length})`);
+    } else {
+      debugLog(`✅ [MobileDeckTabs] Drag enabled - ${columns.length} columns`);
+    }
+  });
+  
+  // カラム切り替え関数
+  const switchColumn = createColumnSwitcher(deckStore, 'MobileDeckTabs');
+  
 </script>
 
 <!-- モバイルデッキタブバー -->
@@ -95,21 +70,17 @@
 >
   <div 
     class="flex overflow-x-auto scrollbar-hide px-2 pt-1.5 pb-1"
-    use:dndzone={{
-      items: columns,
-      flipDurationMs,
-      dropTargetStyle: {},
-      dragDisabled: columns.length <= 1
-    }}
+    use:dndzone={DRAG_DROP_CONFIG.createDndZoneOptions(columns, zoneId)}
     onconsider={handleConsider}
     onfinalize={handleFinalize}
     role="presentation"
   >
     {#if columns.length > 0}
       <!-- 実際のカラムタブ表示 -->
-      {#each columns as column (column.id)}
+      {#each columns as column (`${column.id}${(column as any)[SHADOW_ITEM_MARKER_PROPERTY_NAME] ? '_shadow_placeholder' : ''}`)}
         <button
           class="flex-shrink-0 flex items-center justify-center w-9 h-9 mx-1 rounded-xl transition-all duration-200 ease-out active:scale-90 focus-ring-subtle focus-visible:outline-2 focus-visible:outline-primary/60 focus-visible:outline-offset-1"
+          data-is-dnd-shadow-item-hint={(column as any)[SHADOW_ITEM_MARKER_PROPERTY_NAME]}
           class:bg-primary-active={column.id === activeColumnId}
           class:shadow-sm={column.id === activeColumnId}
           class:scale-105={column.id === activeColumnId}
@@ -125,7 +96,7 @@
           aria-describedby={columns.length > 1 ? 'drag-instructions' : undefined}
           title={`${column.settings.title}${columns.length > 1 ? ' - ドラッグで並び替え' : ''}`}
           onclick={() => switchColumn(column.id)}
-          animate:flip={{ duration: flipDurationMs }}
+          animate:flip={{ duration: DRAG_DROP_CONFIG.flipDurationMs }}
         >
           <!-- アイコンのみ表示 -->
           <Icon 
