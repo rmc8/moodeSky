@@ -332,6 +332,7 @@ export interface AddDeckModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (column: Column) => void;
+  zIndex?: number;
 }
 
 /**

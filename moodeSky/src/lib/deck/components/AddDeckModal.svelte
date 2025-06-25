@@ -14,7 +14,7 @@
   // Props
   // ===================================================================
 
-  const { isOpen, onClose, onSuccess }: AddDeckModalProps = $props();
+  const { isOpen, onClose, onSuccess, zIndex = 50 }: AddDeckModalProps = $props();
 
   // ===================================================================
   // Event Handlers
@@ -46,6 +46,7 @@
   onClose={handleClose}
   showFooter={true}
   size="lg"
+  {zIndex}
 >
   <!-- ヘッダーサブタイトル -->
   <svelte:fragment slot="header">
