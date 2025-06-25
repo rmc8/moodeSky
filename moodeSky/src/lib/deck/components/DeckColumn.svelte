@@ -165,8 +165,8 @@
         <h3 class="font-semibold text-sm text-themed truncate">
           {column.settings.title}
         </h3>
-        <p class="text-xs text-themed opacity-60 truncate">
-          @{accountId.split('.')[0] || 'user'}
+        <p class="text-xs text-themed opacity-60">
+          @{accountId || 'user'}
         </p>
       </div>
     </button>
