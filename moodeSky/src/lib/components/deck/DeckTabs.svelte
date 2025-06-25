@@ -12,6 +12,9 @@
   import { getColumnIcon } from '$lib/deck/types.js';
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
+  import { createDragDropHandlers, DRAG_DROP_CONFIG } from '$lib/utils/dragDropHandlers.js';
+  import { dndzone } from 'svelte-dnd-action';
+  import { flip } from 'svelte/animate';
   
   // ===================================================================
   // Props
@@ -38,13 +41,25 @@
   const columns = $derived(deckStore.columns);
   const activeColumnId = $derived(deckStore.state.activeColumnId);
   
-  // ===================================================================
-  // イベントハンドラー
-  // ===================================================================
+  // 一意なゾーンIDを生成してプレースホルダーの重複を防ぐ
+  const zoneId = DRAG_DROP_CONFIG.generateZoneId(`deck-tabs-${variant}`);
+  
+  // ドラッグ&ドロップハンドラーの初期化
+  const { handleConsider, handleFinalize } = createDragDropHandlers(
+    deckStore,
+    `DeckTabs-${variant}`,
+    {
+      onFinalizeExtra: () => {
+        // モバイルでの触覚フィードバック
+        if (variant === 'mobile' && 'vibrate' in navigator) {
+          navigator.vibrate([50, 30, 50]);
+        }
+      }
+    }
+  );
   
   // カラムを切り替える
   function switchColumn(columnId: string) {
-    // ステート更新
     deckStore.state.activeColumnId = columnId;
     
     // カスタムイベントを発行してDeckContainerに通知
@@ -57,6 +72,7 @@
     console.log('🎛️ [DeckTabs] Switched to column:', columnId, 'variant:', variant);
   }
   
+  
 </script>
 
 <!-- デッキタブバー -->
@@ -67,18 +83,27 @@
   role="tablist"
   aria-label={t('deck.tabs.tabArea')}
 >
-  <div class="deck-tabs__content">
+  <div 
+    class="deck-tabs__content"
+    use:dndzone={DRAG_DROP_CONFIG.createDndZoneOptions(columns, zoneId)}
+    onconsider={handleConsider}
+    onfinalize={handleFinalize}
+    role="presentation"
+  >
     {#if columns.length > 0}
       <!-- 実際のカラムタブ表示 -->
-      {#each columns as column}
+      {#each columns as column, index (column.id)}
         <button
           class="deck-tabs__button"
           class:deck-tabs__button--active={column.id === activeColumnId}
+          class:cursor-grab={columns.length > 1}
           role="tab"
           aria-selected={column.id === activeColumnId}
-          aria-label={column.settings.title}
-          title={column.settings.title}
+          aria-label={`${column.settings.title}${columns.length > 1 ? ' - ドラッグで並び替え' : ''}`}
+          aria-describedby={columns.length > 1 ? `drag-instructions-${variant}` : undefined}
+          title={`${column.settings.title}${columns.length > 1 ? ' - ドラッグで並び替え' : ''}`}
           onclick={() => switchColumn(column.id)}
+          animate:flip={{ duration: DRAG_DROP_CONFIG.flipDurationMs }}
         >
           <!-- アイコン表示 -->
           <Icon 
@@ -112,6 +137,13 @@
             {t('deck.empty.title')}
           </span>
         {/if}
+      </div>
+    {/if}
+    
+    <!-- ドラッグ&ドロップ使用説明（スクリーンリーダー用） -->
+    {#if columns.length > 1}
+      <div id="drag-instructions-{variant}" class="sr-only">
+        {variant === 'mobile' ? '長押ししてドラッグしてタブの順序を変更できます' : 'ドラッグしてタブの順序を変更できます'}
       </div>
     {/if}
   </div>
@@ -256,5 +288,139 @@
   .deck-tabs__button {
     backface-visibility: hidden;
     -webkit-font-smoothing: antialiased;
+  }
+  
+  /* ドラッグ&ドロップ関連スタイル */
+  .draggable {
+    touch-action: none; /* Pointer Events API最適化 */
+    user-select: none;  /* テキスト選択防止 */
+  }
+  
+  /* ドラッグ中のタブ */
+  .draggable[data-dragging="true"] {
+    opacity: 0.4;
+    z-index: 1;
+  }
+  
+  /* モバイル版ドラッグ中スタイル */
+  .deck-tabs--mobile .draggable[data-dragging="true"] {
+    transform: scale(0.95);
+  }
+  
+  /* デスクトップ版ドラッグ中スタイル */
+  .deck-tabs--desktop .draggable[data-dragging="true"] {
+    transform: scale(0.98);
+  }
+  
+  /* プレビューエレメント（統合版） */
+  :global(.drag-preview) {
+    border-radius: 0.75rem; /* rounded-xl */
+    backdrop-filter: blur(10px);
+    will-change: transform;
+  }
+  
+  /* モバイル版プレビュー */
+  .deck-tabs--mobile :global(.drag-preview) {
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* デスクトップ版プレビュー */
+  .deck-tabs--desktop :global(.drag-preview) {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    min-width: 120px; /* デスクトップタブの最小幅確保 */
+  }
+  
+  /* ドロップゾーンのインジケーター */
+  .draggable:not([data-dragging="true"]):hover {
+    transition: all 0.15s ease-out;
+  }
+  
+  /* モバイル版（水平レイアウト）のドロップインジケーター */
+  .deck-tabs--mobile .draggable + .draggable::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 60%;
+    background: transparent;
+    border-radius: 1px;
+    transition: background-color 0.15s ease-out;
+    pointer-events: none;
+  }
+  
+  /* デスクトップ版（水平レイアウト）のドロップインジケーター */
+  .deck-tabs--desktop .draggable + .draggable::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 70%;
+    background: transparent;
+    border-radius: 1px;
+    transition: background-color 0.15s ease-out;
+    pointer-events: none;
+  }
+  
+  /* ドラッグホバー時のドロップインジケーター */
+  .draggable.drop-target + .draggable::before {
+    background: rgb(var(--primary));
+    box-shadow: 0 0 8px rgb(var(--primary) / 0.5);
+  }
+  
+  /* アクセシビリティ向上 */
+  @media (prefers-reduced-motion: reduce) {
+    .draggable,
+    :global(.drag-preview) {
+      transition: none !important;
+      animation: none !important;
+      transform: none !important;
+    }
+  }
+  
+  /* ハイコントラストモード対応 */
+  @media (prefers-contrast: high) {
+    .draggable[data-dragging="true"] {
+      outline: 2px solid;
+      outline-offset: 2px;
+    }
+  }
+  
+  /* タッチデバイス最適化（モバイル） */
+  @media (hover: none) and (pointer: coarse) {
+    .deck-tabs--mobile .draggable {
+      /* モバイルでのタッチターゲット最適化 */
+      min-width: 36px;
+      min-height: 36px;
+    }
+  }
+  
+  /* デスクトップ最適化 */
+  @media (min-width: 768px) {
+    .deck-tabs--desktop .draggable {
+      /* デスクトップでのマウスターゲット最適化 */
+      min-height: 40px;
+    }
+    
+    /* マウス操作での視覚的フィードバック */
+    .deck-tabs--desktop .draggable:hover:not([data-dragging="true"]) {
+      transform: translateY(-1px);
+    }
+  }
+  
+  /* スクリーンリーダー用の非表示クラス */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 </style>

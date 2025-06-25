@@ -25,9 +25,6 @@ export function useTranslation() {
      * 翻訳関数（パラメータなし）
      */
     t: (key: keyof typeof messages): string => {
-      // 現在の言語を強制的に参照してリアクティブに
-      const _ = currentLanguage();
-      
       const messageFunction = messages[key] as TranslationFunction;
       if (typeof messageFunction === 'function') {
         try {
@@ -46,9 +43,6 @@ export function useTranslation() {
      * 翻訳関数（パラメータあり）
      */
     tp: (key: keyof typeof messages, params: Record<string, any> = {}): string => {
-      // 現在の言語を強制的に参照してリアクティブに
-      const _ = currentLanguage();
-      
       const messageFunction = messages[key] as TranslationFunction;
       if (typeof messageFunction === 'function') {
         try {
@@ -102,10 +96,6 @@ class ReactiveTranslationStore {
        * 翻訳関数（パラメータなし）
        */
       t: (key: keyof typeof messages): string => {
-        // リアクティブ依存関係を確立
-        const _ = currentLanguage();
-        const __ = updateFlag();
-        
         const messageFunction = messages[key] as TranslationFunction;
         if (typeof messageFunction === 'function') {
           try {
@@ -124,10 +114,6 @@ class ReactiveTranslationStore {
        * 翻訳関数（パラメータあり）
        */
       tp: (key: keyof typeof messages, params: Record<string, any> = {}): string => {
-        // リアクティブ依存関係を確立
-        const _ = currentLanguage();
-        const __ = updateFlag();
-        
         const messageFunction = messages[key] as TranslationFunction;
         if (typeof messageFunction === 'function') {
           try {

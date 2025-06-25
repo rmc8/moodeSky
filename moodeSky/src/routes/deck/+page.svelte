@@ -5,7 +5,6 @@
   import Navigation from '$lib/components/Navigation.svelte';
   import Avatar from '$lib/components/Avatar.svelte';
   import DeckContainer from '$lib/deck/components/DeckContainer.svelte';
-  import DeckTabs from '$lib/components/deck/DeckTabs.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
@@ -96,22 +95,95 @@
         
         // デッキストアを初期化
         console.log('🔍 [DEBUG] Initializing deck store...');
+        console.log('🔍 [DEBUG] Account handle:', activeAccount.profile.handle);
+        console.log('🔍 [DEBUG] DeckStore state before init:', {
+          isInitialized: deckStore.isInitialized,
+          isEmpty: deckStore.isEmpty,
+          columnCount: deckStore.columnCount,
+          columns: deckStore.columns
+        });
+        
         await deckStore.initialize(activeAccount.profile.handle);
+        
+        console.log('🔍 [DEBUG] DeckStore state after init:', {
+          isInitialized: deckStore.isInitialized,
+          isEmpty: deckStore.isEmpty,
+          columnCount: deckStore.columnCount,
+          columns: deckStore.columns,
+          storeState: deckStore.state
+        });
         
         // 初回利用時（カラムが0個）の場合、デフォルトカラムを作成
         if (deckStore.isEmpty) {
           console.log('🔍 [DEBUG] No columns found, creating default column');
-          await deckStore.addColumn(
-            activeAccount.profile.handle,
-            'home',
-            {
+          console.log('🔍 [DEBUG] Adding column with params:', {
+            accountId: activeAccount.profile.handle,
+            algorithm: 'home',
+            settings: {
               title: t('navigation.home'),
               subtitle: 'フォロー中のユーザーの投稿'
             }
-          );
+          });
+          
+          try {
+            const newColumn = await deckStore.addColumn(
+              activeAccount.profile.handle,
+              'home',
+              {
+                title: t('navigation.home'),
+                subtitle: 'フォロー中のユーザーの投稿'
+              }
+            );
+            console.log('🔍 [DEBUG] Default column created successfully:', newColumn);
+          } catch (error) {
+            console.error('🔍 [DEBUG] Failed to create default column:', error);
+            console.error('🔍 [DEBUG] Error details:', error instanceof Error ? error.message : error);
+          }
+        } else {
+          console.log('🔍 [DEBUG] Columns already exist, skipping default column creation');
         }
         
-        console.log('🔍 [DEBUG] Deck initialized with', deckStore.columnCount, 'columns');
+        console.log('🔍 [DEBUG] Final deck state:', {
+          columnCount: deckStore.columnCount,
+          columns: deckStore.columns,
+          activeColumnId: deckStore.state.activeColumnId,
+          isEmpty: deckStore.isEmpty
+        });
+        
+        // フェイルセーフ: 3秒後にカラムチェック、必要に応じて強制作成
+        setTimeout(async () => {
+          console.log('🔍 [DEBUG] Failsafe check after 3 seconds:', {
+            isEmpty: deckStore.isEmpty,
+            columnCount: deckStore.columnCount,
+            isInitialized: deckStore.isInitialized
+          });
+          
+          if (deckStore.isEmpty && deckStore.isInitialized && activeAccount) {
+            console.log('🚨 [FAILSAFE] No columns found after 3 seconds, forcing default column creation');
+            try {
+              const failsafeColumn = await deckStore.addColumn(
+                activeAccount.profile.handle,
+                'home',
+                {
+                  title: t('navigation.home'),
+                  subtitle: 'フォロー中のユーザーの投稿'
+                }
+              );
+              console.log('🚨 [FAILSAFE] Forced column creation successful:', failsafeColumn);
+            } catch (error) {
+              console.error('🚨 [FAILSAFE] Forced column creation failed:', error);
+              // 最後の手段: ページリロード
+              console.log('🚨 [FAILSAFE] Attempting page reload as last resort...');
+              setTimeout(() => {
+                if (deckStore.isEmpty) {
+                  location.reload();
+                }
+              }, 1000);
+            }
+          } else {
+            console.log('🔍 [DEBUG] Failsafe check passed - columns exist');
+          }
+        }, 3000);
         
         // ブラウザバック防止
         history.pushState(null, '', window.location.href);
@@ -148,9 +220,18 @@
   
   // デッキが空になったことを検出して自動的にデフォルトカラムを作成
   $effect(() => {
+    console.log('🔍 [DEBUG] Effect triggered - edge case recovery:', {
+      isInitialized: deckStore.isInitialized,
+      isLoading: isLoading,
+      hasActiveAccount: !!activeAccount,
+      isEmpty: deckStore.isEmpty,
+      columnCount: deckStore.columnCount
+    });
+    
     // 初期化完了後で、ログイン済みで、デッキが空の場合
     if (deckStore.isInitialized && !isLoading && activeAccount && deckStore.isEmpty) {
-      console.log('🔍 [DEBUG] Deck became empty, creating default home column');
+      console.log('🔍 [DEBUG] Edge case: Deck became empty, creating default home column');
+      console.log('🔍 [DEBUG] Account handle for recovery:', activeAccount.profile.handle);
       
       // 非同期でデフォルトカラムを作成
       deckStore.addColumn(
@@ -160,11 +241,19 @@
           title: t('navigation.home'),
           subtitle: 'フォロー中のユーザーの投稿'
         }
-      ).then(() => {
-        console.log('🔍 [DEBUG] Default column created after deck became empty');
+      ).then((column) => {
+        console.log('🔍 [DEBUG] Recovery: Default column created successfully:', column);
+        console.log('🔍 [DEBUG] Recovery: Final state:', {
+          columnCount: deckStore.columnCount,
+          isEmpty: deckStore.isEmpty,
+          activeColumnId: deckStore.state.activeColumnId
+        });
       }).catch((error) => {
-        console.error('🔍 [DEBUG] Failed to create default column:', error);
+        console.error('🔍 [DEBUG] Recovery: Failed to create default column:', error);
+        console.error('🔍 [DEBUG] Recovery: Error details:', error instanceof Error ? error.message : error);
       });
+    } else {
+      console.log('🔍 [DEBUG] Edge case conditions not met, skipping recovery');
     }
   });
   
@@ -201,8 +290,7 @@
     <!-- ナビゲーション（レスポンシブ制御は Navigation 内部で実施） -->
     <Navigation {currentPath} accountId={activeAccount.profile.handle} onAddDeck={handleOpenAddDeckModal} />
     
-    <!-- モバイル用デッキタブ（画面上部） -->
-    <DeckTabs variant="mobile" class="md:hidden" />
+    <!-- モバイル用デッキタブは Navigation.svelte 内で管理 -->
     
     <!-- メインコンテンツエリア -->
     <main class="flex-1 md:ml-64 mobile-main-content main-content-flex">
