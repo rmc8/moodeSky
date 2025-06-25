@@ -42,11 +42,11 @@
 <!-- 統一UIコンポーネントシステム -->
 <Modal 
   {isOpen}
+  {zIndex}
   title={m['deck.addDeck.title']()}
   onClose={handleClose}
   showFooter={true}
   size="lg"
-  {zIndex}
 >
   <!-- ヘッダーサブタイトル -->
   <svelte:fragment slot="header">
