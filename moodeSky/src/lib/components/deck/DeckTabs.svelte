@@ -94,7 +94,7 @@
       <!-- 実際のカラムタブ表示 -->
       {#each columns as column, index (column.id)}
         <button
-          class="deck-tabs__button"
+          class="deck-tabs__button touch-none select-none"
           class:deck-tabs__button--active={column.id === activeColumnId}
           class:cursor-grab={columns.length > 1}
           role="tab"
@@ -290,29 +290,9 @@
     -webkit-font-smoothing: antialiased;
   }
   
-  /* ドラッグ&ドロップ関連スタイル */
-  .draggable {
-    touch-action: none; /* Pointer Events API最適化 */
-    user-select: none;  /* テキスト選択防止 */
-  }
+  /* ドラッグ&ドロップ最適化 - TailwindCSS v4統合完了 */
   
-  /* ドラッグ中のタブ */
-  .draggable[data-dragging="true"] {
-    opacity: 0.4;
-    z-index: 1;
-  }
-  
-  /* モバイル版ドラッグ中スタイル */
-  .deck-tabs--mobile .draggable[data-dragging="true"] {
-    transform: scale(0.95);
-  }
-  
-  /* デスクトップ版ドラッグ中スタイル */
-  .deck-tabs--desktop .draggable[data-dragging="true"] {
-    transform: scale(0.98);
-  }
-  
-  /* プレビューエレメント（統合版） */
+  /* グローバルドラッグプレビュー最適化 */
   :global(.drag-preview) {
     border-radius: 0.75rem; /* rounded-xl */
     backdrop-filter: blur(10px);
@@ -330,50 +310,9 @@
     min-width: 120px; /* デスクトップタブの最小幅確保 */
   }
   
-  /* ドロップゾーンのインジケーター */
-  .draggable:not([data-dragging="true"]):hover {
-    transition: all 0.15s ease-out;
-  }
-  
-  /* モバイル版（水平レイアウト）のドロップインジケーター */
-  .deck-tabs--mobile .draggable + .draggable::before {
-    content: '';
-    position: absolute;
-    left: -2px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 2px;
-    height: 60%;
-    background: transparent;
-    border-radius: 1px;
-    transition: background-color 0.15s ease-out;
-    pointer-events: none;
-  }
-  
-  /* デスクトップ版（水平レイアウト）のドロップインジケーター */
-  .deck-tabs--desktop .draggable + .draggable::before {
-    content: '';
-    position: absolute;
-    left: -4px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 2px;
-    height: 70%;
-    background: transparent;
-    border-radius: 1px;
-    transition: background-color 0.15s ease-out;
-    pointer-events: none;
-  }
-  
-  /* ドラッグホバー時のドロップインジケーター */
-  .draggable.drop-target + .draggable::before {
-    background: rgb(var(--primary));
-    box-shadow: 0 0 8px rgb(var(--primary) / 0.5);
-  }
-  
   /* アクセシビリティ向上 */
   @media (prefers-reduced-motion: reduce) {
-    .draggable,
+    .deck-tabs__button,
     :global(.drag-preview) {
       transition: none !important;
       animation: none !important;
@@ -381,17 +320,9 @@
     }
   }
   
-  /* ハイコントラストモード対応 */
-  @media (prefers-contrast: high) {
-    .draggable[data-dragging="true"] {
-      outline: 2px solid;
-      outline-offset: 2px;
-    }
-  }
-  
   /* タッチデバイス最適化（モバイル） */
   @media (hover: none) and (pointer: coarse) {
-    .deck-tabs--mobile .draggable {
+    .deck-tabs--mobile .deck-tabs__button {
       /* モバイルでのタッチターゲット最適化 */
       min-width: 36px;
       min-height: 36px;
@@ -400,13 +331,13 @@
   
   /* デスクトップ最適化 */
   @media (min-width: 768px) {
-    .deck-tabs--desktop .draggable {
+    .deck-tabs--desktop .deck-tabs__button {
       /* デスクトップでのマウスターゲット最適化 */
       min-height: 40px;
     }
     
-    /* マウス操作での視覚的フィードバック */
-    .deck-tabs--desktop .draggable:hover:not([data-dragging="true"]) {
+    /* マウス操作での視覚的フィードバック - TailwindCSS v4対応 */
+    .deck-tabs--desktop .deck-tabs__button:hover:not(:active) {
       transform: translateY(-1px);
     }
   }

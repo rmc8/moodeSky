@@ -1,4 +1,4 @@
-name: Mobile - iOS & Android Build
+name: Mobile - Compatibility Checks (Minimal)
 
 on:
   push:
@@ -16,9 +16,9 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  # モバイル対応チェック
-  mobile-checks:
-    name: Mobile Compatibility Checks
+  # モバイル設定チェック（ビルドなし）
+  mobile-preparation:
+    name: Mobile Test Preparation
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -32,235 +32,46 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: ./moodeSky/package-lock.json
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,aarch64-apple-ios,x86_64-apple-ios
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Check mobile configuration
         run: |
-          # Tauri mobile設定の確認
-          if [ -f "src-tauri/gen/android/app/build.gradle" ]; then
+          # Tauri mobile設定の確認（軽量）
+          echo "📱 Checking mobile configuration..."
+          
+          # Android設定確認
+          if [ -d "src-tauri/gen/android" ]; then
             echo "✅ Android configuration found"
           else
-            echo "⚠️ Android configuration not found - run 'npm run tauri android init'"
+            echo "⚠️ Android configuration not found"
           fi
           
-          if [ -f "src-tauri/gen/apple/moodeSky.xcodeproj/project.pbxproj" ]; then
+          # iOS設定確認
+          if [ -d "src-tauri/gen/apple" ]; then
             echo "✅ iOS configuration found"
           else
-            echo "⚠️ iOS configuration not found - run 'npm run tauri ios init'"
+            echo "⚠️ iOS configuration not found"
           fi
 
-      - name: Validate mobile-specific code
+      - name: Validate mobile dependencies
         run: |
-          # モバイル向けRustコードの構文チェック
-          cd src-tauri
-          
-          # Android target check
-          if cargo check --target aarch64-linux-android 2>/dev/null; then
-            echo "✅ Android target compilation check passed"
+          echo "📦 Checking mobile dependencies..."
+          # package.jsonの@tauri-apps/cliを確認
+          if pnpm list @tauri-apps/cli > /dev/null 2>&1; then
+            echo "✅ Tauri CLI installed"
           else
-            echo "⚠️ Android target compilation issues found"
+            echo "⚠️ Tauri CLI not found"
           fi
-
-      - name: CSS responsive check
-        run: |
-          # レスポンシブCSSの基本チェック
-          if grep -r "@media" src/ 2>/dev/null; then
-            echo "✅ Responsive CSS found"
-          else
-            echo "⚠️ No responsive CSS found - consider adding mobile-first design"
-          fi
-
-  # Android ビルド (未来対応 - 現在は無効化)
-  android-build:
-    name: Android Build
-    runs-on: ubuntu-latest
-    if: false  # Tauri Mobile Alpha対応時に有効化
-    needs: mobile-checks
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: ./moodeSky/package-lock.json
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
-
-      - name: Install Android NDK
-        run: |
-          sdkmanager "ndk;25.1.8937393"
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ./moodeSky
-
-      - name: Build Android Debug APK
-        run: npm run tauri android build -- --debug
-        working-directory: ./moodeSky
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/25.1.8937393
-
-      - name: Build Android Release APK
-        run: npm run tauri android build -- --release
-        working-directory: ./moodeSky
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/25.1.8937393
-
-      - name: Upload Android APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-apk
-          path: |
-            moodeSky/src-tauri/gen/android/app/build/outputs/apk/**/*.apk
-          retention-days: 30
-
-  # iOS ビルド (未来対応 - 現在は無効化)
-  ios-build:
-    name: iOS Build
-    runs-on: macos-latest
-    if: false  # Tauri Mobile Alpha対応時に有効化
-    needs: mobile-checks
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: ./moodeSky/package-lock.json
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-apple-ios,x86_64-apple-ios,aarch64-apple-ios-sim
-
-      - name: Install iOS dependencies
-        run: |
-          # iOS Simulator & development tools
-          sudo xcode-select --install || true
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ./moodeSky
-
-      - name: Build iOS Debug
-        run: npm run tauri ios build -- --debug
-        working-directory: ./moodeSky
-
-      - name: Build iOS Release
-        run: npm run tauri ios build -- --release
-        working-directory: ./moodeSky
-
-      - name: Upload iOS IPA
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-ipa
-          path: |
-            moodeSky/src-tauri/gen/apple/build/**/*.ipa
-          retention-days: 30
-
-  # モバイルテスト準備 (未来対応)
-  mobile-test-prep:
-    name: Mobile Test Preparation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Create mobile test plan
-        run: |
-          mkdir -p mobile-test-reports
-          cat > mobile-test-reports/test-plan.md << 'EOF'
-          # Mobile Test Plan for moodeSky
-
-          ## Test Scenarios
-
-          ### Android Testing
-          - [ ] Installation on Android devices
-          - [ ] Basic app functionality
-          - [ ] AT Protocol API connectivity
-          - [ ] Performance on low-end devices
-          - [ ] Battery usage optimization
-          - [ ] Network connectivity handling
-
-          ### iOS Testing  
-          - [ ] Installation on iOS devices
-          - [ ] Basic app functionality
-          - [ ] AT Protocol API connectivity
-          - [ ] Performance on older devices
-          - [ ] Battery usage optimization
-          - [ ] Network connectivity handling
-
-          ### Cross-Platform
-          - [ ] UI consistency between platforms
-          - [ ] Feature parity verification
-          - [ ] Data synchronization
-          - [ ] Offline functionality
-
-          ## Test Environment
-          - Android: API levels 24+ (Android 7.0+)
-          - iOS: iOS 12.0+
-          - Network: WiFi, 4G, 5G, Offline
-          - Devices: Various screen sizes and resolutions
-
-          ## Performance Criteria
-          - App startup time: < 3 seconds
-          - API response time: < 2 seconds
-          - Memory usage: < 100MB idle
-          - Battery drain: Minimal background usage
-
-          ## Security Testing
-          - [ ] Secure storage of credentials
-          - [ ] API communication encryption
-          - [ ] Biometric authentication (if supported)
-          - [ ] App permission handling
-          EOF
-
-      - name: Upload test plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: mobile-test-plan
-          path: mobile-test-reports/test-plan.md
 
   # モバイル設定ガイド生成
   mobile-setup-guide:
@@ -270,127 +81,55 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Generate setup guide
+      - name: Create mobile setup guide
         run: |
-          mkdir -p docs/mobile
-          cat > docs/mobile/MOBILE_SETUP.md << 'EOF'
-          # 📱 Mobile Development Setup Guide
-
-          ## Prerequisites
-
-          ### Android Development
-          ```bash
-          # Install Android Studio
-          # Download from: https://developer.android.com/studio
-
-          # Install Android SDK & NDK via Android Studio
-          # Required: Android SDK API 24+, NDK 25+
-
-          # Add to environment variables
-          export ANDROID_HOME=$HOME/Android/Sdk
-          export NDK_HOME=$ANDROID_HOME/ndk/25.1.8937393
-          export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
-          ```
-
-          ### iOS Development (macOS only)
-          ```bash
-          # Install Xcode from App Store
-          # Install Xcode Command Line Tools
-          sudo xcode-select --install
-
-          # Install iOS Simulator (via Xcode)
-          ```
-
-          ### Rust Mobile Targets
-          ```bash
-          # Android targets
-          rustup target add aarch64-linux-android
-          rustup target add armv7-linux-androideabi
-          rustup target add i686-linux-android
-          rustup target add x86_64-linux-android
-
-          # iOS targets
-          rustup target add aarch64-apple-ios
-          rustup target add x86_64-apple-ios
-          rustup target add aarch64-apple-ios-sim
-          ```
-
-          ## Project Setup
-
-          ### Initialize Mobile Projects
-          ```bash
-          cd moodeSky
-
-          # Initialize Android project
-          npm run tauri android init
-
-          # Initialize iOS project (macOS only)
-          npm run tauri ios init
-          ```
-
-          ### Development Commands
-          ```bash
-          # Android development
-          npm run tauri android dev
-
-          # iOS development
-          npm run tauri ios dev
-
-          # Build for production
-          npm run tauri android build --release
-          npm run tauri ios build --release
-          ```
-
-          ## Testing on Devices
-
-          ### Android Testing
-          ```bash
-          # Enable Developer Options & USB Debugging
-          # Connect device via USB
-
-          # Install and run on device
-          npm run tauri android dev --device
-          ```
-
-          ### iOS Testing
-          ```bash
-          # Register device in Apple Developer Console
-          # Install development profile
-
-          # Install and run on device
-          npm run tauri ios dev --device
-          ```
-
-          ## Deployment
-
-          ### Android (Google Play Store)
-          1. Generate signed APK/AAB
-          2. Upload to Google Play Console
-          3. Configure store listing
-          4. Submit for review
-
-          ### iOS (App Store)
-          1. Archive application in Xcode
-          2. Upload to App Store Connect
-          3. Configure app metadata
-          4. Submit for review
-
-          ## Troubleshooting
-
-          ### Common Issues
-          - **Android NDK not found**: Ensure NDK_HOME is set correctly
-          - **iOS simulator not starting**: Check Xcode installation
-          - **Build errors**: Clean build cache and retry
-          - **Permission errors**: Check device developer settings
-
-          ### Support Resources
-          - [Tauri Mobile Guide](https://tauri.app/v1/guides/getting-started/mobile)
-          - [Android Developer Docs](https://developer.android.com/)
-          - [iOS Developer Docs](https://developer.apple.com/documentation/)
+          cat > mobile-setup.md << 'EOF'
+          # moodeSky Mobile Setup Guide
+          
+          ## Android Development
+          
+          1. Install Android Studio and Android SDK
+          2. Setup Android targets:
+             ```bash
+             rustup target add aarch64-linux-android armv7-linux-androideabi
+             ```
+          3. Initialize Android project:
+             ```bash
+             cd moodeSky
+             pnpm tauri android init
+             ```
+          4. Build Android app:
+             ```bash
+             pnpm tauri android build
+             ```
+          
+          ## iOS Development (macOS required)
+          
+          1. Install Xcode
+          2. Setup iOS targets:
+             ```bash
+             rustup target add aarch64-apple-ios x86_64-apple-ios
+             ```
+          3. Initialize iOS project:
+             ```bash
+             cd moodeSky
+             pnpm tauri ios init
+             ```
+          4. Build iOS app:
+             ```bash
+             pnpm tauri ios build
+             ```
+          
+          ## Notes
+          - Mobile builds are currently disabled in CI to reduce complexity
+          - Run mobile builds locally during development
+          - Enable mobile CI when ready for production
           EOF
+          
+          echo "📖 Mobile setup guide generated"
 
       - name: Upload setup guide
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: mobile-setup-guide
-          path: docs/mobile/MOBILE_SETUP.md
+          path: mobile-setup.md
