@@ -215,7 +215,7 @@
 <!-- 統一UIコンポーネントシステム -->
 <Modal 
   isOpen={isOpen && !!feedType}
-  title={m['deck.addDeck.feedConfig.title']({ feedType: feedType?.name || '' })}
+  title={m['deck.addDeck.feedConfig.title']({ feedType: feedType?.name ?? 'Unknown' })}
   onClose={handleClose}
   showFooter={true}
   size="lg"
