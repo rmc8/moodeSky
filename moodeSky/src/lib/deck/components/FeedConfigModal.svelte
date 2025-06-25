@@ -215,7 +215,7 @@
 <!-- 統一UIコンポーネントシステム -->
 <Modal 
   isOpen={isOpen && !!feedType}
-  title={feedType ? `${feedType.name}の設定` : ''}
+  title={m['deck.addDeck.feedConfig.title']({ feedType: feedType?.name || '' })}
   onClose={handleClose}
   showFooter={true}
   size="lg"
@@ -282,28 +282,28 @@
 
   <!-- フッターボタン -->
   <svelte:fragment slot="footer">
-    <!-- モバイル: 縦並び、デスクトップ: 横並び -->
-    <div class="flex flex-col sm:flex-row sm:justify-between gap-3">
+    <!-- モバイル: 縦並び、タブレット以上: 横並び -->
+    <div class="flex flex-col md:flex-row md:justify-between gap-3 flex-wrap">
       <!-- 戻るボタン -->
-      <div class="flex justify-center sm:justify-start">
+      <div class="flex justify-center md:justify-start">
         <Button 
           variant="secondary" 
           onclick={handleBack}
           leftIcon={ICONS.ARROW_BACK}
           size="md"
-          class="w-full sm:w-auto"
+          class="w-full md:w-auto md:min-w-[120px]"
         >
           {m['deck.addDeck.buttons.previous']()}
         </Button>
       </div>
       
       <!-- キャンセル・作成ボタン -->
-      <div class="flex flex-col sm:flex-row gap-3">
+      <div class="flex flex-col md:flex-row gap-3">
         <Button 
           variant="secondary" 
           onclick={handleClose}
           size="md"
-          class="w-full sm:w-auto"
+          class="w-full md:w-auto md:min-w-[120px]"
         >
           {m['deck.addDeck.buttons.cancel']()}
         </Button>
@@ -314,7 +314,7 @@
           loading={isLoading}
           leftIcon={isLoading ? undefined : ICONS.ADD}
           size="md"
-          class="w-full sm:w-auto"
+          class="w-full md:w-auto md:min-w-[120px]"
         >
           {m['deck.addDeck.buttons.create']()}
         </Button>
