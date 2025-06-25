@@ -33,11 +33,15 @@
   let activeAccount = $state<Account | null>(null);
   
   // アクティブアカウントを取得
-  $effect(async () => {
-    const result = await authService.getActiveAccount();
-    if (result.success && result.data) {
-      activeAccount = result.data;
-    }
+  $effect(() => {
+    const loadActiveAccount = async () => {
+      const result = await authService.getActiveAccount();
+      if (result.success && result.data) {
+        activeAccount = result.data;
+      }
+    };
+    
+    loadActiveAccount();
   });
   
   interface NavItem {
