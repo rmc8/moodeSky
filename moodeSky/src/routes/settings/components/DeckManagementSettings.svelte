@@ -15,12 +15,14 @@
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import type { Column } from '$lib/deck/types.js';
-  import { m } from '../../../paraglide/messages.js';
+  import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
   import { message } from '@tauri-apps/plugin-dialog';
 
   // ===================================================================
   // 状態管理
   // ===================================================================
+
+  const { t } = useTranslation();
 
 
   let activeAccount = $state<Account | null>(null);
@@ -81,7 +83,7 @@
       
       // 成功メッセージ表示
       await message(
-        m['settings.deckManagement.addSuccess']({ name: column.settings.title })
+        `${t('settings.deckManagement.addSuccess').replace('{name}', column.settings.title)}`
       );
       
       // ホーム画面に自動遷移
@@ -109,7 +111,7 @@
     try {
       // 削除確認ダイアログ
       await message(
-        m['settings.deckManagement.deleteConfirmation']({ name: deckTitle })
+        `${t('settings.deckManagement.deleteConfirmation').replace('{name}', deckTitle)}`
       );
 
       // 削除実行
@@ -117,12 +119,12 @@
       
       // 成功メッセージ
       await message(
-        m['settings.deckManagement.deleteSuccess']({ name: deckTitle })
+        `${t('settings.deckManagement.deleteSuccess').replace('{name}', deckTitle)}`
       );
     } catch (error) {
       console.error('🛠️ [DeckManagement] デッキ削除エラー:', error);
       await message(
-        m['settings.deckManagement.deleteError']()
+        t('settings.deckManagement.deleteError')
       );
     }
   }
@@ -140,10 +142,10 @@
   <div class="mb-6">
     <h2 class="text-themed text-2xl font-bold mb-2 flex items-center gap-3">
       <Icon icon={ICONS.DASHBOARD} size="lg" color="themed" />
-      {m['settings.deckManagement.title']()}
+      {t('settings.deckManagement.title')}
     </h2>
     <p class="text-secondary text-lg leading-relaxed">
-      {m['settings.deckManagement.description']()}
+      {t('settings.deckManagement.description')}
     </p>
   </div>
 
@@ -151,7 +153,7 @@
     <!-- ローディング状態 -->
     <div class="bg-card rounded-xl p-8 text-center">
       <div class="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
-      <p class="text-themed opacity-80">{m['settings.deckManagement.loading']()}</p>
+      <p class="text-themed opacity-80">{t('settings.deckManagement.loading')}</p>
     </div>
   {:else}
     <!-- デッキ追加ボタン -->
@@ -161,7 +163,7 @@
         onclick={handleAddDeck}
       >
         <Icon icon={ICONS.ADD} size="md" class="text-[var(--color-background)]" />
-        {m['settings.deckManagement.addDeck']()}
+        {t('settings.deckManagement.addDeck')}
       </button>
     </div>
 
@@ -169,7 +171,7 @@
       <!-- デッキ一覧 -->
       <div class="space-y-4">
         <h3 class="text-themed text-xl font-semibold mb-4">
-          {m['settings.deckManagement.existingDecks']()}
+          {t('settings.deckManagement.existingDecks')}
         </h3>
         
         {#each columns as column (column.id)}
@@ -189,10 +191,10 @@
                     {column.settings.title}
                   </h4>
                   <p class="text-secondary text-sm">
-                    {m['settings.deckManagement.algorithm']()}: {column.algorithm}
+                    {t('settings.deckManagement.algorithm')}: {column.algorithm}
                   </p>
                   <p class="text-secondary text-xs">
-                    {m['settings.deckManagement.createdAt']()}: {new Date(column.createdAt).toLocaleDateString()}
+                    {t('settings.deckManagement.createdAt')}: {new Date(column.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               </div>
@@ -202,14 +204,14 @@
                 <button
                   class="p-2 text-secondary hover:text-themed hover:bg-muted rounded-lg transition-all"
                   onclick={() => handleDeckSettings(column.id, column.settings.title)}
-                  title={m['settings.deckManagement.settings']()}
+                  title={t('settings.deckManagement.settings')}
                 >
                   <Icon icon={ICONS.SETTINGS} size="md" />
                 </button>
                 <button
                   class="p-2 text-error hover:text-error/80 hover:bg-error/10 rounded-lg transition-all"
                   onclick={() => handleDeleteDeck(column.id, column.settings.title)}
-                  title={m['settings.deckManagement.delete']()}
+                  title={t('settings.deckManagement.delete')}
                 >
                   <Icon icon={ICONS.DELETE} size="md" />
                 </button>
@@ -223,17 +225,17 @@
       <div class="bg-card rounded-xl p-12 text-center">
         <div class="text-6xl mb-6">🎛️</div>
         <h3 class="text-themed text-xl font-semibold mb-2">
-          {m['settings.deckManagement.noDecks']()}
+          {t('settings.deckManagement.noDecks')}
         </h3>
         <p class="text-secondary mb-6">
-          {m['settings.deckManagement.noDecksDescription']()}
+          {t('settings.deckManagement.noDecksDescription')}
         </p>
         <button
           class="button-primary px-6 py-3 text-lg font-medium flex items-center gap-3 mx-auto"
           onclick={handleAddDeck}
         >
           <Icon icon={ICONS.ADD} size="md" class="text-[var(--color-background)]" />
-          {m['settings.deckManagement.addFirstDeck']()}
+          {t('settings.deckManagement.addFirstDeck')}
         </button>
       </div>
     {/if}
