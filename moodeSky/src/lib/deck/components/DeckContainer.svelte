@@ -13,6 +13,7 @@
   import type { Column } from '../types.js';
   import DeckColumn from './DeckColumn.svelte';
   import AddDeckModal from './AddDeckModal.svelte';
+  import DeckSettingsModal from './DeckSettingsModal.svelte';
   // import ColumnIndicators from './ColumnIndicators.svelte'; // 上部タブに統一のため削除
   import { SwipeDetector, CircularColumnNavigator, ColumnIntersectionObserver } from '../utils/swipeDetector.js';
   import { COLUMN_WIDTHS } from '../types.js';
@@ -43,6 +44,10 @@
   // モーダル状態は外部プロップまたは内部状態を使用
   let internalShowAddDeckModal = $state(false);
   const showAddDeckModal = $derived(externalShowAddDeckModal || internalShowAddDeckModal);
+  
+  // デッキ設定モーダル状態
+  let showDeckSettingsModal = $state(false);
+  let currentSettingsColumn = $state<Column | null>(null);
   
   // レスポンシブ状態管理
   let isMobile = $state(false);
@@ -310,6 +315,23 @@
    */
   function handleAddDeck() {
     internalShowAddDeckModal = true;
+  }
+
+  /**
+   * デッキ設定モーダルを開く
+   */
+  function handleOpenSettings(column: Column) {
+    console.log('🎛️ [DeckContainer] Opening deck settings modal for column:', column.id, column.settings.title);
+    currentSettingsColumn = column;
+    showDeckSettingsModal = true;
+  }
+
+  /**
+   * デッキ設定モーダルを閉じる
+   */
+  function handleCloseSettings() {
+    showDeckSettingsModal = false;
+    currentSettingsColumn = null;
   }
 
   /**
@@ -977,6 +999,7 @@
     </div>
     
   {:else}
+
     <!-- デッキカラム表示 -->
     {debugLog('🚨 [RENDER DEBUG] Rendering deck columns section')}
     {debugLog('🚨 [RENDER DEBUG] isMobile:', isMobile)}
@@ -1022,6 +1045,7 @@
                 {column}
                 {index}
                 {accountId}
+                onOpenDeckSettings={() => handleOpenSettings(column)}
               />
             </div>
           {/each}
@@ -1041,6 +1065,7 @@
               {column}
               {index}
               {accountId}
+              onOpenDeckSettings={() => handleOpenSettings(column)}
             />
           </div>
         {/each}
@@ -1057,12 +1082,20 @@
   {/if}
 </div>
 
-<!-- カラム追加モーダル（仮実装） -->
-<!-- Add Deck Modal -->
+<!-- カラム追加モーダル -->
 <AddDeckModal 
   isOpen={showAddDeckModal}
   onClose={handleCloseAddDeckModal}
   onSuccess={handleDeckCreated}
+/>
+
+<!-- デッキ設定モーダル -->
+<DeckSettingsModal 
+  isOpen={showDeckSettingsModal}
+  onClose={handleCloseSettings}
+  deckId={currentSettingsColumn?.id}
+  deckTitle={currentSettingsColumn?.settings.title}
+  zIndex={9999}
 />
 
 <style>

@@ -132,6 +132,28 @@ export interface Column {
 }
 
 // ===================================================================
+// デッキグローバル設定
+// ===================================================================
+
+export interface DeckSettings {
+  // 自動更新設定
+  autoRefreshInterval: number;     // ミリ秒単位（0で無効）
+  
+  // レイアウト設定
+  gap: number;                     // カラム間のギャップ（px）
+  padding: number;                 // デッキの余白（px）
+  
+  // 表示設定
+  showColumnHeaders: boolean;      // カラムヘッダー表示
+  compactMode: boolean;           // コンパクトモード
+  smoothAnimations: boolean;      // スムーズアニメーション
+  
+  // インタラクション設定
+  enableSwipeGestures: boolean;   // スワイプジェスチャー
+  enableKeyboardShortcuts: boolean; // キーボードショートカット
+}
+
+// ===================================================================
 // デッキレイアウト設定
 // ===================================================================
 
@@ -152,6 +174,7 @@ export interface DeckLayout {
 
 export interface DeckState {
   layout: DeckLayout;
+  deckSettings: DeckSettings;  // デッキグローバル設定
   activeColumnId?: string;
   lastSavedAt: string;
   version: number;       // マイグレーション用
@@ -174,6 +197,17 @@ export const DEFAULT_COLUMN_SETTINGS: ColumnSettings = {
   isPinned: false,
   sortOrder: 'newest',
   filterKeywords: []
+};
+
+export const DEFAULT_DECK_SETTINGS: DeckSettings = {
+  autoRefreshInterval: 300000, // 5分
+  gap: 16,
+  padding: 8,
+  showColumnHeaders: true,
+  compactMode: false,
+  smoothAnimations: true,
+  enableSwipeGestures: true,
+  enableKeyboardShortcuts: true
 };
 
 export const DEFAULT_DECK_LAYOUT: DeckLayout = {
