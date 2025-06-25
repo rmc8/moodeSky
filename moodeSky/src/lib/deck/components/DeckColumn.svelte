@@ -8,10 +8,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
-  import ConfirmationModal from '$lib/components/ui/ConfirmationModal.svelte';
+  import AvatarGroup from '$lib/components/AvatarGroup.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { deckStore } from '../store.svelte.js';
+  import { accountsStore } from '$lib/stores/accounts.svelte.js';
   import type { Column, ColumnWidth } from '../types.js';
+  import type { Account } from '$lib/types/auth.js';
   import { COLUMN_WIDTHS, getFeedTypeIcon } from '../types.js';
   import * as m from '../../../paraglide/messages.js';
 
@@ -24,18 +26,44 @@
     index: number;
     accountId: string;
     onScrollElementUpdate?: (columnId: string, element: HTMLElement | undefined) => void;
+    onOpenDeckSettings?: () => void;
   }
 
-  const { column, index, accountId, onScrollElementUpdate }: Props = $props();
+  const { column, index, accountId, onScrollElementUpdate, onOpenDeckSettings }: Props = $props();
+  
 
   // ===================================================================
   // 状態管理
   // ===================================================================
 
   let scrollElement: HTMLElement;
-  let showSettings = $state(false);
   let isRefreshing = $state(false);
-  let showDeleteConfirmation = $state(false);
+
+  // ===================================================================
+  // アバター表示用のロジック
+  // ===================================================================
+  
+  /**
+   * 表示用アカウント情報を取得（DIDベースの型安全な検索）
+   * accountId が 'all' の場合は全アカウント、そうでなければDIDで検索
+   */
+  const displayAccounts = $derived.by((): Account[] => {
+    try {
+      if (accountId === 'all') {
+        return accountsStore.allAccounts;
+      }
+      
+      // DIDベースでの厳密な検索
+      const targetAccount = accountsStore.allAccounts.find((acc: Account) => 
+        acc.profile.did === accountId
+      );
+      
+      return targetAccount ? [targetAccount] : [];
+    } catch (error) {
+      console.error('DeckColumn: Error retrieving accounts:', error);
+      return [];
+    }
+  });
 
   // ===================================================================
   // カラム幅の動的スタイル
@@ -97,64 +125,6 @@
   // イベントハンドラー
   // ===================================================================
 
-  /**
-   * カラム設定を開く/閉じる
-   */
-  function toggleSettings() {
-    showSettings = !showSettings;
-  }
-
-  /**
-   * カラム削除の確認ダイアログを表示
-   */
-  function handleRemoveColumn() {
-    console.log('🎛️ [DeckColumn] Delete button clicked for column:', column.id);
-    showDeleteConfirmation = true;
-    showSettings = false; // 設定メニューを閉じる
-  }
-
-  /**
-   * 削除確認 - 確認時の処理
-   */
-  async function handleDeleteConfirm() {
-    console.log('🎛️ [DeckColumn] User confirmed deletion for column:', column.id);
-    
-    try {
-      await deckStore.removeColumn(column.id);
-      console.log('🎛️ [DeckColumn] Column removed successfully:', column.id);
-      showDeleteConfirmation = false;
-      
-      // 成功通知は deckStore または上位コンポーネントで処理
-      // アプリケーション統一のトーストシステムがある場合はそちらを使用
-    } catch (error) {
-      console.error('🎛️ [DeckColumn] Failed to remove column:', error);
-      showDeleteConfirmation = false;
-      
-      // エラー時は簡易的にアラートを表示（将来的にはトーストシステムに移行）
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert(`カラムの削除に失敗しました: ${errorMessage}`);
-    }
-  }
-
-  /**
-   * 削除確認 - キャンセル時の処理
-   */
-  function handleDeleteCancel() {
-    console.log('🎛️ [DeckColumn] User cancelled deletion for column:', column.id);
-    showDeleteConfirmation = false;
-  }
-
-  /**
-   * カラム幅を変更
-   */
-  async function handleWidthChange(width: ColumnWidth) {
-    try {
-      await deckStore.updateColumnSettings(column.id, { width });
-      console.log('🎛️ [DeckColumn] Column width updated:', column.id, width);
-    } catch (error) {
-      console.error('🎛️ [DeckColumn] Failed to update column width:', error);
-    }
-  }
 
   /**
    * リフレッシュ（現在は仮実装）
@@ -216,87 +186,46 @@
       class="flex items-center gap-3 flex-1 min-w-0 text-left rounded p-1 transition-colors hover:bg-muted/10"
       onclick={handleHeaderClick}
     >
+      <!-- デッキ種類アイコン -->
       <div class="flex-shrink-0 w-10 h-10 rounded bg-primary/10 flex items-center justify-center">
         <Icon icon={getFeedTypeIcon(column.algorithm)} size="md" color="primary" />
       </div>
+      
+      <!-- アカウントアバター表示 -->
+      <AvatarGroup 
+        accounts={displayAccounts} 
+        size="sm" 
+        maxDisplay={4}
+      />
       
       <div class="flex-1 min-w-0">
         <h3 class="font-semibold text-sm text-themed truncate">
           {column.settings.title}
         </h3>
-        <p class="text-xs text-themed opacity-60 truncate">
-          @{accountId.split('.')[0] || 'user'}
+        <p class="text-xs text-themed opacity-60">
+          @{accountId || 'user'}
         </p>
       </div>
     </button>
 
     <!-- ヘッダーボタン -->
     <div class="flex items-center gap-1">
-      <!-- リフレッシュボタン -->
-      <button 
-        class="w-8 h-8 rounded flex items-center justify-center transition-colors hover:bg-muted/20 disabled:opacity-50 disabled:cursor-not-allowed"
-        onclick={handleRefresh}
-        disabled={isRefreshing}
-        aria-label={m['deck.column.refresh']()}
-      >
-        <Icon 
-          icon={ICONS.REFRESH} 
-          size="sm" 
-          color="themed" 
-          class={isRefreshing ? 'animate-spin' : ''}
-        />
-      </button>
-
-      <!-- 設定ボタン -->
-      <button 
-        class="w-8 h-8 rounded flex items-center justify-center transition-colors hover:bg-muted/20"
-        onclick={toggleSettings}
-        class:bg-primary-active={showSettings} class:text-primary={showSettings}
-        aria-label={m['deck.column.settings']()}
-      >
-        <Icon icon={ICONS.SETTINGS} size="sm" color="themed" />
-      </button>
+      <!-- デッキ設定ボタン -->
+      {#if onOpenDeckSettings}
+        <button 
+          class="w-8 h-8 rounded flex items-center justify-center transition-colors hover:bg-muted/20"
+          onclick={() => {
+            console.log('🎯 [DeckColumn] Deck settings button clicked');
+            onOpenDeckSettings();
+          }}
+          aria-label="デッキ設定"
+          title="デッキ設定"
+        >
+          <Icon icon={ICONS.SETTINGS} size="sm" color="themed" />
+        </button>
+      {/if}
     </div>
 
-    <!-- 設定ドロップダウン -->
-    {#if showSettings}
-      <div 
-        class="absolute top-full right-0 mt-1 bg-card border border-themed/5 rounded-lg shadow-lg p-3 z-20"
-        class:min-w-64={windowWidth >= 768}
-        class:min-w-48={windowWidth < 768}
-        class:max-w-xs={windowWidth < 768}
-      >
-        <!-- カラム幅設定 -->
-        <div class="mb-4 last:mb-0">
-          <h4 class="text-sm font-medium text-themed mb-2">
-            {m['deck.column.width']()}
-          </h4>
-          <div class="space-y-1">
-            {#each Object.entries(COLUMN_WIDTHS) as [width, info]}
-              <button
-                class="w-full flex items-center justify-between p-2 rounded text-left transition-colors hover:bg-muted/10"
-                class:bg-primary-active={column.settings.width === width} class:text-primary={column.settings.width === width}
-                onclick={() => handleWidthChange(width as ColumnWidth)}
-              >
-                <span class="text-sm text-themed">{info.label}</span>
-                <span class="text-xs text-themed opacity-60">{info.width}px</span>
-              </button>
-            {/each}
-          </div>
-        </div>
-
-        <!-- 削除ボタン -->
-        <div class="mb-4 last:mb-0">
-          <button 
-            class="w-full flex items-center gap-2 p-2 rounded text-error transition-colors hover:bg-error/10"
-            onclick={handleRemoveColumn}
-          >
-            <Icon icon={ICONS.DELETE} size="sm" color="error" />
-            {m['deck.column.delete']()}
-          </button>
-        </div>
-      </div>
-    {/if}
   </header>
 
   <!-- カラムコンテンツ -->
@@ -335,18 +264,6 @@
   </div>
 </div>
 
-<!-- 削除確認モーダル -->
-<ConfirmationModal
-  isOpen={showDeleteConfirmation}
-  variant="danger"
-  title={m['deck.column.delete']()}
-  message={m['deck.column.confirmDelete']()}
-  confirmText={m['common.delete']()}
-  cancelText={m['common.cancel']()}
-  onConfirm={handleDeleteConfirm}
-  onCancel={handleDeleteCancel}
-  zIndex={9999}
-/>
 
 <style>
   /* DeckColumn TailwindCSS v4移行完了 - 大幅CSS削減達成 */

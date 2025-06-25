@@ -125,6 +125,26 @@
     "mobile": {
       "swipeHint": "Wischen, um Spalten zu wechseln"
     },
+    "settings": {
+      "title": "Deck-Einstellungen",
+      "nameLabel": "Deck-Name",
+      "namePlaceholder": "Deck-Namen eingeben",
+      "nameDescription": "Legen Sie den Anzeigenamen für dieses Deck fest",
+      "sizeLabel": "Deck-Größe",
+      "sizeDescription": "Spaltenbreite für Desktop auswählen",
+      "deleteSection": "Deck löschen",
+      "deleteDescription": "Dieses Deck löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteConfirmation": "\"{name}\" löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "saving": "Speichern...",
+      "changeName": "Name ändern",
+      "deleting": "Löschen...",
+      "changingSize": "Größe ändern...",
+      "error": {
+        "saveName": "Fehler beim Ändern des Deck-Namens",
+        "deleteItem": "Fehler beim Löschen des Decks",
+        "changeSize": "Fehler beim Ändern der Deck-Größe"
+      }
+    },
     "addDeck": {
       "title": "Deck hinzufügen",
       "subtitle": "Eine neue Deck-Spalte erstellen",

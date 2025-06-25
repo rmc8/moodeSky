@@ -125,6 +125,26 @@
     "mobile": {
       "swipeHint": "Deslize para alternar colunas"
     },
+    "settings": {
+      "title": "Configurações do Deck",
+      "nameLabel": "Nome do Deck",
+      "namePlaceholder": "Digite o nome do deck",
+      "nameDescription": "Defina o nome de exibição para este deck",
+      "sizeLabel": "Tamanho do Deck",
+      "sizeDescription": "Selecione a largura da coluna para desktop",
+      "deleteSection": "Excluir Deck",
+      "deleteDescription": "Excluir este deck. Esta operação não pode ser desfeita.",
+      "deleteConfirmation": "Excluir \"{name}\"? Esta operação não pode ser desfeita.",
+      "saving": "Salvando...",
+      "changeName": "Alterar Nome",
+      "deleting": "Excluindo...",
+      "changingSize": "Alterando tamanho...",
+      "error": {
+        "saveName": "Falha ao alterar nome do deck",
+        "deleteItem": "Falha ao excluir deck",
+        "changeSize": "Falha ao alterar tamanho do deck"
+      }
+    },
     "addDeck": {
       "title": "Adicionar Painel",
       "subtitle": "Criar uma nova coluna de painel",

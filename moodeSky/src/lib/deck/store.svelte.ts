@@ -11,11 +11,12 @@ import type {
   Column, 
   DeckState, 
   DeckLayout, 
+  DeckSettings,
   ColumnType,
   ColumnAlgorithm,
   ColumnSettings
 } from './types.js';
-import { createColumn, DEFAULT_DECK_LAYOUT } from './types.js';
+import { createColumn, DEFAULT_DECK_LAYOUT, DEFAULT_DECK_SETTINGS } from './types.js';
 
 // ===================================================================
 // デッキストアクラス（Svelte 5 runes）
@@ -25,8 +26,9 @@ export class DeckStore {
   // リアクティブ状態
   state = $state<DeckState>({
     layout: structuredClone(DEFAULT_DECK_LAYOUT),
+    deckSettings: structuredClone(DEFAULT_DECK_SETTINGS),
     lastSavedAt: new Date().toISOString(),
-    version: 1
+    version: 2
   });
 
   isInitialized = $state(false);
@@ -107,8 +109,18 @@ export class DeckStore {
    * 状態マイグレーション（将来のバージョン対応）
    */
   private migrateState(savedState: DeckState): DeckState {
-    // 現在はv1のみ、将来的にマイグレーションロジック追加
-    if (savedState.version !== 1) {
+    // v1からv2: deckSettings追加
+    if (savedState.version === 1 && !savedState.deckSettings) {
+      console.log('🎛️ [DeckStore] Migrating state v1 → v2: Adding deckSettings');
+      return {
+        ...savedState,
+        deckSettings: structuredClone(DEFAULT_DECK_SETTINGS),
+        version: 2
+      };
+    }
+    
+    // 不明なバージョンの場合は警告
+    if (savedState.version > 2) {
       console.warn('🎛️ [DeckStore] Unknown state version:', savedState.version);
     }
     
@@ -237,6 +249,24 @@ export class DeckStore {
   }
 
   /**
+   * カラムタイトルを更新
+   */
+  async updateColumnTitle(columnId: string, title: string): Promise<void> {
+    const column = this.state.layout.columns.find(col => col.id === columnId);
+    
+    if (!column) {
+      console.warn('🎛️ [DeckStore] Column not found for title update:', columnId);
+      return;
+    }
+
+    column.settings.title = title.trim();
+    column.updatedAt = new Date().toISOString();
+
+    await this.save();
+    console.log('🎛️ [DeckStore] Column title updated:', columnId, title);
+  }
+
+  /**
    * カラムデータを更新
    */
   updateColumnData(columnId: string, data: Partial<Column['data']>): void {
@@ -256,12 +286,21 @@ export class DeckStore {
   // ===================================================================
 
   /**
-   * デッキ設定を更新
+   * デッキグローバル設定を更新
    */
-  async updateDeckSettings(settings: Partial<DeckLayout['settings']>): Promise<void> {
-    this.state.layout.settings = { ...this.state.layout.settings, ...settings };
+  async updateDeckSettings(settings: Partial<DeckSettings>): Promise<void> {
+    this.state.deckSettings = { ...this.state.deckSettings, ...settings };
     await this.save();
     console.log('🎛️ [DeckStore] Deck settings updated:', settings);
+  }
+
+  /**
+   * デッキレイアウト設定を更新
+   */
+  async updateDeckLayoutSettings(settings: Partial<DeckLayout['settings']>): Promise<void> {
+    this.state.layout.settings = { ...this.state.layout.settings, ...settings };
+    await this.save();
+    console.log('🎛️ [DeckStore] Deck layout settings updated:', settings);
   }
 
   /**
@@ -321,9 +360,16 @@ export class DeckStore {
   }
 
   /**
-   * デッキ設定
+   * デッキグローバル設定
    */
-  get deckSettings(): DeckLayout['settings'] {
+  get deckSettings(): DeckSettings {
+    return this.state.deckSettings;
+  }
+
+  /**
+   * デッキレイアウト設定
+   */
+  get deckLayoutSettings(): DeckLayout['settings'] {
     return this.state.layout.settings;
   }
 

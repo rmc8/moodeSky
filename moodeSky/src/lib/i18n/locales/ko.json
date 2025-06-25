@@ -125,6 +125,26 @@
     "mobile": {
       "swipeHint": "스와이프하여 컴럼 전환"
     },
+    "settings": {
+      "title": "덱 설정",
+      "nameLabel": "덱 이름",
+      "namePlaceholder": "덱 이름 입력",
+      "nameDescription": "이 덱의 표시 이름을 설정합니다",
+      "sizeLabel": "덱 크기",
+      "sizeDescription": "데스크톱에서의 컬럼 폭을 선택",
+      "deleteSection": "덱 삭제",
+      "deleteDescription": "이 덱을 삭제합니다. 이 작업은 되돌릴 수 없습니다.",
+      "deleteConfirmation": "\"{name}\"을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "saving": "저장 중...",
+      "changeName": "이름 변경",
+      "deleting": "삭제 중...",
+      "changingSize": "크기 변경 중...",
+      "error": {
+        "saveName": "덱 이름 변경에 실패했습니다",
+        "deleteItem": "덱 삭제에 실패했습니다",
+        "changeSize": "덱 크기 변경에 실패했습니다"
+      }
+    },
     "addDeck": {
       "title": "덱 추가",
       "subtitle": "새로운 덱 컬럼 생성",

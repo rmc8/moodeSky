@@ -125,6 +125,26 @@
     "mobile": {
       "swipeHint": "Swipe to switch columns"
     },
+    "settings": {
+      "title": "Deck Settings",
+      "nameLabel": "Deck Name",
+      "namePlaceholder": "Enter deck name",
+      "nameDescription": "Set the display name for this deck",
+      "sizeLabel": "Deck Size",
+      "sizeDescription": "Select column width for desktop",
+      "deleteSection": "Delete Deck",
+      "deleteDescription": "Delete this deck. This operation cannot be undone.",
+      "deleteConfirmation": "Delete \"{name}\"? This operation cannot be undone.",
+      "saving": "Saving...",
+      "changeName": "Change Name",
+      "deleting": "Deleting...",
+      "changingSize": "Changing size...",
+      "error": {
+        "saveName": "Failed to change deck name",
+        "deleteItem": "Failed to delete deck",
+        "changeSize": "Failed to change deck size"
+      }
+    },
     "addDeck": {
       "title": "Add Deck",
       "subtitle": "Create a new deck column",

@@ -17,6 +17,15 @@ Object.defineProperty(globalThis, 'window', {
   configurable: true
 });
 
+// Svelte 5のクライアント環境を強制
+Object.defineProperty(globalThis, '__SVELTE', {
+  value: {
+    CLIENT: true,
+    SERVER: false
+  },
+  configurable: true
+});
+
 // import.meta.env のモック
 Object.defineProperty(globalThis, 'import', {
   value: {
