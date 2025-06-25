@@ -282,21 +282,28 @@
 
   <!-- フッターボタン -->
   <svelte:fragment slot="footer">
-    <div class="flex justify-between">
-      <Button 
-        variant="secondary" 
-        onclick={handleBack}
-        leftIcon={ICONS.ARROW_BACK}
-        size="md"
-      >
-        {m['deck.addDeck.buttons.previous']()}
-      </Button>
+    <!-- モバイル: 縦並び、デスクトップ: 横並び -->
+    <div class="flex flex-col sm:flex-row sm:justify-between gap-3">
+      <!-- 戻るボタン -->
+      <div class="flex justify-center sm:justify-start">
+        <Button 
+          variant="secondary" 
+          onclick={handleBack}
+          leftIcon={ICONS.ARROW_BACK}
+          size="md"
+          class="w-full sm:w-auto"
+        >
+          {m['deck.addDeck.buttons.previous']()}
+        </Button>
+      </div>
       
-      <div class="flex gap-3">
+      <!-- キャンセル・作成ボタン -->
+      <div class="flex flex-col sm:flex-row gap-3">
         <Button 
           variant="secondary" 
           onclick={handleClose}
           size="md"
+          class="w-full sm:w-auto"
         >
           {m['deck.addDeck.buttons.cancel']()}
         </Button>
@@ -307,6 +314,7 @@
           loading={isLoading}
           leftIcon={isLoading ? undefined : ICONS.ADD}
           size="md"
+          class="w-full sm:w-auto"
         >
           {m['deck.addDeck.buttons.create']()}
         </Button>
