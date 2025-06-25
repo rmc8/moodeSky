@@ -13,11 +13,9 @@
   import FeedSettings from './FeedSettings.svelte';
   import type { 
     FeedTypeConfig, 
-    Column,
-    ColumnAlgorithm 
+    Column
   } from '../types.js';
   import {
-    getFeedTypeConfig,
     getDefaultDeckName,
     getFeedTypeIcon
   } from '../types.js';
