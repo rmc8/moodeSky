@@ -11,21 +11,17 @@
   import AddDeckModal from '$lib/deck/components/AddDeckModal.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
-  import { deckStore } from '$lib/deck/store.svelte.js';
   import { debugLog } from '$lib/utils/debugUtils.js';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import type { Column } from '$lib/deck/types.js';
-  import * as m from '../../paraglide/messages.js';
   
   // リアクティブ翻訳システム
   const { t } = useTranslation();
   
   // $propsを使用してプロップを受け取る（Svelte 5 runes mode）
-  const { currentPath = '', accountId = '', onAddDeck } = $props<{ 
-    currentPath?: string; 
-    accountId?: string; 
-    onAddDeck?: () => void;
+  const { currentPath = '' } = $props<{ 
+    currentPath?: string;
   }>();
   
   // グローバルなデッキ追加モーダル状態管理

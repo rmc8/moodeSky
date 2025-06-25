@@ -52,7 +52,7 @@
 {#if isDesktop}
   <!-- デスクトップ・タブレット用サイドナビゲーション (768px以上) -->
   {console.log('🔍 [Navigation] Rendering desktop navigation (SideNavigation)')}
-  <SideNavigation {currentPath} {accountId} {onAddDeck} />
+  <SideNavigation {currentPath} />
 {:else}
   <!-- モバイル用ナビゲーション (768px未満) -->
   {console.log('🔍 [Navigation] Rendering mobile navigation')}
@@ -62,5 +62,5 @@
   {/if}
   
   <!-- モバイル用ボトムナビゲーション -->
-  <BottomNavigation {currentPath} {accountId} {onAddDeck} />
+  <BottomNavigation {currentPath} />
 {/if}
