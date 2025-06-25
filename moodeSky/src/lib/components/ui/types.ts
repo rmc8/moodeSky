@@ -112,7 +112,7 @@ export interface ModalProps {
 /**
  * 入力フィールドタイプ
  */
-export type InputType = 'text' | 'password' | 'email' | 'search' | 'textarea';
+export type InputType = 'text' | 'password' | 'email' | 'search' | 'textarea' | 'number';
 
 /**
  * 入力フィールド状態

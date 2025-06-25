@@ -299,6 +299,17 @@ const navItems = $derived<NavItem[]>([
 - **Commits**: Use descriptive messages
 - **PR creation**: Include tests and documentation updates
 
+## Emergency Procedures
+
+### App State Reset
+**Quick Reset**: `cargo clean` + clear app data (`~/Library/Application Support/com.rmc8.moodesky.app/`)  
+**Full Details**: See `docs/TROUBLESHOOTING.md`
+
+### Port Conflicts
+```bash
+lsof -ti:1420 | xargs kill -9
+```
+
 ## Key Development Patterns
 
 ### 1. Type Definitions (Critical Pattern)

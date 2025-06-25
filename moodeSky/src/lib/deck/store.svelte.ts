@@ -150,6 +150,7 @@ export class DeckStore {
 
   /**
    * カラムを削除
+   * エッジケース対応: アクティブカラム削除時の同期イベント発行
    */
   async removeColumn(columnId: string): Promise<void> {
     const index = this.state.layout.columns.findIndex(col => col.id === columnId);
@@ -159,15 +160,43 @@ export class DeckStore {
       return;
     }
 
+    const wasActiveColumn = this.state.activeColumnId === columnId;
+    const oldActiveId = this.state.activeColumnId;
+    
     this.state.layout.columns.splice(index, 1);
     
     // アクティブカラムが削除された場合の処理
-    if (this.state.activeColumnId === columnId) {
+    if (wasActiveColumn) {
       this.state.activeColumnId = this.state.layout.columns[0]?.id;
+      console.log('🔄 [DeckStore] Active column was deleted, switched to:', this.state.activeColumnId);
     }
 
     await this.save();
     console.log('🎛️ [DeckStore] Column removed:', columnId);
+    
+    // カラム削除による同期イベントを発行（アクティブカラム変更時のみ）
+    if (wasActiveColumn && typeof window !== 'undefined') {
+      const syncEvent = new CustomEvent('columnOrderChanged', {
+        detail: {
+          newColumnOrder: this.state.layout.columns.map(col => col.id),
+          activeColumnId: this.state.activeColumnId,
+          activeColumnIndex: this.getActiveColumnIndex(),
+          timestamp: Date.now(),
+          source: 'DeckStore-removeColumn',
+          reason: 'activeColumnDeleted',
+          deletedColumnId: columnId,
+          oldActiveId
+        },
+        bubbles: true
+      });
+      window.dispatchEvent(syncEvent);
+      
+      console.log('🔄 [DeckStore] Column deletion sync event emitted:', {
+        deletedColumnId: columnId,
+        newActiveColumnId: this.state.activeColumnId,
+        newActiveColumnIndex: this.getActiveColumnIndex()
+      });
+    }
   }
 
   /**
@@ -296,6 +325,83 @@ export class DeckStore {
    */
   get deckSettings(): DeckLayout['settings'] {
     return this.state.layout.settings;
+  }
+
+  // ===================================================================
+  // タブ/デッキ同期システム
+  // ===================================================================
+
+  /**
+   * アクティブカラムの現在のインデックスを取得
+   * ドラッグ&ドロップでの並び替え後の同期に使用
+   * エッジケース対応: 削除・空状態・無効ID
+   */
+  getActiveColumnIndex(): number {
+    // 空のデッキ状態
+    if (this.state.layout.columns.length === 0) {
+      console.log('🔄 [DeckStore] Empty deck - returning index 0');
+      return 0;
+    }
+    
+    // アクティブIDが未設定の場合
+    if (!this.state.activeColumnId) {
+      console.log('🔄 [DeckStore] No active column ID - defaulting to first column');
+      this.state.activeColumnId = this.state.layout.columns[0]?.id;
+      return 0;
+    }
+    
+    // アクティブIDに対応するカラムを検索
+    const index = this.state.layout.columns.findIndex(col => col.id === this.state.activeColumnId);
+    
+    // 無効なアクティブID（削除されたカラム等）
+    if (index === -1) {
+      console.warn('🔄 [DeckStore] Active column ID not found - resetting to first available column:', {
+        invalidId: this.state.activeColumnId,
+        availableColumns: this.state.layout.columns.length
+      });
+      
+      // 最初の利用可能なカラムにフォールバック
+      this.state.activeColumnId = this.state.layout.columns[0]?.id;
+      return 0;
+    }
+    
+    return index;
+  }
+
+  /**
+   * アクティブカラムIDの現在位置を計算（リアクティブ）
+   * Svelte 5 runesでの自動同期用
+   */
+  get activeColumnIndex(): number {
+    return this.getActiveColumnIndex();
+  }
+
+  /**
+   * 指定インデックスのカラムをアクティブに設定
+   * モバイルナビゲーションとの同期用
+   */
+  setActiveColumnByIndex(index: number): void {
+    const column = this.state.layout.columns[index];
+    if (column) {
+      this.state.activeColumnId = column.id;
+      console.log('🔄 [DeckStore] Active column updated by index:', { index, columnId: column.id });
+    } else {
+      console.warn('🔄 [DeckStore] Invalid column index for activation:', index);
+    }
+  }
+
+  /**
+   * カラム並び替え後のアクティブインデックス同期
+   * DeckContainerのactiveColumnIndexとの同期を確保
+   */
+  syncActiveColumnIndex(): number {
+    const currentIndex = this.getActiveColumnIndex();
+    console.log('🔄 [DeckStore] Active column index synced:', {
+      activeColumnId: this.state.activeColumnId,
+      currentIndex,
+      totalColumns: this.state.layout.columns.length
+    });
+    return currentIndex;
   }
 }
 

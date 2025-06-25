@@ -33,7 +33,7 @@ Object.defineProperty(globalThis, 'import', {
 
 // Tauri APIのモック
 global.window = global.window ?? Object.create(window);
-global.window.__TAURI__ = {
+(global.window as any).__TAURI__ = {
   core: {
     invoke: vi.fn(),
   },
@@ -95,5 +95,5 @@ Object.defineProperty(global, 'crypto', {
 });
 
 // requestAnimationFrame / cancelAnimationFrame のモック
-global.requestAnimationFrame = vi.fn(cb => setTimeout(cb, 0));
-global.cancelAnimationFrame = vi.fn(id => clearTimeout(id));
+global.requestAnimationFrame = vi.fn(cb => setTimeout(cb, 0)) as any;
+global.cancelAnimationFrame = vi.fn(id => clearTimeout(id)) as any;

@@ -19,6 +19,7 @@
   import { debugLog, debugError, debugWarn } from '$lib/utils/debugUtils.js';
   import { SWIPE_CONFIG, NAVIGATION_CONFIG } from '../config/swipeConfig.js';
   import * as m from '../../../paraglide/messages.js';
+  import type { TabSyncEventDetail, DesktopScrollEventDetail } from '$lib/types/dragDrop.js';
 
   // ===================================================================
   // Props
@@ -56,6 +57,12 @@
   let stateMonitorInterval: number | undefined;
   // let debugState = $state({ canSwipe: true, isAnimating: false, timeSinceLastSwipe: 0 }); // 未使用のため削除
   let isSwipeInProgress = $state(false); // スワイプ中フラグ（IntersectionObserver制御用）
+  
+  // 競合状態防止用の状態管理
+  let isSyncInProgress = $state(false);
+  let lastSyncTime = 0;
+  let pendingSyncDebounceTimeout: number | undefined;
+  const SYNC_DEBOUNCE_MS = 75; // 同期処理のデバウンス間隔
 
   // ===================================================================
   // ライフサイクル・初期化
@@ -70,6 +77,9 @@
       
       // ウィンドウリサイズ監視
       window.addEventListener('resize', updateResponsiveState);
+      
+      // タブ/デッキ同期イベント監視
+      window.addEventListener('columnOrderChanged', handleColumnOrderChanged as EventListener);
       
       await deckStore.initialize(accountId);
       debugLog('🎛️ [DeckContainer] Deck store initialized, columns:', deckStore.columns.length);
@@ -96,12 +106,18 @@
   onDestroy(() => {
     // クリーンアップ
     window.removeEventListener('resize', updateResponsiveState);
+    window.removeEventListener('columnOrderChanged', handleColumnOrderChanged as EventListener);
     swipeDetector?.destroy();
     intersectionObserver?.destroy();
     
     // 状態監視の停止
     if (stateMonitorInterval) {
       clearInterval(stateMonitorInterval);
+    }
+    
+    // ペンディング同期処理のクリーンアップ
+    if (pendingSyncDebounceTimeout) {
+      clearTimeout(pendingSyncDebounceTimeout);
     }
   });
 
@@ -147,6 +163,147 @@
   // ===================================================================
   // イベントハンドラー
   // ===================================================================
+
+  /**
+   * タブ/デッキ同期イベントハンドラー（デバウンス付き）
+   * ドラッグ&ドロップでの高速連続操作への対応
+   */
+  function handleColumnOrderChanged(event: Event) {
+    // 既存のペンディング処理をクリア
+    if (pendingSyncDebounceTimeout) {
+      clearTimeout(pendingSyncDebounceTimeout);
+    }
+    
+    // デバウンス処理: 一定時間後に実際の同期処理を実行
+    pendingSyncDebounceTimeout = window.setTimeout(() => {
+      handleColumnOrderChangedImmediate(event);
+      pendingSyncDebounceTimeout = undefined;
+    }, SYNC_DEBOUNCE_MS);
+  }
+
+  /**
+   * タブ/デッキ同期の即座実行
+   * エッジケース対応: 無効インデックス・空状態・データ不整合・競合状態防止
+   */
+  function handleColumnOrderChangedImmediate(event: Event) {
+    // 同期処理中の重複実行を防ぐ
+    if (isSyncInProgress) {
+      debugLog('⚠️ [DeckContainer] Sync already in progress, skipping duplicate event');
+      return;
+    }
+    
+    isSyncInProgress = true;
+    const syncStartTime = Date.now();
+    
+    try {
+      const customEvent = event as CustomEvent;
+      const { 
+        activeColumnIndex: newActiveIndex, 
+        source, 
+        activeColumnId,
+        reason,
+        deletedColumnId 
+      } = customEvent.detail;
+      
+      debugLog('🔄 [DeckContainer] Column order changed event received:', {
+        source,
+        reason,
+        oldActiveIndex: activeColumnIndex,
+        newActiveIndex,
+        activeColumnId,
+        deletedColumnId,
+        isMobile,
+        totalColumns: deckStore.columns.length,
+        timeSinceLastSync: syncStartTime - lastSyncTime
+      });
+    
+    // エッジケース: 空のデッキ状態
+    if (deckStore.columns.length === 0) {
+      debugLog('⚠️ [DeckContainer] Empty deck state - resetting activeColumnIndex to 0');
+      activeColumnIndex = 0;
+      return;
+    }
+    
+    // エッジケース: 無効なインデックス範囲
+    const maxValidIndex = deckStore.columns.length - 1;
+    const validatedIndex = Math.max(0, Math.min(newActiveIndex, maxValidIndex));
+    
+    if (validatedIndex !== newActiveIndex) {
+      debugWarn('🔄 [DeckContainer] Invalid activeColumnIndex received, clamping:', {
+        received: newActiveIndex,
+        validated: validatedIndex,
+        maxValid: maxValidIndex
+      });
+    }
+    
+    // activeColumnIndexを新しい位置に更新
+    if (validatedIndex !== activeColumnIndex) {
+      const oldIndex = activeColumnIndex;
+      activeColumnIndex = validatedIndex;
+      
+      debugLog('✅ [DeckContainer] activeColumnIndex synchronized:', {
+        oldIndex,
+        newIndex: activeColumnIndex,
+        activeColumnId,
+        wasValidated: validatedIndex !== newActiveIndex
+      });
+      
+      // モバイル機能が有効な場合は追加同期
+      if (isMobile && deckStore.columns.length > 0) {
+        // CircularColumnNavigatorとの同期（境界チェック付き）
+        if (columnNavigator) {
+          try {
+            columnNavigator.updateCurrentIndex(validatedIndex);
+            debugLog('🔄 [DeckContainer] CircularColumnNavigator synced to index:', validatedIndex);
+          } catch (navError) {
+            debugError('❌ [DeckContainer] CircularColumnNavigator sync failed:', navError);
+            // フォールバック: ナビゲーターを再初期化
+            if (deckStore.columns.length > 0) {
+              setTimeout(() => {
+                initializeMobileFeatures();
+              }, 100);
+            }
+          }
+        }
+        
+        // IntersectionObserverは自動で追従するため手動同期不要
+        // SwipeDetectorは状態のみなので同期不要
+        
+        debugLog('📱 [DeckContainer] Mobile navigation components synchronized');
+      }
+    }
+    
+    // 特別なケース: アクティブカラム削除による同期
+    if (reason === 'activeColumnDeleted') {
+      debugLog('🗑️ [DeckContainer] Active column was deleted, ensuring full resync:', {
+        deletedColumnId,
+        newActiveColumnId: activeColumnId,
+        newActiveIndex: validatedIndex
+      });
+      
+      // 削除後の状態確認とフル再同期
+      if (isMobile && deckStore.columns.length > 0) {
+        setTimeout(() => {
+          // モバイル機能の完全再初期化
+          cleanupDeckFeatures();
+          initializeMobileFeatures();
+        }, 150);
+      }
+    }
+    
+    } finally {
+      // 同期処理の完了をマーク（必ず実行）
+      isSyncInProgress = false;
+      lastSyncTime = Date.now();
+      
+      const syncDuration = lastSyncTime - syncStartTime;
+      debugLog('✅ [DeckContainer] Column sync completed:', {
+        duration: `${syncDuration}ms`,
+        finalActiveIndex: activeColumnIndex,
+        finalActiveId: deckStore.state.activeColumnId
+      });
+    }
+  }
 
   /**
    * Add Deck モーダルを開く
@@ -706,28 +863,57 @@
   
   // タブからの切り替えイベントを受信（モバイル用）
   $effect(() => {
-    const handleTabSwitch = (event: CustomEvent) => {
+    const handleTabSwitch = (event: CustomEvent<TabSyncEventDetail>) => {
+      debugLog('🔄 [DeckContainer] Tab switch event received:', event.detail);
+      
       const { columnId } = event.detail;
       const columnIndex = deckStore.columns.findIndex(col => col.id === columnId);
+      
+      debugLog('🔄 [DeckContainer] Column lookup:', { 
+        columnId, 
+        columnIndex, 
+        totalColumns: deckStore.columns.length,
+        currentActiveIndex: activeColumnIndex,
+        columns: deckStore.columns.map(col => ({ id: col.id, title: col.settings.title }))
+      });
+      
       if (columnIndex !== -1 && columnIndex !== activeColumnIndex) {
+        const oldIndex = activeColumnIndex;
         activeColumnIndex = columnIndex;
+        
+        debugLog('✅ [DeckContainer] activeColumnIndex updated:', { 
+          from: oldIndex, 
+          to: columnIndex,
+          columnId: columnId
+        });
         
         // スワイプ用のスムーズ移動を実行
         if (columnNavigator && window.innerWidth < 768) {
           columnNavigator.scrollToColumn(columnIndex);
+          debugLog('🏃 [DeckContainer] Column navigator scroll triggered for index:', columnIndex);
         }
         
         debugLog('🎛️ [DeckContainer] Tab switch received, index:', columnIndex);
+      } else {
+        debugLog('⚠️ [DeckContainer] No sync needed:', { 
+          columnIndex, 
+          activeColumnIndex,
+          reason: columnIndex === -1 ? 'Column not found' : 'Already active'
+        });
       }
     };
     
+    debugLog('🎧 [DeckContainer] Tab switch event listener registered');
     window.addEventListener('tabColumnSwitch', handleTabSwitch as EventListener);
-    return () => window.removeEventListener('tabColumnSwitch', handleTabSwitch as EventListener);
+    return () => {
+      debugLog('🎧 [DeckContainer] Tab switch event listener removed');
+      window.removeEventListener('tabColumnSwitch', handleTabSwitch as EventListener);
+    };
   });
   
   // デスクトップ用スクロールイベントを受信
   $effect(() => {
-    const handleDesktopScroll = (event: CustomEvent) => {
+    const handleDesktopScroll = (event: CustomEvent<DesktopScrollEventDetail>) => {
       const { columnIndex } = event.detail;
       
       if (!desktopDeckElement || window.innerWidth < 768) return;
