@@ -306,6 +306,9 @@ export interface DeckStoreInterface {
     };
   };
   save(): Promise<void>;
+  getActiveColumnIndex(): number;
+  syncActiveColumnIndex(): number;
+  setActiveColumnByIndex(index: number): void;
 }
 
 /**
@@ -388,6 +391,7 @@ function safeDOMCheck(element: any, operation: string): boolean {
 /**
  * シンプルなドラッグ&ドロップハンドラーを作成
  * Svelteリアクティビティ原則に従い、純粋な再代入のみ実行
+ * 競合状態防止: スロットリング・デバウンシング対応
  */
 export function createDragDropHandlers(
   deckStore: DeckStoreInterface,
@@ -399,6 +403,13 @@ export function createDragDropHandlers(
   
   // ゾーン種別の判定
   const zoneType: 'mobile' | 'desktop' = componentName.toLowerCase().includes('mobile') ? 'mobile' : 'desktop';
+  
+  // 競合状態防止用の状態管理
+  let isProcessingFinalize = false;
+  let lastSyncEventTime = 0;
+  let pendingSyncTimeout: number | null = null;
+  const SYNC_THROTTLE_MS = 100; // 同期イベントのスロットリング間隔
+  const SYNC_DEBOUNCE_MS = 50;  // 同期イベントのデバウンス間隔
   
   /**
    * ドラッグ中のハンドラ（onconsider用）
@@ -426,8 +437,62 @@ export function createDragDropHandlers(
   };
 
   /**
+   * 同期イベントの発行（スロットリング・デバウンシング対応）
+   */
+  const emitSyncEvent = (items: any[]) => {
+    const now = Date.now();
+    
+    // スロットリングチェック: 最小間隔の強制
+    if (now - lastSyncEventTime < SYNC_THROTTLE_MS) {
+      debugLog(`🔄 [${componentName}] Sync event throttled, scheduling debounced emission`);
+      
+      // 既存のペンディング処理をクリア
+      if (pendingSyncTimeout) {
+        clearTimeout(pendingSyncTimeout);
+      }
+      
+      // デバウンス処理: 一定時間後に実行
+      pendingSyncTimeout = window.setTimeout(() => {
+        emitSyncEventImmediate(items);
+        pendingSyncTimeout = null;
+      }, SYNC_DEBOUNCE_MS);
+      
+      return;
+    }
+    
+    // 即座に実行
+    emitSyncEventImmediate(items);
+  };
+  
+  /**
+   * 同期イベントの即座発行
+   */
+  const emitSyncEventImmediate = (items: any[]) => {
+    const syncEvent = new CustomEvent('columnOrderChanged', {
+      detail: {
+        newColumnOrder: items.map(col => col.id),
+        activeColumnId: deckStore.state.activeColumnId,
+        activeColumnIndex: deckStore.getActiveColumnIndex(),
+        timestamp: Date.now(),
+        source: componentName
+      },
+      bubbles: true
+    });
+    window.dispatchEvent(syncEvent);
+    
+    lastSyncEventTime = Date.now();
+    
+    debugLog(`🔄 [${componentName}] Column order sync event emitted:`, {
+      activeColumnId: deckStore.state.activeColumnId,
+      activeColumnIndex: deckStore.getActiveColumnIndex(),
+      totalColumns: items.length
+    });
+  };
+
+  /**
    * ドラッグ完了時のハンドラ（onfinalize用）
    * Svelteリアクティビティ原則: シンプルな再代入 + 保存処理のみ
+   * 競合状態防止: 処理中の重複実行を防ぐ
    */
   const handleFinalize = async (e: CustomEvent<ColumnDndEvent>) => {
     // ゾーン使用可否チェック
@@ -435,27 +500,42 @@ export function createDragDropHandlers(
       return;
     }
     
+    // 処理中の重複実行を防ぐ
+    if (isProcessingFinalize) {
+      debugLog(`⚠️ [${componentName}] Finalize already in progress, skipping duplicate call`);
+      return;
+    }
+    
+    isProcessingFinalize = true;
     debugPerformance.start(`${componentName}-finalize`);
     
-    // ★★★ 最重要：Svelteリアクティビティ原則に従った純粋な再代入 ★★★
-    deckStore.state.layout.columns = e.detail.items;
-    
-    // 保存処理（非同期で実行）
     try {
-      await deckStore.save();
-      debugLog(`💾 [${componentName}] Column order saved successfully`);
-    } catch (saveError) {
-      debugError(`🎛️ [${componentName}] Failed to save column order:`, saveError);
+      // ★★★ 最重要：Svelteリアクティビティ原則に従った純粋な再代入 ★★★
+      deckStore.state.layout.columns = e.detail.items;
+      
+      // 保存処理（非同期で実行）
+      try {
+        await deckStore.save();
+        debugLog(`💾 [${componentName}] Column order saved successfully`);
+        
+        // スロットリング・デバウンシング対応の同期イベント発行
+        emitSyncEvent(e.detail.items);
+        
+      } catch (saveError) {
+        debugError(`🎛️ [${componentName}] Failed to save column order:`, saveError);
+      }
+      
+      // 追加処理があれば実行（エラーハンドリング付き）
+      try {
+        options.onFinalizeExtra?.(e.detail.items, e.detail.info);
+      } catch (extraError) {
+        debugError(`🔧 [${componentName}] Extra finalize processing failed:`, extraError);
+      }
+      
+    } finally {
+      isProcessingFinalize = false;
+      debugPerformance.end(`${componentName}-finalize`);
     }
-    
-    // 追加処理があれば実行（エラーハンドリング付き）
-    try {
-      options.onFinalizeExtra?.(e.detail.items, e.detail.info);
-    } catch (extraError) {
-      debugError(`🔧 [${componentName}] Extra finalize processing failed:`, extraError);
-    }
-    
-    debugPerformance.end(`${componentName}-finalize`);
   };
 
   return {
