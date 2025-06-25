@@ -62,7 +62,7 @@
     try {
       isSaving = true;
       
-      // TODO: deckStore.updateDeckName(deckId, deckName.trim());
+      await deckStore.updateColumnTitle(deckId, deckName.trim());
       console.log('🎛️ [DeckSettings] Deck name update:', { deckId, newName: deckName.trim() });
       
       originalDeckName = deckName.trim();

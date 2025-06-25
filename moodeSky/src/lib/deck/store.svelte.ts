@@ -249,6 +249,24 @@ export class DeckStore {
   }
 
   /**
+   * カラムタイトルを更新
+   */
+  async updateColumnTitle(columnId: string, title: string): Promise<void> {
+    const column = this.state.layout.columns.find(col => col.id === columnId);
+    
+    if (!column) {
+      console.warn('🎛️ [DeckStore] Column not found for title update:', columnId);
+      return;
+    }
+
+    column.settings.title = title.trim();
+    column.updatedAt = new Date().toISOString();
+
+    await this.save();
+    console.log('🎛️ [DeckStore] Column title updated:', columnId, title);
+  }
+
+  /**
    * カラムデータを更新
    */
   updateColumnData(columnId: string, data: Partial<Column['data']>): void {
