@@ -15,6 +15,13 @@ import {
   AvatarCacheErrorFactory, 
   AvatarCacheErrorLogger 
 } from '$lib/errors/avatarCacheError.js';
+import { MetricsCollector } from '$lib/monitoring/metricsCollector.js';
+import { 
+  ExponentialBackoff, 
+  BACKOFF_PRESETS,
+  type ExponentialBackoffOptions 
+} from '$lib/utils/exponentialBackoff.js';
+import type { DashboardData } from '$lib/types/metrics.js';
 
 /**
  * グローバルアバターキャッシュストア (Svelte 5 runes)
@@ -31,6 +38,19 @@ class AvatarCacheStore {
   // ===================================================================
   
   private readonly config: AvatarCacheConfig;
+  
+  // ===================================================================
+  // モニタリング・リトライシステム
+  // ===================================================================
+  
+  /** メトリクス収集システム */
+  private readonly metricsCollector: MetricsCollector;
+  
+  /** 指数バックオフ（レート制限対応） */
+  private readonly backoff: ExponentialBackoff;
+  
+  /** バッチ取得用バックオフ（より寛容な設定） */
+  private readonly batchBackoff: ExponentialBackoff;
 
   // ===================================================================
   // 状態管理 (Svelte 5 runes)
@@ -58,7 +78,7 @@ class AvatarCacheStore {
   private isInitialized = $state(false);
   
   /** クリーンアップタスクのインターバルID（メモリリーク防止用） */
-  private cleanupIntervalId: number | null = null;
+  private cleanupIntervalId: ReturnType<typeof setInterval> | null = null;
   
   /** 現在実行中のフェッチPromiseマップ（レースコンディション防止用） */
   private fetchPromises = new Map<string, Promise<AvatarFetchResult>>();
@@ -75,6 +95,19 @@ class AvatarCacheStore {
     
     // LRUキャッシュを設定に基づいて初期化
     this.cache = $state(new LRUCache<string, CachedAvatarInfo>(this.config.maxCacheSize));
+    
+    // メトリクス収集システムを初期化
+    this.metricsCollector = new MetricsCollector({
+      baseIntervalMs: 30000,  // 30秒
+      retentionMs: 24 * 60 * 60 * 1000,  // 24時間
+      maxMetrics: 5000
+    });
+    
+    // 標準のバックオフ設定（API フェッチ用）
+    this.backoff = new ExponentialBackoff(BACKOFF_PRESETS.standard);
+    
+    // バッチ取得用により寛容なバックオフ設定
+    this.batchBackoff = new ExponentialBackoff(BACKOFF_PRESETS.conservative);
   }
 
   // ===================================================================
@@ -99,6 +132,11 @@ class AvatarCacheStore {
   /** 現在の設定（読み取り専用） */
   get configuration(): AvatarCacheConfig {
     return { ...this.config };
+  }
+  
+  /** メトリクスダッシュボードデータ */
+  get dashboardData(): DashboardData {
+    return this.metricsCollector.generateDashboardData();
   }
 
   // ===================================================================
@@ -428,9 +466,11 @@ class AvatarCacheStore {
   }
 
   /**
-   * バッチでプロフィール情報を取得
+   * バッチでプロフィール情報を取得（メトリクス付き）
    */
   private async fetchProfilesBatch(dids: string[]): Promise<Array<{did: string; success: boolean; data?: CachedAvatarInfo; error?: string}>> {
+    this.metricsCollector.recordAPIRequest('getProfiles', 'POST');
+    
     try {
       const batchResults = await profileService.getProfiles(dids);
       
@@ -550,7 +590,7 @@ class AvatarCacheStore {
           this.cache.set(account.profile.did, avatarInfo);
         }
         this.stats.totalCached = this.cache.currentSize;
-        console.log(`🎭 [AvatarCache] Pre-cached ${this.cache.size} account avatars`);
+        console.log(`🎭 [AvatarCache] Pre-cached ${this.cache.currentSize} account avatars`);
       }
     } catch (error) {
       const cacheError = AvatarCacheErrorFactory.fromError(error, {
@@ -570,7 +610,7 @@ class AvatarCacheStore {
     // 5分おきにクリーンアップを実行
     this.cleanupIntervalId = setInterval(() => {
       this.cleanupExpiredCache();
-    }, 5 * 60 * 1000) as number;
+    }, 5 * 60 * 1000);
   }
   
   /**

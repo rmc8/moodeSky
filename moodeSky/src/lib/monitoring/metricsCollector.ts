@@ -9,9 +9,6 @@ import type {
   GaugeMetric,
   HistogramMetric,
   TimerMetric,
-  MetricType,
-  MetricPriority,
-  AvatarCacheMetrics,
   MetricsCollectionConfig,
   AlertRule,
   AlertStatus,
@@ -21,6 +18,11 @@ import type {
   PerformanceProfile,
   MetricQuery,
   MetricFilter
+} from '$lib/types/metrics.js';
+import {
+  MetricType,
+  MetricPriority,
+  AvatarCacheMetrics
 } from '$lib/types/metrics.js';
 
 /**
