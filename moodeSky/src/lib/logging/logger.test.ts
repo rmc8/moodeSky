@@ -184,7 +184,12 @@ describe('Logger System', () => {
 
   describe('Timer Functionality', () => {
     it('should measure operation duration', () => {
-      const endTimer = logger.startTimer('test_operation', { userId: 'user123' });
+      const testLogger = new Logger({
+        transports: [mockTransport],
+        bufferSize: 1
+      });
+      
+      const endTimer = testLogger.startTimer('test_operation', { userId: 'user123' });
 
       // 時間を進める
       vi.advanceTimersByTime(250);
@@ -207,6 +212,8 @@ describe('Logger System', () => {
           })
         })
       );
+      
+      testLogger.destroy();
     });
   });
 
