@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
   import { AtpAgent } from '@atproto/api';
   import { authService } from '$lib/services/authStore.js';
   import { accountsStore } from '$lib/stores/accounts.svelte.js';
@@ -11,6 +13,21 @@
 
   // リアクティブ翻訳システム
   const { t, currentLanguage } = useTranslation();
+
+  // URLパラメータでアカウント追加モードを検出
+  const isAddMode = $derived($page.url.searchParams.get('mode') === 'add');
+  const hasExistingAccounts = $derived(accountsStore.hasAccounts);
+  const showBackButton = $derived(() => {
+    const shouldShow = isAddMode; // 一時的にアカウント存在チェックを無効化
+    console.log('🔍 [Login] showBackButton debug:', {
+      isAddMode,
+      hasExistingAccounts,
+      accountCount: accountsStore.accountCount,
+      isInitialized: accountsStore.isInitialized,
+      shouldShow
+    });
+    return shouldShow;
+  });
 
   let handle = $state('');
   let password = $state('');
@@ -87,7 +104,12 @@
         await accountsStore.addAccount(saveResult.data);
       }
       
-      await goto('/deck');
+      // アカウント追加モードの場合は設定画面に戻る
+      if (isAddMode) {
+        await goto('/settings');
+      } else {
+        await goto('/deck');
+      }
       
     } catch (error: any) {
       // AT Protocol固有のエラーハンドリング
@@ -114,6 +136,28 @@
       isLoading = false;
     }
   }
+
+  // 設定画面に戻る関数
+  function goBackToSettings() {
+    console.log('🔄 [Login] 設定画面に戻るボタンがクリックされました');
+    try {
+      goto('/settings');
+      console.log('🔄 [Login] goto("/settings") 実行完了');
+    } catch (error) {
+      console.error('🔄 [Login] goto実行エラー:', error);
+    }
+  }
+
+  // アカウントストアの初期化
+  onMount(async () => {
+    try {
+      console.log('🔄 [Login] アカウントストア初期化開始');
+      await accountsStore.initialize();
+      console.log('🔄 [Login] アカウントストア初期化完了');
+    } catch (error) {
+      console.error('🔄 [Login] アカウントストア初期化エラー:', error);
+    }
+  });
 </script>
 
 <main class="min-h-screen flex items-center justify-center bg-themed p-4">
@@ -124,9 +168,22 @@
     </div>
     
     <!-- 言語セレクター（左上） -->
-    <div class="absolute top-4 left-4">
+    <div class="absolute top-4 left-4 flex flex-col gap-2">
       <LanguageSelectorCompact />
+      
+      <!-- アカウント追加モード時の戻るボタン -->
+      {#if showBackButton}
+        <button
+          class="flex items-center gap-2 px-3 py-2 text-sm bg-muted/20 hover:bg-muted/40 text-themed rounded-lg transition-colors border border-themed/20 w-max"
+          onclick={goBackToSettings}
+          title="設定画面に戻る"
+        >
+          <Icon icon={ICONS.ARROW_BACK} size="sm" color="themed" />
+          <span class="text-xs">戻る</span>
+        </button>
+      {/if}
     </div>
+    
     <div class="text-center mb-8">
       <h1 class="text-3xl font-bold text-themed mb-2">moodeSky</h1>
       <p class="text-label text-sm">{t('login.title')}</p>

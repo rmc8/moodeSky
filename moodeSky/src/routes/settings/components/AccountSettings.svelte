@@ -58,31 +58,51 @@
    */
   async function logoutAll() {
     try {
+      console.log('🔓 [AccountSettings] ログアウト処理開始');
       isLoading = true;
       errorMessage = '';
       
+      // 現在のアカウント数を記録
+      const currentAccountCount = accountsStore.accountCount;
+      console.log(`🔓 [AccountSettings] 削除対象アカウント数: ${currentAccountCount}`);
+      
       // アカウントストアを使用して全アカウントをクリア
+      console.log('🔓 [AccountSettings] accountsStore.clearAllAccounts() 実行中...');
       await accountsStore.clearAllAccounts();
       
+      // エラーチェック
       if (accountsStore.error) {
-        console.error('Log out failed:', accountsStore.error);
-        errorMessage = m['settings.account.logoutAllError']();
+        console.error('🔓 [AccountSettings] ログアウト失敗 - accountsStore.error:', accountsStore.error);
+        errorMessage = `${m['settings.account.logoutAllError']()}\n詳細: ${accountsStore.error}`;
         return;
       }
       
+      // 削除後のアカウント数を確認
+      const remainingAccountCount = accountsStore.accountCount;
+      console.log(`🔓 [AccountSettings] ログアウト後のアカウント数: ${remainingAccountCount}`);
+      
+      if (remainingAccountCount > 0) {
+        console.warn('🔓 [AccountSettings] 警告: アカウントが完全に削除されていません');
+        errorMessage = 'アカウントの削除が不完全です。再度お試しください。';
+        return;
+      }
+      
+      console.log('🔓 [AccountSettings] ログアウト成功 - リダイレクト準備中');
       successMessage = m['settings.account.logoutAllSuccess']();
       
       // 短い遅延後にログイン画面へリダイレクト
       setTimeout(async () => {
+        console.log('🔓 [AccountSettings] ログイン画面へリダイレクト実行');
         await goto('/login');
       }, 1500);
       
     } catch (error) {
-      console.error('Log out error:', error);
-      errorMessage = m['settings.account.logoutAllError']();
+      console.error('🔓 [AccountSettings] ログアウト処理例外:', error);
+      errorMessage = `${m['settings.account.logoutAllError']()}\n詳細: ${error instanceof Error ? error.message : String(error)}`;
     } finally {
       isLoading = false;
       showSignOutConfirm = false;
+      console.log('🔓 [AccountSettings] ログアウト処理終了');
     }
   }
 
@@ -90,6 +110,7 @@
    * ログアウト確認ダイアログを表示
    */
   function confirmLogoutAll() {
+    console.log('🔓 [AccountSettings] ログアウト確認ダイアログを表示');
     showSignOutConfirm = true;
   }
 
@@ -97,6 +118,7 @@
    * ログアウト確認をキャンセル
    */
   function cancelLogoutAll() {
+    console.log('🔓 [AccountSettings] ログアウト確認をキャンセル');
     showSignOutConfirm = false;
   }
 
@@ -113,9 +135,25 @@
    */
   function handleAccountDeleted(event: Event) {
     const customEvent = event as CustomEvent;
-    console.log('🛠️ [AccountSettings] Account deleted:', customEvent.detail.accountId);
+    console.log('🛠️ [AccountSettings] アカウント削除イベント受信:', {
+      accountId: customEvent.detail.accountId,
+      handle: customEvent.detail.handle
+    });
+    
     // アカウントストアから削除（リアクティブ更新）
+    console.log('🛠️ [AccountSettings] accountsStore.removeAccount 実行中...', customEvent.detail.accountId);
     accountsStore.removeAccount(customEvent.detail.accountId);
+    
+    // 成功メッセージを表示
+    successMessage = `${customEvent.detail.handle} からログアウトしました`;
+    
+    // アカウントが0個になった場合は自動的にログイン画面にリダイレクト
+    setTimeout(() => {
+      if (accountsStore.accountCount === 0) {
+        console.log('🛠️ [AccountSettings] アカウントが0個になったため、ログイン画面にリダイレクト');
+        goto('/login');
+      }
+    }, 1500);
   }
 
   /**
@@ -191,11 +229,13 @@
   {/if}
 
   {#if errorMessage}
-    <div class="mb-6 p-4 bg-error/10 border border-error/20 rounded-lg flex items-center gap-3">
-      <Icon icon={ICONS.ERROR} size="md" color="error" />
-      <span class="text-error font-medium">{errorMessage}</span>
+    <div class="mb-6 p-4 bg-error/10 border border-error/20 rounded-lg flex items-start gap-3">
+      <Icon icon={ICONS.ERROR} size="md" color="error" class="flex-shrink-0 mt-0.5" />
+      <div class="flex-1 min-w-0">
+        <span class="text-error font-medium whitespace-pre-line">{errorMessage}</span>
+      </div>
       <button 
-        class="ml-auto text-error hover:text-error/80 transition-colors"
+        class="flex-shrink-0 text-error hover:text-error/80 transition-colors"
         onclick={clearMessages}
         aria-label={m['settings.closeMessage']()}
       >
@@ -350,9 +390,20 @@
 
   <!-- サインアウト確認ダイアログ -->
   {#if showSignOutConfirm}
-    <div class="fixed inset-0 bg-themed/50 flex items-center justify-center z-50">
-      <div class="bg-card rounded-xl p-6 shadow-xl max-w-md w-full mx-4">
-        <h3 class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
+    <div 
+      class="fixed inset-0 bg-themed/50 flex items-center justify-center z-[9999] backdrop-blur-sm"
+      onkeydown={(e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          cancelLogoutAll();
+        }
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="logout-dialog-title"
+    >
+      <div class="bg-card rounded-xl p-6 shadow-2xl max-w-md w-full mx-4 border border-themed">
+        <h3 id="logout-dialog-title" class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
           <Icon icon={ICONS.WARNING} size="md" color="warning" />
           {m['settings.account.logoutAllConfirm']()}
         </h3>
@@ -385,8 +436,8 @@
 
   <!-- ローディング状態 -->
   {#if isLoading && !showSignOutConfirm}
-    <div class="fixed inset-0 bg-themed/50 flex items-center justify-center z-50">
-      <div class="bg-card rounded-lg p-6 shadow-xl flex items-center gap-3">
+    <div class="fixed inset-0 bg-themed/50 flex items-center justify-center z-[9998] backdrop-blur-sm">
+      <div class="bg-card rounded-lg p-6 shadow-2xl flex items-center gap-3 border border-themed">
         <div class="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
         <span class="text-themed">{m['settings.changingSettings']()}</span>
       </div>

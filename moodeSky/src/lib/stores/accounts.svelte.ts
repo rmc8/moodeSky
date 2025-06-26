@@ -105,26 +105,34 @@ class AccountsStore {
    */
   async removeAccount(accountId: string): Promise<void> {
     try {
+      console.log(`🏪 [AccountsStore] アカウント削除開始 - ID: ${accountId}, 現在のアカウント数: ${this.allAccounts.length}`);
       this.isLoading = true;
       this.error = null;
 
+      console.log('🏪 [AccountsStore] authService.deleteAccount 呼び出し中...', accountId);
       const result = await authService.deleteAccount(accountId);
+      console.log('🏪 [AccountsStore] authService.deleteAccount 結果:', result);
       
       if (result.success) {
+        // 削除前のアカウント情報を取得
+        const deletedAccount = this.allAccounts.find(acc => acc.id === accountId);
+        console.log('🏪 [AccountsStore] 削除対象アカウント:', deletedAccount?.profile.handle);
+        
         // ストアからアカウントを削除
         this.allAccounts = this.allAccounts.filter(
           (account) => account.id !== accountId
         );
-        console.log('🏪 [AccountsStore] アカウント削除完了:', accountId);
+        console.log(`🏪 [AccountsStore] アカウント削除完了: ${deletedAccount?.profile.handle}, 残りアカウント数: ${this.allAccounts.length}`);
       } else {
         console.error('🏪 [AccountsStore] アカウント削除失敗:', result.error);
-        this.error = 'アカウントの削除に失敗しました';
+        this.error = `アカウントの削除に失敗しました: ${result.error?.message || 'Unknown error'}`;
       }
     } catch (error) {
       console.error('🏪 [AccountsStore] アカウント削除エラー:', error);
-      this.error = 'アカウントの削除に失敗しました';
+      this.error = `アカウントの削除でエラーが発生しました: ${error}`;
     } finally {
       this.isLoading = false;
+      console.log(`🏪 [AccountsStore] アカウント削除処理終了 - 最終アカウント数: ${this.allAccounts.length}`);
     }
   }
 
@@ -133,23 +141,27 @@ class AccountsStore {
    */
   async clearAllAccounts(): Promise<void> {
     try {
+      console.log(`🏪 [AccountsStore] 全アカウントクリア開始 - 現在のアカウント数: ${this.allAccounts.length}`);
       this.isLoading = true;
       this.error = null;
 
+      console.log('🏪 [AccountsStore] authService.clearAll() 呼び出し中...');
       const result = await authService.clearAll();
+      console.log('🏪 [AccountsStore] authService.clearAll() 完了 - 結果:', result);
       
       if (result.success) {
         this.allAccounts = [];
-        console.log('🏪 [AccountsStore] 全アカウントクリア完了');
+        console.log('🏪 [AccountsStore] 全アカウントクリア完了 - ストア配列クリア済み');
       } else {
         console.error('🏪 [AccountsStore] 全アカウントクリア失敗:', result.error);
-        this.error = '全アカウントのクリアに失敗しました';
+        this.error = `全アカウントのクリアに失敗しました: ${result.error?.message || 'Unknown error'}`;
       }
     } catch (error) {
       console.error('🏪 [AccountsStore] 全アカウントクリアエラー:', error);
-      this.error = '全アカウントのクリアに失敗しました';
+      this.error = `全アカウントのクリアでエラーが発生しました: ${error}`;
     } finally {
       this.isLoading = false;
+      console.log(`🏪 [AccountsStore] 全アカウントクリア処理終了 - 最終アカウント数: ${this.allAccounts.length}`);
     }
   }
 

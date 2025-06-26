@@ -557,8 +557,12 @@ export class AuthService {
    */
   async deleteAccount(accountId: string): Promise<AuthResult> {
     try {
+      console.log('🔑 [AuthService] deleteAccount() 開始 - アカウントID:', accountId);
+      
+      console.log('🔑 [AuthService] ストア読み込み中...');
       const storeResult = await this.loadAuthStore();
       if (!storeResult.success) {
+        console.error('🔑 [AuthService] ストア読み込み失敗:', storeResult.error);
         return {
           success: false,
           error: storeResult.error,
@@ -566,11 +570,15 @@ export class AuthService {
       }
 
       const authStore = storeResult.data!;
+      console.log(`🔑 [AuthService] 現在のアカウント数: ${authStore.accounts.length}`);
+      
       const accountIndex = authStore.accounts.findIndex(
         (account) => account.id === accountId
       );
+      console.log('🔑 [AuthService] 削除対象アカウントのインデックス:', accountIndex);
 
       if (accountIndex < 0) {
+        console.warn('🔑 [AuthService] アカウントが見つかりません:', accountId);
         return {
           success: false,
           error: {
@@ -580,11 +588,21 @@ export class AuthService {
         };
       }
 
+      // 削除前のアカウント情報をログ出力
+      const deletingAccount = authStore.accounts[accountIndex];
+      console.log('🔑 [AuthService] 削除対象アカウント:', deletingAccount.profile.handle);
+
       // アカウントを削除
       authStore.accounts.splice(accountIndex, 1);
+      console.log(`🔑 [AuthService] アカウント削除後の配列サイズ: ${authStore.accounts.length}`);
 
-      return await this.saveAuthStore(authStore);
+      console.log('🔑 [AuthService] ストア保存中...');
+      const saveResult = await this.saveAuthStore(authStore);
+      console.log('🔑 [AuthService] ストア保存結果:', saveResult);
+      
+      return saveResult;
     } catch (error) {
+      console.error('🔑 [AuthService] deleteAccount() 例外:', error);
       return {
         success: false,
         error: {
@@ -600,6 +618,20 @@ export class AuthService {
    */
   async clearAll(): Promise<AuthResult> {
     try {
+      console.log('🔑 [AuthService] clearAll() 開始 - 全認証データクリア処理');
+      
+      // 現在のストア状態を確認
+      try {
+        const currentStore = await this.loadAuthStore();
+        console.log('🔑 [AuthService] 現在のストア状態:', {
+          success: currentStore.success,
+          accountCount: currentStore.success ? currentStore.data?.accounts?.length || 0 : 'N/A',
+          error: currentStore.error
+        });
+      } catch (checkError) {
+        console.warn('🔑 [AuthService] ストア状態確認時エラー:', checkError);
+      }
+
       // セッションイベントを発火 (削除時はイベントのみ)
       // Note: AtpSessionEventの具体的な値は@atproto/apiのドキュメントを要確認
       // ここでは一旦コメントアウト
@@ -607,8 +639,13 @@ export class AuthService {
       //   await this.sessionEventHandler('delete', undefined);
       // }
 
-      return await this.deleteFromStore('auth_store');
+      console.log('🔑 [AuthService] deleteFromStore("auth_store") 実行中...');
+      const result = await this.deleteFromStore('auth_store');
+      console.log('🔑 [AuthService] deleteFromStore 結果:', result);
+      
+      return result;
     } catch (error) {
+      console.error('🔑 [AuthService] clearAll() 例外:', error);
       return {
         success: false,
         error: {

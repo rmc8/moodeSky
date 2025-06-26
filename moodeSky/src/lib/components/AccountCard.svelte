@@ -68,6 +68,9 @@
   // 再認証モーダル管理
   let showReauthModal = $state(false);
   let currentAccount = $state(account);
+  
+  // ログアウト確認モーダル管理
+  let showLogoutConfirmModal = $state(false);
 
   // ===================================================================
   // 算出プロパティ
@@ -112,25 +115,57 @@
   }
 
   /**
-   * アカウントからログアウト
+   * ログアウト確認モーダルを表示
    */
-  async function onLogoutAccount() {
+  function confirmLogoutAccount() {
+    console.log('🔓 [AccountCard] ログアウト確認モーダル表示:', account.profile.handle);
+    showLogoutConfirmModal = true;
+  }
+  
+  /**
+   * ログアウト確認をキャンセル
+   */
+  function cancelLogoutAccount() {
+    console.log('🔓 [AccountCard] ログアウト確認キャンセル:', account.profile.handle);
+    showLogoutConfirmModal = false;
+  }
+
+  /**
+   * アカウントからログアウト（確認後実行）
+   */
+  async function executeLogoutAccount() {
     try {
+      console.log('🔓 [AccountCard] アカウントログアウト開始:', account.profile.handle);
       isLoading = true;
+      showLogoutConfirmModal = false;
       
       // authService.deleteAccount を呼び出し（ローカルからアカウント情報を削除）
+      console.log('🔓 [AccountCard] authService.deleteAccount 呼び出し中...', account.id);
       const result = await import('$lib/services/authStore.js').then(m => m.authService.deleteAccount(account.id));
+      console.log('🔓 [AccountCard] authService.deleteAccount 結果:', result);
       
       if (result.success) {
-        console.log('Account logout successfully:', account.profile.handle);
+        console.log('🔓 [AccountCard] アカウントログアウト成功:', account.profile.handle);
+        
+        // セッション関連のタイマーを停止
+        if (updateTimer) {
+          clearTimeout(updateTimer);
+          updateTimer = null;
+        }
+        
         // 成功時は親コンポーネントの再読み込みをトリガー
         // CustomEvent を発火してAccountSettingsに通知
-        window.dispatchEvent(new CustomEvent('accountDeleted', { detail: { accountId: account.id } }));
+        window.dispatchEvent(new CustomEvent('accountDeleted', { detail: { 
+          accountId: account.id,
+          handle: account.profile.handle 
+        } }));
       } else {
-        console.error('Failed to logout account:', result.error);
+        console.error('🔓 [AccountCard] アカウントログアウト失敗:', result.error);
+        alert(`ログアウトに失敗しました: ${result.error?.message || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error logging out account:', error);
+      console.error('🔓 [AccountCard] アカウントログアウトエラー:', error);
+      alert(`ログアウト中にエラーが発生しました: ${error}`);
     } finally {
       isLoading = false;
     }
@@ -627,7 +662,7 @@
           
           <button
             class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-error/10 text-error hover:bg-error/20 border border-error/20 flex-1"
-            onclick={onLogoutAccount}
+            onclick={confirmLogoutAccount}
             disabled={isLoading}
           >
             <Icon icon={ICONS.LOGOUT} size="sm" color="error" />
@@ -642,7 +677,7 @@
             <span class="text-error text-sm font-medium">セッション検証エラー</span>
           </div>
           <p class="text-themed text-xs opacity-70">
-            ネットワーク接続を確認するか、再認証を試してください。
+            ネットワーク接続を確認して再検証するか、このアカウントからログアウトしてください。
           </p>
         </div>
         
@@ -657,12 +692,12 @@
           </button>
           
           <button
-            class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30 flex-1"
-            onclick={openReauthModal}
+            class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-error/10 text-error hover:bg-error/20 border border-error/20 flex-1"
+            onclick={confirmLogoutAccount}
             disabled={isLoading}
           >
-            <Icon icon={ICONS.REFRESH} size="sm" color="primary" />
-            <span>{m['reauth.button']()}</span>
+            <Icon icon={ICONS.LOGOUT} size="sm" color="error" />
+            <span>{m['settings.account.logoutAccount']()}</span>
           </button>
         </div>
       {:else if sessionStatus() === 'checking'}
@@ -684,7 +719,7 @@
           
           <button
             class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-error/10 text-error hover:bg-error/20 border border-error/20 flex-1"
-            onclick={onLogoutAccount}
+            onclick={confirmLogoutAccount}
             disabled={isLoading}
           >
             <Icon icon={ICONS.LOGOUT} size="sm" color="error" />
@@ -710,4 +745,71 @@
   onClose={closeReauthModal}
   onSuccess={handleReauthSuccess}
 />
+
+<!-- ログアウト確認モーダル -->
+{#if showLogoutConfirmModal}
+  <div 
+    class="fixed inset-0 bg-themed/50 flex items-center justify-center z-[9999] backdrop-blur-sm"
+    onkeydown={(e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cancelLogoutAccount();
+      }
+    }}
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="logout-confirm-title"
+  >
+    <div class="bg-card rounded-xl p-6 shadow-2xl max-w-md w-full mx-4 border border-themed">
+      <h3 id="logout-confirm-title" class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
+        <Icon icon={ICONS.WARNING} size="md" color="warning" />
+        アカウントからログアウト
+      </h3>
+      
+      <div class="mb-4">
+        <div class="flex items-center gap-3 p-3 bg-muted/10 rounded-lg border border-themed/20">
+          <Avatar
+            src={account.profile.avatar || ''}
+            displayName={account.profile.displayName || account.profile.handle}
+            handle={account.profile.handle}
+            size="sm"
+          />
+          <div class="flex-1 min-w-0">
+            <div class="font-medium text-themed truncate">
+              {account.profile.displayName || account.profile.handle}
+            </div>
+            <div class="text-sm text-secondary truncate">
+              @{account.profile.handle}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <p class="text-themed opacity-80 mb-6">
+        このアカウントからログアウトしますか？<br>
+        再度利用するには、ログイン情報を入力し直す必要があります。
+      </p>
+      
+      <div class="flex gap-3 justify-end">
+        <button
+          class="px-4 py-2 border border-themed rounded-lg text-themed hover:bg-muted/20 transition-colors"
+          onclick={cancelLogoutAccount}
+        >
+          キャンセル
+        </button>
+        <button
+          class="px-4 py-2 bg-error text-white rounded-lg hover:bg-error/80 transition-colors flex items-center gap-2"
+          onclick={executeLogoutAccount}
+          disabled={isLoading}
+        >
+          {#if isLoading}
+            <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+          {/if}
+          <Icon icon={ICONS.LOGOUT} size="sm" class="text-white" />
+          ログアウト
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
 
