@@ -8,6 +8,21 @@ import type {
 } from '$lib/types/avatarCache.js';
 import { authService } from '$lib/services/authStore.js';
 import { profileService } from '$lib/services/profileService.js';
+import { LRUCache } from '$lib/utils/lruCache.js';
+import { createOptimalConfig } from '$lib/config/avatarCache.js';
+import { 
+  AvatarCacheError, 
+  AvatarCacheErrorFactory, 
+  AvatarCacheErrorLogger 
+} from '$lib/errors/avatarCacheError.js';
+import { MetricsCollector } from '$lib/monitoring/metricsCollector.js';
+import { 
+  ExponentialBackoff, 
+  BACKOFF_PRESETS,
+  type ExponentialBackoffOptions 
+} from '$lib/utils/exponentialBackoff.js';
+import type { DashboardData } from '$lib/types/metrics.js';
+import { getLogger, createLogger, type Logger } from '$lib/logging/logger.js';
 
 /**
  * グローバルアバターキャッシュストア (Svelte 5 runes)
@@ -23,21 +38,30 @@ class AvatarCacheStore {
   // 設定
   // ===================================================================
   
-  private readonly config: AvatarCacheConfig = {
-    ttl: 30 * 60 * 1000,          // 30分
-    staleTtl: 2 * 60 * 60 * 1000, // 2時間  
-    maxCacheSize: 1000,           // 最大1000アカウント
-    batchSize: 25,                // 一度に25アカウントまで取得
-    maxRetries: 3,                // 最大3回リトライ
-    retryDelay: 1000              // 1秒間隔
-  };
+  private readonly config: AvatarCacheConfig;
+  
+  // ===================================================================
+  // モニタリング・リトライシステム
+  // ===================================================================
+  
+  /** メトリクス収集システム */
+  private readonly metricsCollector: MetricsCollector;
+  
+  /** 指数バックオフ（レート制限対応） */
+  private readonly backoff: ExponentialBackoff;
+  
+  /** バッチ取得用バックオフ（より寛容な設定） */
+  private readonly batchBackoff: ExponentialBackoff;
+  
+  /** 構造化ログシステム */
+  private readonly logger: Logger;
 
   // ===================================================================
   // 状態管理 (Svelte 5 runes)
   // ===================================================================
   
-  /** メインキャッシュ（DID -> アバター情報） */
-  private cache = $state<Map<string, CachedAvatarInfo>>(new Map());
+  /** メインキャッシュ（DID -> アバター情報）- LRU Cache使用 */
+  private cache: LRUCache<string, CachedAvatarInfo>;
   
   /** 現在取得中のDIDセット */
   private fetchingDids = $state<Set<string>>(new Set());
@@ -56,6 +80,42 @@ class AvatarCacheStore {
   
   /** 初期化状態 */
   private isInitialized = $state(false);
+  
+  /** クリーンアップタスクのインターバルID（メモリリーク防止用） */
+  private cleanupIntervalId: ReturnType<typeof setInterval> | null = null;
+  
+  /** 現在実行中のフェッチPromiseマップ（レースコンディション防止用） */
+  private fetchPromises = new Map<string, Promise<AvatarFetchResult>>();
+
+  // ===================================================================
+  // コンストラクタ
+  // ===================================================================
+  
+  constructor(customConfig?: Partial<AvatarCacheConfig>) {
+    // 環境に応じた最適設定を取得
+    this.config = customConfig 
+      ? { ...createOptimalConfig(), ...customConfig }
+      : createOptimalConfig();
+    
+    // LRUキャッシュを設定に基づいて初期化
+    this.cache = $state(new LRUCache<string, CachedAvatarInfo>(this.config.maxCacheSize));
+    
+    // メトリクス収集システムを初期化
+    this.metricsCollector = new MetricsCollector({
+      baseIntervalMs: 30000,  // 30秒
+      retentionMs: 24 * 60 * 60 * 1000,  // 24時間
+      maxMetrics: 5000
+    });
+    
+    // 標準のバックオフ設定（API フェッチ用）
+    this.backoff = new ExponentialBackoff(BACKOFF_PRESETS.standard);
+    
+    // バッチ取得用により寛容なバックオフ設定
+    this.batchBackoff = new ExponentialBackoff(BACKOFF_PRESETS.conservative);
+    
+    // 構造化ログシステムを初期化
+    this.logger = getLogger();
+  }
 
   // ===================================================================
   // 算出プロパティ
@@ -63,7 +123,7 @@ class AvatarCacheStore {
   
   /** 現在のキャッシュサイズ */
   get cacheSize(): number {
-    return this.cache.size;
+    return this.cache.currentSize;
   }
   
   /** 統計情報（読み取り専用） */
@@ -74,6 +134,16 @@ class AvatarCacheStore {
   /** 初期化完了状態 */
   get initialized(): boolean {
     return this.isInitialized;
+  }
+  
+  /** 現在の設定（読み取り専用） */
+  get configuration(): AvatarCacheConfig {
+    return { ...this.config };
+  }
+  
+  /** メトリクスダッシュボードデータ */
+  get dashboardData(): DashboardData {
+    return this.metricsCollector.generateDashboardData();
   }
 
   // ===================================================================
@@ -87,7 +157,11 @@ class AvatarCacheStore {
     if (this.isInitialized) return;
     
     try {
-      console.log('🎭 [AvatarCache] Initializing avatar cache system...');
+      this.logger.info('Initializing avatar cache system', {
+        operation: 'initialization',
+        cacheSize: this.config.maxCacheSize,
+        ttl: this.config.ttl
+      }, 'avatarCache');
       
       // 既存のアカウント情報からキャッシュを初期構築
       await this.initializeCacheFromAccounts();
@@ -96,11 +170,18 @@ class AvatarCacheStore {
       this.startCleanupTask();
       
       this.isInitialized = true;
-      console.log(`🎭 [AvatarCache] Initialized with ${this.cacheSize} cached avatars`);
+      this.logger.info('Avatar cache system initialized successfully', {
+        operation: 'initialization',
+        cachedAvatars: this.cacheSize,
+        totalConfig: this.config
+      }, 'avatarCache');
       
     } catch (error) {
-      console.error('🎭 [AvatarCache] Initialization failed:', error);
-      throw error;
+      const cacheError = AvatarCacheErrorFactory.fromError(error, {
+        operation: 'initialization'
+      });
+      AvatarCacheErrorLogger.log(cacheError);
+      throw cacheError;
     }
   }
 
@@ -246,12 +327,30 @@ class AvatarCacheStore {
    * 単一アバターを取得
    */
   private async fetchAvatar(did: string): Promise<AvatarFetchResult> {
-    if (this.fetchingDids.has(did)) {
-      // すでに取得中の場合は待機
-      return await this.waitForFetch(did);
+    // 既に取得中の場合は同じPromiseを返す（レースコンディション防止）
+    const existingPromise = this.fetchPromises.get(did);
+    if (existingPromise) {
+      return existingPromise;
     }
 
+    // 新しいフェッチPromiseを作成してキャッシュに保存
+    const fetchPromise = this.performSingleFetch(did);
+    this.fetchPromises.set(did, fetchPromise);
+    
+    // Promise完了後にキャッシュから削除
+    fetchPromise.finally(() => {
+      this.fetchPromises.delete(did);
+      this.fetchingDids.delete(did);
+    });
+    
     this.fetchingDids.add(did);
+    return fetchPromise;
+  }
+  
+  /**
+   * 実際のフェッチ処理を実行
+   */
+  private async performSingleFetch(did: string): Promise<AvatarFetchResult> {
 
     try {
       // AT Protocol APIを使用してプロフィール取得
@@ -276,7 +375,11 @@ class AvatarCacheStore {
       };
 
     } catch (error) {
-      console.error(`🎭 [AvatarCache] Failed to fetch avatar for ${did}:`, error);
+      const cacheError = AvatarCacheErrorFactory.fromError(error, {
+        did,
+        operation: 'avatar_fetch'
+      });
+      AvatarCacheErrorLogger.log(cacheError);
       
       const errorInfo: CachedAvatarInfo = {
         did,
@@ -284,7 +387,7 @@ class AvatarCacheStore {
         cachedAt: Date.now(),
         lastUpdated: Date.now(),
         status: 'error',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: cacheError.message
       };
 
       this.setCache(did, errorInfo);
@@ -292,12 +395,10 @@ class AvatarCacheStore {
 
       return {
         success: false,
-        error: errorInfo.error,
+        error: cacheError.message,
         fromCache: false
       };
 
-    } finally {
-      this.fetchingDids.delete(did);
     }
   }
 
@@ -324,13 +425,17 @@ class AvatarCacheStore {
         }
         
       } catch (error) {
-        console.error('🎭 [AvatarCache] Batch fetch failed:', error);
+        const cacheError = AvatarCacheErrorFactory.fromError(error, {
+          operation: 'batch_fetch',
+          context: { batchSize: batch.length }
+        });
+        AvatarCacheErrorLogger.log(cacheError);
         
         // バッチ全体が失敗した場合、個別エラーとして記録
         for (const did of batch) {
           errors.push({ 
             did, 
-            error: error instanceof Error ? error.message : 'Batch fetch failed' 
+            error: cacheError.message
           });
         }
       }
@@ -366,15 +471,21 @@ class AvatarCacheStore {
         avatar: result.data.avatar
       };
     } catch (error) {
-      console.error(`🎭 [AvatarCache] ProfileService fetch failed for ${did}:`, error);
-      throw error;
+      const cacheError = AvatarCacheErrorFactory.fromError(error, {
+        did,
+        operation: 'profile_service_fetch'
+      });
+      AvatarCacheErrorLogger.log(cacheError);
+      throw cacheError;
     }
   }
 
   /**
-   * バッチでプロフィール情報を取得
+   * バッチでプロフィール情報を取得（メトリクス付き）
    */
   private async fetchProfilesBatch(dids: string[]): Promise<Array<{did: string; success: boolean; data?: CachedAvatarInfo; error?: string}>> {
+    this.metricsCollector.recordAPIRequest('getProfiles', 'POST');
+    
     try {
       const batchResults = await profileService.getProfiles(dids);
       
@@ -428,33 +539,21 @@ class AvatarCacheStore {
    * キャッシュに保存
    */
   private setCache(did: string, avatarInfo: CachedAvatarInfo): void {
-    // キャッシュサイズ制限チェック
-    if (this.cache.size >= this.config.maxCacheSize && !this.cache.has(did)) {
-      this.cleanupOldestCache();
-    }
+    // LRUキャッシュが自動的にサイズ制限を管理するため、
+    // 明示的なサイズチェックは不要
     
     this.cache.set(did, avatarInfo);
-    this.stats.totalCached = this.cache.size;
+    this.stats.totalCached = this.cache.currentSize;
   }
 
   /**
-   * 最も古いキャッシュを削除
+   * LRUキャッシュの統計情報をログ出力
+   * (LRUCacheが自動的に最も使われていないアイテムを削除)
    */
-  private cleanupOldestCache(): void {
-    let oldestTime = Date.now();
-    let oldestDid = '';
-    
-    for (const [did, info] of this.cache) {
-      if (info.cachedAt < oldestTime) {
-        oldestTime = info.cachedAt;
-        oldestDid = did;
-      }
-    }
-    
-    if (oldestDid) {
-      this.cache.delete(oldestDid);
-      console.log(`🎭 [AvatarCache] Removed oldest cache entry: ${oldestDid}`);
-    }
+  private logCacheStats(): void {
+    const currentSize = this.cache.currentSize;
+    const maxSize = this.config.maxCacheSize;
+    console.log(`🎭 [AvatarCache] LRU Cache: ${currentSize}/${maxSize} entries`);
   }
 
   /**
@@ -476,38 +575,15 @@ class AvatarCacheStore {
   private scheduleBackgroundFetch(did: string): void {
     setTimeout(() => {
       this.fetchAvatar(did).catch(error => {
-        console.warn(`🎭 [AvatarCache] Background fetch failed for ${did}:`, error);
+        const cacheError = AvatarCacheErrorFactory.fromError(error, {
+          did,
+          operation: 'background_fetch'
+        });
+        AvatarCacheErrorLogger.log(cacheError);
       });
     }, 100);
   }
 
-  /**
-   * 取得完了を待機
-   */
-  private async waitForFetch(did: string): Promise<AvatarFetchResult> {
-    const maxWait = 10000; // 最大10秒待機
-    const startTime = Date.now();
-    
-    while (this.fetchingDids.has(did) && (Date.now() - startTime) < maxWait) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    
-    const cached = this.getCachedAvatar(did);
-    if (cached) {
-      return {
-        success: cached.status === 'success',
-        data: cached,
-        error: cached.error,
-        fromCache: true
-      };
-    }
-    
-    return {
-      success: false,
-      error: 'Fetch timeout',
-      fromCache: false
-    };
-  }
 
   /**
    * 既存アカウントからキャッシュを初期構築
@@ -528,11 +604,14 @@ class AvatarCacheStore {
           };
           this.cache.set(account.profile.did, avatarInfo);
         }
-        this.stats.totalCached = this.cache.size;
-        console.log(`🎭 [AvatarCache] Pre-cached ${this.cache.size} account avatars`);
+        this.stats.totalCached = this.cache.currentSize;
+        console.log(`🎭 [AvatarCache] Pre-cached ${this.cache.currentSize} account avatars`);
       }
     } catch (error) {
-      console.warn('🎭 [AvatarCache] Failed to initialize cache from accounts:', error);
+      const cacheError = AvatarCacheErrorFactory.fromError(error, {
+        operation: 'accounts_initialization'
+      });
+      AvatarCacheErrorLogger.log(cacheError);
     }
   }
 
@@ -540,10 +619,36 @@ class AvatarCacheStore {
    * 定期クリーンアップタスクを開始
    */
   private startCleanupTask(): void {
+    // 既存のインターバルがあれば先にクリア
+    this.stopCleanupTask();
+    
     // 5分おきにクリーンアップを実行
-    setInterval(() => {
+    this.cleanupIntervalId = setInterval(() => {
       this.cleanupExpiredCache();
     }, 5 * 60 * 1000);
+  }
+  
+  /**
+   * 定期クリーンアップタスクを停止
+   */
+  private stopCleanupTask(): void {
+    if (this.cleanupIntervalId !== null) {
+      clearInterval(this.cleanupIntervalId);
+      this.cleanupIntervalId = null;
+    }
+  }
+  
+  /**
+   * ストアを破棄してリソースをクリーンアップ
+   * メモリリーク防止のため、アプリケーション終了時や不要になった時に呼び出す
+   */
+  public destroy(): void {
+    this.stopCleanupTask();
+    this.cache.clear();
+    this.fetchingDids.clear();
+    this.batchQueue.clear();
+    this.fetchPromises.clear();
+    this.isInitialized = false;
   }
 
   /**
@@ -553,14 +658,15 @@ class AvatarCacheStore {
     const now = Date.now();
     let removedCount = 0;
     
-    for (const [did, info] of this.cache) {
+    // LRUキャッシュのentriesメソッドを使用してイテレーション
+    for (const [did, info] of this.cache.entries()) {
       if ((now - info.cachedAt) > this.config.staleTtl) {
         this.cache.delete(did);
         removedCount++;
       }
     }
     
-    this.stats.totalCached = this.cache.size;
+    this.stats.totalCached = this.cache.currentSize;
     this.stats.lastCleanup = now;
     
     if (removedCount > 0) {
