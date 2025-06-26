@@ -11,10 +11,10 @@
   import AvatarGroup from '$lib/components/AvatarGroup.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { deckStore } from '../store.svelte.js';
-  import { accountsStore } from '$lib/stores/accounts.svelte.js';
   import type { Column, ColumnWidth } from '../types.js';
   import type { Account } from '$lib/types/auth.js';
   import { COLUMN_WIDTHS, getFeedTypeIcon } from '../types.js';
+  import { avatarCache } from '$lib/stores/avatarCache.svelte.js';
   import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
@@ -25,11 +25,12 @@
     column: Column;
     index: number;
     accountId: string;
+    activeAccount?: Account;
     onScrollElementUpdate?: (columnId: string, element: HTMLElement | undefined) => void;
     onOpenDeckSettings?: () => void;
   }
 
-  const { column, index, accountId, onScrollElementUpdate, onOpenDeckSettings }: Props = $props();
+  const { column, index, accountId, activeAccount, onScrollElementUpdate, onOpenDeckSettings }: Props = $props();
   
 
   // ===================================================================
@@ -40,27 +41,41 @@
   let isRefreshing = $state(false);
 
   // ===================================================================
-  // アバター表示用のロジック
+  // アバター表示用のロジック - アバターキャッシュ統合
   // ===================================================================
   
   /**
-   * 表示用アカウント情報を取得（DIDベースの型安全な検索）
-   * accountId が 'all' の場合は全アカウント、そうでなければDIDで検索
+   * アクティブアカウントの表示（直接activeAccountを使用）
+   * handleは表示用、DIDはアバターキャッシュ用として使い分け
    */
   const displayAccounts = $derived.by((): Account[] => {
     try {
       if (accountId === 'all') {
-        return accountsStore.allAccounts;
+        // 'all'の場合はactiveAccountがあればそれを表示（マルチアカウント未実装）
+        return activeAccount ? [activeAccount] : [];
       }
       
-      // DIDベースでの厳密な検索
-      const targetAccount = accountsStore.allAccounts.find((acc: Account) => 
-        acc.profile.did === accountId
-      );
-      
-      return targetAccount ? [targetAccount] : [];
+      // 直接activeAccountを使用（handle表示、DIDでアバター取得）
+      if (activeAccount) {
+        console.log(`🎭 [DeckColumn] Using activeAccount for handle ${accountId}:`, {
+          did: activeAccount.profile.did,
+          handle: activeAccount.profile.handle,
+          displayName: activeAccount.profile.displayName,
+          hasAvatar: !!activeAccount.profile.avatar
+        });
+        
+        // アバターキャッシュへのプリフェッチ（バックグラウンドで取得）
+        avatarCache.getAvatar(activeAccount.profile.did).catch((error) => {
+          console.warn(`🎭 [DeckColumn] Avatar cache prefetch failed for ${activeAccount.profile.did}:`, error);
+        });
+        
+        return [activeAccount];
+      } else {
+        console.warn(`🎭 [DeckColumn] No activeAccount available for handle: ${accountId}`);
+        return [];
+      }
     } catch (error) {
-      console.error('DeckColumn: Error retrieving accounts:', error);
+      console.error('🎭 [DeckColumn] Error preparing display accounts:', error);
       return [];
     }
   });

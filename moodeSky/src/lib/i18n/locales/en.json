@@ -561,6 +561,24 @@
       "title": "Notification Settings",
       "description": "Notification settings feature is coming soon"
     },
+    "deckManagement": {
+      "title": "Deck Management",
+      "description": "Manage deck columns and their settings.",
+      "loading": "Loading decks...",
+      "addDeck": "Add Deck",
+      "existingDecks": "Existing Decks",
+      "algorithm": "Algorithm",
+      "createdAt": "Created At",
+      "settings": "Settings",
+      "delete": "Delete",
+      "noDecks": "No Decks Found",
+      "noDecksDescription": "You haven't created any decks yet. Add one to get started!",
+      "addFirstDeck": "Add Your First Deck",
+      "addSuccess": "Successfully added deck '{name}'.",
+      "deleteConfirmation": "Are you sure you want to delete the deck '{name}'?",
+      "deleteSuccess": "Successfully deleted deck '{name}'.",
+      "deleteError": "Failed to delete deck."
+    },
     "authRequired": "Authentication required",
     "closeMessage": "Close message"
   }

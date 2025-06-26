@@ -9,6 +9,7 @@
   import type { Account } from '$lib/types/auth.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
   import { deckStore } from '$lib/deck/store.svelte.js';
+  import { avatarCache } from '$lib/stores/avatarCache.svelte.js';
   
   
   // リアクティブ翻訳システム
@@ -103,7 +104,12 @@
           columns: deckStore.columns
         });
         
-        await deckStore.initialize(activeAccount.profile.handle);
+        await deckStore.initialize(activeAccount.profile.did);
+        
+        // アバターキャッシュシステムを初期化
+        console.log('🔍 [DEBUG] Initializing avatar cache...');
+        await avatarCache.initialize();
+        console.log('🔍 [DEBUG] Avatar cache initialized successfully');
         
         console.log('🔍 [DEBUG] DeckStore state after init:', {
           isInitialized: deckStore.isInitialized,
@@ -127,7 +133,7 @@
           
           try {
             const newColumn = await deckStore.addColumn(
-              activeAccount.profile.handle,
+              activeAccount.profile.did,
               'home',
               {
                 title: t('navigation.home'),
@@ -162,7 +168,7 @@
             console.log('🚨 [FAILSAFE] No columns found after 3 seconds, forcing default column creation');
             try {
               const failsafeColumn = await deckStore.addColumn(
-                activeAccount.profile.handle,
+                activeAccount.profile.did,
                 'home',
                 {
                   title: t('navigation.home'),
@@ -235,7 +241,7 @@
       
       // 非同期でデフォルトカラムを作成
       deckStore.addColumn(
-        activeAccount.profile.handle,
+        activeAccount.profile.did,
         'home',
         {
           title: t('navigation.home'),
@@ -288,7 +294,7 @@
   {console.log('🔍 [DEBUG] Rendering main deck layout with account:', activeAccount)}
   <div class="h-screen flex flex-col bg-themed">
     <!-- ナビゲーション（レスポンシブ制御は Navigation 内部で実施） -->
-    <Navigation {currentPath} accountId={activeAccount.profile.handle} onAddDeck={handleOpenAddDeckModal} />
+    <Navigation {currentPath} accountId={activeAccount.profile.did} onAddDeck={handleOpenAddDeckModal} />
     
     <!-- モバイル用デッキタブは Navigation.svelte 内で管理 -->
     
@@ -298,6 +304,7 @@
       <div class="deck-content-wrapper">
         <DeckContainer 
           accountId={activeAccount.profile.handle}
+          activeAccount={activeAccount}
           className="h-full"
           {showAddDeckModal}
           onCloseAddDeckModal={handleCloseAddDeckModal}

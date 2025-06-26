@@ -6,6 +6,7 @@
   4バリアント × 4状態 × レスポンシブ対応
 -->
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import type { CardProps } from './types.js';
 
   // ===================================================================
@@ -19,8 +20,9 @@
     clickable = false,
     onclick,
     ariaLabel,
-    class: additionalClass = ''
-  }: CardProps = $props();
+    class: additionalClass = '',
+    children
+  }: CardProps & { children: Snippet } = $props();
 
   // ===================================================================
   // 内部状態管理
@@ -226,12 +228,12 @@
     onblur={handleBlur}
     {...accessibilityAttributes()}
   >
-    <slot />
+    {@render children()}
   </div>
 {:else}
   <!-- 静的カード -->
   <div class={finalClasses()}>
-    <slot />
+    {@render children()}
   </div>
 {/if}
 

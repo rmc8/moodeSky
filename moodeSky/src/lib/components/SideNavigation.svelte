@@ -13,21 +13,17 @@
   import AddDeckModal from '$lib/deck/components/AddDeckModal.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
-  import { deckStore } from '$lib/deck/store.svelte.js';
   import { debugLog } from '$lib/utils/debugUtils.js';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import type { Column } from '$lib/deck/types.js';
-  import * as m from '../../paraglide/messages.js';
   
   // リアクティブ翻訳システム
   const { t } = useTranslation();
   
   // $propsを使用してプロップを受け取る（Svelte 5 runes mode）
-  const { currentPath = '', accountId = '', onAddDeck } = $props<{ 
-    currentPath?: string; 
-    accountId?: string; 
-    onAddDeck?: () => void;
+  const { currentPath = '' } = $props<{ 
+    currentPath?: string;
   }>();
   
   // デバッグログ追加
@@ -38,11 +34,23 @@
   let activeAccount = $state<Account | null>(null);
   
   // アクティブアカウントを取得
-  $effect(async () => {
-    const result = await authService.getActiveAccount();
-    if (result.success && result.data) {
-      activeAccount = result.data;
-    }
+  $effect(() => {
+    const loadActiveAccount = async () => {
+      const result = await authService.getActiveAccount();
+      if (result.success && result.data) {
+        activeAccount = result.data;
+        debugLog('🔍 [SideNavigation] Active account loaded:', {
+          handle: activeAccount.profile.handle,
+          displayName: activeAccount.profile.displayName,
+          avatar: activeAccount.profile.avatar,
+          avatarAvailable: !!activeAccount.profile.avatar
+        });
+      } else {
+        debugLog('⚠️ [SideNavigation] Failed to load active account:', result);
+      }
+    };
+    
+    loadActiveAccount();
   });
   
   interface NavItem {
@@ -123,6 +131,7 @@
   class="fixed left-0 top-0 bottom-0 z-40 w-64 bg-card border-r border-subtle shadow-lg flex flex-col"
   aria-label={t('navigation.home')}
 >
+
   <!-- 上部: 投稿ボタン -->
   <div class="flex-shrink-0 p-4">
     <button

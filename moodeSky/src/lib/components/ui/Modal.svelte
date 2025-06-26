@@ -5,6 +5,7 @@
   既存モーダル構造の統一 + slot-based設計 + 完全アクセシビリティ対応
 -->
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { onMount } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
@@ -24,8 +25,11 @@
     showCloseButton = true,
     onClose,
     onEscapeKey,
-    zIndex = 50
-  }: ModalProps = $props();
+    zIndex = 50,
+    children,
+    header,
+    footer
+  }: ModalProps & { children: Snippet; header?: Snippet; footer?: Snippet } = $props();
 
   // ===================================================================
   // 内部状態管理
@@ -41,22 +45,22 @@
   // ===================================================================
 
   /**
-   * サイズ別クラス
+   * サイズ別クラス（モバイルレスポンシブ対応）
    */
   const sizeClasses = $derived(() => {
     switch (size) {
       case 'sm':
-        return 'max-w-md';
+        return 'max-w-[calc(100vw-1rem)] sm:max-w-md';
       case 'md':
-        return 'max-w-2xl';
+        return 'max-w-[calc(100vw-1rem)] sm:max-w-2xl';
       case 'lg':
-        return 'max-w-4xl';
+        return 'max-w-[calc(100vw-1rem)] sm:max-w-4xl';
       case 'xl':
-        return 'max-w-6xl';
+        return 'max-w-[calc(100vw-1rem)] sm:max-w-6xl';
       case 'full':
         return 'max-w-none mx-4';
       default:
-        return 'max-w-4xl';
+        return 'max-w-[calc(100vw-1rem)] sm:max-w-4xl';
     }
   });
 
@@ -72,10 +76,10 @@
   });
 
   /**
-   * オーバーレイクラス（tokimekibluesky参考の配置戦略）
+   * オーバーレイクラス（モバイル最適化パディング）
    */
   const overlayClasses = $derived(() => 
-    `fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center ${zIndexStyle()} p-4 transition-all duration-300`
+    `fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center ${zIndexStyle()} p-2 sm:p-4 transition-all duration-300`
   );
 
   /**
@@ -288,7 +292,9 @@
               {/if}
               
               <!-- ヘッダースロット -->
-              <slot name="header" />
+              {#if header}
+                {@render header()}
+              {/if}
             </div>
 
             <!-- 閉じるボタン -->
@@ -309,13 +315,15 @@
 
       <!-- コンテンツエリア -->
       <div class="p-8 overflow-y-auto flex-1 custom-scrollbar">
-        <slot />
+        {@render children()}
       </div>
 
       <!-- フッター -->
       {#if showFooter}
         <div class="bg-gradient-to-r from-muted/5 to-muted/10 px-8 py-6">
-          <slot name="footer" />
+          {#if footer}
+            {@render footer()}
+          {/if}
         </div>
       {/if}
     </div>

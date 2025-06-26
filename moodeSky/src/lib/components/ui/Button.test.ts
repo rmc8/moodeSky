@@ -8,6 +8,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Button from './Button.svelte';
 import { ICONS } from '$lib/types/icon.js';
 
+// Snippet テスト用ヘルパー - Svelte 5互換
+const createTestSnippet = (content = 'Test Button') => {
+  const snippet = () => {
+    const result = document.createTextNode(content);
+    return result;
+  };
+  (snippet as any)['@@render'] = true;
+  return snippet as any;
+};
+
 describe('Button Component', () => {
   beforeEach(() => {
     // 各テスト前にモックをリセット
@@ -19,7 +29,7 @@ describe('Button Component', () => {
   // ===================================================================
 
   it('should render with default props', () => {
-    render(Button);
+    render(Button, { props: { children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button).toBeInTheDocument();
@@ -32,14 +42,14 @@ describe('Button Component', () => {
   // ===================================================================
 
   it('should apply primary variant classes by default', () => {
-    render(Button);
+    render(Button, { props: { children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button).toHaveClass('button-primary');
   });
 
   it('should apply secondary variant classes', () => {
-    render(Button, { props: { variant: 'secondary' } });
+    render(Button, { props: { variant: 'secondary', children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button.className).toContain('bg-muted/10');
@@ -48,7 +58,7 @@ describe('Button Component', () => {
   });
 
   it('should apply outline variant classes', () => {
-    render(Button, { props: { variant: 'outline' } });
+    render(Button, { props: { variant: 'outline', children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button.className).toContain('bg-transparent');
@@ -57,7 +67,7 @@ describe('Button Component', () => {
   });
 
   it('should apply ghost variant classes', () => {
-    render(Button, { props: { variant: 'ghost' } });
+    render(Button, { props: { variant: 'ghost', children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button.className).toContain('bg-transparent');
@@ -69,7 +79,7 @@ describe('Button Component', () => {
   // ===================================================================
 
   it('should apply medium size classes by default', () => {
-    render(Button);
+    render(Button, { props: { children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button.className).toContain('px-6');
@@ -77,7 +87,7 @@ describe('Button Component', () => {
   });
 
   it('should apply small size classes', () => {
-    render(Button, { props: { size: 'sm' } });
+    render(Button, { props: { size: 'sm', children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button.className).toContain('px-4');
@@ -86,7 +96,7 @@ describe('Button Component', () => {
   });
 
   it('should apply large size classes', () => {
-    render(Button, { props: { size: 'lg' } });
+    render(Button, { props: { size: 'lg', children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button.className).toContain('px-8');
@@ -99,7 +109,7 @@ describe('Button Component', () => {
   // ===================================================================
 
   it('should be disabled when disabled prop is true', () => {
-    render(Button, { props: { disabled: true } });
+    render(Button, { props: { disabled: true, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button).toBeDisabled();
@@ -109,7 +119,7 @@ describe('Button Component', () => {
   });
 
   it('should show loading state', () => {
-    render(Button, { props: { loading: true } });
+    render(Button, { props: { loading: true, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button).toBeDisabled();
@@ -123,14 +133,14 @@ describe('Button Component', () => {
   // ===================================================================
 
   it('should render left icon', () => {
-    render(Button, { props: { leftIcon: ICONS.ARROW_LEFT } });
+    render(Button, { props: { leftIcon: ICONS.ARROW_LEFT, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button.className).toContain('gap-2');
   });
 
   it('should render right icon', () => {
-    render(Button, { props: { rightIcon: ICONS.ARROW_RIGHT } });
+    render(Button, { props: { rightIcon: ICONS.ARROW_RIGHT, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button.className).toContain('gap-2');
@@ -142,7 +152,7 @@ describe('Button Component', () => {
 
   it('should call onclick when clicked', async () => {
     const handleClick = vi.fn();
-    render(Button, { props: { onclick: handleClick } });
+    render(Button, { props: { onclick: handleClick, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     await fireEvent.click(button);
@@ -152,7 +162,7 @@ describe('Button Component', () => {
 
   it('should not call onclick when disabled', async () => {
     const handleClick = vi.fn();
-    render(Button, { props: { onclick: handleClick, disabled: true } });
+    render(Button, { props: { onclick: handleClick, disabled: true, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     await fireEvent.click(button);
@@ -162,7 +172,7 @@ describe('Button Component', () => {
 
   it('should not call onclick when loading', async () => {
     const handleClick = vi.fn();
-    render(Button, { props: { onclick: handleClick, loading: true } });
+    render(Button, { props: { onclick: handleClick, loading: true, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     await fireEvent.click(button);
@@ -176,7 +186,7 @@ describe('Button Component', () => {
       throw new Error('Test error');
     });
     
-    render(Button, { props: { onclick: errorHandler } });
+    render(Button, { props: { onclick: errorHandler, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     await fireEvent.click(button);
@@ -194,7 +204,7 @@ describe('Button Component', () => {
 
   it('should handle Enter key press', async () => {
     const handleClick = vi.fn();
-    render(Button, { props: { onclick: handleClick } });
+    render(Button, { props: { onclick: handleClick, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     button.focus();
@@ -205,7 +215,7 @@ describe('Button Component', () => {
 
   it('should handle Space key press', async () => {
     const handleClick = vi.fn();
-    render(Button, { props: { onclick: handleClick } });
+    render(Button, { props: { onclick: handleClick, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     button.focus();
@@ -216,7 +226,7 @@ describe('Button Component', () => {
 
   it('should not handle keyboard when disabled', async () => {
     const handleClick = vi.fn();
-    render(Button, { props: { onclick: handleClick, disabled: true } });
+    render(Button, { props: { onclick: handleClick, disabled: true, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     await fireEvent.keyDown(button, { key: 'Enter' });
@@ -230,7 +240,7 @@ describe('Button Component', () => {
   // ===================================================================
 
   it('should have proper aria attributes', () => {
-    render(Button, { props: { ariaLabel: 'Test Aria Label' } });
+    render(Button, { props: { ariaLabel: 'Test Aria Label', children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('aria-label', 'Test Aria Label');
@@ -239,7 +249,7 @@ describe('Button Component', () => {
   });
 
   it('should have proper aria attributes when disabled', () => {
-    render(Button, { props: { disabled: true } });
+    render(Button, { props: { disabled: true, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('aria-disabled', 'true');
@@ -247,7 +257,7 @@ describe('Button Component', () => {
   });
 
   it('should have proper aria attributes when loading', () => {
-    render(Button, { props: { loading: true } });
+    render(Button, { props: { loading: true, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('aria-busy', 'true');
@@ -260,7 +270,7 @@ describe('Button Component', () => {
   // ===================================================================
 
   it('should apply additional CSS classes', () => {
-    render(Button, { props: { class: 'custom-class another-class' } });
+    render(Button, { props: { class: 'custom-class another-class', children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button.className).toContain('custom-class');
@@ -268,7 +278,7 @@ describe('Button Component', () => {
   });
 
   it('should maintain base classes with additional classes', () => {
-    render(Button, { props: { class: 'custom-class' } });
+    render(Button, { props: { class: 'custom-class', children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button.className).toContain('custom-class');
@@ -282,7 +292,7 @@ describe('Button Component', () => {
   // ===================================================================
 
   it('should be focusable by default', () => {
-    render(Button);
+    render(Button, { props: { children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     button.focus();
@@ -290,7 +300,7 @@ describe('Button Component', () => {
   });
 
   it('should not be focusable when disabled', () => {
-    render(Button, { props: { disabled: true } });
+    render(Button, { props: { disabled: true, children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('tabindex', '-1');
@@ -301,14 +311,14 @@ describe('Button Component', () => {
   // ===================================================================
 
   it('should support submit type', () => {
-    render(Button, { props: { type: 'submit' } });
+    render(Button, { props: { type: 'submit', children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('type', 'submit');
   });
 
   it('should support reset type', () => {
-    render(Button, { props: { type: 'reset' } });
+    render(Button, { props: { type: 'reset', children: createTestSnippet() } });
     
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('type', 'reset');

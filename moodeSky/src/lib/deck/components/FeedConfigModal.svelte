@@ -13,11 +13,9 @@
   import FeedSettings from './FeedSettings.svelte';
   import type { 
     FeedTypeConfig, 
-    Column,
-    ColumnAlgorithm 
+    Column
   } from '../types.js';
   import {
-    getFeedTypeConfig,
     getDefaultDeckName,
     getFeedTypeIcon
   } from '../types.js';
@@ -215,19 +213,13 @@
 <!-- 統一UIコンポーネントシステム -->
 <Modal 
   isOpen={isOpen && !!feedType}
-  title={feedType ? `${feedType.name}の設定` : ''}
+  title={m['deck.addDeck.feedConfig.title']({ feedType: feedType?.name ?? 'Unknown' })}
   onClose={handleClose}
   showFooter={true}
-  size="xl"
+  size="lg"
+  header={headerSnippet}
+  footer={footerSnippet}
 >
-  <!-- ヘッダーサブタイトル -->
-  <svelte:fragment slot="header">
-    {#if feedType}
-      <p class="text-secondary text-lg leading-relaxed">
-        {feedType.description}
-      </p>
-    {/if}
-  </svelte:fragment>
 
   <!-- エラーメッセージ -->
   {#if errorMessage}
@@ -280,37 +272,53 @@
     />
   </div>
 
-  <!-- フッターボタン -->
-  <svelte:fragment slot="footer">
-    <div class="flex justify-between">
+</Modal>
+
+{#snippet headerSnippet()}
+  {#if feedType}
+    <p class="text-secondary text-lg leading-relaxed">
+      {feedType.description}
+    </p>
+  {/if}
+{/snippet}
+
+{#snippet footerSnippet()}
+  <!-- モバイル: 縦並び、タブレット以上: 横並び -->
+  <div class="flex flex-col md:flex-row md:justify-between gap-3 flex-wrap">
+    <!-- 戻るボタン -->
+    <div class="flex justify-center md:justify-start">
       <Button 
         variant="secondary" 
         onclick={handleBack}
         leftIcon={ICONS.ARROW_BACK}
         size="md"
+        class="w-full md:w-auto md:min-w-[120px]"
       >
         {m['deck.addDeck.buttons.previous']()}
       </Button>
-      
-      <div class="flex gap-3">
-        <Button 
-          variant="secondary" 
-          onclick={handleClose}
-          size="md"
-        >
-          {m['deck.addDeck.buttons.cancel']()}
-        </Button>
-        <Button 
-          variant="primary" 
-          onclick={handleCreate}
-          disabled={isLoading || !selectedAccountId}
-          loading={isLoading}
-          leftIcon={isLoading ? undefined : ICONS.ADD}
-          size="md"
-        >
-          {m['deck.addDeck.buttons.create']()}
-        </Button>
-      </div>
     </div>
-  </svelte:fragment>
-</Modal>
+    
+    <!-- キャンセル・作成ボタン -->
+    <div class="flex flex-col md:flex-row gap-3">
+      <Button 
+        variant="secondary" 
+        onclick={handleClose}
+        size="md"
+        class="w-full md:w-auto md:min-w-[120px]"
+      >
+        {m['deck.addDeck.buttons.cancel']()}
+      </Button>
+      <Button 
+        variant="primary" 
+        onclick={handleCreate}
+        disabled={isLoading || !selectedAccountId}
+        loading={isLoading}
+        leftIcon={isLoading ? undefined : ICONS.ADD}
+        size="md"
+        class="w-full md:w-auto md:min-w-[120px]"
+      >
+        {m['deck.addDeck.buttons.create']()}
+      </Button>
+    </div>
+  </div>
+{/snippet}

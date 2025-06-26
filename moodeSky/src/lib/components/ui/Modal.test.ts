@@ -7,6 +7,16 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Modal from './Modal.svelte';
 
+// Snippet テスト用ヘルパー - Svelte 5互換
+const createTestSnippet = (content = 'Test Modal Content') => {
+  const snippet = () => {
+    const result = document.createTextNode(content);
+    return result;
+  };
+  (snippet as any)['@@render'] = true;
+  return snippet as any;
+};
+
 describe('Modal Component', () => {
   let originalOverflow: string;
 
@@ -38,19 +48,19 @@ describe('Modal Component', () => {
   // ===================================================================
 
   it('should not render when isOpen is false', () => {
-    render(Modal, { props: { isOpen: false, onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: false, onClose: vi.fn(), children: createTestSnippet() } });
     
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('should render when isOpen is true', () => {
-    render(Modal, { props: { isOpen: true, onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, onClose: vi.fn(), children: createTestSnippet() } });
     
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('should render with title', () => {
-    render(Modal, { props: { isOpen: true, title: 'Test Modal Title', onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, title: 'Test Modal Title', onClose: vi.fn(), children: createTestSnippet() } });
     
     expect(screen.getByText('Test Modal Title')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Test Modal Title');
@@ -61,35 +71,35 @@ describe('Modal Component', () => {
   // ===================================================================
 
   it('should apply default large size classes', () => {
-    render(Modal, { props: { isOpen: true, onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, onClose: vi.fn(), children: createTestSnippet() } });
     
     const modalContainer = screen.getByRole('document');
     expect(modalContainer.className).toContain('max-w-4xl');
   });
 
   it('should apply small size classes', () => {
-    render(Modal, { props: { isOpen: true, size: 'sm', onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, size: 'sm', onClose: vi.fn(), children: createTestSnippet() } });
     
     const modalContainer = screen.getByRole('document');
     expect(modalContainer.className).toContain('max-w-md');
   });
 
   it('should apply medium size classes', () => {
-    render(Modal, { props: { isOpen: true, size: 'md', onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, size: 'md', onClose: vi.fn(), children: createTestSnippet() } });
     
     const modalContainer = screen.getByRole('document');
     expect(modalContainer.className).toContain('max-w-2xl');
   });
 
   it('should apply extra large size classes', () => {
-    render(Modal, { props: { isOpen: true, size: 'xl', onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, size: 'xl', onClose: vi.fn(), children: createTestSnippet() } });
     
     const modalContainer = screen.getByRole('document');
     expect(modalContainer.className).toContain('max-w-6xl');
   });
 
   it('should apply full size classes', () => {
-    render(Modal, { props: { isOpen: true, size: 'full', onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, size: 'full', onClose: vi.fn(), children: createTestSnippet() } });
     
     const modalContainer = screen.getByRole('document');
     expect(modalContainer.className).toContain('max-w-none');
@@ -101,19 +111,19 @@ describe('Modal Component', () => {
   // ===================================================================
 
   it('should show header by default', () => {
-    render(Modal, { props: { isOpen: true, title: 'Test Title', onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, title: 'Test Title', onClose: vi.fn(), children: createTestSnippet() } });
     
     expect(screen.getByText('Test Title')).toBeInTheDocument();
   });
 
   it('should hide header when showHeader is false', () => {
-    render(Modal, { props: { isOpen: true, title: 'Test Title', showHeader: false, onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, title: 'Test Title', showHeader: false, onClose: vi.fn(), children: createTestSnippet() } });
     
     expect(screen.queryByText('Test Title')).not.toBeInTheDocument();
   });
 
   it('should show close button by default', () => {
-    render(Modal, { props: { isOpen: true, title: 'Test Title', onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, title: 'Test Title', onClose: vi.fn(), children: createTestSnippet() } });
     
     const closeButton = screen.getByLabelText('モーダルを閉じる');
     expect(closeButton).toBeInTheDocument();
@@ -125,7 +135,8 @@ describe('Modal Component', () => {
         isOpen: true, 
         title: 'Test Title', 
         showCloseButton: false, 
-        onClose: vi.fn() 
+        onClose: vi.fn(),
+        children: createTestSnippet()
       }
     });
     
@@ -133,7 +144,7 @@ describe('Modal Component', () => {
   });
 
   it('should not show footer by default', () => {
-    const { container } = render(Modal, { props: { isOpen: true, onClose: vi.fn() } });
+    const { container } = render(Modal, { props: { isOpen: true, onClose: vi.fn(), children: createTestSnippet() } });
     
     // フッターのDOMが存在しないことを確認
     const footerElement = container.querySelector('.bg-gradient-to-r.from-muted\\/5');
@@ -146,7 +157,7 @@ describe('Modal Component', () => {
 
   it('should call onClose when close button is clicked', async () => {
     const onClose = vi.fn();
-    render(Modal, { props: { isOpen: true, title: 'Test Title', onClose } });
+    render(Modal, { props: { isOpen: true, title: 'Test Title', onClose, children: createTestSnippet() } });
     
     const closeButton = screen.getByLabelText('モーダルを閉じる');
     await fireEvent.click(closeButton);
@@ -156,7 +167,7 @@ describe('Modal Component', () => {
 
   it('should call onClose when overlay is clicked', async () => {
     const onClose = vi.fn();
-    render(Modal, { props: { isOpen: true, onClose } });
+    render(Modal, { props: { isOpen: true, onClose, children: createTestSnippet() } });
     
     const overlay = screen.getByRole('dialog');
     await fireEvent.click(overlay);
@@ -170,7 +181,7 @@ describe('Modal Component', () => {
 
   it('should call onClose when Escape key is pressed', async () => {
     const onClose = vi.fn();
-    render(Modal, { props: { isOpen: true, onClose } });
+    render(Modal, { props: { isOpen: true, onClose, children: createTestSnippet() } });
     
     await fireEvent.keyDown(document, { key: 'Escape' });
     
@@ -180,7 +191,7 @@ describe('Modal Component', () => {
   it('should call custom onEscapeKey when provided', async () => {
     const onClose = vi.fn();
     const onEscapeKey = vi.fn();
-    render(Modal, { props: { isOpen: true, onClose, onEscapeKey } });
+    render(Modal, { props: { isOpen: true, onClose, onEscapeKey, children: createTestSnippet() } });
     
     await fireEvent.keyDown(document, { key: 'Escape' });
     
@@ -193,7 +204,7 @@ describe('Modal Component', () => {
   // ===================================================================
 
   it('should have proper ARIA attributes', () => {
-    render(Modal, { props: { isOpen: true, title: 'Test Title', onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, title: 'Test Title', onClose: vi.fn(), children: createTestSnippet() } });
     
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveAttribute('aria-modal', 'true');
@@ -205,7 +216,7 @@ describe('Modal Component', () => {
   });
 
   it('should have proper ARIA attributes without title', () => {
-    render(Modal, { props: { isOpen: true, onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, onClose: vi.fn(), children: createTestSnippet() } });
     
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveAttribute('aria-modal', 'true');
@@ -217,7 +228,7 @@ describe('Modal Component', () => {
   // ===================================================================
 
   it('should disable body scroll when open', async () => {
-    render(Modal, { props: { isOpen: true, onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, onClose: vi.fn(), children: createTestSnippet() } });
     
     // 非同期でDOM更新を待つ
     await waitFor(() => {
@@ -226,7 +237,7 @@ describe('Modal Component', () => {
   });
 
   it('should restore body scroll when closed', async () => {
-    const { rerender } = render(Modal, { props: { isOpen: true, onClose: vi.fn() } });
+    const { rerender } = render(Modal, { props: { isOpen: true, onClose: vi.fn(), children: createTestSnippet() } });
     
     // モーダルが開いている状態でbodyスクロールが無効化されることを確認
     await waitFor(() => {
@@ -234,7 +245,7 @@ describe('Modal Component', () => {
     });
     
     // モーダルを閉じる
-    await rerender({ isOpen: false, onClose: vi.fn() });
+    await rerender({ isOpen: false, onClose: vi.fn(), children: createTestSnippet() });
     
     // bodyスクロールが復元されることを確認
     await waitFor(() => {
@@ -247,14 +258,14 @@ describe('Modal Component', () => {
   // ===================================================================
 
   it('should apply default z-index', () => {
-    render(Modal, { props: { isOpen: true, onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, onClose: vi.fn(), children: createTestSnippet() } });
     
     const overlay = screen.getByRole('dialog');
     expect(overlay.className).toContain('z-50');
   });
 
   it('should apply custom z-index', () => {
-    render(Modal, { props: { isOpen: true, zIndex: 999, onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, zIndex: 999, onClose: vi.fn(), children: createTestSnippet() } });
     
     const overlay = screen.getByRole('dialog');
     expect(overlay.className).toContain('z-999');
@@ -280,7 +291,7 @@ describe('Modal Component', () => {
     });
     
     const onClose = vi.fn();
-    render(Modal, { props: { isOpen: true, onClose } });
+    render(Modal, { props: { isOpen: true, onClose, children: createTestSnippet() } });
     
     // モーダルを閉じる
     const closeButton = screen.getByLabelText('モーダルを閉じる');
@@ -300,7 +311,7 @@ describe('Modal Component', () => {
   // ===================================================================
 
   it('should apply responsive classes', () => {
-    render(Modal, { props: { isOpen: true, onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, onClose: vi.fn(), children: createTestSnippet() } });
     
     const overlay = screen.getByRole('dialog');
     expect(overlay.className).toContain('p-4');
@@ -318,7 +329,7 @@ describe('Modal Component', () => {
   // ===================================================================
 
   it('should apply theme-based styling', () => {
-    render(Modal, { props: { isOpen: true, title: 'Styled Modal', onClose: vi.fn() } });
+    render(Modal, { props: { isOpen: true, title: 'Styled Modal', onClose: vi.fn(), children: createTestSnippet() } });
     
     const container = screen.getByRole('document');
     expect(container.className).toContain('bg-card');
