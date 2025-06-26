@@ -15,8 +15,8 @@
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
   import { debugLog } from '$lib/utils/debugUtils.js';
   import { authService } from '$lib/services/authStore.js';
-  import type { Account } from '$lib/types/auth.js';
   import type { Column } from '$lib/deck/types.js';
+  import { accountsStore } from '$lib/stores/accounts.svelte.js';
   
   // リアクティブ翻訳システム
   const { t } = useTranslation();
@@ -31,26 +31,11 @@
   
   // グローバルなデッキ追加モーダル状態管理
   let showAddDeckModal = $state(false);
-  let activeAccount = $state<Account | null>(null);
   
-  // アクティブアカウントを取得
+  
+  // accountsStoreを初期化
   $effect(() => {
-    const loadActiveAccount = async () => {
-      const result = await authService.getActiveAccount();
-      if (result.success && result.data) {
-        activeAccount = result.data;
-        debugLog('🔍 [SideNavigation] Active account loaded:', {
-          handle: activeAccount.profile.handle,
-          displayName: activeAccount.profile.displayName,
-          avatar: activeAccount.profile.avatar,
-          avatarAvailable: !!activeAccount.profile.avatar
-        });
-      } else {
-        debugLog('⚠️ [SideNavigation] Failed to load active account:', result);
-      }
-    };
-    
-    loadActiveAccount();
+    accountsStore.initialize();
   });
   
   interface NavItem {
@@ -124,6 +109,7 @@
     // TODO: 投稿作成モーダル/ページを開く
     debugLog('投稿作成機能（未実装）');
   }
+  
 </script>
 
 <!-- サイドナビゲーションバー -->
@@ -156,7 +142,7 @@
     <DeckTabBar />
   </div>
   
-  <!-- 下部: ナビゲーション項目 -->
+  <!-- 下部: ナビゲーション項目 + アカウント情報 -->
   <div class="flex-shrink-0 p-4 flex flex-col gap-2">
     {#each navItems as item}
       <button
@@ -180,11 +166,12 @@
         </span>
       </button>
     {/each}
+    
   </div>
 </nav>
 
 <!-- グローバルなデッキ追加モーダル -->
-{#if showAddDeckModal && activeAccount}
+{#if showAddDeckModal && accountsStore.activeAccount}
   <AddDeckModal
     isOpen={showAddDeckModal}
     onClose={handleCloseAddDeckModal}
@@ -192,3 +179,4 @@
     zIndex={9999}
   />
 {/if}
+

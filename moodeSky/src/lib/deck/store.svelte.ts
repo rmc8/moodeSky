@@ -16,6 +16,7 @@ import type {
   ColumnAlgorithm,
   ColumnSettings
 } from './types.js';
+import type { Account } from '$lib/types/auth.js';
 import { createColumn, DEFAULT_DECK_LAYOUT, DEFAULT_DECK_SETTINGS } from './types.js';
 
 // ===================================================================
@@ -132,13 +133,14 @@ export class DeckStore {
   // ===================================================================
 
   /**
-   * カラムを追加
+   * カラムを追加（マルチアカウント対応）
    */
   async addColumn(
     accountId: string,
     algorithm: ColumnAlgorithm,
     settings?: Partial<ColumnSettings>,
-    algorithmConfig?: any
+    algorithmConfig?: any,
+    targetAccounts?: Account[]
   ): Promise<Column> {
     const column = createColumn(accountId, algorithm, settings);
     
@@ -149,6 +151,12 @@ export class DeckStore {
         name: column.settings.title,
         ...algorithmConfig
       };
+    }
+    
+    // マルチアカウント対応：対象アカウント配列を設定
+    if (targetAccounts && targetAccounts.length > 0) {
+      column.targetAccounts = targetAccounts;
+      console.log('🎛️ [DeckStore] Setting targetAccounts for column:', targetAccounts.length);
     }
     
     this.state.layout.columns.push(column);
@@ -264,6 +272,33 @@ export class DeckStore {
 
     await this.save();
     console.log('🎛️ [DeckStore] Column title updated:', columnId, title);
+  }
+
+  /**
+   * カラムのアカウントを更新（マルチアカウント対応）
+   */
+  async updateColumnAccount(columnId: string, accountId: string | 'all', targetAccounts?: Account[]): Promise<void> {
+    const column = this.state.layout.columns.find(col => col.id === columnId);
+    
+    if (!column) {
+      console.warn('🎛️ [DeckStore] Column not found for account update:', columnId);
+      return;
+    }
+
+    column.accountId = accountId;
+    column.updatedAt = new Date().toISOString();
+    
+    // 全アカウント選択時は対象アカウント配列を設定
+    if (accountId === 'all' && targetAccounts && targetAccounts.length > 0) {
+      column.targetAccounts = targetAccounts;
+      console.log('🎛️ [DeckStore] Setting targetAccounts for column:', targetAccounts.length);
+    } else {
+      // 単一アカウント選択時は対象アカウント配列をクリア
+      column.targetAccounts = undefined;
+    }
+
+    await this.save();
+    console.log('🎛️ [DeckStore] Column account updated:', columnId, accountId);
   }
 
   /**

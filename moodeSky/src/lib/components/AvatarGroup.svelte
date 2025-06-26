@@ -3,6 +3,7 @@
   複数アカウントのアバター表示を管理するコンポーネント
   
   1つ、2つ、3つ、4つ以上のアカウントに対応した適切なレイアウトを提供
+  重なり合うスタイルで美しい表示を実現
 -->
 <script lang="ts">
   import Avatar from './Avatar.svelte';
@@ -19,13 +20,17 @@
     size?: 'sm' | 'md' | 'lg';
     maxDisplay?: number;
     class?: string;
+    clickable?: boolean;
+    onClick?: (event: MouseEvent) => void;
   }
 
   const { 
     accounts, 
     size = 'md', 
     maxDisplay = 4, 
-    class: className = '' 
+    class: className = '',
+    clickable = false,
+    onClick
   }: Props = $props();
 
   // ===================================================================
@@ -94,90 +99,268 @@
     };
     return sizeMap[size];
   });
+
+  // ===================================================================
+  // イベントハンドラー
+  // ===================================================================
+
+  function handleClick(event: MouseEvent) {
+    if (clickable && onClick) {
+      event.stopPropagation();
+      onClick(event);
+    }
+  }
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (clickable && onClick && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      event.stopPropagation();
+      onClick(event as any);
+    }
+  }
+
+  // ===================================================================
+  // アバターコンテンツ生成
+  // ===================================================================
+
+  /**
+   * アバターコンテンツの型定義
+   */
+  type AvatarContent = 
+    | { type: 'empty'; content: null }
+    | { type: 'single'; account: Account }
+    | { type: 'dual'; accounts: Account[] }
+    | { type: 'triple'; accounts: Account[] }
+    | { type: 'grid'; accounts: Account[]; extraCount: number };
+
+  /**
+   * アバターコンテンツを生成（重複を避けるため）
+   */
+  function renderAvatarContent(): AvatarContent {
+    if (displayMode === 'empty') {
+      return {
+        type: 'empty',
+        content: null
+      };
+    } else if (displayMode === 'single') {
+      return {
+        type: 'single',
+        account: displayAccounts[0]
+      };
+    } else if (displayMode === 'dual') {
+      return {
+        type: 'dual',
+        accounts: displayAccounts.slice(0, 2)
+      };
+    } else if (displayMode === 'triple') {
+      return {
+        type: 'triple',
+        accounts: displayAccounts.slice(0, 3)
+      };
+    } else {
+      return {
+        type: 'grid',
+        accounts: displayAccounts.slice(0, 3),
+        extraCount: accounts.length - 3
+      };
+    }
+  }
+
+  const avatarContent = $derived(renderAvatarContent());
 </script>
 
-<div class="flex-shrink-0 relative {containerSize} {className}">
-  {#if displayMode === 'empty'}
+{#if clickable}
+<button 
+  class="flex-shrink-0 relative {containerSize} {className} rounded-full transition-all duration-200 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:ring-offset-2"
+  onclick={handleClick}
+  onkeydown={handleKeydown}
+  aria-label="アカウント切り替え"
+  tabindex="0"
+>
+  {#if avatarContent.type === 'empty'}
     <!-- フォールバック：アカウントが見つからない場合 -->
-    <div class="{containerSize} rounded-full bg-muted/20 flex items-center justify-center">
+    <div class="{containerSize} rounded-full bg-muted bg-opacity-20 flex items-center justify-center">
       <Icon icon={ICONS.PERSON} size="sm" color="secondary" />
     </div>
     
-  {:else if displayMode === 'single'}
+  {:else if avatarContent.type === 'single'}
     <!-- 単一アカウント -->
     <Avatar 
-      src={displayAccounts[0].profile.avatar} 
-      displayName={displayAccounts[0].profile.displayName}
-      handle={displayAccounts[0].profile.handle}
+      src={avatarContent.account.profile.avatar} 
+      displayName={avatarContent.account.profile.displayName}
+      handle={avatarContent.account.profile.handle}
       {size}
     />
     
-  {:else if displayMode === 'dual'}
-    <!-- 2アカウント：左右分割 -->
-    <div class="{containerSize} flex">
+  {:else if avatarContent.type === 'dual'}
+    <!-- 2アカウント：重なり表示 -->
+    <div class="{containerSize} relative flex items-center justify-start">
       <Avatar 
-        src={displayAccounts[0].profile.avatar} 
-        displayName={displayAccounts[0].profile.displayName}
-        handle={displayAccounts[0].profile.handle}
+        src={avatarContent.accounts[0].profile.avatar} 
+        displayName={avatarContent.accounts[0].profile.displayName}
+        handle={avatarContent.accounts[0].profile.handle}
         size={avatarSize}
-        class="flex-1 rounded-r-none"
+        class="relative z-10 border-2 border-card"
       />
       <Avatar 
-        src={displayAccounts[1].profile.avatar} 
-        displayName={displayAccounts[1].profile.displayName}
-        handle={displayAccounts[1].profile.handle}
+        src={avatarContent.accounts[1].profile.avatar} 
+        displayName={avatarContent.accounts[1].profile.displayName}
+        handle={avatarContent.accounts[1].profile.handle}
         size={avatarSize}
-        class="flex-1 rounded-l-none -ml-px"
+        class="relative z-0 -ml-3 border-2 border-card"
       />
     </div>
     
-  {:else if displayMode === 'triple'}
-    <!-- 3アカウント：上1つ、下2つ -->
-    <div class="{containerSize} flex flex-col">
+  {:else if avatarContent.type === 'triple'}
+    <!-- 3アカウント：重なり表示 -->
+    <div class="{containerSize} relative flex items-center justify-start">
       <Avatar 
-        src={displayAccounts[0].profile.avatar} 
-        displayName={displayAccounts[0].profile.displayName}
-        handle={displayAccounts[0].profile.handle}
+        src={avatarContent.accounts[0].profile.avatar} 
+        displayName={avatarContent.accounts[0].profile.displayName}
+        handle={avatarContent.accounts[0].profile.handle}
         size={avatarSize}
-        class="w-full flex-1 rounded-b-none"
+        class="relative z-20 border-2 border-card"
       />
-      <div class="flex flex-1">
-        <Avatar 
-          src={displayAccounts[1].profile.avatar} 
-          displayName={displayAccounts[1].profile.displayName}
-          handle={displayAccounts[1].profile.handle}
-          size={avatarSize}
-          class="flex-1 rounded-t-none rounded-r-none"
-        />
-        <Avatar 
-          src={displayAccounts[2].profile.avatar} 
-          displayName={displayAccounts[2].profile.displayName}
-          handle={displayAccounts[2].profile.handle}
-          size={avatarSize}
-          class="flex-1 rounded-t-none rounded-l-none -ml-px"
-        />
-      </div>
+      <Avatar 
+        src={avatarContent.accounts[1].profile.avatar} 
+        displayName={avatarContent.accounts[1].profile.displayName}
+        handle={avatarContent.accounts[1].profile.handle}
+        size={avatarSize}
+        class="relative z-10 -ml-3 border-2 border-card"
+      />
+      <Avatar 
+        src={avatarContent.accounts[2].profile.avatar} 
+        displayName={avatarContent.accounts[2].profile.displayName}
+        handle={avatarContent.accounts[2].profile.handle}
+        size={avatarSize}
+        class="relative z-0 -ml-3 border-2 border-card"
+      />
     </div>
     
   {:else}
-    <!-- 4+アカウント：2x2グリッド -->
-    <div class="{containerSize} grid grid-cols-2 grid-rows-2 gap-px">
-      {#each displayAccounts as account, i}
-        <Avatar 
-          src={account.profile.avatar} 
-          displayName={account.profile.displayName}
-          handle={account.profile.handle}
-          size={avatarSize}
-          class="w-full h-full {i === 0 ? 'rounded-r-none rounded-b-none' : i === 1 ? 'rounded-l-none rounded-b-none' : i === 2 ? 'rounded-r-none rounded-t-none' : 'rounded-l-none rounded-t-none'}"
-        />
-      {/each}
+    <!-- 4+アカウント：重なり表示 + 数値インジケーター -->
+    <div class="{containerSize} relative flex items-center justify-start">
+      <Avatar 
+        src={avatarContent.accounts[0].profile.avatar} 
+        displayName={avatarContent.accounts[0].profile.displayName}
+        handle={avatarContent.accounts[0].profile.handle}
+        size={avatarSize}
+        class="relative z-30 border-2 border-card"
+      />
+      <Avatar 
+        src={avatarContent.accounts[1].profile.avatar} 
+        displayName={avatarContent.accounts[1].profile.displayName}
+        handle={avatarContent.accounts[1].profile.handle}
+        size={avatarSize}
+        class="relative z-20 -ml-3 border-2 border-card"
+      />
+      <Avatar 
+        src={avatarContent.accounts[2].profile.avatar} 
+        displayName={avatarContent.accounts[2].profile.displayName}
+        handle={avatarContent.accounts[2].profile.handle}
+        size={avatarSize}
+        class="relative z-10 -ml-3 border-2 border-card"
+      />
+      
+      <!-- 数値インジケーター -->
+      <div class="relative z-0 -ml-3 {avatarSize === 'sm' ? 'w-8 h-8' : avatarSize === 'md' ? 'w-10 h-10' : 'w-12 h-12'} bg-muted bg-opacity-80 rounded-full border-2 border-card flex items-center justify-center">
+        <span class="text-xs font-bold text-themed">+{avatarContent.extraCount}</span>
+      </div>
+    </div>
+  {/if}
+</button>
+{:else}
+<div class="flex-shrink-0 relative {containerSize} {className}">
+  {#if avatarContent.type === 'empty'}
+    <!-- フォールバック：アカウントが見つからない場合 -->
+    <div class="{containerSize} rounded-full bg-muted bg-opacity-20 flex items-center justify-center">
+      <Icon icon={ICONS.PERSON} size="sm" color="secondary" />
     </div>
     
-    {#if hasMoreAccounts}
-      <!-- 4つ超過の場合の追加表示インジケーター -->
-      <div class="absolute -bottom-1 -right-1 {indicatorSize} bg-primary rounded-full border border-card flex items-center justify-center">
-        <span class="text-white text-xs font-bold leading-none">+</span>
+  {:else if avatarContent.type === 'single'}
+    <!-- 単一アカウント -->
+    <Avatar 
+      src={avatarContent.account.profile.avatar} 
+      displayName={avatarContent.account.profile.displayName}
+      handle={avatarContent.account.profile.handle}
+      {size}
+    />
+    
+  {:else if avatarContent.type === 'dual'}
+    <!-- 2アカウント：重なり表示 -->
+    <div class="{containerSize} relative flex items-center justify-start">
+      <Avatar 
+        src={avatarContent.accounts[0].profile.avatar} 
+        displayName={avatarContent.accounts[0].profile.displayName}
+        handle={avatarContent.accounts[0].profile.handle}
+        size={avatarSize}
+        class="relative z-10 border-2 border-card"
+      />
+      <Avatar 
+        src={avatarContent.accounts[1].profile.avatar} 
+        displayName={avatarContent.accounts[1].profile.displayName}
+        handle={avatarContent.accounts[1].profile.handle}
+        size={avatarSize}
+        class="relative z-0 -ml-3 border-2 border-card"
+      />
+    </div>
+    
+  {:else if avatarContent.type === 'triple'}
+    <!-- 3アカウント：重なり表示 -->
+    <div class="{containerSize} relative flex items-center justify-start">
+      <Avatar 
+        src={avatarContent.accounts[0].profile.avatar} 
+        displayName={avatarContent.accounts[0].profile.displayName}
+        handle={avatarContent.accounts[0].profile.handle}
+        size={avatarSize}
+        class="relative z-20 border-2 border-card"
+      />
+      <Avatar 
+        src={avatarContent.accounts[1].profile.avatar} 
+        displayName={avatarContent.accounts[1].profile.displayName}
+        handle={avatarContent.accounts[1].profile.handle}
+        size={avatarSize}
+        class="relative z-10 -ml-3 border-2 border-card"
+      />
+      <Avatar 
+        src={avatarContent.accounts[2].profile.avatar} 
+        displayName={avatarContent.accounts[2].profile.displayName}
+        handle={avatarContent.accounts[2].profile.handle}
+        size={avatarSize}
+        class="relative z-0 -ml-3 border-2 border-card"
+      />
+    </div>
+    
+  {:else}
+    <!-- 4+アカウント：重なり表示 + 数値インジケーター -->
+    <div class="{containerSize} relative flex items-center justify-start">
+      <Avatar 
+        src={avatarContent.accounts[0].profile.avatar} 
+        displayName={avatarContent.accounts[0].profile.displayName}
+        handle={avatarContent.accounts[0].profile.handle}
+        size={avatarSize}
+        class="relative z-30 border-2 border-card"
+      />
+      <Avatar 
+        src={avatarContent.accounts[1].profile.avatar} 
+        displayName={avatarContent.accounts[1].profile.displayName}
+        handle={avatarContent.accounts[1].profile.handle}
+        size={avatarSize}
+        class="relative z-20 -ml-3 border-2 border-card"
+      />
+      <Avatar 
+        src={avatarContent.accounts[2].profile.avatar} 
+        displayName={avatarContent.accounts[2].profile.displayName}
+        handle={avatarContent.accounts[2].profile.handle}
+        size={avatarSize}
+        class="relative z-10 -ml-3 border-2 border-card"
+      />
+      
+      <!-- 数値インジケーター -->
+      <div class="relative z-0 -ml-3 {avatarSize === 'sm' ? 'w-8 h-8' : avatarSize === 'md' ? 'w-10 h-10' : 'w-12 h-12'} bg-muted bg-opacity-80 rounded-full border-2 border-card flex items-center justify-center">
+        <span class="text-xs font-bold text-themed">+{avatarContent.extraCount}</span>
       </div>
-    {/if}
+    </div>
   {/if}
 </div>
+{/if}

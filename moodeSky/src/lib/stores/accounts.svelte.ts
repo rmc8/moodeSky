@@ -154,6 +154,48 @@ class AccountsStore {
   }
 
   /**
+   * 現在のアクティブアカウント
+   */
+  activeAccount = $state<Account | null>(null);
+
+  /**
+   * アクティブアカウントを設定
+   */
+  async setActiveAccount(account: Account): Promise<void> {
+    try {
+      // 直接アクティブアカウントを設定（authServiceには設定メソッドが存在しないため）
+      this.activeAccount = account;
+      console.log('🏪 [AccountsStore] アクティブアカウント設定完了:', account.profile.handle);
+      
+      // 永続化（将来実装）
+      // await this.saveActiveAccountPreference(account.id);
+    } catch (error) {
+      console.error('🏪 [AccountsStore] アクティブアカウント設定エラー:', error);
+      this.error = 'アクティブアカウントの設定に失敗しました';
+    }
+  }
+
+  /**
+   * アクティブアカウントIDでアカウントを取得
+   */
+  async loadActiveAccount(): Promise<void> {
+    try {
+      const result = await authService.getActiveAccount();
+      
+      if (result.success && result.data) {
+        this.activeAccount = result.data;
+        console.log('🏪 [AccountsStore] アクティブアカウント取得完了:', result.data.profile.handle);
+      } else {
+        console.warn('🏪 [AccountsStore] アクティブアカウントが見つかりません');
+        this.activeAccount = null;
+      }
+    } catch (error) {
+      console.error('🏪 [AccountsStore] アクティブアカウント取得エラー:', error);
+      this.activeAccount = null;
+    }
+  }
+
+  /**
    * エラーをクリア
    */
   clearError(): void {
@@ -165,6 +207,7 @@ class AccountsStore {
    */
   async refresh(): Promise<void> {
     await this.loadAccounts();
+    await this.loadActiveAccount();
   }
 
   /**
@@ -173,6 +216,7 @@ class AccountsStore {
   async initialize(): Promise<void> {
     if (!this.isInitialized) {
       await this.loadAccounts();
+      await this.loadActiveAccount();
     }
   }
 }

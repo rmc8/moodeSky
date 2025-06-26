@@ -10,12 +10,12 @@
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
   import { deckStore } from '$lib/deck/store.svelte.js';
   import { avatarCache } from '$lib/stores/avatarCache.svelte.js';
+  import { accountsStore } from '$lib/stores/accounts.svelte.js';
   
   
   // リアクティブ翻訳システム
   const { t, currentLanguage } = useTranslation();
   
-  let activeAccount = $state<Account | null>(null);
   let isLoading = $state(true);
   let errorMessage = $state('');
   
@@ -40,7 +40,7 @@
   });
   
   $effect(() => {
-    console.log('🔍 [DEBUG] State change - activeAccount:', activeAccount);
+    console.log('🔍 [DEBUG] State change - activeAccount:', accountsStore.activeAccount);
   });
   let currentPath = $state($page.url.pathname);
   
@@ -67,36 +67,39 @@
           console.error('🚨 [NETWORK] Network connection failed:', networkError);
         }
         
-        console.log('🔍 [DEBUG] authService:', authService);
-        console.log('🔍 [DEBUG] About to call getActiveAccount...');
+        console.log('🔍 [DEBUG] accountsStore:', accountsStore);
+        console.log('🔍 [DEBUG] About to initialize accountsStore...');
         
-        // アクティブアカウントを取得
-        const result = await authService.getActiveAccount();
-        console.log('🔍 [DEBUG] getActiveAccount result:', result);
+        // accountsStoreを初期化（全アカウント + アクティブアカウント取得）
+        await accountsStore.initialize();
+        console.log('🔍 [DEBUG] accountsStore initialized:', {
+          allAccounts: accountsStore.allAccounts.length,
+          activeAccount: accountsStore.activeAccount?.profile.handle
+        });
         
-        if (!result.success) {
-          console.error('🔍 [DEBUG] 認証情報の取得に失敗:', result.error);
-          console.log('🔍 [DEBUG] Setting error message and redirecting to login');
-          
-          errorMessage = t('auth.authDataFetchFailed');
+        if (!accountsStore.hasAccounts) {
+          console.log('🔍 [DEBUG] アカウントが見つかりません');
+          console.log('🔍 [DEBUG] Redirecting to login...');
           await goto('/login');
           return;
         }
         
-        if (!result.data) {
+        if (!accountsStore.activeAccount) {
           console.log('🔍 [DEBUG] アクティブアカウントが見つかりません');
           console.log('🔍 [DEBUG] Redirecting to login...');
           await goto('/login');
           return;
         }
         
-        console.log('🔍 [DEBUG] Setting activeAccount:', result.data);
-        activeAccount = result.data;
-        console.log('🔍 [DEBUG] activeAccount set successfully:', activeAccount);
+        console.log('🔍 [DEBUG] accountsStore setup successfully:', {
+          totalAccounts: accountsStore.accountCount,
+          activeAccount: accountsStore.activeAccount.profile.handle,
+          allAccountHandles: accountsStore.allAccounts.map(acc => acc.profile.handle)
+        });
         
         // デッキストアを初期化
         console.log('🔍 [DEBUG] Initializing deck store...');
-        console.log('🔍 [DEBUG] Account handle:', activeAccount.profile.handle);
+        console.log('🔍 [DEBUG] Account handle:', accountsStore.activeAccount.profile.handle);
         console.log('🔍 [DEBUG] DeckStore state before init:', {
           isInitialized: deckStore.isInitialized,
           isEmpty: deckStore.isEmpty,
@@ -104,7 +107,7 @@
           columns: deckStore.columns
         });
         
-        await deckStore.initialize(activeAccount.profile.did);
+        await deckStore.initialize(accountsStore.activeAccount.profile.did);
         
         // アバターキャッシュシステムを初期化
         console.log('🔍 [DEBUG] Initializing avatar cache...');
@@ -123,7 +126,7 @@
         if (deckStore.isEmpty) {
           console.log('🔍 [DEBUG] No columns found, creating default column');
           console.log('🔍 [DEBUG] Adding column with params:', {
-            accountId: activeAccount.profile.handle,
+            accountId: accountsStore.activeAccount.profile.handle,
             algorithm: 'home',
             settings: {
               title: t('navigation.home'),
@@ -133,7 +136,7 @@
           
           try {
             const newColumn = await deckStore.addColumn(
-              activeAccount.profile.did,
+              accountsStore.activeAccount.profile.did,
               'home',
               {
                 title: t('navigation.home'),
@@ -164,11 +167,11 @@
             isInitialized: deckStore.isInitialized
           });
           
-          if (deckStore.isEmpty && deckStore.isInitialized && activeAccount) {
+          if (deckStore.isEmpty && deckStore.isInitialized && accountsStore.activeAccount) {
             console.log('🚨 [FAILSAFE] No columns found after 3 seconds, forcing default column creation');
             try {
               const failsafeColumn = await deckStore.addColumn(
-                activeAccount.profile.did,
+                accountsStore.activeAccount.profile.did,
                 'home',
                 {
                   title: t('navigation.home'),
@@ -229,19 +232,19 @@
     console.log('🔍 [DEBUG] Effect triggered - edge case recovery:', {
       isInitialized: deckStore.isInitialized,
       isLoading: isLoading,
-      hasActiveAccount: !!activeAccount,
+      hasActiveAccount: !!accountsStore.activeAccount,
       isEmpty: deckStore.isEmpty,
       columnCount: deckStore.columnCount
     });
     
     // 初期化完了後で、ログイン済みで、デッキが空の場合
-    if (deckStore.isInitialized && !isLoading && activeAccount && deckStore.isEmpty) {
+    if (deckStore.isInitialized && !isLoading && accountsStore.activeAccount && deckStore.isEmpty) {
       console.log('🔍 [DEBUG] Edge case: Deck became empty, creating default home column');
-      console.log('🔍 [DEBUG] Account handle for recovery:', activeAccount.profile.handle);
+      console.log('🔍 [DEBUG] Account handle for recovery:', accountsStore.activeAccount.profile.handle);
       
       // 非同期でデフォルトカラムを作成
       deckStore.addColumn(
-        activeAccount.profile.did,
+        accountsStore.activeAccount.profile.did,
         'home',
         {
           title: t('navigation.home'),
@@ -289,12 +292,16 @@
       </button>
     </div>
   </div>
-{:else if activeAccount}
+{:else if accountsStore.activeAccount}
   <!-- メインデッキレイアウト -->
-  {console.log('🔍 [DEBUG] Rendering main deck layout with account:', activeAccount)}
+  {console.log('🔍 [DEBUG] Rendering main deck layout with accounts:', {
+    activeAccount: accountsStore.activeAccount.profile.handle,
+    totalAccounts: accountsStore.accountCount,
+    allHandles: accountsStore.allAccounts.map(acc => acc.profile.handle)
+  })}
   <div class="h-screen flex flex-col bg-themed">
     <!-- ナビゲーション（レスポンシブ制御は Navigation 内部で実施） -->
-    <Navigation {currentPath} accountId={activeAccount.profile.did} onAddDeck={handleOpenAddDeckModal} />
+    <Navigation {currentPath} accountId={accountsStore.activeAccount.profile.did} onAddDeck={handleOpenAddDeckModal} />
     
     <!-- モバイル用デッキタブは Navigation.svelte 内で管理 -->
     
@@ -303,8 +310,9 @@
       <!-- デッキコンテンツエリア -->
       <div class="deck-content-wrapper">
         <DeckContainer 
-          accountId={activeAccount.profile.handle}
-          activeAccount={activeAccount}
+          accountId={accountsStore.activeAccount.profile.handle}
+          activeAccount={accountsStore.activeAccount}
+          allAccounts={accountsStore.allAccounts}
           className="h-full"
           {showAddDeckModal}
           onCloseAddDeckModal={handleCloseAddDeckModal}
@@ -315,7 +323,7 @@
 {:else}
   <!-- フォールバック画面 - 条件に当てはまらない場合 -->
   {console.log('🔍 [DEBUG] Rendering fallback screen - no conditions matched')}
-  {console.log('🔍 [DEBUG] Current state - isLoading:', isLoading, 'errorMessage:', errorMessage, 'activeAccount:', activeAccount)}
+  {console.log('🔍 [DEBUG] Current state - isLoading:', isLoading, 'errorMessage:', errorMessage, 'activeAccount:', accountsStore.activeAccount)}
   <div class="min-h-screen flex items-center justify-center bg-themed p-4">
     <div class="bg-card rounded-2xl shadow-xl p-12 w-full max-w-md text-center">
       <h2 class="text-themed text-2xl font-semibold mb-4">⚠️ {t('deck.unexpectedState')}</h2>
@@ -325,7 +333,8 @@
       <div class="text-left bg-themed/5 rounded-lg p-4 mb-4 text-sm">
         <p><strong>isLoading:</strong> {isLoading}</p>
         <p><strong>errorMessage:</strong> '{errorMessage}'</p>
-        <p><strong>activeAccount:</strong> {activeAccount ? 'present' : 'null'}</p>
+        <p><strong>activeAccount:</strong> {accountsStore.activeAccount ? 'present' : 'null'}</p>
+        <p><strong>accountCount:</strong> {accountsStore.accountCount}</p>
       </div>
       <button 
         class="bg-primary hover:bg-primary/80 text-white font-semibold py-3 px-6 rounded-lg transition-colors"

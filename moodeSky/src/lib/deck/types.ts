@@ -8,6 +8,7 @@
 
 import { ICONS } from '$lib/types/icon.js';
 import * as m from '../../paraglide/messages.js';
+import type { Account } from '$lib/types/auth.js';
 
 // ===================================================================
 // カラム幅設定（tokimekibluesky参考）
@@ -118,13 +119,16 @@ export interface ColumnData {
 
 export interface Column {
   id: string;
-  accountId: string;     // 所有アカウントID
+  accountId: string;     // 所有アカウントID（'all'の場合は全アカウント対応）
   algorithm: ColumnAlgorithm;
   algorithmConfig?: ColumnAlgorithmConfig; // 詳細設定
   settings: ColumnSettings;
   data: ColumnData;
   createdAt: string;
   updatedAt: string;
+  
+  // マルチアカウント対応
+  targetAccounts?: Account[]; // 対象アカウント配列（全アカウント選択時に使用）
   
   // UI状態（永続化しない）
   scrollElement?: HTMLElement;

@@ -180,12 +180,20 @@
       // アルゴリズム設定の構築
       const algorithmConfig: any = { ...feedConfig };
 
+      // 全アカウント選択時の対象アカウント配列を準備
+      let targetAccounts: Account[] | undefined;
+      if (selectedAccountId === 'all') {
+        targetAccounts = availableAccounts; // 実際の全アカウント情報を保存
+        console.log('🔧 [FeedConfigModal] Setting targetAccounts for all:', targetAccounts.length);
+      }
+
       // DeckStoreを使用してカラムを作成
       const column = await deckStore.addColumn(
         selectedAccountId,
         feedType.id,
         settings,
-        algorithmConfig
+        algorithmConfig,
+        targetAccounts
       );
 
       console.log('🔧 [FeedConfigModal] デッキ作成成功:', column);
