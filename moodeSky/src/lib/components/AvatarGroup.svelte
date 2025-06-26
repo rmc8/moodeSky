@@ -214,12 +214,12 @@
       class="w-full h-full"
     >
       <defs>
-        {#each displayAccounts as account (account.profile.did)}
+        {#each displayAccounts as account, i (account.profile.did)}
           <pattern
-            id="pattern-{uniqueId}-{account.profile.did}"
-            patternUnits="objectBoundingBox"
-            width="1"
-            height="1"
+            id="pattern-{uniqueId}-{account.profile.did}-{i}"
+            patternUnits="userSpaceOnUse"
+            width={svgSize}
+            height={svgSize}
           >
             <image
               href={account.profile.avatar}
@@ -236,7 +236,7 @@
       {#each displayAccounts as account, i (account.profile.did)}
         <path
           d={getSlicePath(i, displayAccounts.length, svgSize)}
-          fill="url(#pattern-{uniqueId}-{account.profile.did})"
+          fill="url(#pattern-{uniqueId}-{account.profile.did}-{i})"
           class="slice-path transition-transform duration-200 hover:scale-105"
           style="transform-origin: center;"
         />
@@ -254,12 +254,12 @@
       class="w-full h-full"
     >
       <defs>
-        {#each displayAccounts as account (account.profile.did)}
+        {#each displayAccounts as account, i (account.profile.did)}
           <pattern
-            id="pattern-static-{uniqueId}-{account.profile.did}"
-            patternUnits="objectBoundingBox"
-            width="1"
-            height="1"
+            id="pattern-static-{uniqueId}-{account.profile.did}-{i}"
+            patternUnits="userSpaceOnUse"
+            width={svgSize}
+            height={svgSize}
           >
             <image
               href={account.profile.avatar}
@@ -276,7 +276,7 @@
       {#each displayAccounts as account, i (account.profile.did)}
         <path
           d={getSlicePath(i, displayAccounts.length, svgSize)}
-          fill="url(#pattern-static-{uniqueId}-{account.profile.did})"
+          fill="url(#pattern-static-{uniqueId}-{account.profile.did}-{i})"
           class="slice-path"
         />
       {/each}
