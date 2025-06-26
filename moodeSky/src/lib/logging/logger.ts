@@ -32,6 +32,16 @@ export interface LogContext {
   duration?: number;
   /** エラーコード */
   errorCode?: string;
+  /** スタックトレース */
+  stack?: string;
+  /** キャッシュサイズ */
+  cacheSize?: number;
+  /** キャッシュされたアバター数 */
+  cachedAvatars?: number;
+  /** TTL設定 */
+  ttl?: number;
+  /** 全設定情報 */
+  totalConfig?: any;
   /** 追加メタデータ */
   metadata?: Record<string, any>;
 }

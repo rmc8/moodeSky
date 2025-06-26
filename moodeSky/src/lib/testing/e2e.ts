@@ -3,7 +3,7 @@
  * アバターキャッシュシステムの統合テスト用ヘルパー
  */
 
-import type { Page, Browser, BrowserContext } from '@playwright/test';
+import type { Page, Browser, BrowserContext, Route } from '@playwright/test';
 
 /**
  * テストコンテキスト
@@ -91,7 +91,7 @@ export class AvatarCacheE2EHelper {
 
     // ログレベルを設定
     if (options.logLevel) {
-      await page.evaluate((level) => {
+      await page.evaluate((level: string) => {
         (window as any).__AVATAR_CACHE_LOG_LEVEL__ = level;
       }, options.logLevel);
     }
@@ -111,7 +111,7 @@ export class AvatarCacheE2EHelper {
   async setupMockAPI(responses: MockAPIResponse[]): Promise<void> {
     const { page } = this.testContext;
 
-    await page.route('**/xrpc/com.atproto.repo.getRecord*', async (route) => {
+    await page.route('**/xrpc/com.atproto.repo.getRecord*', async (route: Route) => {
       const url = new URL(route.request().url());
       const did = url.searchParams.get('repo');
       
@@ -180,7 +180,7 @@ export class AvatarCacheE2EHelper {
   }> {
     const { page } = this.testContext;
 
-    const result = await page.evaluate(async (targetDid) => {
+    const result = await page.evaluate(async (targetDid: string) => {
       const startTime = performance.now();
       
       try {
@@ -223,7 +223,7 @@ export class AvatarCacheE2EHelper {
   }>> {
     const { page } = this.testContext;
 
-    const result = await page.evaluate(async (targetDids) => {
+    const result = await page.evaluate(async (targetDids: string[]) => {
       const avatarCache = (window as any).__AVATAR_CACHE__;
       if (!avatarCache) {
         throw new Error('Avatar cache not initialized');

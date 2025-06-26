@@ -16,7 +16,7 @@ vi.mock('$lib/services/profileService.js', () => ({
 
 // モックされたprofileServiceへの参照を取得
 import { profileService } from '$lib/services/profileService.js';
-const mockProfileService = profileService as { getProfile: ReturnType<typeof vi.fn> };
+const mockProfileService = profileService as any;
 
 describe('AvatarCache Store', () => {
   beforeEach(() => {
