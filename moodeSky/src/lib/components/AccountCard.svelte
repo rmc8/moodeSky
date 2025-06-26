@@ -775,6 +775,7 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="logout-confirm-title"
+    tabindex="-1"
   >
     <div class="bg-card rounded-xl p-6 shadow-2xl max-w-md w-full mx-4 border border-themed">
       <h3 id="logout-confirm-title" class="text-themed text-lg font-semibold mb-4 flex items-center gap-2">
