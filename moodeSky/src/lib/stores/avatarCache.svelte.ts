@@ -22,6 +22,7 @@ import {
   type ExponentialBackoffOptions 
 } from '$lib/utils/exponentialBackoff.js';
 import type { DashboardData } from '$lib/types/metrics.js';
+import { getLogger, createLogger, type Logger } from '$lib/logging/logger.js';
 
 /**
  * グローバルアバターキャッシュストア (Svelte 5 runes)
@@ -51,6 +52,9 @@ class AvatarCacheStore {
   
   /** バッチ取得用バックオフ（より寛容な設定） */
   private readonly batchBackoff: ExponentialBackoff;
+  
+  /** 構造化ログシステム */
+  private readonly logger: Logger;
 
   // ===================================================================
   // 状態管理 (Svelte 5 runes)
@@ -108,6 +112,9 @@ class AvatarCacheStore {
     
     // バッチ取得用により寛容なバックオフ設定
     this.batchBackoff = new ExponentialBackoff(BACKOFF_PRESETS.conservative);
+    
+    // 構造化ログシステムを初期化
+    this.logger = getLogger();
   }
 
   // ===================================================================
@@ -150,7 +157,11 @@ class AvatarCacheStore {
     if (this.isInitialized) return;
     
     try {
-      console.log('🎭 [AvatarCache] Initializing avatar cache system...');
+      this.logger.info('Initializing avatar cache system', {
+        operation: 'initialization',
+        cacheSize: this.config.maxCacheSize,
+        ttl: this.config.ttl
+      }, 'avatarCache');
       
       // 既存のアカウント情報からキャッシュを初期構築
       await this.initializeCacheFromAccounts();
@@ -159,7 +170,11 @@ class AvatarCacheStore {
       this.startCleanupTask();
       
       this.isInitialized = true;
-      console.log(`🎭 [AvatarCache] Initialized with ${this.cacheSize} cached avatars`);
+      this.logger.info('Avatar cache system initialized successfully', {
+        operation: 'initialization',
+        cachedAvatars: this.cacheSize,
+        totalConfig: this.config
+      }, 'avatarCache');
       
     } catch (error) {
       const cacheError = AvatarCacheErrorFactory.fromError(error, {
