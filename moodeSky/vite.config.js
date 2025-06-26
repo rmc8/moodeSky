@@ -14,6 +14,11 @@ export default defineConfig(async () => ({
         }
     },
 
+    // Environment variables for logging
+    define: {
+        __LOG_LEVEL__: JSON.stringify(process.env.VITE_LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'WARN' : 'DEBUG'))
+    },
+
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     //

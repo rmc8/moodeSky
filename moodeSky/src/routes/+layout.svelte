@@ -4,6 +4,8 @@
   import '../app.css';
   // テーマプロバイダーをインポート
   import ThemeProvider from '../lib/components/ThemeProvider.svelte';
+  // トーストコンテナをインポート
+  import ToastContainer from '../lib/components/ToastContainer.svelte';
   // i18n初期化
   import { initializeI18n, i18nStore } from '../lib/stores/i18n.svelte.js';
   // 認証サービス
@@ -69,5 +71,8 @@
     <main class="h-screen w-full flex flex-col">
       <slot />
     </main>
+    
+    <!-- トースト通知コンテナ -->
+    <ToastContainer />
   {/snippet}
 </ThemeProvider>

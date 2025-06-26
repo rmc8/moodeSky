@@ -23,7 +23,12 @@
   } from '$lib/utils/timeUtils.js';
   import type { TimeRemaining } from '$lib/utils/timeUtils.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
+  import { createComponentLogger } from '$lib/utils/logger.js';
+  import { toastStore } from '$lib/stores/toast.svelte.js';
   import * as m from '../../paraglide/messages.js';
+
+  // コンポーネント専用ログ
+  const log = createComponentLogger('AccountCard');
 
   // ===================================================================
   // プロパティ
@@ -118,7 +123,7 @@
    * ログアウト確認モーダルを表示
    */
   function confirmLogoutAccount() {
-    console.log('🔓 [AccountCard] ログアウト確認モーダル表示:', account.profile.handle);
+    log.info('ログアウト確認モーダル表示', { handle: account.profile.handle });
     showLogoutConfirmModal = true;
   }
   
@@ -126,7 +131,7 @@
    * ログアウト確認をキャンセル
    */
   function cancelLogoutAccount() {
-    console.log('🔓 [AccountCard] ログアウト確認キャンセル:', account.profile.handle);
+    log.info('ログアウト確認キャンセル', { handle: account.profile.handle });
     showLogoutConfirmModal = false;
   }
 
@@ -135,17 +140,17 @@
    */
   async function executeLogoutAccount() {
     try {
-      console.log('🔓 [AccountCard] アカウントログアウト開始:', account.profile.handle);
+      log.info('アカウントログアウト開始', { handle: account.profile.handle });
       isLoading = true;
       showLogoutConfirmModal = false;
       
       // authService.deleteAccount を呼び出し（ローカルからアカウント情報を削除）
-      console.log('🔓 [AccountCard] authService.deleteAccount 呼び出し中...', account.id);
+      log.debug('authService.deleteAccount 呼び出し中', { accountId: account.id });
       const result = await import('$lib/services/authStore.js').then(m => m.authService.deleteAccount(account.id));
-      console.log('🔓 [AccountCard] authService.deleteAccount 結果:', result);
+      log.debug('authService.deleteAccount 結果', { result });
       
       if (result.success) {
-        console.log('🔓 [AccountCard] アカウントログアウト成功:', account.profile.handle);
+        log.info('アカウントログアウト成功', { handle: account.profile.handle });
         
         // セッション関連のタイマーを停止
         if (updateTimer) {
@@ -160,12 +165,16 @@
           handle: account.profile.handle 
         } }));
       } else {
-        console.error('🔓 [AccountCard] アカウントログアウト失敗:', result.error);
-        alert(`ログアウトに失敗しました: ${result.error?.message || 'Unknown error'}`);
+        log.error('アカウントログアウト失敗', { error: result.error });
+        toastStore.error(`ログアウトに失敗しました: ${result.error?.message || 'Unknown error'}`, {
+          title: 'ログアウトエラー'
+        });
       }
     } catch (error) {
-      console.error('🔓 [AccountCard] アカウントログアウトエラー:', error);
-      alert(`ログアウト中にエラーが発生しました: ${error}`);
+      log.error('アカウントログアウトエラー', { error });
+      toastStore.error(`ログアウト中にエラーが発生しました: ${error}`, {
+        title: 'システムエラー'
+      });
     } finally {
       isLoading = false;
     }
@@ -184,15 +193,15 @@
       if (result.success) {
         sessionValidationStatus = result.data ? 'valid' : 'invalid';
         if (!result.data) {
-          console.warn('🔒 [AccountCard] Session validation failed for:', account.profile.handle);
+          log.warn('Session validation failed', { handle: account.profile.handle });
         }
       } else {
         sessionValidationStatus = 'error';
-        console.error('❌ [AccountCard] Session validation error:', result.error);
+        log.error('Session validation error', { error: result.error });
       }
     } catch (error) {
       sessionValidationStatus = 'error';
-      console.error('❌ [AccountCard] Session validation exception:', error);
+      log.error('Session validation exception', { error });
     }
   }
 
@@ -207,18 +216,25 @@
       const result = await authService.testRefreshJwtUpdate(account.id);
       
       if (result.success && result.data) {
-        console.log('🧪 [AccountCard] RefreshJwt更新テスト完了:', result.data);
-        alert(`RefreshJwt更新テスト結果:\n${result.data.isUpdated ? '✅ 更新されました' : '⚠️ 更新されませんでした'}\n詳細はコンソールを確認してください。`);
+        log.info('RefreshJwt更新テスト完了', { data: result.data });
+        toastStore.info(`RefreshJwt更新テスト結果:\n${result.data.isUpdated ? '✅ 更新されました' : '⚠️ 更新されませんでした'}\n詳細はコンソールを確認してください。`, {
+          title: 'RefreshJwt更新テスト',
+          duration: 6000
+        });
         
         // トークン期限情報を再更新
         updateTokenExpiration();
       } else {
-        console.error('❌ [AccountCard] RefreshJwt更新テストエラー:', result.error);
-        alert(`RefreshJwt更新テストエラー:\n${result.error?.message || 'Unknown error'}`);
+        log.error('RefreshJwt更新テストエラー', { error: result.error });
+        toastStore.error(`RefreshJwt更新テストエラー:\n${result.error?.message || 'Unknown error'}`, {
+          title: 'テストエラー'
+        });
       }
     } catch (error) {
-      console.error('❌ [AccountCard] RefreshJwt更新テスト例外:', error);
-      alert(`RefreshJwt更新テスト例外:\n${error}`);
+      log.error('RefreshJwt更新テスト例外', { error });
+      toastStore.error(`RefreshJwt更新テスト例外:\n${error}`, {
+        title: 'システムエラー'
+      });
     } finally {
       isLoading = false;
     }
@@ -230,7 +246,7 @@
   async function loadProfileStats() {
     isLoading = true;
     try {
-      console.log('📊 [AccountCard] Loading profile stats for account:', account.profile.handle);
+      log.debug('Loading profile stats for account', { handle: account.profile.handle });
       
       // 既にキャッシュされたデータがある場合は先に表示
       if (account.profile.followersCount !== undefined) {
@@ -245,7 +261,7 @@
       const { profileService } = await import('$lib/services/profileService.js');
       
       if (!account.session?.accessJwt) {
-        console.warn('📊 [AccountCard] No access token available for profile stats');
+        log.warn('No access token available for profile stats');
         return;
       }
       
@@ -262,10 +278,10 @@
           posts: result.data.postsCount
         };
         
-        console.log('📊 [AccountCard] Successfully loaded profile stats:', profileStats);
+        log.debug('Successfully loaded profile stats', { profileStats });
       } else {
         // API失敗時のフォールバック表示
-        console.warn('📊 [AccountCard] Failed to load profile stats:', result.error);
+        log.warn('Failed to load profile stats', { error: result.error });
         
         // 既存のキャッシュデータがあれば表示を維持
         if (!profileStats && account.profile.followersCount !== undefined) {
@@ -277,7 +293,7 @@
         }
       }
     } catch (error) {
-      console.error('📊 [AccountCard] Error loading profile stats:', error);
+      log.error('Error loading profile stats', { error });
       
       // エラー時もキャッシュデータがあれば表示
       if (account.profile.followersCount !== undefined) {
@@ -298,7 +314,7 @@
   function updateTokenExpiration() {
     try {
       if (!account.session?.refreshJwt) {
-        console.log('📊 [AccountCard] RefreshJwt not found for account:', account.profile.handle);
+        log.debug('RefreshJwt not found for account', { handle: account.profile.handle });
         tokenTimeRemaining = null;
         expirationDate = null;
         return;
@@ -309,7 +325,7 @@
         const tokenInfo = getTokenInfo(account.session.refreshJwt);
         const issuedAt = getTokenIssuedAt(account.session.refreshJwt);
         
-        console.log('📊 [AccountCard] RefreshJwt詳細情報:', {
+        log.debug('RefreshJwt詳細情報', {
           handle: account.profile.handle,
           accountId: account.id,
           isValid: tokenInfo.isValid,
@@ -329,7 +345,7 @@
       // 絶対期限日時を取得
       expirationDate = getTokenExpiration(account.session.refreshJwt);
       
-      console.log('📊 [AccountCard] 期限計算結果:', {
+      log.debug('期限計算結果', {
         handle: account.profile.handle,
         remainingSeconds,
         tokenTimeRemaining,
@@ -341,7 +357,7 @@
       scheduleNextUpdate();
       
     } catch (error) {
-      console.warn('Failed to update token expiration:', error);
+      log.warn('Failed to update token expiration', { error });
       tokenTimeRemaining = null;
       expirationDate = null;
     }
@@ -453,7 +469,7 @@
       } 
     }));
     
-    console.log('Reauthentication successful:', updatedAccount.profile.handle);
+    log.info('Reauthentication successful', { handle: updatedAccount.profile.handle });
   }
 
   // ===================================================================

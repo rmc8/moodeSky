@@ -1,8 +1,13 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { authService } from '$lib/services/authStore.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
+  import { delayedGoto, DelayManager } from '$lib/utils/delay.js';
+  import { createComponentLogger } from '$lib/utils/logger.js';
+
+  // コンポーネント専用ログ
+  const log = createComponentLogger('RootPage');
 
   // リアクティブ翻訳システム
   const { t } = useTranslation();
@@ -19,6 +24,9 @@
     completed: false,
     hasLegacyData: false
   });
+
+  // 遅延操作管理
+  const delayManager = new DelayManager();
 
   onMount(async () => {
     try {
@@ -51,24 +59,23 @@
         // localStorage からの移行を実行
         const migrationResult = await authService.migrateFromLocalStorage();
         if (migrationResult.success && migrationResult.data) {
-          console.log('localStorage からの移行が完了:', migrationResult.data);
+          log.info('localStorage からの移行完了', {
+            handle: migrationResult.data.profile.handle,
+            did: migrationResult.data.profile.did
+          });
           statusMessage = t('root.migrationComplete');
           migrationStatus.completed = true;
           migrationStatus.accountInfo = {
             handle: migrationResult.data.profile.handle
           };
           
-          // 少し待ってからデッキページへ
-          setTimeout(async () => {
-            await goto('/deck');
-          }, 1500);
+          // 遅延ナビゲーション（キャンセル可能）
+          await delayedGoto('/deck', 1500, 'migration-complete');
           return;
         } else if (!migrationResult.success) {
-          console.warn('Migration failed:', migrationResult.error);
+          log.warn('移行処理失敗', { error: migrationResult.error });
           statusMessage = t('root.migrationError');
-          setTimeout(async () => {
-            await goto('/login');
-          }, 2000);
+          await delayedGoto('/login', 2000, 'migration-failed');
           return;
         }
       }
@@ -78,28 +85,32 @@
       // アクティブアカウントの確認
       const activeAccount = await authService.getActiveAccount();
       if (activeAccount.success && activeAccount.data) {
-        console.log('アクティブアカウント発見:', activeAccount.data);
+        log.info('アクティブアカウント発見', {
+          handle: activeAccount.data.profile.handle,
+          did: activeAccount.data.profile.did
+        });
         statusMessage = t('root.redirectingToDeck');
-        setTimeout(async () => {
-          await goto('/deck');
-        }, 800);
+        await delayedGoto('/deck', 800, 'active-account-found');
         return;
       }
 
       // ログインが必要
+      log.debug('アクティブアカウントなし、ログインページへ遷移');
       statusMessage = t('root.redirectingToLogin');
-      setTimeout(async () => {
-        await goto('/login');
-      }, 800);
+      await delayedGoto('/login', 800, 'no-active-account');
     } catch (error) {
-      console.error('認証状態確認エラー:', error);
+      log.error('認証状態確認エラー', { error });
       statusMessage = t('root.error');
-      setTimeout(async () => {
-        await goto('/login');
-      }, 1500);
+      await delayedGoto('/login', 1500, 'auth-check-error');
     } finally {
       isLoading = false;
     }
+  });
+
+  // コンポーネント破棄時の cleanup
+  onDestroy(() => {
+    log.debug('コンポーネント破棄、遅延操作をクリーンアップ');
+    delayManager.cancelAll();
   });
 </script>
 

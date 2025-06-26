@@ -10,6 +10,10 @@
   import LanguageSelectorCompact from '$lib/components/LanguageSelectorCompact.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
+  import { createComponentLogger } from '$lib/utils/logger.js';
+
+  // コンポーネント専用ログ
+  const log = createComponentLogger('Login');
 
   // リアクティブ翻訳システム
   const { t, currentLanguage } = useTranslation();
@@ -18,14 +22,17 @@
   const isAddMode = $derived($page.url.searchParams.get('mode') === 'add');
   const hasExistingAccounts = $derived(accountsStore.hasAccounts);
   const showBackButton = $derived(() => {
-    const shouldShow = isAddMode; // 一時的にアカウント存在チェックを無効化
-    console.log('🔍 [Login] showBackButton debug:', {
+    // アカウント追加モードかつ既存アカウントが存在し、ストアが初期化済みの場合に表示
+    const shouldShow = isAddMode && hasExistingAccounts && accountsStore.isInitialized;
+    
+    log.debug('showBackButton calculation', {
       isAddMode,
       hasExistingAccounts,
       accountCount: accountsStore.accountCount,
       isInitialized: accountsStore.isInitialized,
       shouldShow
     });
+    
     return shouldShow;
   });
 
@@ -66,7 +73,11 @@
       });
       
       // ログイン成功 - didとハンドル、プロフィール情報を保存
-      console.log('ログイン成功:', response);
+      log.info('ログイン成功', {
+        handle: response.data.handle,
+        did: response.data.did,
+        service: host
+      });
       
       // Store API に認証情報を保存（統計情報も自動取得・保存）
       const sessionData = {
@@ -87,16 +98,19 @@
       );
       
       if (!saveResult.success) {
-        console.error('認証情報の保存に失敗:', saveResult.error);
+        log.error('認証情報の保存に失敗', { error: saveResult.error });
         errorMessage = t('validation.authSaveFailed');
         return;
       }
       
-      console.log('認証情報を正常に保存:', saveResult.data);
-      console.log('📊 プロフィール統計情報:', {
-        フォロワー数: saveResult.data?.profile.followersCount,
-        フォロー数: saveResult.data?.profile.followingCount,
-        ポスト数: saveResult.data?.profile.postsCount,
+      log.info('認証情報を正常に保存', {
+        handle: saveResult.data?.profile.handle,
+        did: saveResult.data?.profile.did
+      });
+      log.debug('プロフィール統計情報取得', {
+        followersCount: saveResult.data?.profile.followersCount,
+        followingCount: saveResult.data?.profile.followingCount,
+        postsCount: saveResult.data?.profile.postsCount
       });
       
       // アカウントストアにも追加（リアクティブ更新）
@@ -113,7 +127,13 @@
       
     } catch (error: any) {
       // AT Protocol固有のエラーハンドリング
-      console.error('Login error:', error);
+      log.error('ログインエラー', {
+        error,
+        handle,
+        host,
+        errorStatus: error?.status,
+        errorMessage: error?.message
+      });
       
       if (error?.status === 401) {
         errorMessage = t('validation.authFailed');
@@ -139,23 +159,23 @@
 
   // 設定画面に戻る関数
   function goBackToSettings() {
-    console.log('🔄 [Login] 設定画面に戻るボタンがクリックされました');
+    log.debug('設定画面に戻るボタンクリック');
     try {
       goto('/settings');
-      console.log('🔄 [Login] goto("/settings") 実行完了');
+      log.debug('設定画面への遷移実行完了');
     } catch (error) {
-      console.error('🔄 [Login] goto実行エラー:', error);
+      log.error('設定画面への遷移エラー', { error });
     }
   }
 
   // アカウントストアの初期化
   onMount(async () => {
     try {
-      console.log('🔄 [Login] アカウントストア初期化開始');
+      log.debug('アカウントストア初期化開始');
       await accountsStore.initialize();
-      console.log('🔄 [Login] アカウントストア初期化完了');
+      log.debug('アカウントストア初期化完了');
     } catch (error) {
-      console.error('🔄 [Login] アカウントストア初期化エラー:', error);
+      log.error('アカウントストア初期化エラー', { error });
     }
   });
 </script>
@@ -172,7 +192,7 @@
       <LanguageSelectorCompact />
       
       <!-- アカウント追加モード時の戻るボタン -->
-      {#if showBackButton}
+      {#if showBackButton()}
         <button
           class="flex items-center gap-2 px-3 py-2 text-sm bg-muted/20 hover:bg-muted/40 text-themed rounded-lg transition-colors border border-themed/20 w-max"
           onclick={goBackToSettings}

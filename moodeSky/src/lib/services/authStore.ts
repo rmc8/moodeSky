@@ -10,6 +10,10 @@ import type {
   STORE_KEYS
 } from '../types/auth.js';
 import { profileService } from './profileService.js';
+import { createComponentLogger } from '../utils/logger.js';
+
+// コンポーネント専用ログ
+const log = createComponentLogger('AuthService');
 
 /**
  * Tauri Store Plugin AuthService
@@ -32,7 +36,7 @@ export class AuthService {
   createPersistSessionHandler = (accountId?: string) => {
     return async (evt: AtpSessionEvent, sess?: AtpSessionData) => {
       try {
-        console.log(`🔄 [AuthService] SessionEvent: ${evt}`, { accountId, session: sess });
+        log.debug('SessionEvent', { event: evt, accountId, hasSession: !!sess });
 
         if (evt === 'update' && sess) {
           // 既存のアカウント情報を取得してrefreshJwtを比較
@@ -47,7 +51,7 @@ export class AuthService {
                 const { getTokenExpiration, getTokenIssuedAt } = await import('../utils/jwt.js');
                 oldRefreshJwtExpiration = getTokenExpiration(oldRefreshJwt);
                 const oldIssuedAt = getTokenIssuedAt(oldRefreshJwt);
-                console.log('📊 [AuthService] 旧RefreshJwt情報:', {
+                log.debug('旧RefreshJwt情報', {
                   accountId,
                   handle: accountResult.data.profile.handle,
                   tokenLength: oldRefreshJwt.length,
@@ -65,7 +69,7 @@ export class AuthService {
             const newRefreshJwtExpiration = getTokenExpiration(sess.refreshJwt);
             const newIssuedAt = getTokenIssuedAt(sess.refreshJwt);
             
-            console.log('🆕 [AuthService] 新RefreshJwt情報:', {
+            log.debug('新RefreshJwt情報', {
               accountId,
               handle: sess.handle,
               tokenLength: sess.refreshJwt.length,
@@ -78,7 +82,7 @@ export class AuthService {
             const isRefreshJwtUpdated = oldRefreshJwt !== sess.refreshJwt;
             const isExpirationUpdated = oldRefreshJwtExpiration?.getTime() !== newRefreshJwtExpiration?.getTime();
             
-            console.log('🔄 [AuthService] RefreshJwt更新状況:', {
+            log.debug('RefreshJwt更新状況', {
               accountId,
               isRefreshJwtUpdated,
               isExpirationUpdated,
@@ -92,7 +96,7 @@ export class AuthService {
           await this.updateAccountSession(accountId, sess);
         } else if (evt === 'create' && sess) {
           // セッション作成時の処理（通常のログイン時は別経路なので、ここは自動更新用）
-          console.log('🆕 [AuthService] Session created via persistSession');
+          log.debug('Session created via persistSession');
           
           if (sess.refreshJwt) {
             const { getTokenExpiration, getTokenIssuedAt } = await import('../utils/jwt.js');
@@ -110,7 +114,7 @@ export class AuthService {
           }
         } else if (evt === 'expired') {
           // セッション期限切れ時の処理
-          console.warn('⚠️ [AuthService] Session expired:', accountId);
+          log.warn('Session expired', { accountId });
           if (accountId) {
             await this.markAccountSessionExpired(accountId);
           }
@@ -121,7 +125,7 @@ export class AuthService {
           await this.sessionEventHandler(evt, sess);
         }
       } catch (error) {
-        console.error('❌ [AuthService] persistSession handler error:', error);
+        log.error('persistSession handler error', { error });
       }
     };
   };
@@ -135,7 +139,7 @@ export class AuthService {
         // accountIdが指定されていない場合、セッションのDIDから検索
         const allAccountsResult = await this.getAllAccounts();
         if (!allAccountsResult.success || !allAccountsResult.data) {
-          console.warn('⚠️ [AuthService] Failed to get accounts for session update');
+          log.warn('Failed to get accounts for session update');
           return;
         }
 
@@ -144,7 +148,7 @@ export class AuthService {
         );
 
         if (!matchingAccount) {
-          console.warn('⚠️ [AuthService] No matching account found for session update:', session.did);
+          log.warn('No matching account found for session update', { did: session.did });
           return;
         }
 
@@ -154,7 +158,7 @@ export class AuthService {
       // アカウント情報を取得
       const accountResult = await this.getAccountById(accountId);
       if (!accountResult.success || !accountResult.data) {
-        console.warn('⚠️ [AuthService] Account not found for session update:', accountId);
+        log.warn('Account not found for session update', { accountId });
         return;
       }
 
@@ -170,7 +174,7 @@ export class AuthService {
       // ストアに保存
       const storeResult = await this.loadAuthStore();
       if (!storeResult.success || !storeResult.data) {
-        console.error('❌ [AuthService] Failed to load store for session update');
+        log.error('Failed to load store for session update');
         return;
       }
 
@@ -180,10 +184,10 @@ export class AuthService {
       if (accountIndex >= 0) {
         authStore.accounts[accountIndex] = updatedAccount;
         await this.saveAuthStore(authStore);
-        console.log('✅ [AuthService] Session updated successfully for account:', account.profile.handle);
+        log.info('Session updated successfully for account', { handle: account.profile.handle });
       }
     } catch (error) {
-      console.error('❌ [AuthService] Failed to update account session:', error);
+      log.error('Failed to update account session', { error });
     }
   }
 
@@ -192,7 +196,7 @@ export class AuthService {
    */
   private async markAccountSessionExpired(accountId: string): Promise<void> {
     try {
-      console.log('⚠️ [AuthService] Marking session as expired for account:', accountId);
+      log.warn('Marking session as expired for account', { accountId });
       
       // 実装としては、セッションの有効性フラグを設定するか、
       // または期限切れを示すメタデータを追加することができます
@@ -201,7 +205,7 @@ export class AuthService {
       
       const accountResult = await this.getAccountById(accountId);
       if (accountResult.success && accountResult.data) {
-        console.warn(`⚠️ [AuthService] Session expired for ${accountResult.data.profile.handle}`);
+        log.warn('Session expired for account', { handle: accountResult.data.profile.handle });
       }
     } catch (error) {
       console.error('❌ [AuthService] Failed to mark session as expired:', error);
@@ -557,12 +561,12 @@ export class AuthService {
    */
   async deleteAccount(accountId: string): Promise<AuthResult> {
     try {
-      console.log('🔑 [AuthService] deleteAccount() 開始 - アカウントID:', accountId);
+      log.info('deleteAccount 開始', { accountId });
       
-      console.log('🔑 [AuthService] ストア読み込み中...');
+      log.debug('ストア読み込み中');
       const storeResult = await this.loadAuthStore();
       if (!storeResult.success) {
-        console.error('🔑 [AuthService] ストア読み込み失敗:', storeResult.error);
+        log.error('ストア読み込み失敗', { error: storeResult.error });
         return {
           success: false,
           error: storeResult.error,
@@ -570,15 +574,15 @@ export class AuthService {
       }
 
       const authStore = storeResult.data!;
-      console.log(`🔑 [AuthService] 現在のアカウント数: ${authStore.accounts.length}`);
+      log.debug('現在のアカウント数', { count: authStore.accounts.length });
       
       const accountIndex = authStore.accounts.findIndex(
         (account) => account.id === accountId
       );
-      console.log('🔑 [AuthService] 削除対象アカウントのインデックス:', accountIndex);
+      log.debug('削除対象アカウントのインデックス', { accountIndex });
 
       if (accountIndex < 0) {
-        console.warn('🔑 [AuthService] アカウントが見つかりません:', accountId);
+        log.warn('アカウントが見つかりません', { accountId });
         return {
           success: false,
           error: {
@@ -590,19 +594,19 @@ export class AuthService {
 
       // 削除前のアカウント情報をログ出力
       const deletingAccount = authStore.accounts[accountIndex];
-      console.log('🔑 [AuthService] 削除対象アカウント:', deletingAccount.profile.handle);
+      log.debug('削除対象アカウント', { handle: deletingAccount.profile.handle });
 
       // アカウントを削除
       authStore.accounts.splice(accountIndex, 1);
-      console.log(`🔑 [AuthService] アカウント削除後の配列サイズ: ${authStore.accounts.length}`);
+      log.debug('アカウント削除後の配列サイズ', { size: authStore.accounts.length });
 
-      console.log('🔑 [AuthService] ストア保存中...');
+      log.debug('ストア保存中');
       const saveResult = await this.saveAuthStore(authStore);
-      console.log('🔑 [AuthService] ストア保存結果:', saveResult);
+      log.debug('ストア保存結果', { result: saveResult });
       
       return saveResult;
     } catch (error) {
-      console.error('🔑 [AuthService] deleteAccount() 例外:', error);
+      log.error('deleteAccount() 例外', { error });
       return {
         success: false,
         error: {
@@ -618,12 +622,12 @@ export class AuthService {
    */
   async clearAll(): Promise<AuthResult> {
     try {
-      console.log('🔑 [AuthService] clearAll() 開始 - 全認証データクリア処理');
+      log.info('clearAll() 開始 - 全認証データクリア処理');
       
       // 現在のストア状態を確認
       try {
         const currentStore = await this.loadAuthStore();
-        console.log('🔑 [AuthService] 現在のストア状態:', {
+        log.debug('現在のストア状態', {
           success: currentStore.success,
           accountCount: currentStore.success ? currentStore.data?.accounts?.length || 0 : 'N/A',
           error: currentStore.error
