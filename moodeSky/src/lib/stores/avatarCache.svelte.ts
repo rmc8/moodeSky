@@ -56,6 +56,12 @@ class AvatarCacheStore {
   
   /** 初期化状態 */
   private isInitialized = $state(false);
+  
+  /** クリーンアップタスクのインターバルID（メモリリーク防止用） */
+  private cleanupIntervalId: number | null = null;
+  
+  /** 現在実行中のフェッチPromiseマップ（レースコンディション防止用） */
+  private fetchPromises = new Map<string, Promise<AvatarFetchResult>>();
 
   // ===================================================================
   // 算出プロパティ
@@ -246,12 +252,30 @@ class AvatarCacheStore {
    * 単一アバターを取得
    */
   private async fetchAvatar(did: string): Promise<AvatarFetchResult> {
-    if (this.fetchingDids.has(did)) {
-      // すでに取得中の場合は待機
-      return await this.waitForFetch(did);
+    // 既に取得中の場合は同じPromiseを返す（レースコンディション防止）
+    const existingPromise = this.fetchPromises.get(did);
+    if (existingPromise) {
+      return existingPromise;
     }
 
+    // 新しいフェッチPromiseを作成してキャッシュに保存
+    const fetchPromise = this.performSingleFetch(did);
+    this.fetchPromises.set(did, fetchPromise);
+    
+    // Promise完了後にキャッシュから削除
+    fetchPromise.finally(() => {
+      this.fetchPromises.delete(did);
+      this.fetchingDids.delete(did);
+    });
+    
     this.fetchingDids.add(did);
+    return fetchPromise;
+  }
+  
+  /**
+   * 実際のフェッチ処理を実行
+   */
+  private async performSingleFetch(did: string): Promise<AvatarFetchResult> {
 
     try {
       // AT Protocol APIを使用してプロフィール取得
@@ -296,8 +320,6 @@ class AvatarCacheStore {
         fromCache: false
       };
 
-    } finally {
-      this.fetchingDids.delete(did);
     }
   }
 
@@ -481,33 +503,6 @@ class AvatarCacheStore {
     }, 100);
   }
 
-  /**
-   * 取得完了を待機
-   */
-  private async waitForFetch(did: string): Promise<AvatarFetchResult> {
-    const maxWait = 10000; // 最大10秒待機
-    const startTime = Date.now();
-    
-    while (this.fetchingDids.has(did) && (Date.now() - startTime) < maxWait) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    
-    const cached = this.getCachedAvatar(did);
-    if (cached) {
-      return {
-        success: cached.status === 'success',
-        data: cached,
-        error: cached.error,
-        fromCache: true
-      };
-    }
-    
-    return {
-      success: false,
-      error: 'Fetch timeout',
-      fromCache: false
-    };
-  }
 
   /**
    * 既存アカウントからキャッシュを初期構築
@@ -540,10 +535,36 @@ class AvatarCacheStore {
    * 定期クリーンアップタスクを開始
    */
   private startCleanupTask(): void {
+    // 既存のインターバルがあれば先にクリア
+    this.stopCleanupTask();
+    
     // 5分おきにクリーンアップを実行
-    setInterval(() => {
+    this.cleanupIntervalId = setInterval(() => {
       this.cleanupExpiredCache();
-    }, 5 * 60 * 1000);
+    }, 5 * 60 * 1000) as number;
+  }
+  
+  /**
+   * 定期クリーンアップタスクを停止
+   */
+  private stopCleanupTask(): void {
+    if (this.cleanupIntervalId !== null) {
+      clearInterval(this.cleanupIntervalId);
+      this.cleanupIntervalId = null;
+    }
+  }
+  
+  /**
+   * ストアを破棄してリソースをクリーンアップ
+   * メモリリーク防止のため、アプリケーション終了時や不要になった時に呼び出す
+   */
+  public destroy(): void {
+    this.stopCleanupTask();
+    this.cache.clear();
+    this.fetchingDids.clear();
+    this.batchQueue.clear();
+    this.fetchPromises.clear();
+    this.isInitialized = false;
   }
 
   /**
