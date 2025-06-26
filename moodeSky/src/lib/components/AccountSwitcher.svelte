@@ -89,14 +89,11 @@
       <!-- すべてのアカウントオプション -->
       {#if showAllAccountsOption && accounts.length > 1}
         <button
-          class="w-full p-4 rounded-lg border transition-all duration-200 flex items-center gap-3 text-left"
+          class="w-full p-4 rounded-lg border transition-all duration-200 flex items-center gap-3 text-left group"
           class:border-primary={isAllAccountsSelected}
-          class:bg-primary={isAllAccountsSelected}
-          class:bg-opacity-5={isAllAccountsSelected}
           class:border-subtle={!isAllAccountsSelected}
           class:hover:border-primary={!isAllAccountsSelected}
-          class:hover:bg-primary={!isAllAccountsSelected}
-          class:hover:bg-opacity-5={!isAllAccountsSelected}
+          class:hover:bg-muted={!isAllAccountsSelected}
           onclick={() => handleAccountSelect('all')}
         >
           <!-- 複数アバター表示 - 円形分割モード -->
@@ -113,22 +110,10 @@
           
           <!-- 「すべてのアカウント」テキスト -->
           <div class="flex-1 min-w-0">
-            <div 
-              class="font-semibold transition-colors duration-200"
-              class:text-white={isAllAccountsSelected}
-              class:text-themed={!isAllAccountsSelected}
-              class:hover:text-white={!isAllAccountsSelected}
-            >
+            <div class="font-semibold text-themed transition-colors duration-200">
               すべてのアカウント
             </div>
-            <div 
-              class="text-sm transition-colors duration-200"
-              class:text-white={isAllAccountsSelected}
-              class:text-opacity-80={isAllAccountsSelected}
-              class:text-secondary={!isAllAccountsSelected}
-              class:hover:text-white={!isAllAccountsSelected}
-              class:hover:text-opacity-80={!isAllAccountsSelected}
-            >
+            <div class="text-sm text-secondary transition-colors duration-200">
               {accounts.length}個のアカウント
             </div>
           </div>
@@ -148,14 +133,11 @@
       <!-- アカウント一覧 -->
       {#each accounts as account (account.profile.did)}
         <button
-          class="w-full p-4 rounded-lg border transition-all duration-200 flex items-center gap-3 text-left"
+          class="w-full p-4 rounded-lg border transition-all duration-200 flex items-center gap-3 text-left group"
           class:border-primary={activeAccount?.profile.did === account.profile.did && !isAllAccountsSelected}
-          class:bg-primary={activeAccount?.profile.did === account.profile.did && !isAllAccountsSelected}
-          class:bg-opacity-5={activeAccount?.profile.did === account.profile.did && !isAllAccountsSelected}
           class:border-subtle={activeAccount?.profile.did !== account.profile.did || isAllAccountsSelected}
           class:hover:border-primary={activeAccount?.profile.did !== account.profile.did || isAllAccountsSelected}
-          class:hover:bg-primary={activeAccount?.profile.did !== account.profile.did || isAllAccountsSelected}
-          class:hover:bg-opacity-5={activeAccount?.profile.did !== account.profile.did || isAllAccountsSelected}
+          class:hover:bg-muted={activeAccount?.profile.did !== account.profile.did || isAllAccountsSelected}
           onclick={() => handleAccountSelect(account)}
         >
           <!-- アバター - flex-shrink-0で固定幅確保 -->
@@ -170,22 +152,10 @@
           
           <!-- アカウント情報 -->
           <div class="flex-1 min-w-0">
-            <div 
-              class="font-semibold truncate transition-colors duration-200"
-              class:text-white={activeAccount?.profile.did === account.profile.did && !isAllAccountsSelected}
-              class:text-themed={activeAccount?.profile.did !== account.profile.did || isAllAccountsSelected}
-              class:hover:text-white={activeAccount?.profile.did !== account.profile.did || isAllAccountsSelected}
-            >
+            <div class="font-semibold truncate text-themed transition-colors duration-200">
               {account.profile.displayName || account.profile.handle}
             </div>
-            <div 
-              class="text-sm truncate transition-colors duration-200"
-              class:text-white={activeAccount?.profile.did === account.profile.did && !isAllAccountsSelected}
-              class:text-opacity-80={activeAccount?.profile.did === account.profile.did && !isAllAccountsSelected}
-              class:text-secondary={activeAccount?.profile.did !== account.profile.did || isAllAccountsSelected}
-              class:hover:text-white={activeAccount?.profile.did !== account.profile.did || isAllAccountsSelected}
-              class:hover:text-opacity-80={activeAccount?.profile.did !== account.profile.did || isAllAccountsSelected}
-            >
+            <div class="text-sm truncate text-secondary transition-colors duration-200">
               @{account.profile.handle}
             </div>
           </div>
@@ -201,17 +171,17 @@
       
       <!-- アカウント追加ボタン -->
       <button
-        class="w-full p-4 rounded-lg border border-dashed border-primary border-opacity-30 hover:border-primary hover:border-opacity-60 hover:bg-primary hover:bg-opacity-5 transition-all duration-200 flex items-center gap-3 text-left"
+        class="w-full p-4 rounded-lg border border-dashed border-primary border-opacity-30 hover:border-primary hover:border-opacity-60 hover:bg-muted transition-all duration-200 flex items-center gap-3 text-left group"
         onclick={handleAddAccount}
       >
-        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary bg-opacity-10 flex items-center justify-center">
+        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary bg-opacity-10 flex items-center justify-center transition-all duration-200">
           <Icon icon={ICONS.ADD} size="md" color="primary" />
         </div>
         <div class="flex-1 min-w-0">
-          <div class="font-semibold text-primary">
+          <div class="font-semibold text-primary transition-colors duration-200">
             {m['settings.account.addAccount']()}
           </div>
-          <div class="text-sm text-secondary">
+          <div class="text-sm text-secondary transition-colors duration-200">
             {m['settings.account.addAccountDescription']()}
           </div>
         </div>
