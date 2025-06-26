@@ -42,7 +42,6 @@
   let scrollElement: HTMLElement;
   let isRefreshing = $state(false);
   let showAccountSwitcher = $state(false);
-  let accountSwitcherPosition = $state({ x: 0, y: 0 });
 
   // ===================================================================
   // アバター表示用のロジック - アバターキャッシュ統合
@@ -208,16 +207,35 @@
    * アカウント切り替え処理
    */
   async function handleAccountSelect(account: Account | 'all') {
-    if (account === 'all') {
-      console.log('Selected all accounts for deck');
-      // 全アカウント選択時
-      await deckStore.updateColumnAccount(column.id, 'all', allAccounts);
-    } else {
-      console.log('Selected account for deck:', account.profile.handle);
-      // 単一アカウント選択時
-      await deckStore.updateColumnAccount(column.id, account.profile.did);
+    console.log('🔄 [DeckColumn] handleAccountSelect called with:', account === 'all' ? 'all accounts' : account.profile.handle);
+    console.log('🔄 [DeckColumn] column.id:', column.id);
+    console.log('🔄 [DeckColumn] allAccounts:', allAccounts);
+    
+    try {
+      if (account === 'all') {
+        console.log('🔄 [DeckColumn] Setting all accounts for deck');
+        // 全アカウント選択時
+        await deckStore.updateColumnAccount(column.id, 'all', allAccounts);
+        console.log('🔄 [DeckColumn] All accounts set successfully');
+      } else {
+        console.log('🔄 [DeckColumn] Setting single account for deck:', account.profile.handle);
+        // 単一アカウント選択時
+        await deckStore.updateColumnAccount(column.id, account.profile.did);
+        console.log('🔄 [DeckColumn] Single account set successfully');
+      }
+      
+      // デバッグ: 更新後のカラム状態を確認
+      const updatedColumn = deckStore.getColumn(column.id);
+      console.log('🔄 [DeckColumn] Updated column state:', {
+        accountId: updatedColumn?.accountId,
+        targetAccounts: updatedColumn?.targetAccounts?.length || 0
+      });
+      
+    } catch (error) {
+      console.error('🔄 [DeckColumn] Error updating column account:', error);
+    } finally {
+      showAccountSwitcher = false;
     }
-    showAccountSwitcher = false;
   }
 
   /**
@@ -258,10 +276,14 @@
     <!-- アカウント切り替えボタン -->
     <button 
       class="flex-shrink-0 p-1 rounded-lg hover:bg-muted/20 transition-colors relative"
-      onclick={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        accountSwitcherPosition = { x: rect.left, y: rect.bottom + 8 };
+      onclick={() => {
+        console.log('🎯 [DeckColumn] Avatar click event triggered');
+        console.log('🎯 [DeckColumn] allAccounts:', allAccounts);
+        console.log('🎯 [DeckColumn] displayAccounts:', displayAccounts);
+        
         showAccountSwitcher = !showAccountSwitcher;
+        
+        console.log('🎯 [DeckColumn] showAccountSwitcher set to:', showAccountSwitcher);
       }}
       aria-label="デッキのアカウントを切り替え"
       title="デッキのアカウントを切り替え"
@@ -270,7 +292,7 @@
         accounts={displayAccounts} 
         size="sm" 
         maxDisplay={4}
-        clickable={true}
+        clickable={false}
       />
     </button>
     
@@ -351,16 +373,16 @@
   </div>
 </div>
 
-<!-- アカウント切り替えモーダル -->
-{#if showAccountSwitcher && allAccounts}
+<!-- アカウント切り替えモーダル（AddDeckModalパターン） -->
+{#if showAccountSwitcher && allAccounts && allAccounts.length > 0}
+  {console.log('🎯 [DeckColumn] Rendering AccountSwitcher modal')}
   <AccountSwitcher
     isOpen={showAccountSwitcher}
     accounts={allAccounts}
     activeAccount={activeAccount || null}
-    position={accountSwitcherPosition}
-    isMobile={windowWidth < 768}
     showAllAccountsOption={true}
     isAllAccountsSelected={accountId === 'all'}
+    zIndex={9999}
     onClose={handleCloseAccountSwitcher}
     onAccountSelect={handleAccountSelect}
     onAddAccount={() => {

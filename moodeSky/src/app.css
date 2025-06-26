@@ -33,6 +33,7 @@
     --text-secondary: 71 85 105;    /* slate-600 - セカンダリテキスト用 */
     --text-inactive: 148 163 184;   /* slate-400 - 非アクティブ状態用 */
     --primary: 59 130 246;          /* sky blue - blue-500 */
+    --primary-foreground: 255 255 255; /* white - プライマリ背景に対する前景色 */
     --secondary: 37 99 235;         /* blue-600 */
     --accent: 56 189 248;           /* sky-400 */
     --muted: 248 250 252;           /* slate-50 - 背景専用 */
@@ -52,6 +53,7 @@
     --text-secondary: 203 213 225;  /* slate-300 - セカンダリテキスト用 */
     --text-inactive: 148 163 184;   /* slate-400 - 非アクティブ状態用 */
     --primary: 251 146 60;          /* sunset orange - orange-400 */
+    --primary-foreground: 15 23 42; /* slate-900 - オレンジ背景に対する前景色 */
     --secondary: 249 115 22;        /* orange-500 */
     --accent: 254 215 170;          /* orange-200 */
     --muted: 226 232 240;           /* slate-200 - 背景専用 */
