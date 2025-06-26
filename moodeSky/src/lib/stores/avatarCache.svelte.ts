@@ -314,7 +314,7 @@ class AvatarCacheStore {
         const batchResults = await this.fetchProfilesBatch(batch);
         
         for (const result of batchResults) {
-          if (result.success) {
+          if (result.success && result.data) {
             this.setCache(result.did, result.data);
             results.set(result.did, result.data);
           } else {
