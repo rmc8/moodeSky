@@ -62,10 +62,61 @@ class AccountsStore {
       const result = await authService.getAllAccounts();
       
       if (result.success) {
-        this.allAccounts = result.data || [];
-        log.info('アカウント一覧取得完了', {
+        const rawAccounts = result.data || [];
+        
+        // 重複アカウントのチェックと除去（DIDベース）
+        const dids = rawAccounts.map(acc => acc.profile.did);
+        const uniqueDids = [...new Set(dids)];
+        const handles = rawAccounts.map(acc => acc.profile.handle);
+        const uniqueHandles = [...new Set(handles)];
+        
+        console.log('🔍 [DUPLICATE CHECK] AccountsStore loadAccounts before deduplication:', {
+          totalAccounts: rawAccounts.length,
+          uniqueDids: uniqueDids.length,
+          uniqueHandles: uniqueHandles.length,
+          duplicateDids: dids.length !== uniqueDids.length,
+          duplicateHandles: handles.length !== uniqueHandles.length
+        });
+        
+        // DIDベースで重複を除去（最後にアクセスしたアカウント情報を保持）
+        const accountMap = new Map<string, Account>();
+        rawAccounts.forEach(account => {
+          const existingAccount = accountMap.get(account.profile.did);
+          if (!existingAccount || new Date(account.lastAccessAt) > new Date(existingAccount.lastAccessAt)) {
+            accountMap.set(account.profile.did, account);
+          }
+        });
+        
+        this.allAccounts = Array.from(accountMap.values());
+        
+        console.log('🔍 [FINAL RESULT] After deduplication:', {
+          originalCount: rawAccounts.length,
+          deduplicatedCount: this.allAccounts.length,
+          removedCount: rawAccounts.length - this.allAccounts.length,
+          finalAccounts: this.allAccounts.map(acc => ({
+            id: acc.id,
+            did: acc.profile.did,
+            handle: acc.profile.handle,
+            lastAccessAt: acc.lastAccessAt
+          }))
+        });
+        
+        if (rawAccounts.length !== this.allAccounts.length) {
+          console.warn('🔧 [DUPLICATE REMOVAL] Removed duplicate accounts:', {
+            originalCount: rawAccounts.length,
+            deduplicatedCount: this.allAccounts.length,
+            removedCount: rawAccounts.length - this.allAccounts.length
+          });
+        }
+        
+        log.info('アカウント一覧取得完了（重複除去済み）', {
           accountCount: this.allAccounts.length,
-          accounts: this.allAccounts.map(acc => ({ handle: acc.profile.handle, did: acc.profile.did }))
+          accounts: this.allAccounts.map(acc => ({ 
+            id: acc.id,
+            handle: acc.profile.handle, 
+            did: acc.profile.did,
+            displayName: acc.profile.displayName 
+          }))
         });
       } else {
         log.error('アカウント取得失敗', { error: result.error });
@@ -200,8 +251,22 @@ class AccountsStore {
    */
   async setActiveAccount(account: Account): Promise<void> {
     try {
+      console.log('🔄 [ACTIVE ACCOUNT] Setting active account:', {
+        handle: account.profile.handle,
+        did: account.profile.did,
+        id: account.id,
+        previousActiveAccount: this.activeAccount?.profile.handle || 'none'
+      });
+      
       // 直接アクティブアカウントを設定（authServiceには設定メソッドが存在しないため）
       this.activeAccount = account;
+      
+      console.log('✅ [ACTIVE ACCOUNT] Active account set successfully:', {
+        handle: account.profile.handle,
+        did: account.profile.did,
+        isActive: !!this.activeAccount
+      });
+      
       log.info('アクティブアカウント設定完了', {
         handle: account.profile.handle,
         did: account.profile.did
@@ -210,6 +275,7 @@ class AccountsStore {
       // 永続化（将来実装）
       // await this.saveActiveAccountPreference(account.id);
     } catch (error) {
+      console.error('❌ [ACTIVE ACCOUNT] Failed to set active account:', error);
       log.error('アクティブアカウント設定エラー', {
         error,
         handle: account.profile.handle
@@ -223,19 +289,33 @@ class AccountsStore {
    */
   async loadActiveAccount(): Promise<void> {
     try {
+      console.log('🔍 [ACTIVE ACCOUNT] Loading active account from authService...');
       const result = await authService.getActiveAccount();
+      
+      console.log('🔍 [ACTIVE ACCOUNT] AuthService result:', {
+        success: result.success,
+        hasData: !!result.data,
+        handle: result.data?.profile.handle || 'none',
+        error: result.error?.message || 'none'
+      });
       
       if (result.success && result.data) {
         this.activeAccount = result.data;
+        console.log('✅ [ACTIVE ACCOUNT] Active account loaded successfully:', {
+          handle: result.data.profile.handle,
+          did: result.data.profile.did
+        });
         log.info('アクティブアカウント取得完了', {
           handle: result.data.profile.handle,
           did: result.data.profile.did
         });
       } else {
+        console.log('⚠️ [ACTIVE ACCOUNT] No active account found');
         log.warn('アクティブアカウントが見つかりません');
         this.activeAccount = null;
       }
     } catch (error) {
+      console.error('❌ [ACTIVE ACCOUNT] Error loading active account:', error);
       log.error('アクティブアカウント取得エラー', { error });
       this.activeAccount = null;
     }
@@ -263,6 +343,15 @@ class AccountsStore {
     if (!this.isInitialized) {
       await this.loadAccounts();
       await this.loadActiveAccount();
+      
+      // アクティブアカウントが見つからない場合、最初のアカウントを自動設定
+      if (!this.activeAccount && this.allAccounts.length > 0) {
+        console.log('🔄 [AccountsStore] アクティブアカウントが未設定、最初のアカウントを設定:', {
+          targetAccount: this.allAccounts[0].profile.handle,
+          totalAccounts: this.allAccounts.length
+        });
+        await this.setActiveAccount(this.allAccounts[0]);
+      }
     }
   }
 }

@@ -1046,7 +1046,7 @@
               <DeckColumn
                 {column}
                 {index}
-                {accountId}
+                accountId={column.accountId}
                 {activeAccount}
                 {allAccounts}
                 onOpenDeckSettings={() => handleOpenSettings(column)}
@@ -1068,7 +1068,7 @@
             <DeckColumn
               {column}
               {index}
-              {accountId}
+              accountId={column.accountId}
               {activeAccount}
               {allAccounts}
               onOpenDeckSettings={() => handleOpenSettings(column)}

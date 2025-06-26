@@ -48,13 +48,23 @@
   // ===================================================================
   
   /**
-   * 表示対象アカウントの決定（マルチアカウント対応）
-   * 全アカウント選択時は targetAccounts または allAccounts を使用、単一選択時は activeAccount を使用
+   * 表示対象アカウントの決定（カラム設定優先）
+   * カラム固有のaccountIdを最優先で使用し、アクティブアカウントはフォールバックのみ
    */
   const displayAccounts = $derived.by((): Account[] => {
     try {
-      if (accountId === 'all') {
-        // 全アカウント選択時：優先度は targetAccounts > allAccounts > activeAccount
+      // カラム設定のアカウントIDを取得（プロップのaccountIdではなくcolumn.accountIdを使用）
+      const columnAccountId = column.accountId;
+      
+      console.log(`🎯 [DeckColumn] Column account resolution:`, {
+        columnId: column.id,
+        columnAccountId,
+        propsAccountId: accountId,
+        columnTitle: column.settings.title
+      });
+      
+      if (columnAccountId === 'all') {
+        // 全アカウント選択時：動的に変化（ログイン・ログアウトで変動）
         if (column.targetAccounts && column.targetAccounts.length > 0) {
           console.log(`🎭 [DeckColumn] Using targetAccounts for 'all' (${column.targetAccounts.length} accounts)`);
           
@@ -67,7 +77,7 @@
           
           return column.targetAccounts;
         } else if (allAccounts.length > 0) {
-          // 新しいフォールバック：allAccounts を使用
+          // 全アカウントを動的に使用
           console.log(`🎭 [DeckColumn] Using allAccounts for 'all' (${allAccounts.length} accounts)`);
           
           // 各アカウントのアバターを並行でプリフェッチ
@@ -85,13 +95,41 @@
         }
       }
       
-      // 単一アカウント選択時：activeAccount を使用
+      // 単一アカウント選択時：カラム固有アカウントを優先検索
+      const columnAccount = allAccounts.find(acc => 
+        acc.profile.did === columnAccountId || 
+        acc.profile.handle === columnAccountId ||
+        acc.id === columnAccountId
+      );
+      
+      if (columnAccount) {
+        console.log(`✅ [DeckColumn] Using column-specific account:`, {
+          columnAccountId,
+          foundAccount: {
+            did: columnAccount.profile.did,
+            handle: columnAccount.profile.handle,
+            displayName: columnAccount.profile.displayName,
+            hasAvatar: !!columnAccount.profile.avatar
+          }
+        });
+        
+        // アバターキャッシュへのプリフェッチ
+        avatarCache.getAvatar(columnAccount.profile.did).catch((error) => {
+          console.warn(`🎭 [DeckColumn] Avatar cache prefetch failed for ${columnAccount.profile.did}:`, error);
+        });
+        
+        return [columnAccount];
+      }
+      
+      // フォールバック：アクティブアカウントを使用
       if (activeAccount) {
-        console.log(`🎭 [DeckColumn] Using activeAccount for ${accountId}:`, {
-          did: activeAccount.profile.did,
-          handle: activeAccount.profile.handle,
-          displayName: activeAccount.profile.displayName,
-          hasAvatar: !!activeAccount.profile.avatar
+        console.warn(`⚠️ [DeckColumn] Column account not found, falling back to activeAccount:`, {
+          columnAccountId,
+          fallbackAccount: {
+            did: activeAccount.profile.did,
+            handle: activeAccount.profile.handle,
+            displayName: activeAccount.profile.displayName
+          }
         });
         
         // アバターキャッシュへのプリフェッチ
@@ -101,7 +139,7 @@
         
         return [activeAccount];
       } else {
-        console.warn(`🎭 [DeckColumn] No activeAccount available for ${accountId}`);
+        console.error(`❌ [DeckColumn] No account available for column ${column.id}`);
         return [];
       }
     } catch (error) {
@@ -293,6 +331,7 @@
         size="sm" 
         maxDisplay={4}
         clickable={false}
+        displayMode={displayAccounts.length > 1 ? "split" : "overlap"}
       />
     </button>
     
@@ -306,12 +345,12 @@
           {column.settings.title}
         </h3>
         <p class="text-xs text-themed opacity-60">
-          {#if accountId === 'all' && displayAccounts.length > 1}
+          {#if column.accountId === 'all' && displayAccounts.length > 1}
             すべてのアカウント ({displayAccounts.length})
           {:else if displayAccounts.length > 0}
             @{displayAccounts[0].profile.handle}
           {:else}
-            @{accountId || 'user'}
+            @{column.accountId || 'user'}
           {/if}
         </p>
       </div>
@@ -381,7 +420,7 @@
     accounts={allAccounts}
     activeAccount={activeAccount || null}
     showAllAccountsOption={true}
-    isAllAccountsSelected={accountId === 'all'}
+    isAllAccountsSelected={column.accountId === 'all'}
     zIndex={9999}
     onClose={handleCloseAccountSwitcher}
     onAccountSelect={handleAccountSelect}

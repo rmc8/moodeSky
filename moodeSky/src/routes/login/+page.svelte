@@ -116,6 +116,26 @@
       // アカウントストアにも追加（リアクティブ更新）
       if (saveResult.data) {
         await accountsStore.addAccount(saveResult.data);
+        
+        // ログイン成功時にアクティブアカウントとして設定
+        await accountsStore.setActiveAccount(saveResult.data);
+        log.info('アクティブアカウント設定完了', {
+          handle: saveResult.data.profile.handle,
+          did: saveResult.data.profile.did
+        });
+        
+        // アクティブアカウントが確実に設定されたことを確認
+        if (!accountsStore.activeAccount) {
+          log.error('アクティブアカウント設定確認失敗');
+          errorMessage = 'アクティブアカウントの設定に失敗しました';
+          return;
+        }
+        
+        log.info('遷移準備完了', {
+          activeAccount: accountsStore.activeAccount.profile.handle,
+          isAddMode,
+          targetPath: isAddMode ? '/settings' : '/deck'
+        });
       }
       
       // アカウント追加モードの場合は設定画面に戻る
