@@ -358,6 +358,30 @@ const navItems = $derived<NavItem[]>([
 ]);
 ```
 
+### 5. AT Protocol Identification Pattern
+**Critical Rule: Always use DID for reliable identification**
+
+**Identification Hierarchy (by reliability):**
+1. **DID (Decentralized Identifier)**: **IMMUTABLE** - Never changes, highest reliability
+2. **Handle**: **VARIABLE** - Can change, lower reliability for persistent identification
+
+```typescript
+// ✅ Good: Use DID for persistent identification, caching, and database keys
+const cachedProfile = avatarCache.get(account.profile.did);
+const accountLookup = accounts.find(acc => acc.profile.did === targetDid);
+
+// ⚠️ Acceptable: Use handle for display and user-facing features only
+const displayText = `@${account.profile.handle}`;
+const userFriendlyId = account.profile.handle;
+
+// ❌ Bad: Using handle for persistent identification or caching
+const cachedProfile = cache.get(account.profile.handle); // Handle can change!
+```
+
+**Key Use Cases:**
+- **DID**: Database keys, caching, persistent references, account matching
+- **Handle**: User display, @mentions, user-friendly URLs, temporary lookups
+
 ## Important Files & Configurations
 
 ### Critical Files to Monitor

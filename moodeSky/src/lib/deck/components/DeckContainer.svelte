@@ -28,12 +28,13 @@
 
   interface Props {
     accountId: string;
+    activeAccount?: import('$lib/types/auth.js').Account;
     className?: string;
     showAddDeckModal?: boolean;
     onCloseAddDeckModal?: () => void;
   }
 
-  const { accountId, className = '', showAddDeckModal: externalShowAddDeckModal = false, onCloseAddDeckModal }: Props = $props();
+  const { accountId, activeAccount, className = '', showAddDeckModal: externalShowAddDeckModal = false, onCloseAddDeckModal }: Props = $props();
 
   // ===================================================================
   // 状態管理
@@ -1045,6 +1046,7 @@
                 {column}
                 {index}
                 {accountId}
+                {activeAccount}
                 onOpenDeckSettings={() => handleOpenSettings(column)}
               />
             </div>
@@ -1065,6 +1067,7 @@
               {column}
               {index}
               {accountId}
+              {activeAccount}
               onOpenDeckSettings={() => handleOpenSettings(column)}
             />
           </div>

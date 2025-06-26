@@ -39,6 +39,14 @@
       const result = await authService.getActiveAccount();
       if (result.success && result.data) {
         activeAccount = result.data;
+        debugLog('🔍 [SideNavigation] Active account loaded:', {
+          handle: activeAccount.profile.handle,
+          displayName: activeAccount.profile.displayName,
+          avatar: activeAccount.profile.avatar,
+          avatarAvailable: !!activeAccount.profile.avatar
+        });
+      } else {
+        debugLog('⚠️ [SideNavigation] Failed to load active account:', result);
       }
     };
     
@@ -123,6 +131,7 @@
   class="fixed left-0 top-0 bottom-0 z-40 w-64 bg-card border-r border-subtle shadow-lg flex flex-col"
   aria-label={t('navigation.home')}
 >
+
   <!-- 上部: 投稿ボタン -->
   <div class="flex-shrink-0 p-4">
     <button
