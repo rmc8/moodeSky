@@ -10,12 +10,15 @@
   import Icon from '$lib/components/Icon.svelte';
   import AvatarGroup from '$lib/components/AvatarGroup.svelte';
   import AccountSwitcher from '$lib/components/AccountSwitcher.svelte';
+  import PostCard from '$lib/components/PostCard.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { deckStore } from '../store.svelte.js';
   import type { Column, ColumnWidth } from '../types.js';
   import type { Account } from '$lib/types/auth.js';
   import { COLUMN_WIDTHS, getFeedTypeIcon } from '../types.js';
   import { avatarCache } from '$lib/stores/avatarCache.svelte.js';
+  import { timelineService } from '$lib/services/timelineService.js';
+  import type { SimplePost } from '$lib/types/post.js';
   import * as m from '../../../paraglide/messages.js';
 
   // ===================================================================
@@ -42,6 +45,8 @@
   let scrollElement: HTMLElement;
   let isRefreshing = $state(false);
   let showAccountSwitcher = $state(false);
+  let posts = $state<SimplePost[]>([]);
+  let timelineError = $state<string | null>(null);
 
   // ===================================================================
   // アバター表示用のロジック - アバターキャッシュ統合
@@ -210,23 +215,60 @@
 
 
   /**
-   * リフレッシュ（現在は仮実装）
+   * タイムライン読み込み（ホームフィード対応）
    */
   async function handleRefresh() {
     if (isRefreshing) return;
 
     try {
       isRefreshing = true;
-      console.log('🎛️ [DeckColumn] Refreshing column:', column.id);
+      timelineError = null;
+      console.log('🎛️ [DeckColumn] Loading timeline for column:', column.id);
       
-      // 仮のリフレッシュ処理（2秒待機）
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // 実際のAPI呼び出しはここで実装
-      // await fetchColumnData();
+      // ホームフィードのみ対応（段階的実装）
+      if (column.algorithm === 'home') {
+        // 表示対象のアカウントを取得
+        const targetAccount = displayAccounts[0];
+        if (!targetAccount) {
+          throw new Error('No account available for timeline');
+        }
+        
+        console.log('📋 [DeckColumn] Loading timeline for account:', targetAccount.profile.handle);
+        
+        // タイムラインデータを取得
+        const timelineData = await timelineService.getTimeline(targetAccount);
+        
+        // SimplePost形式に変換
+        const simplePosts: SimplePost[] = timelineData.map((item: any) => {
+          const post = item.post || item; // AT Protocolの構造に対応
+          return {
+            uri: post.uri,
+            cid: post.cid,
+            author: {
+              did: post.author.did,
+              handle: post.author.handle,
+              displayName: post.author.displayName,
+              avatar: post.author.avatar
+            },
+            text: post.record?.text || '',
+            createdAt: post.record?.createdAt || post.indexedAt,
+            replyCount: post.replyCount,
+            repostCount: post.repostCount,
+            likeCount: post.likeCount,
+            indexedAt: post.indexedAt
+          };
+        });
+        
+        posts = simplePosts;
+        console.log('✅ [DeckColumn] Timeline loaded:', posts.length, 'posts');
+      } else {
+        // 他のフィードタイプは後の段階で実装
+        console.log('ℹ️ [DeckColumn] Feed type not yet supported:', column.algorithm);
+      }
       
     } catch (error) {
-      console.error('🎛️ [DeckColumn] Failed to refresh column:', error);
+      console.error('🎛️ [DeckColumn] Failed to load timeline:', error);
+      timelineError = error instanceof Error ? error.message : 'タイムラインの読み込みに失敗しました';
     } finally {
       isRefreshing = false;
     }
@@ -381,34 +423,54 @@
     class="flex-1 overflow-y-auto overflow-x-hidden scrollbar-professional w-full min-w-0 max-w-full"
     bind:this={scrollElement}
   >
-    <!-- 空状態（現在の実装） -->
-    <div class="flex flex-col items-center justify-center h-full text-center w-full min-w-0 max-w-full" class:p-6={windowWidth >= 768} class:px-4={windowWidth < 768} class:py-6={windowWidth < 768}>
-      <div class="mb-4 opacity-40">
-        <Icon icon={ICONS.INBOX} size="lg" color="themed" />
-      </div>
-      <h4 class="font-medium text-themed mb-2">
-        {m['deck.column.empty.title']()}
-      </h4>
-      <p class="text-sm text-themed opacity-70 mb-6 max-w-48">
-        {m['deck.column.empty.description']()}
-      </p>
-      <button 
-        class="button-primary text-sm px-4 py-2"
-        onclick={handleRefresh}
-        disabled={isRefreshing}
-      >
-        {isRefreshing ? m['deck.column.loading']() : m['deck.column.loadContent']()}
-      </button>
-    </div>
-
-    <!-- 将来: タイムラインコンテンツがここに表示される -->
-    <!-- {#if column.data.feed.length > 0}
-      <div class="deck-column__feed">
-        {#each column.data.feed as post}
+    {#if posts.length > 0}
+      <!-- タイムライン表示 -->
+      <div class="space-y-2 p-2">
+        {#each posts as post (post.uri)}
           <PostCard {post} />
         {/each}
       </div>
-    {/if} -->
+    {:else if timelineError}
+      <!-- エラー状態 -->
+      <div class="flex flex-col items-center justify-center h-full text-center w-full min-w-0 max-w-full" class:p-6={windowWidth >= 768} class:px-4={windowWidth < 768} class:py-6={windowWidth < 768}>
+        <div class="mb-4 opacity-40">
+          <Icon icon={ICONS.WARNING} size="lg" color="error" />
+        </div>
+        <h4 class="font-medium text-themed mb-2">
+          読み込みエラー
+        </h4>
+        <p class="text-sm text-themed opacity-70 mb-6 max-w-48">
+          {timelineError}
+        </p>
+        <button 
+          class="button-primary text-sm px-4 py-2"
+          onclick={handleRefresh}
+          disabled={isRefreshing}
+        >
+          再試行
+        </button>
+      </div>
+    {:else}
+      <!-- 空状態 -->
+      <div class="flex flex-col items-center justify-center h-full text-center w-full min-w-0 max-w-full" class:p-6={windowWidth >= 768} class:px-4={windowWidth < 768} class:py-6={windowWidth < 768}>
+        <div class="mb-4 opacity-40">
+          <Icon icon={ICONS.INBOX} size="lg" color="themed" />
+        </div>
+        <h4 class="font-medium text-themed mb-2">
+          {m['deck.column.empty.title']()}
+        </h4>
+        <p class="text-sm text-themed opacity-70 mb-6 max-w-48">
+          {m['deck.column.empty.description']()}
+        </p>
+        <button 
+          class="button-primary text-sm px-4 py-2"
+          onclick={handleRefresh}
+          disabled={isRefreshing}
+        >
+          {isRefreshing ? m['deck.column.loading']() : m['deck.column.loadContent']()}
+        </button>
+      </div>
+    {/if}
   </div>
 </div>
 
