@@ -29,9 +29,9 @@
     }
   });
   
-  // 表示名の決定（displayName > handle）
-  const authorDisplayName = $derived(
-    post.author.displayName || `@${post.author.handle}`
+  // displayNameの有効性チェック
+  const hasValidDisplayName = $derived(
+    post.author.displayName && post.author.displayName.trim() !== ''
   );
 </script>
 
@@ -50,23 +50,28 @@
     
     <!-- 作者情報と日時 -->
     <div class="flex-1 min-w-0">
-      <div class="flex items-center gap-2 flex-wrap">
-        <!-- 表示名 -->
-        <h3 class="font-semibold text-themed text-sm truncate">
-          {authorDisplayName}
-        </h3>
-        
-        <!-- ハンドル -->
-        {#if post.author.displayName}
-          <span class="text-secondary text-sm truncate">
-            @{post.author.handle}
-          </span>
+      <!-- 1行目: 表示名と日時 (displayNameが有効な場合のみ) -->
+      {#if hasValidDisplayName}
+        <div class="flex items-center justify-between gap-2">
+          <h3 class="font-semibold text-themed text-sm truncate">
+            {post.author.displayName}
+          </h3>
+          <time class="text-secondary text-sm flex-shrink-0" datetime={post.createdAt}>
+            {formatDate()}
+          </time>
+        </div>
+      {/if}
+      
+      <!-- 2行目: ハンドル -->
+      <div class="flex items-center gap-2">
+        <span class="text-secondary text-sm truncate">
+          @{post.author.handle}
+        </span>
+        {#if !hasValidDisplayName}
+          <time class="text-secondary text-sm flex-shrink-0" datetime={post.createdAt}>
+            {formatDate()}
+          </time>
         {/if}
-        
-        <!-- 日時 -->
-        <time class="text-secondary text-sm flex-shrink-0" datetime={post.createdAt}>
-          {formatDate}
-        </time>
       </div>
     </div>
   </header>
