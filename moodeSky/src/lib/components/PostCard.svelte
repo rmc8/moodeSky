@@ -5,6 +5,7 @@
 -->
 <script lang="ts">
   import Avatar from './Avatar.svelte';
+  import { formatRelativeTime, formatAbsoluteTime } from '$lib/utils/relativeTime.js';
   import type { SimplePost } from '$lib/types/post.js';
   
   interface Props {
@@ -14,20 +15,11 @@
   
   const { post, class: className = '' }: Props = $props();
   
-  // 投稿日時の表示用フォーマット
-  const formatDate = $derived(() => {
-    try {
-      const date = new Date(post.createdAt);
-      return date.toLocaleString('ja-JP', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch (error) {
-      return '日時不明';
-    }
-  });
+  // 投稿日時の相対時間表示
+  const relativeTime = $derived(() => formatRelativeTime(post.createdAt));
+  
+  // ツールチップ用の絶対時間表示  
+  const absoluteTime = $derived(() => formatAbsoluteTime(post.createdAt));
   
   // displayNameの有効性チェック
   const hasValidDisplayName = $derived(
@@ -56,8 +48,12 @@
           <h3 class="font-semibold text-themed text-sm truncate">
             {post.author.displayName}
           </h3>
-          <time class="text-secondary text-sm flex-shrink-0" datetime={post.createdAt}>
-            {formatDate()}
+          <time 
+            class="text-secondary text-sm flex-shrink-0" 
+            datetime={post.createdAt}
+            title={absoluteTime()}
+          >
+            {relativeTime()}
           </time>
         </div>
       {/if}
@@ -68,8 +64,12 @@
           @{post.author.handle}
         </span>
         {#if !hasValidDisplayName}
-          <time class="text-secondary text-sm flex-shrink-0" datetime={post.createdAt}>
-            {formatDate()}
+          <time 
+            class="text-secondary text-sm flex-shrink-0" 
+            datetime={post.createdAt}
+            title={absoluteTime()}
+          >
+            {relativeTime()}
           </time>
         {/if}
       </div>
