@@ -17,7 +17,8 @@
   import type { Account } from '$lib/types/auth.js';
   import { COLUMN_WIDTHS, getFeedTypeIcon } from '../types.js';
   import { avatarCache } from '$lib/stores/avatarCache.svelte.js';
-  import { timelineService } from '$lib/services/timelineService.js';
+  import { agentManager } from '$lib/services/agentManager.js';
+  import { timelineService, TimelineError, TimelineErrorType } from '$lib/services/timelineService.js';
   import type { SimplePost } from '$lib/types/post.js';
   import * as m from '../../../paraglide/messages.js';
 
@@ -47,6 +48,7 @@
   let showAccountSwitcher = $state(false);
   let posts = $state<SimplePost[]>([]);
   let timelineError = $state<string | null>(null);
+  let timelineErrorType = $state<TimelineErrorType | null>(null);
 
   // ===================================================================
   // アバター表示用のロジック - アバターキャッシュ統合
@@ -72,26 +74,10 @@
         // 全アカウント選択時：動的に変化（ログイン・ログアウトで変動）
         if (column.targetAccounts && column.targetAccounts.length > 0) {
           console.log(`🎭 [DeckColumn] Using targetAccounts for 'all' (${column.targetAccounts.length} accounts)`);
-          
-          // 各アカウントのアバターを並行でプリフェッチ
-          column.targetAccounts.forEach(account => {
-            avatarCache.getAvatar(account.profile.did).catch((error) => {
-              console.warn(`🎭 [DeckColumn] Avatar cache prefetch failed for ${account.profile.did}:`, error);
-            });
-          });
-          
           return column.targetAccounts;
         } else if (allAccounts.length > 0) {
           // 全アカウントを動的に使用
           console.log(`🎭 [DeckColumn] Using allAccounts for 'all' (${allAccounts.length} accounts)`);
-          
-          // 各アカウントのアバターを並行でプリフェッチ
-          allAccounts.forEach(account => {
-            avatarCache.getAvatar(account.profile.did).catch((error) => {
-              console.warn(`🎭 [DeckColumn] Avatar cache prefetch failed for ${account.profile.did}:`, error);
-            });
-          });
-          
           return allAccounts;
         } else {
           // 最終フォールバック：activeAccount を使用
@@ -118,11 +104,6 @@
           }
         });
         
-        // アバターキャッシュへのプリフェッチ
-        avatarCache.getAvatar(columnAccount.profile.did).catch((error) => {
-          console.warn(`🎭 [DeckColumn] Avatar cache prefetch failed for ${columnAccount.profile.did}:`, error);
-        });
-        
         return [columnAccount];
       }
       
@@ -135,11 +116,6 @@
             handle: activeAccount.profile.handle,
             displayName: activeAccount.profile.displayName
           }
-        });
-        
-        // アバターキャッシュへのプリフェッチ
-        avatarCache.getAvatar(activeAccount.profile.did).catch((error) => {
-          console.warn(`🎭 [DeckColumn] Avatar cache prefetch failed for ${activeAccount.profile.did}:`, error);
         });
         
         return [activeAccount];
@@ -171,6 +147,23 @@
       // デスクトップ: 従来通りの固定幅
       const width = COLUMN_WIDTHS[column.settings.width];
       return `width: ${width.width}px; min-width: ${width.width}px;`;
+    }
+  });
+
+  // ===================================================================
+  // エフェクト
+  // ===================================================================
+
+  // アバターキャッシュプリフェッチ
+  $effect(() => {
+    // displayAccountsが変更されたときにアバターをプリフェッチ
+    if (displayAccounts.length > 0) {
+      displayAccounts.forEach(account => {
+        // 非同期処理だが、エラーは無視（プリフェッチのため）
+        avatarCache.getAvatar(account.profile.did).catch((error) => {
+          console.warn(`🎭 [DeckColumn] Avatar cache prefetch failed for ${account.profile.did}:`, error);
+        });
+      });
     }
   });
 
@@ -223,6 +216,7 @@
     try {
       isRefreshing = true;
       timelineError = null;
+      timelineErrorType = null;
       console.log('🎛️ [DeckColumn] Loading timeline for column:', column.id);
       
       // ホームフィードのみ対応（段階的実装）
@@ -235,8 +229,15 @@
         
         console.log('📋 [DeckColumn] Loading timeline for account:', targetAccount.profile.handle);
         
-        // タイムラインデータを取得
-        const timelineData = await timelineService.getTimeline(targetAccount);
+        // AgentManagerからAgentを取得
+        const agent = agentManager.getAgent(targetAccount);
+        console.log('🎯 [DeckColumn] Got agent from AgentManager:', { 
+          accountDid: targetAccount.profile.did, 
+          agentStatus: agent.status 
+        });
+        
+        // タイムラインデータを取得（Agent注入）
+        const timelineData = await timelineService.getTimeline(targetAccount, agent);
         
         // SimplePost形式に変換
         const simplePosts: SimplePost[] = timelineData.map((item: any) => {
@@ -268,7 +269,21 @@
       
     } catch (error) {
       console.error('🎛️ [DeckColumn] Failed to load timeline:', error);
-      timelineError = error instanceof Error ? error.message : 'タイムラインの読み込みに失敗しました';
+      
+      if (error instanceof TimelineError) {
+        // TimelineErrorの場合、適切なメッセージを表示
+        timelineError = error.message;
+        timelineErrorType = error.type;
+        
+        // セッション期限切れの場合は特別な処理
+        if (error.type === TimelineErrorType.SESSION_EXPIRED) {
+          console.warn('🎛️ [DeckColumn] Session expired, user needs to re-login');
+        }
+      } else {
+        // その他のエラー
+        timelineError = error instanceof Error ? error.message : 'タイムラインの読み込みに失敗しました';
+        timelineErrorType = null;
+      }
     } finally {
       isRefreshing = false;
     }
@@ -434,21 +449,47 @@
       <!-- エラー状態 -->
       <div class="flex flex-col items-center justify-center h-full text-center w-full min-w-0 max-w-full" class:p-6={windowWidth >= 768} class:px-4={windowWidth < 768} class:py-6={windowWidth < 768}>
         <div class="mb-4 opacity-40">
-          <Icon icon={ICONS.WARNING} size="lg" color="error" />
+          {#if timelineErrorType === TimelineErrorType.SESSION_EXPIRED}
+            <Icon icon={ICONS.LOGIN} size="lg" color="warning" />
+          {:else if timelineErrorType === TimelineErrorType.NETWORK_ERROR}
+            <Icon icon={ICONS.ERROR} size="lg" color="error" />
+          {:else}
+            <Icon icon={ICONS.WARNING} size="lg" color="error" />
+          {/if}
         </div>
+        
         <h4 class="font-medium text-themed mb-2">
-          読み込みエラー
+          {#if timelineErrorType === TimelineErrorType.SESSION_EXPIRED}
+            認証が必要です
+          {:else if timelineErrorType === TimelineErrorType.NETWORK_ERROR}
+            接続エラー
+          {:else}
+            読み込みエラー
+          {/if}
         </h4>
+        
         <p class="text-sm text-themed opacity-70 mb-6 max-w-48">
           {timelineError}
         </p>
-        <button 
-          class="button-primary text-sm px-4 py-2"
-          onclick={handleRefresh}
-          disabled={isRefreshing}
-        >
-          再試行
-        </button>
+        
+        <div class="flex flex-col gap-3">
+          {#if timelineErrorType === TimelineErrorType.SESSION_EXPIRED}
+            <button 
+              class="button-primary text-sm px-4 py-2"
+              onclick={() => window.location.href = '/login'}
+            >
+              再ログイン
+            </button>
+          {:else}
+            <button 
+              class="button-primary text-sm px-4 py-2"
+              onclick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? '読み込み中...' : '再試行'}
+            </button>
+          {/if}
+        </div>
       </div>
     {:else}
       <!-- 空状態 -->
