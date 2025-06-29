@@ -30,11 +30,11 @@ export class MultiAccountService {
       const errors: string[] = [];
 
       for (const account of accountsResult.data!) {
-        const agentResult = await agentManager.getAgent(account.id);
-        if (agentResult.success && agentResult.data) {
-          agents.push(agentResult.data);
-        } else {
-          errors.push(`Failed to initialize agent for ${account.profile.handle}: ${agentResult.error?.message}`);
+        try {
+          const agent = agentManager.getAgent(account);
+          agents.push(agent);
+        } catch (error) {
+          errors.push(`Failed to initialize agent for ${account.profile.handle}: ${error}`);
         }
       }
 
@@ -64,8 +64,8 @@ export class MultiAccountService {
         return { success: true, data: null };
       }
 
-      const agentResult = await agentManager.getAgent(activeAccountResult.data.id);
-      return agentResult;
+      const agent = agentManager.getAgent(activeAccountResult.data);
+      return { success: true, data: agent };
     } catch (error) {
       return {
         success: false,
@@ -104,8 +104,17 @@ export class MultiAccountService {
       }
 
       // エージェントを作成
-      const agentResult = await agentManager.getAgent(accountResult.data.id);
-      if (!agentResult.success || !agentResult.data) {
+      try {
+        const agent = agentManager.getAgent(accountResult.data);
+        
+        return {
+          success: true,
+          data: {
+            account: accountResult.data,
+            agent: agent
+          }
+        };
+      } catch (error) {
         return {
           success: false,
           error: {
@@ -114,14 +123,6 @@ export class MultiAccountService {
           }
         };
       }
-
-      return {
-        success: true,
-        data: {
-          account: accountResult.data,
-          agent: agentResult.data
-        }
-      };
     } catch (error) {
       return {
         success: false,
@@ -138,8 +139,11 @@ export class MultiAccountService {
    */
   async removeAccount(accountId: string): Promise<AgentResult> {
     try {
-      // エージェントを削除
-      const agentRemovalResult = agentManager.removeAgent(accountId);
+      // アカウント情報を取得してからエージェントを削除
+      const accountResult = await authService.getAccountById(accountId);
+      if (accountResult.success && accountResult.data) {
+        agentManager.removeAgent(accountResult.data);
+      }
       
       // アカウントを削除
       const accountRemovalResult = await authService.deleteAccount(accountId);
@@ -184,11 +188,18 @@ export class MultiAccountService {
 
       const accountsWithAgents = [];
       for (const account of accountsResult.data!) {
-        const agentResult = await agentManager.getAgent(account.id);
-        accountsWithAgents.push({
-          account,
-          agent: agentResult.success && agentResult.data ? agentResult.data : null
-        });
+        try {
+          const agent = agentManager.getAgent(account);
+          accountsWithAgents.push({
+            account,
+            agent: agent
+          });
+        } catch (error) {
+          accountsWithAgents.push({
+            account,
+            agent: null
+          });
+        }
       }
 
       return { success: true, data: accountsWithAgents };
@@ -207,22 +218,36 @@ export class MultiAccountService {
    * 全てのエージェントのセッションを検証
    */
   async validateAllSessions(): Promise<{ validCount: number; invalidCount: number; details: Array<{ accountId: string; handle: string; isValid: boolean }> }> {
-    const agents = agentManager.getActiveAgents();
+    const accountsResult = await authService.getAllAccounts();
+    if (!accountsResult.success) {
+      return { validCount: 0, invalidCount: 0, details: [] };
+    }
+    
     const results = [];
     let validCount = 0;
     let invalidCount = 0;
 
-    for (const agent of agents) {
-      const isValid = await agent.validateSession();
-      results.push({
-        accountId: agent.account.id,
-        handle: agent.account.profile.handle,
-        isValid
-      });
+    for (const account of accountsResult.data!) {
+      try {
+        const agent = agentManager.getAgent(account);
+        const isValid = await agent.validateSession();
+        results.push({
+          accountId: account.id,
+          handle: account.profile.handle,
+          isValid
+        });
 
-      if (isValid) {
-        validCount++;
-      } else {
+        if (isValid) {
+          validCount++;
+        } else {
+          invalidCount++;
+        }
+      } catch (error) {
+        results.push({
+          accountId: account.id,
+          handle: account.profile.handle,
+          isValid: false
+        });
         invalidCount++;
       }
     }
@@ -238,7 +263,7 @@ export class MultiAccountService {
    * リソースをクリーンアップ
    */
   cleanup(): void {
-    agentManager.dispose();
+    agentManager.removeAllAgents();
   }
 }
 
