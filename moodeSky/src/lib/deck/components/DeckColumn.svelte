@@ -46,6 +46,8 @@
 
   let scrollElement: HTMLElement;
   let isRefreshing = $state(false);
+  let isInitialLoading = $state(false);
+  let hasTriedAutoLoad = $state(false);
   let showAccountSwitcher = $state(false);
   let posts = $state<SimplePost[]>([]);
   let timelineError = $state<string | null>(null);
@@ -168,6 +170,23 @@
     }
   });
 
+  // 自動読み込み監視（アカウント初期化完了後のリアクティブ処理）
+  $effect(() => {
+    // displayAccountsが利用可能になったときに自動読み込みを試行
+    console.log('🎛️ [DeckColumn] Auto-load effect triggered:', {
+      columnId: column.id,
+      displayAccountsLength: displayAccounts.length,
+      hasTriedAutoLoad,
+      postsLength: posts.length,
+      algorithm: column.algorithm
+    });
+
+    if (shouldAutoLoad()) {
+      console.log('🎛️ [DeckColumn] Starting reactive auto-load for column:', column.id);
+      handleAutoLoad();
+    }
+  });
+
   // ===================================================================
   // ライフサイクル
   // ===================================================================
@@ -194,6 +213,12 @@
     }
 
     console.log('🎛️ [DeckColumn] Column mounted:', column.id, column.settings.title);
+    
+    // 自動コンテンツ読み込み
+    if (shouldAutoLoad()) {
+      console.log('🎛️ [DeckColumn] Starting auto-load for column:', column.id);
+      handleAutoLoad();
+    }
   });
 
   onDestroy(() => {
@@ -204,9 +229,73 @@
   });
 
   // ===================================================================
-  // イベントハンドラー
+  // ヘルパー関数
   // ===================================================================
 
+  /**
+   * 自動読み込みを実行すべきかどうかを判定
+   */
+  function shouldAutoLoad(): boolean {
+    // 既に自動読み込みを試行済みの場合はスキップ
+    if (hasTriedAutoLoad) {
+      console.log('🎛️ [DeckColumn] Auto-load skipped: already attempted');
+      return false;
+    }
+
+    // ホームフィードのみ対応（段階的実装）
+    if (column.algorithm !== 'home') {
+      console.log('🎛️ [DeckColumn] Auto-load skipped: non-home algorithm:', column.algorithm);
+      return false;
+    }
+
+    // 有効なアカウントが存在することを確認
+    if (displayAccounts.length === 0) {
+      console.log('🎛️ [DeckColumn] Auto-load skipped: no display accounts available');
+      return false;
+    }
+
+    // 既にコンテンツが読み込まれている場合はスキップ
+    if (posts.length > 0) {
+      console.log('🎛️ [DeckColumn] Auto-load skipped: content already loaded');
+      return false;
+    }
+
+    // エラー状態の場合はスキップ（手動リトライを促す）
+    if (timelineError) {
+      console.log('🎛️ [DeckColumn] Auto-load skipped: previous error state');
+      return false;
+    }
+
+    console.log('🎛️ [DeckColumn] Auto-load conditions met for column:', column.id);
+    return true;
+  }
+
+  /**
+   * 初期自動読み込みを実行
+   */
+  async function handleAutoLoad() {
+    if (isInitialLoading || isRefreshing) return;
+
+    try {
+      hasTriedAutoLoad = true;
+      isInitialLoading = true;
+      console.log('🎛️ [DeckColumn] Auto-loading content for column:', column.id);
+      
+      // handleRefreshと同じロジックを使用
+      await handleRefresh();
+      
+      console.log('🎛️ [DeckColumn] Auto-load completed for column:', column.id);
+    } catch (error) {
+      console.error('🎛️ [DeckColumn] Auto-load failed for column:', column.id, error);
+      // エラーは既にhandleRefresh内で適切に処理される
+    } finally {
+      isInitialLoading = false;
+    }
+  }
+
+  // ===================================================================
+  // イベントハンドラー
+  // ===================================================================
 
   /**
    * タイムライン読み込み（ホームフィード対応）
@@ -445,6 +534,19 @@
         {#each posts as post (post.uri)}
           <PostCard {post} />
         {/each}
+      </div>
+    {:else if isInitialLoading}
+      <!-- 初期読み込み中状態 -->
+      <div class="flex flex-col items-center justify-center h-full text-center w-full min-w-0 max-w-full" class:p-6={windowWidth >= 768} class:px-4={windowWidth < 768} class:py-6={windowWidth < 768}>
+        <div class="mb-4 opacity-60">
+          <Icon icon={ICONS.REFRESH} size="lg" color="themed" />
+        </div>
+        <h4 class="font-medium text-themed mb-2">
+          コンテンツを読み込み中
+        </h4>
+        <p class="text-sm text-themed opacity-70 max-w-48">
+          タイムラインを取得しています...
+        </p>
       </div>
     {:else if timelineError}
       <!-- エラー状態 -->
