@@ -7,6 +7,7 @@
 -->
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
+  import { goto } from '$app/navigation';
   import Icon from '$lib/components/Icon.svelte';
   import AvatarGroup from '$lib/components/AvatarGroup.svelte';
   import AccountSwitcher from '$lib/components/AccountSwitcher.svelte';
@@ -476,9 +477,9 @@
           {#if timelineErrorType === TimelineErrorType.SESSION_EXPIRED}
             <button 
               class="button-primary text-sm px-4 py-2"
-              onclick={() => window.location.href = '/login'}
+              onclick={() => goto('/settings?tab=account')}
             >
-              再ログイン
+              {m['settings.account.title']()}
             </button>
           {:else}
             <button 

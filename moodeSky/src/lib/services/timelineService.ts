@@ -65,7 +65,7 @@ export class TimelineService {
       if (errorMessage.includes('expired') || errorMessage.includes('invalid') || errorMessage.includes('token')) {
         throw new TimelineError(
           TimelineErrorType.SESSION_EXPIRED,
-          'セッションの有効期限が切れています。再ログインしてください。',
+          'このアカウントのセッションが期限切れです。アカウント管理で確認してください。',
           error instanceof Error ? error : new Error(String(error))
         );
       }
