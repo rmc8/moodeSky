@@ -88,6 +88,8 @@ export const ICONS = {
   // Bluesky/ソーシャルメディア機能
   FAVORITE: 'material-symbols:favorite',
   FAVORITE_BORDER: 'material-symbols:favorite-border',
+  // 代替ハートアイコン（フォールバック用）
+  HEART_OUTLINE: 'material-symbols:favorite-outline',
   REPEAT: 'material-symbols:repeat',
   CHAT_BUBBLE: 'material-symbols:chat-bubble-outline',
   REPLY: 'material-symbols:reply',

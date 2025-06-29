@@ -107,7 +107,7 @@ import { message } from '@tauri-apps/plugin-dialog';
     try {
       isSavingSize = true;
       
-      // TODO: deckStore.updateDeckSize(deckId, size);
+      await deckStore.updateColumnSettings(deckId, { width: size });
       console.log('🎛️ [DeckSettings] Deck size update:', { deckId, newSize: size });
       
       currentDeckSize = size;
@@ -167,11 +167,10 @@ import { message } from '@tauri-apps/plugin-dialog';
   // デッキサイズの初期化（deckStoreから取得）
   $effect(() => {
     if (isOpen && deckId && deckStore.columns.length > 0) {
-      // TODO: 実際のデッキサイズをdeckStoreから取得
-      // const column = deckStore.columns.find(c => c.accountId === deckId);
-      // if (column) {
-      //   currentDeckSize = column.settings.width;
-      // }
+      const column = deckStore.columns.find(c => c.id === deckId);
+      if (column && column.settings.width) {
+        currentDeckSize = column.settings.width;
+      }
       console.log('🎛️ [DeckSettings] Initializing deck size for:', deckId);
     }
   });
