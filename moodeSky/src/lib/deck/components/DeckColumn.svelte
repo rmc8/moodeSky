@@ -532,7 +532,7 @@
       <!-- タイムライン表示 -->
       <div class="space-y-2 p-2">
         {#each posts as post (post.uri)}
-          <PostCard {post} />
+          <PostCard {post} columnWidth={column.settings.width} />
         {/each}
       </div>
     {:else if isInitialLoading}
