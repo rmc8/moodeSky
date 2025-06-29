@@ -136,6 +136,23 @@ export const ICONS = {
   // 音量・アクティビティ
   VOLUME_DOWN: 'material-symbols:volume-down',
   VOLUME_UP: 'material-symbols:volume-up',
+  VOLUME_OFF: 'material-symbols:volume-off',
+  
+  // メディアコントロール
+  PLAY_ARROW: 'material-symbols:play-arrow',
+  PAUSE: 'material-symbols:pause',
+  STOP: 'material-symbols:stop',
+  SKIP_NEXT: 'material-symbols:skip-next',
+  SKIP_PREVIOUS: 'material-symbols:skip-previous',
+  FAST_FORWARD: 'material-symbols:fast-forward',
+  FAST_REWIND: 'material-symbols:fast-rewind',
+  REPLAY: 'material-symbols:replay',
+  
+  // 画面・表示
+  FULLSCREEN: 'material-symbols:fullscreen',
+  FULLSCREEN_EXIT: 'material-symbols:fullscreen-exit',
+  ZOOM_IN: 'material-symbols:zoom-in',
+  ZOOM_OUT: 'material-symbols:zoom-out',
   
   // デッキ・カラム管理
   DASHBOARD: 'material-symbols:dashboard',
@@ -170,6 +187,11 @@ export const ICONS = {
   ATTACH_FILE: 'material-symbols:attach-file',
   DOWNLOAD: 'material-symbols:download',
   UPLOAD: 'material-symbols:upload',
+  
+  // リンク・ナビゲーション
+  OPEN_IN_NEW: 'material-symbols:open-in-new',
+  LINK: 'material-symbols:link',
+  LINK_OFF: 'material-symbols:link-off',
   
   // 設定・スケジュール
   SCHEDULE: 'material-symbols:schedule',

@@ -1,7 +1,10 @@
 /**
  * シンプルなPost型定義
  * 段階的実装: 基本表示に必要な最小限のフィールドのみ
+ * 埋め込みコンテンツ（images, video, external, record）対応
  */
+
+import type { Embed, EmbedView } from '$lib/components/embeddings/types.js';
 
 /**
  * 投稿作者の基本情報
@@ -27,6 +30,10 @@ export interface SimplePost {
   // 投稿内容
   text: string;
   createdAt: string;
+  
+  // 埋め込みコンテンツ
+  embed?: Embed | EmbedView;
+  embeds?: (Embed | EmbedView)[];
   
   // 基本統計
   replyCount?: number;

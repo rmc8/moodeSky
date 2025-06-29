@@ -1,11 +1,12 @@
 <!--
   PostCard.svelte
   シンプルなポスト表示カード
-  段階的実装: 作者名、テキスト、日時、アクションボタン
+  段階的実装: 作者名、テキスト、日時、アクションボタン、埋め込みコンテンツ
 -->
 <script lang="ts">
   import Avatar from './Avatar.svelte';
   import PostActionButton from './post/PostActionButton.svelte';
+  import EmbedRenderer from './embeddings/EmbedRenderer.svelte';
   import { formatRelativeTime, formatAbsoluteTime } from '$lib/utils/relativeTime.js';
   import { ICONS } from '$lib/types/icon.js';
   import type { SimplePost } from '$lib/types/post.js';
@@ -48,6 +49,61 @@
     post.author.displayName && post.author.displayName.trim() !== ''
   );
 
+  // 埋め込みコンテンツの存在チェック
+  const hasEmbeds = $derived(() => {
+    const result = !!(post.embed || (post.embeds && post.embeds.length > 0));
+    
+    // デバッグログ: 埋め込み検出状況（$state.snapshot使用）
+    if (post.embed || post.embeds) {
+      console.log('🎯 [PostCard] Embed detection for post:', $state.snapshot({
+        postUri: post.uri,
+        hasEmbed: !!post.embed,
+        embedType: post.embed?.$type,
+        hasEmbeds: !!(post.embeds && post.embeds.length > 0),
+        embedsCount: post.embeds?.length || 0,
+        embedsTypes: post.embeds?.map(e => e.$type) || [],
+        hasEmbeds_result: result,
+        rawEmbed: post.embed,
+        rawEmbeds: post.embeds
+      }));
+    }
+    
+    return result;
+  });
+
+  // 埋め込みデータの統一化（embed または embeds）
+  const embedsData = $derived(() => {
+    let result = null;
+    
+    if (post.embeds && post.embeds.length > 0) {
+      result = $state.snapshot(post.embeds);  // スナップショット化
+      console.log('🎯 [PostCard] Using post.embeds (snapshot):', {
+        postUri: post.uri,
+        embedsCount: post.embeds.length,
+        resultType: Array.isArray(result) ? `Array(${result.length})` : typeof result,
+        resultStructure: result,
+        hasTypes: result ? result.map(e => e?.$type) : 'none'
+      });
+    } else if (post.embed) {
+      result = $state.snapshot(post.embed);  // スナップショット化
+      console.log('🎯 [PostCard] Using post.embed (snapshot):', {
+        postUri: post.uri,
+        embedType: post.embed.$type,
+        resultType: typeof result,
+        resultStructure: result,
+        hasType: result?.$type || 'missing'
+      });
+    } else {
+      console.log('🎯 [PostCard] No embed data found:', {
+        postUri: post.uri,
+        hasEmbed: !!post.embed,
+        hasEmbeds: !!(post.embeds && post.embeds.length > 0)
+      });
+    }
+    
+    return result;
+  });
+
   // アクションボタンハンドラー（将来のAT Protocol連携用）
   function handleReply() {
     console.log('Reply to post:', post.uri);
@@ -67,6 +123,44 @@
   function handleMore() {
     console.log('More options for post:', post.uri);
     // TODO: その他メニュー実装
+  }
+
+  // 埋め込みコンテンツハンドラー
+  function handlePostClick(uri: string, cid: string) {
+    console.log('Navigate to quoted post:', uri, cid);
+    // TODO: 引用投稿へのナビゲーション実装
+  }
+
+  function handleAuthorClick(did: string, handle: string) {
+    console.log('Navigate to profile:', did, handle);
+    // TODO: プロフィールページへのナビゲーション実装
+  }
+
+  function handleImageClick(imageIndex: number, imageUrl: string) {
+    console.log('Open image viewer:', imageIndex, imageUrl);
+    // TODO: 画像ビューアー実装
+  }
+
+  function handleVideoClick(videoUrl: string) {
+    console.log('Open video player:', videoUrl);
+    // TODO: 動画プレーヤー実装
+  }
+
+  function handleLinkClick(url: string, event: MouseEvent) {
+    console.log('Open external link:', url);
+    // デフォルト: 新しいタブで開く
+    window.open(url, '_blank', 'noopener,noreferrer');
+    event.preventDefault();
+  }
+
+  function handleMediaClick(mediaUrl: string, mediaType: string) {
+    console.log('Open media:', mediaType, mediaUrl);
+    // TODO: 統一メディアビューアー実装
+  }
+
+  function handleEmbedError(error: Error, embed: unknown) {
+    console.warn('Embed rendering error:', error, embed);
+    // TODO: エラー報告システム実装
   }
 </script>
 
@@ -123,6 +217,48 @@
   <div class="text-themed text-sm leading-relaxed whitespace-pre-wrap break-words mb-3">
     {post.text}
   </div>
+
+  <!-- 埋め込みコンテンツエリア -->
+  {#if hasEmbeds()}
+    <div class="mb-3">
+      {console.log('🎯 [PostCard] Rendering EmbedRenderer with data:', {
+        postUri: post.uri,
+        embedsData: embedsData(),
+        hasEmbeds: hasEmbeds()
+      })}
+      <EmbedRenderer 
+        embeds={embedsData()}
+        options={{
+          maxWidth: columnWidth === 'xxs' ? 220 : 
+                   columnWidth === 'xs' ? 280 :
+                   columnWidth === 'small' ? 350 :
+                   columnWidth === 'medium' ? 450 :
+                   columnWidth === 'large' ? 550 :
+                   columnWidth === 'xl' ? 650 :
+                   columnWidth === 'xxl' ? 800 : 600,
+          rounded: true,
+          interactive: true,
+          clickable: true,
+          lazy: true
+        }}
+        onPostClick={handlePostClick}
+        onAuthorClick={handleAuthorClick}
+        onImageClick={handleImageClick}
+        onVideoClick={handleVideoClick}
+        onLinkClick={handleLinkClick}
+        onMediaClick={handleMediaClick}
+        onError={handleEmbedError}
+        maxEmbeds={3}
+        debug={true}
+      />
+    </div>
+  {:else}
+    {console.log('🎯 [PostCard] No embeds to render for post:', {
+      postUri: post.uri,
+      hasEmbeds: hasEmbeds(),
+      embedsData: embedsData()
+    })}
+  {/if}
 
   <!-- アクションボタンエリア -->
   <footer class="flex items-center justify-between">
