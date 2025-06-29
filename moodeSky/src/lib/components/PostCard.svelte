@@ -47,7 +47,6 @@
   const hasValidDisplayName = $derived(
     post.author.displayName && post.author.displayName.trim() !== ''
   );
-  
 
   // アクションボタンハンドラー（将来のAT Protocol連携用）
   function handleReply() {
