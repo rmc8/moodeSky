@@ -189,7 +189,7 @@
           {:else if imageError}
             <!-- 画像読み込みエラー表示 -->
             <div class="absolute inset-0 bg-muted flex items-center justify-center">
-              <Icon icon={ICONS.IMAGE_OFF} size="md" color="inactive" />
+              <Icon icon={ICONS.ERROR} size="md" color="inactive" />
             </div>
           {/if}
           
