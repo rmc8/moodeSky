@@ -29,95 +29,49 @@ export class AuthService {
     this.sessionEventHandler = sessionEventHandler;
   }
 
+  // 競合制御用のロックマップ
+  private sessionUpdateLocks = new Map<string, Promise<void>>();
+
   /**
-   * persistSession用のハンドラー
-   * @atproto/api の自動セッション更新時に呼び出される
+   * persistSession用のハンドラー (Issue #89で大幅改善)
+   * AT Protocol の自動セッション更新時に呼び出される
+   * refreshToken rotation の確実な処理と原子性を保証
    */
   createPersistSessionHandler = (accountId?: string) => {
     return async (evt: AtpSessionEvent, sess?: AtpSessionData) => {
+      // 入力検証
+      if (!accountId) {
+        log.warn('persistSessionHandler called without accountId', { event: evt });
+        return;
+      }
+
       try {
-        log.debug('SessionEvent', { event: evt, accountId, hasSession: !!sess });
+        log.info('SessionEvent received', { 
+          event: evt, 
+          accountId, 
+          hasSession: !!sess,
+          handle: sess?.handle 
+        });
 
-        if (evt === 'update' && sess) {
-          // 既存のアカウント情報を取得してrefreshJwtを比較
-          let oldRefreshJwt: string | undefined;
-          let oldRefreshJwtExpiration: Date | null = null;
-          
-          if (accountId) {
-            const accountResult = await this.getAccountById(accountId);
-            if (accountResult.success && accountResult.data) {
-              oldRefreshJwt = accountResult.data.session?.refreshJwt;
-              if (oldRefreshJwt) {
-                const { getTokenExpiration, getTokenIssuedAt } = await import('../utils/jwt.js');
-                oldRefreshJwtExpiration = getTokenExpiration(oldRefreshJwt);
-                const oldIssuedAt = getTokenIssuedAt(oldRefreshJwt);
-                log.debug('旧RefreshJwt情報', {
-                  accountId,
-                  handle: accountResult.data.profile.handle,
-                  tokenLength: oldRefreshJwt.length,
-                  issuedAt: oldIssuedAt?.toISOString(),
-                  expiresAt: oldRefreshJwtExpiration?.toISOString(),
-                  remainingDays: oldRefreshJwtExpiration ? Math.ceil((oldRefreshJwtExpiration.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 'N/A'
-                });
-              }
+        switch (evt) {
+          case 'update':
+            if (sess) {
+              await this.handleSessionUpdate(accountId, sess);
             }
-          }
-
-          // 新しいrefreshJwtの情報を分析
-          if (sess.refreshJwt) {
-            const { getTokenExpiration, getTokenIssuedAt } = await import('../utils/jwt.js');
-            const newRefreshJwtExpiration = getTokenExpiration(sess.refreshJwt);
-            const newIssuedAt = getTokenIssuedAt(sess.refreshJwt);
+            break;
             
-            log.debug('新RefreshJwt情報', {
-              accountId,
-              handle: sess.handle,
-              tokenLength: sess.refreshJwt.length,
-              issuedAt: newIssuedAt?.toISOString(),
-              expiresAt: newRefreshJwtExpiration?.toISOString(),
-              remainingDays: newRefreshJwtExpiration ? Math.ceil((newRefreshJwtExpiration.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 'N/A'
-            });
-
-            // refreshJwtが実際に更新されたかチェック
-            const isRefreshJwtUpdated = oldRefreshJwt !== sess.refreshJwt;
-            const isExpirationUpdated = oldRefreshJwtExpiration?.getTime() !== newRefreshJwtExpiration?.getTime();
+          case 'create':
+            if (sess) {
+              await this.handleSessionCreate(accountId, sess);
+            }
+            break;
             
-            log.debug('RefreshJwt更新状況', {
-              accountId,
-              isRefreshJwtUpdated,
-              isExpirationUpdated,
-              oldExpiration: oldRefreshJwtExpiration?.toISOString(),
-              newExpiration: newRefreshJwtExpiration?.toISOString(),
-              message: isRefreshJwtUpdated ? '✅ RefreshJwt が更新されました' : '⚠️ RefreshJwt は更新されませんでした（accessJwtのみ更新）'
-            });
-          }
-
-          // セッション更新時の処理
-          await this.updateAccountSession(accountId, sess);
-        } else if (evt === 'create' && sess) {
-          // セッション作成時の処理（通常のログイン時は別経路なので、ここは自動更新用）
-          log.debug('Session created via persistSession');
-          
-          if (sess.refreshJwt) {
-            const { getTokenExpiration, getTokenIssuedAt } = await import('../utils/jwt.js');
-            const refreshJwtExpiration = getTokenExpiration(sess.refreshJwt);
-            const issuedAt = getTokenIssuedAt(sess.refreshJwt);
+          case 'expired':
+            await this.handleSessionExpired(accountId);
+            break;
             
-            console.log('🆕 [AuthService] 新規作成RefreshJwt情報:', {
-              accountId,
-              handle: sess.handle,
-              tokenLength: sess.refreshJwt.length,
-              issuedAt: issuedAt?.toISOString(),
-              expiresAt: refreshJwtExpiration?.toISOString(),
-              remainingDays: refreshJwtExpiration ? Math.ceil((refreshJwtExpiration.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 'N/A'
-            });
-          }
-        } else if (evt === 'expired') {
-          // セッション期限切れ時の処理
-          log.warn('Session expired', { accountId });
-          if (accountId) {
-            await this.markAccountSessionExpired(accountId);
-          }
+          default:
+            log.debug('Unhandled session event', { event: evt, accountId });
         }
 
         // 外部ハンドラーがあれば実行
@@ -125,71 +79,351 @@ export class AuthService {
           await this.sessionEventHandler(evt, sess);
         }
       } catch (error) {
-        log.error('persistSession handler error', { error });
+        log.error('persistSession handler critical error', { 
+          error, 
+          event: evt, 
+          accountId,
+          handle: sess?.handle 
+        });
+        
+        // 重要: エラーを再スローしてBskyAgentに失敗を通知
+        throw error;
       }
     };
   };
 
   /**
-   * アカウントのセッション情報を更新
+   * セッション更新処理 (refreshToken rotation対応)
    */
-  private async updateAccountSession(accountId: string | undefined, session: AtpSessionData): Promise<void> {
+  private async handleSessionUpdate(accountId: string, session: AtpSessionData): Promise<void> {
+    // 競合制御: 同じアカウントの同時更新を防止
+    const lockKey = `session_update_${accountId}`;
+    
+    // 既存の更新処理があれば待機
+    const existingLock = this.sessionUpdateLocks.get(lockKey);
+    if (existingLock) {
+      log.debug('Waiting for existing session update', { accountId });
+      await existingLock;
+    }
+
+    // 新しい更新処理を開始
+    const updatePromise = this.performAtomicSessionUpdate(accountId, session);
+    this.sessionUpdateLocks.set(lockKey, updatePromise);
+
     try {
-      if (!accountId) {
-        // accountIdが指定されていない場合、セッションのDIDから検索
-        const allAccountsResult = await this.getAllAccounts();
-        if (!allAccountsResult.success || !allAccountsResult.data) {
-          log.warn('Failed to get accounts for session update');
-          return;
-        }
+      await updatePromise;
+      log.info('Session update completed successfully', { 
+        accountId, 
+        handle: session.handle 
+      });
+    } finally {
+      // ロックを解除
+      this.sessionUpdateLocks.delete(lockKey);
+    }
+  }
 
-        const matchingAccount = allAccountsResult.data.find(
-          account => account.profile.did === session.did
-        );
-
-        if (!matchingAccount) {
-          log.warn('No matching account found for session update', { did: session.did });
-          return;
-        }
-
-        accountId = matchingAccount.id;
-      }
-
-      // アカウント情報を取得
+  /**
+   * 原子性のあるセッション更新処理
+   */
+  private async performAtomicSessionUpdate(accountId: string, newSession: AtpSessionData): Promise<void> {
+    let backup: Account | null = null;
+    
+    try {
+      // 1. セッションデータの検証
+      await this.validateSessionData(newSession);
+      
+      // 2. 既存アカウント情報を取得（バックアップ用）
       const accountResult = await this.getAccountById(accountId);
       if (!accountResult.success || !accountResult.data) {
-        log.warn('Account not found for session update', { accountId });
-        return;
+        throw new Error(`Account not found for session update: ${accountId}`);
       }
-
-      const account = accountResult.data;
-
-      // セッション情報を更新
-      const updatedAccount: Account = {
-        ...account,
-        session,
-        lastAccessAt: new Date().toISOString(),
-      };
-
-      // ストアに保存
-      const storeResult = await this.loadAuthStore();
-      if (!storeResult.success || !storeResult.data) {
-        log.error('Failed to load store for session update');
-        return;
+      
+      backup = { ...accountResult.data };
+      const oldSession = backup.session;
+      
+      // 3. refreshToken rotation の分析とログ
+      await this.analyzeTokenRotation(accountId, oldSession, newSession);
+      
+      // 4. 原子的なセッション更新
+      await this.atomicUpdateAccountSession(accountId, newSession);
+      
+      // 5. SessionManager・JWT Token Manager への通知
+      await this.notifySessionUpdate(accountId, newSession);
+      
+      // 6. 整合性チェック
+      await this.verifySessionIntegrity(accountId, newSession);
+      
+      log.info('Atomic session update successful', {
+        accountId,
+        handle: newSession.handle,
+        accessTokenUpdated: oldSession?.accessJwt !== newSession.accessJwt,
+        refreshTokenUpdated: oldSession?.refreshJwt !== newSession.refreshJwt
+      });
+      
+    } catch (error) {
+      log.error('Atomic session update failed', { 
+        error, 
+        accountId, 
+        handle: newSession.handle 
+      });
+      
+      // ロールバック処理
+      if (backup) {
+        try {
+          await this.rollbackSession(accountId, backup);
+          log.info('Session rollback completed', { accountId });
+        } catch (rollbackError) {
+          log.error('Session rollback failed', { 
+            rollbackError, 
+            originalError: error, 
+            accountId 
+          });
+        }
       }
+      
+      throw error;
+    }
+  }
 
-      const authStore = storeResult.data;
+  /**
+   * セッションデータの検証
+   */
+  private async validateSessionData(session: AtpSessionData): Promise<void> {
+    // 必須フィールドの検証
+    if (!session.did || !session.handle) {
+      throw new Error('Invalid session data: missing did or handle');
+    }
+    
+    if (!session.accessJwt || !session.refreshJwt) {
+      throw new Error('Invalid session data: missing access or refresh JWT');
+    }
+    
+    // JWT形式の基本検証
+    const { decodeJWT } = await import('../utils/jwt.js');
+    
+    const accessPayload = decodeJWT(session.accessJwt);
+    const refreshPayload = decodeJWT(session.refreshJwt);
+    
+    if (!accessPayload || !refreshPayload) {
+      throw new Error('Invalid session data: malformed JWT tokens');
+    }
+    
+    // 期限検証
+    const now = Date.now() / 1000;
+    if (accessPayload.exp && accessPayload.exp < now) {
+      log.warn('Access token already expired in new session', {
+        exp: accessPayload.exp,
+        now,
+        diff: now - accessPayload.exp
+      });
+    }
+  }
+
+  /**
+   * refreshToken rotation の分析
+   */
+  private async analyzeTokenRotation(
+    accountId: string, 
+    oldSession: AtpSessionData | undefined, 
+    newSession: AtpSessionData
+  ): Promise<void> {
+    if (!oldSession) {
+      log.info('No previous session for comparison', { accountId });
+      return;
+    }
+    
+    try {
+      const { getTokenExpiration, getTokenIssuedAt } = await import('../utils/jwt.js');
+      
+      // 旧トークン情報
+      const oldAccessExp = oldSession.accessJwt ? getTokenExpiration(oldSession.accessJwt) : null;
+      const oldRefreshExp = oldSession.refreshJwt ? getTokenExpiration(oldSession.refreshJwt) : null;
+      
+      // 新トークン情報  
+      const newAccessExp = getTokenExpiration(newSession.accessJwt);
+      const newRefreshExp = getTokenExpiration(newSession.refreshJwt);
+      
+      // 更新状況の分析
+      const accessTokenUpdated = oldSession.accessJwt !== newSession.accessJwt;
+      const refreshTokenUpdated = oldSession.refreshJwt !== newSession.refreshJwt;
+      
+      log.info('Token rotation analysis', {
+        accountId,
+        handle: newSession.handle,
+        accessTokenUpdated,
+        refreshTokenUpdated,
+        oldAccessExp: oldAccessExp?.toISOString(),
+        newAccessExp: newAccessExp?.toISOString(),
+        oldRefreshExp: oldRefreshExp?.toISOString(),
+        newRefreshExp: newRefreshExp?.toISOString(),
+        rotationType: refreshTokenUpdated ? 'FULL_ROTATION' : 'ACCESS_ONLY'
+      });
+      
+      // refreshToken が更新されていない場合の警告
+      if (accessTokenUpdated && !refreshTokenUpdated) {
+        log.warn('AccessToken updated but RefreshToken unchanged - potential rotation issue', {
+          accountId,
+          handle: newSession.handle
+        });
+      }
+      
+    } catch (error) {
+      log.warn('Token rotation analysis failed', { error, accountId });
+    }
+  }
+
+  /**
+   * 原子的なアカウントセッション更新
+   */
+  private async atomicUpdateAccountSession(accountId: string, session: AtpSessionData): Promise<void> {
+    const store = await this.getStore();
+    const authStoreResult = await this.loadFromStore<AuthStore>('auth');
+    
+    if (!authStoreResult.success || !authStoreResult.data) {
+      throw new Error('Failed to load auth store for session update');
+    }
+    
+    const authStore = authStoreResult.data;
+    const accountIndex = authStore.accounts.findIndex(acc => acc.id === accountId);
+    
+    if (accountIndex < 0) {
+      throw new Error(`Account not found in store: ${accountId}`);
+    }
+    
+    // アカウント情報を更新
+    const updatedAccount: Account = {
+      ...authStore.accounts[accountIndex],
+      session,
+      lastAccessAt: new Date().toISOString(),
+    };
+    
+    // 原子的更新
+    authStore.accounts[accountIndex] = updatedAccount;
+    
+    // ストアに保存
+    const saveResult = await this.saveToStore('auth', authStore);
+    if (!saveResult.success) {
+      throw new Error(`Failed to save updated session: ${saveResult.error?.message}`);
+    }
+  }
+
+  /**
+   * SessionManager・JWT Token Manager への通知
+   */
+  private async notifySessionUpdate(accountId: string, session: AtpSessionData): Promise<void> {
+    try {
+      // SessionManager への通知（動的インポートで循環依存回避）
+      const { sessionManager } = await import('./sessionManager.js');
+      
+      // SessionManager が初期化されている場合のみ通知
+      if (sessionManager && typeof sessionManager.updateSessionAfterRefresh === 'function') {
+        // セッション更新後の処理を実行
+        const accountResult = await this.getAccountById(accountId);
+        if (accountResult.success && accountResult.data) {
+          await sessionManager.updateSessionAfterRefresh(accountResult.data);
+        }
+      }
+      
+      log.debug('SessionManager notified of session update', { accountId });
+    } catch (error) {
+      // SessionManager への通知失敗は致命的でないためログのみ
+      log.warn('Failed to notify SessionManager of session update', { 
+        error, 
+        accountId 
+      });
+    }
+  }
+
+  /**
+   * セッション整合性の検証
+   */
+  private async verifySessionIntegrity(accountId: string, expectedSession: AtpSessionData): Promise<void> {
+    const verificationResult = await this.getAccountById(accountId);
+    
+    if (!verificationResult.success || !verificationResult.data) {
+      throw new Error('Session integrity check failed: account not found');
+    }
+    
+    const actualSession = verificationResult.data.session;
+    
+    // セッション内容の比較
+    if (actualSession?.accessJwt !== expectedSession.accessJwt) {
+      throw new Error('Session integrity check failed: accessJwt mismatch');
+    }
+    
+    if (actualSession?.refreshJwt !== expectedSession.refreshJwt) {
+      throw new Error('Session integrity check failed: refreshJwt mismatch');
+    }
+    
+    log.debug('Session integrity verified', { accountId });
+  }
+
+  /**
+   * セッションのロールバック
+   */
+  private async rollbackSession(accountId: string, backupAccount: Account): Promise<void> {
+    try {
+      const store = await this.getStore();
+      const authStoreResult = await this.loadFromStore<AuthStore>('auth');
+      
+      if (!authStoreResult.success || !authStoreResult.data) {
+        throw new Error('Failed to load auth store for rollback');
+      }
+      
+      const authStore = authStoreResult.data;
       const accountIndex = authStore.accounts.findIndex(acc => acc.id === accountId);
       
       if (accountIndex >= 0) {
-        authStore.accounts[accountIndex] = updatedAccount;
-        await this.saveAuthStore(authStore);
-        log.info('Session updated successfully for account', { handle: account.profile.handle });
+        authStore.accounts[accountIndex] = backupAccount;
+        await this.saveToStore('auth', authStore);
+        
+        log.info('Session rollback successful', { accountId });
       }
     } catch (error) {
-      log.error('Failed to update account session', { error });
+      log.error('Session rollback failed', { error, accountId });
+      throw error;
     }
   }
+
+  /**
+   * セッション作成処理
+   */
+  private async handleSessionCreate(accountId: string, session: AtpSessionData): Promise<void> {
+    log.info('Session create event', { 
+      accountId, 
+      handle: session.handle 
+    });
+    
+    // 作成イベントは通常のログイン時は別経路のため、
+    // ここは自動更新での新規セッション作成として処理
+    await this.handleSessionUpdate(accountId, session);
+  }
+
+  /**
+   * セッション期限切れ処理
+   */
+  private async handleSessionExpired(accountId: string): Promise<void> {
+    try {
+      log.warn('Session expired event', { accountId });
+      await this.markAccountSessionExpired(accountId);
+      
+      // SessionManager への通知
+      try {
+        const { sessionManager } = await import('./sessionManager.js');
+        if (sessionManager && typeof sessionManager.notifySessionExpired === 'function') {
+          await sessionManager.notifySessionExpired(accountId);
+        }
+      } catch (error) {
+        log.warn('Failed to notify SessionManager of session expiration', { 
+          error, 
+          accountId 
+        });
+      }
+    } catch (error) {
+      log.error('Failed to handle session expiration', { error, accountId });
+    }
+  }
+
 
   /**
    * アカウントのセッションを期限切れとしてマーク

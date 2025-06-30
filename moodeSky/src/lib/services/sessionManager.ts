@@ -414,6 +414,30 @@ export class SessionManager {
     return this.sessionStates.get(accountId) || null;
   }
 
+  /**
+   * セッション期限切れ通知 (AuthService から呼び出し)
+   * 
+   * @param accountId アカウントID
+   */
+  public async notifySessionExpired(accountId: string): Promise<void> {
+    try {
+      const sessionState = this.getOrCreateSessionState(accountId);
+      sessionState.isValid = false;
+      sessionState.lastError = 'Session expired';
+      sessionState.lastValidatedAt = new Date();
+      
+      this.emitEvent({ 
+        type: 'SessionExpired', 
+        accountId, 
+        timestamp: new Date() 
+      });
+      
+      log.info('Session expiration notified', { accountId });
+    } catch (error) {
+      log.error('Failed to handle session expiration notification', { error, accountId });
+    }
+  }
+
   // ===== Private Methods =====
 
   /**
@@ -701,11 +725,11 @@ export class SessionManager {
   }
 
   /**
-   * リフレッシュ後のセッション更新
+   * リフレッシュ後のセッション更新 (AuthService から呼び出し)
    * 
    * @param account 更新されたアカウント情報
    */
-  private async updateSessionAfterRefresh(account: Account): Promise<void> {
+  public async updateSessionAfterRefresh(account: Account): Promise<void> {
     const accountId = account.profile.did;
     
     try {
