@@ -1,11 +1,12 @@
 <!--
   PostCard.svelte
   シンプルなポスト表示カード
-  段階的実装: 作者名、テキスト、日時、アクションボタン
+  段階的実装: 作者名、テキスト、日時、アクションボタン、埋め込みコンテンツ
 -->
 <script lang="ts">
   import Avatar from './Avatar.svelte';
   import PostActionButton from './post/PostActionButton.svelte';
+  import EmbedRenderer from './embeddings/EmbedRenderer.svelte';
   import { formatRelativeTime, formatAbsoluteTime } from '$lib/utils/relativeTime.js';
   import { ICONS } from '$lib/types/icon.js';
   import type { SimplePost } from '$lib/types/post.js';
@@ -48,6 +49,21 @@
     post.author.displayName && post.author.displayName.trim() !== ''
   );
 
+  // 埋め込みコンテンツの存在チェック
+  const hasEmbeds = $derived(() => {
+    return !!(post.embed || (post.embeds && post.embeds.length > 0));
+  });
+
+  // 埋め込みデータの統一化（embed または embeds）
+  const embedsData = $derived(() => {
+    if (post.embeds && post.embeds.length > 0) {
+      return post.embeds;
+    } else if (post.embed) {
+      return post.embed;
+    }
+    return null;
+  });
+
   // アクションボタンハンドラー（将来のAT Protocol連携用）
   function handleReply() {
     console.log('Reply to post:', post.uri);
@@ -67,6 +83,44 @@
   function handleMore() {
     console.log('More options for post:', post.uri);
     // TODO: その他メニュー実装
+  }
+
+  // 埋め込みコンテンツハンドラー
+  function handlePostClick(uri: string, cid: string) {
+    console.log('Navigate to quoted post:', uri, cid);
+    // TODO: 引用投稿へのナビゲーション実装
+  }
+
+  function handleAuthorClick(did: string, handle: string) {
+    console.log('Navigate to profile:', did, handle);
+    // TODO: プロフィールページへのナビゲーション実装
+  }
+
+  function handleImageClick(imageIndex: number, imageUrl: string) {
+    console.log('Open image viewer:', imageIndex, imageUrl);
+    // TODO: 画像ビューアー実装
+  }
+
+  function handleVideoClick(videoUrl: string) {
+    console.log('Open video player:', videoUrl);
+    // TODO: 動画プレーヤー実装
+  }
+
+  function handleLinkClick(url: string, event: MouseEvent) {
+    console.log('Open external link:', url);
+    // デフォルト: 新しいタブで開く
+    window.open(url, '_blank', 'noopener,noreferrer');
+    event.preventDefault();
+  }
+
+  function handleMediaClick(mediaUrl: string, mediaType: string) {
+    console.log('Open media:', mediaType, mediaUrl);
+    // TODO: 統一メディアビューアー実装
+  }
+
+  function handleEmbedError(error: Error, embed: unknown) {
+    console.warn('Embed rendering error:', error, embed);
+    // TODO: エラー報告システム実装
   }
 </script>
 
@@ -123,6 +177,37 @@
   <div class="text-themed text-sm leading-relaxed whitespace-pre-wrap break-words mb-3">
     {post.text}
   </div>
+
+  <!-- 埋め込みコンテンツエリア -->
+  {#if hasEmbeds()}
+    <div class="mb-3">
+      <EmbedRenderer 
+        embeds={embedsData()}
+        options={{
+          maxWidth: columnWidth === 'xxs' ? 220 : 
+                   columnWidth === 'xs' ? 280 :
+                   columnWidth === 'small' ? 350 :
+                   columnWidth === 'medium' ? 450 :
+                   columnWidth === 'large' ? 550 :
+                   columnWidth === 'xl' ? 650 :
+                   columnWidth === 'xxl' ? 800 : 600,
+          rounded: true,
+          interactive: true,
+          clickable: true,
+          lazy: true
+        }}
+        onPostClick={handlePostClick}
+        onAuthorClick={handleAuthorClick}
+        onImageClick={handleImageClick}
+        onVideoClick={handleVideoClick}
+        onLinkClick={handleLinkClick}
+        onMediaClick={handleMediaClick}
+        onError={handleEmbedError}
+        maxEmbeds={3}
+        debug={true}
+      />
+    </div>
+  {/if}
 
   <!-- アクションボタンエリア -->
   <footer class="flex items-center justify-between">

@@ -343,6 +343,8 @@
             },
             text: post.record?.text || '',
             createdAt: post.record?.createdAt || post.indexedAt,
+            embed: post.embed,        // 埋め込みコンテンツ（単一）
+            embeds: post.embeds,      // 埋め込みコンテンツ（複数）
             replyCount: post.replyCount,
             repostCount: post.repostCount,
             likeCount: post.likeCount,
@@ -350,7 +352,97 @@
           };
         });
         
-        posts = simplePosts;
+        // 重複URI排除処理（each_key_duplicate エラー対策）
+        const deduplicationMap = new Map<string, SimplePost>();
+        const embedStats = { 
+          withEmbed: 0, 
+          withEmbeds: 0, 
+          total: 0,
+          embedTypes: {} as Record<string, number>,
+          embedsTypes: {} as Record<string, number>,
+          sampleEmbeds: [] as any[]
+        };
+        
+        for (const post of simplePosts) {
+          // 重複チェック：URIが既に存在しない場合のみ追加
+          if (!deduplicationMap.has(post.uri)) {
+            deduplicationMap.set(post.uri, post);
+            
+            // 埋め込み統計の収集
+            if (post.embed) {
+              embedStats.withEmbed++;
+              const embedType = post.embed.$type || 'unknown';
+              embedStats.embedTypes[embedType] = (embedStats.embedTypes[embedType] || 0) + 1;
+              
+              // サンプルデータの収集（最初の3つまで）
+              if (embedStats.sampleEmbeds.length < 3) {
+                embedStats.sampleEmbeds.push({
+                  type: 'embed',
+                  $type: embedType,
+                  data: post.embed,
+                  postUri: post.uri
+                });
+              }
+            }
+            
+            if (post.embeds && post.embeds.length > 0) {
+              embedStats.withEmbeds++;
+              for (const embed of post.embeds) {
+                const embedType = embed.$type || 'unknown';
+                embedStats.embedsTypes[embedType] = (embedStats.embedsTypes[embedType] || 0) + 1;
+              }
+              
+              // サンプルデータの収集（最初の3つまで）
+              if (embedStats.sampleEmbeds.length < 3) {
+                embedStats.sampleEmbeds.push({
+                  type: 'embeds',
+                  count: post.embeds.length,
+                  $types: post.embeds.map(e => e.$type),
+                  data: post.embeds,
+                  postUri: post.uri
+                });
+              }
+            }
+            
+            embedStats.total++;
+          }
+        }
+        
+        // 順序を保持した重複排除済み配列
+        const deduplicatedPosts = Array.from(deduplicationMap.values());
+        
+        console.log('📋 [DeckColumn] Timeline deduplication stats:', {
+          originalCount: simplePosts.length,
+          deduplicatedCount: deduplicatedPosts.length,
+          duplicatesRemoved: simplePosts.length - deduplicatedPosts.length,
+          embedStats
+        });
+        
+        // 詳細なembed統計表示
+        if (embedStats.withEmbed > 0 || embedStats.withEmbeds > 0) {
+          console.log('🎯 [DeckColumn] EMBED DETAILS:', {
+            totalPostsWithEmbeds: embedStats.withEmbed + embedStats.withEmbeds,
+            singleEmbeds: embedStats.withEmbed,
+            multipleEmbeds: embedStats.withEmbeds,
+            embedTypeBreakdown: embedStats.embedTypes,
+            embedsTypeBreakdown: embedStats.embedsTypes,
+            sampleData: embedStats.sampleEmbeds
+          });
+        } else {
+          console.warn('⚠️ [DeckColumn] NO EMBED DATA FOUND in timeline!', {
+            totalPosts: embedStats.total,
+            checkedPosts: deduplicatedPosts.length,
+            samplePosts: deduplicatedPosts.slice(0, 3).map(p => ({
+              uri: p.uri,
+              hasEmbed: !!p.embed,
+              hasEmbeds: !!(p.embeds && p.embeds.length > 0),
+              embedType: p.embed?.$type,
+              embedsCount: p.embeds?.length || 0
+            }))
+          });
+        }
+        
+        posts = deduplicatedPosts;
         console.log('✅ [DeckColumn] Timeline loaded:', posts.length, 'posts');
       } else {
         // 他のフィードタイプは後の段階で実装
