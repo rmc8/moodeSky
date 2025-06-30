@@ -7,11 +7,20 @@
 <script lang="ts">
   import Avatar from '$lib/components/Avatar.svelte';
   import Icon from '$lib/components/Icon.svelte';
+  import EmbedRenderer from './EmbedRenderer.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { formatRelativeTime } from '$lib/utils/relativeTime.js';
   import type { RecordEmbed, RecordEmbedView, EmbedDisplayOptions } from './types.js';
   import type { EmbedView } from './types.js';
-  import { DEFAULT_EMBED_DISPLAY_OPTIONS } from './types.js';
+  import { 
+    DEFAULT_EMBED_DISPLAY_OPTIONS,
+    isImageEmbed,
+    isImageEmbedView,
+    isVideoEmbed,
+    isVideoEmbedView,
+    isExternalEmbed,
+    isExternalEmbedView
+  } from './types.js';
 
   interface Props {
     /** 記録埋め込みデータ */
@@ -120,6 +129,23 @@
   // ネストが深すぎる場合の判定
   const isTooDeep = $derived(() => currentDepth >= maxDepth);
 
+  // ネストした埋め込みで表示可能なタイプをフィルタリング
+  const allowedNestedEmbeds = $derived(() => {
+    if (!recordData().embeds || recordData().embeds.length === 0) {
+      return [];
+    }
+
+    return recordData().embeds.filter((embed: any) => {
+      // 画像、動画、外部リンクのみ許可
+      return isImageEmbed(embed) || 
+             isImageEmbedView(embed) || 
+             isVideoEmbed(embed) || 
+             isVideoEmbedView(embed) || 
+             isExternalEmbed(embed) || 
+             isExternalEmbedView(embed);
+    });
+  });
+
   // 短縮表示用のテキスト切り詰め
   const truncateText = (text: string, maxLength: number): string => {
     if (text.length <= maxLength) return text;
@@ -201,16 +227,22 @@
           {truncateText(postText(), 280)}
         </div>
         
-        <!-- ネストされた埋め込み（深度制限あり） -->
-        {#if recordData().embeds.length > 0 && !isTooDeep()}
-          <div class="mt-2 ml-2 border-l-2 border-subtle pl-2">
-            {#each recordData().embeds as nestedEmbed}
-              <!-- 再帰的な埋め込み表示（簡略化） -->
-              <div class="text-xs text-secondary">
-                <Icon icon={ICONS.ATTACH_FILE} size="xs" color="inactive" />
-                埋め込みコンテンツ
-              </div>
-            {/each}
+        <!-- ネストされた埋め込み（画像・動画・外部リンクのみ表示） -->
+        {#if allowedNestedEmbeds().length > 0 && !isTooDeep()}
+          <div class="mt-2">
+            <EmbedRenderer 
+              embeds={allowedNestedEmbeds()}
+              options={{
+                ...displayOptions,
+                maxWidth: 400,
+                rounded: true,
+                clickable: false,
+                interactive: false,
+                showImageCount: false
+              }}
+              maxEmbeds={1}
+              maxImages={1}
+            />
           </div>
         {/if}
       </div>

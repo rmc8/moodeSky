@@ -181,7 +181,7 @@
 <!-- モーダルオーバーレイ -->
 {#if isOpen}
   <div 
-    class="fixed inset-0 bg-themed/50 flex items-center justify-center z-50 backdrop-blur-sm"
+    class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm"
     onclick={handleCancel}
     onkeydown={handleKeydown}
     role="button"
@@ -190,7 +190,7 @@
   >
     <!-- モーダルコンテンツ -->
     <div 
-      class="bg-card rounded-xl p-6 shadow-xl max-w-md w-full mx-4 border border-themed"
+      class="bg-card rounded-xl p-6 shadow-xl max-w-md w-full mx-4 border-subtle"
       onclick={(e) => e.stopPropagation()}
       onkeydown={(e) => e.stopPropagation()}
       role="dialog"
@@ -290,11 +290,11 @@
             disabled={!canSubmit()}
           >
             {#if isLoading}
-              <div class="w-4 h-4 border-2 border-themed/30 border-t-themed rounded-full animate-spin mr-2 inline-block"></div>
+              <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3 inline-block"></div>
               {m['reauth.authenticating']()}
             {:else}
-              <Icon icon={ICONS.LOGIN} size="sm" color="themed" />
-              {m['reauth.button']()}
+              <Icon icon={ICONS.LOGIN} size="sm" color="white" />
+              <span class="ml-2">{m['reauth.button']()}</span>
             {/if}
           </button>
         </div>
