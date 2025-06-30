@@ -51,57 +51,17 @@
 
   // 埋め込みコンテンツの存在チェック
   const hasEmbeds = $derived(() => {
-    const result = !!(post.embed || (post.embeds && post.embeds.length > 0));
-    
-    // デバッグログ: 埋め込み検出状況（$state.snapshot使用）
-    if (post.embed || post.embeds) {
-      console.log('🎯 [PostCard] Embed detection for post:', $state.snapshot({
-        postUri: post.uri,
-        hasEmbed: !!post.embed,
-        embedType: post.embed?.$type,
-        hasEmbeds: !!(post.embeds && post.embeds.length > 0),
-        embedsCount: post.embeds?.length || 0,
-        embedsTypes: post.embeds?.map(e => e.$type) || [],
-        hasEmbeds_result: result,
-        rawEmbed: post.embed,
-        rawEmbeds: post.embeds
-      }));
-    }
-    
-    return result;
+    return !!(post.embed || (post.embeds && post.embeds.length > 0));
   });
 
   // 埋め込みデータの統一化（embed または embeds）
   const embedsData = $derived(() => {
-    let result = null;
-    
     if (post.embeds && post.embeds.length > 0) {
-      result = $state.snapshot(post.embeds);  // スナップショット化
-      console.log('🎯 [PostCard] Using post.embeds (snapshot):', {
-        postUri: post.uri,
-        embedsCount: post.embeds.length,
-        resultType: Array.isArray(result) ? `Array(${result.length})` : typeof result,
-        resultStructure: result,
-        hasTypes: result ? result.map(e => e?.$type) : 'none'
-      });
+      return post.embeds;
     } else if (post.embed) {
-      result = $state.snapshot(post.embed);  // スナップショット化
-      console.log('🎯 [PostCard] Using post.embed (snapshot):', {
-        postUri: post.uri,
-        embedType: post.embed.$type,
-        resultType: typeof result,
-        resultStructure: result,
-        hasType: result?.$type || 'missing'
-      });
-    } else {
-      console.log('🎯 [PostCard] No embed data found:', {
-        postUri: post.uri,
-        hasEmbed: !!post.embed,
-        hasEmbeds: !!(post.embeds && post.embeds.length > 0)
-      });
+      return post.embed;
     }
-    
-    return result;
+    return null;
   });
 
   // アクションボタンハンドラー（将来のAT Protocol連携用）
@@ -221,11 +181,6 @@
   <!-- 埋め込みコンテンツエリア -->
   {#if hasEmbeds()}
     <div class="mb-3">
-      {console.log('🎯 [PostCard] Rendering EmbedRenderer with data:', {
-        postUri: post.uri,
-        embedsData: embedsData(),
-        hasEmbeds: hasEmbeds()
-      })}
       <EmbedRenderer 
         embeds={embedsData()}
         options={{
@@ -252,12 +207,6 @@
         debug={true}
       />
     </div>
-  {:else}
-    {console.log('🎯 [PostCard] No embeds to render for post:', {
-      postUri: post.uri,
-      hasEmbeds: hasEmbeds(),
-      embedsData: embedsData()
-    })}
   {/if}
 
   <!-- アクションボタンエリア -->
