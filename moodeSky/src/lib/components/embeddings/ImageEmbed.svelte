@@ -19,13 +19,16 @@
     class?: string;
     /** クリック時の処理 */
     onClick?: (imageIndex: number, imageUrl: string) => void;
+    /** 最大表示画像数（引用ポストなどで制限用） */
+    maxImages?: number;
   }
 
   const { 
     embed, 
     options = {}, 
     class: additionalClass = '',
-    onClick
+    onClick,
+    maxImages = 4
   }: Props = $props();
 
   // 表示設定のマージ
@@ -79,20 +82,20 @@
 
   // 16:9美しいレイアウトクラスの計算
   const gridLayoutClass = $derived(() => {
-    const count = images().length;
+    const count = Math.min(images().length, maxImages);
     
     // 美しい16:9レイアウトパターン
     switch (count) {
       case 1:
         return 'image-layout-single';
       case 2:
-        return 'image-layout-double';
+        return maxImages >= 2 ? 'image-layout-double' : 'image-layout-single';
       case 3:
-        return 'image-layout-triple';
+        return maxImages >= 3 ? 'image-layout-triple' : 'image-layout-single';
       case 4:
-        return 'image-layout-quad';
+        return maxImages >= 4 ? 'image-layout-quad' : 'image-layout-single';
       default:
-        return 'image-layout-quad'; // 5枚以上は4枚表示
+        return maxImages >= 4 ? 'image-layout-quad' : 'image-layout-single';
     }
   });
 
@@ -195,10 +198,10 @@
 >
   <!-- 16:9美しい画像グリッド -->
   <div class="relative w-full aspect-[16/9] border-subtle rounded-lg overflow-hidden {gridLayoutClass()}">
-    {#each images().slice(0, 4) as image, index}
+    {#each images().slice(0, maxImages) as image, index}
       <!-- 個別画像コンテナ -->
       <div
-        class={getImageClass(index, Math.min(images().length, 4))}
+        class={getImageClass(index, Math.min(images().length, maxImages))}
         role={displayOptions.clickable ? "button" : undefined}
         tabindex={displayOptions.clickable ? 0 : undefined}
         aria-label={displayOptions.clickable ? `画像 ${index + 1} を表示` : undefined}
@@ -268,14 +271,14 @@
   </div>
   
   <!-- 画像枚数インジケーター＋追加画像表示 -->
-  {#if images().length > 4}
-    <!-- 5枚以上の場合: 4枚目に+N表示オーバーレイ -->
+  {#if images().length > maxImages}
+    <!-- 制限枚数以上の場合: 最後の画像に+N表示オーバーレイ -->
     <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm z-10">
-      +{images().length - 4}
+      +{images().length - maxImages}
     </div>
   {/if}
   
-  {#if images().length > 2 && displayOptions.showImageCount !== false}
+  {#if images().length > 2 && displayOptions.showImageCount !== false && maxImages > 1}
     <div class="mt-2 text-center">
       <span class="text-secondary text-sm">
         {images().length} 枚の画像

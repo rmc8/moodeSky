@@ -63,6 +63,8 @@
     onError?: (error: Error, embed: unknown) => void;
     /** 最大表示数（配列の場合） */
     maxEmbeds?: number;
+    /** 画像の最大表示数 */
+    maxImages?: number;
     /** デバッグモード */
     debug?: boolean;
   }
@@ -79,6 +81,7 @@
     onMediaClick,
     onError,
     maxEmbeds = 10,
+    maxImages = 4,
     debug = false
   }: Props = $props();
 
@@ -249,6 +252,7 @@
             embed={embed as any}
             options={options}
             onClick={handleImageEmbedClick}
+            maxImages={maxImages}
           />
         {:else if type === 'video'}
           <!-- 動画埋め込み -->
