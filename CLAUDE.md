@@ -261,20 +261,60 @@ const navItems = $derived<NavItem[]>([
 ### Priority Tools for Development
 
 1. **sequential_thinking** - **Use actively for complex problem-solving**
-2. **sveltekit-docs** - SvelteKit-specific questions
-3. **svelte-docs** - **Svelte 5** specific features (runes, etc.)
-4. **tauri-docs** - **Tauri 2** specific implementation
-5. **atproto-docs** - AT Protocol TypeScript library
-6. **bluesky** - Real API testing and verification
-7. **tavily** - Latest information and general search
-8. **context7** - Dynamic library reference ("use context7" declaration)
-9. **GitHub** - Project management and collaboration
+2. **gemini-cli** - **Large context analysis and complex reasoning tasks**
+3. **sveltekit-docs** - SvelteKit-specific questions
+4. **svelte-docs** - **Svelte 5** specific features (runes, etc.)
+5. **tauri-docs** - **Tauri 2** specific implementation
+6. **atproto-docs** - AT Protocol TypeScript library
+7. **bluesky** - Real API testing and verification
+8. **tavily** - Latest information and general search
+9. **context7** - Dynamic library reference ("use context7" declaration)
+10. **GitHub** - Project management and collaboration
 
 ### Usage Guidelines
 - **Always use sequential_thinking** for complex tasks
+- **Use gemini-cli for large context analysis** - When dealing with codebases that exceed your context window, use `gemini -p "prompt"` syntax with @-syntax for file references
 - **Check existing type definitions** with context7 before creating custom types
 - **Test real API** behavior with bluesky tools
 - **Consult official docs** with RAG tools before implementation
+
+### Gemini CLI Integration
+
+**Purpose**: Leverage Gemini's 100M+ token context window for large-scale codebase analysis and complex reasoning tasks.
+
+**Basic Syntax**:
+```bash
+gemini -p "プロンプトをここに書く"
+```
+
+**File Reference with @-syntax**:
+```bash
+# Single file analysis
+gemini -p "@src/main.py このファイルの目的と構造を説明して"
+
+# Multiple files
+gemini -p "@package.json @src/index.js 依存関係を分析して"
+
+# Directory analysis
+gemini -p "@src/ プロジェクトのアーキテクチャを要約して"
+```
+
+**JSON Output for Machine Processing**:
+```bash
+gemini -p "@src/security.js の脆弱性分析を行ってください。応答は{\"vulnerabilities\": [\"脆弱性のリスト\"], \"recommendations\": [\"推奨事項のリスト\"}} という形式の単一JSONオブジェクトのみで返してください。"
+```
+
+**When to Use Gemini CLI**:
+- Repository-wide analysis beyond your context limits
+- Large-scale refactoring planning
+- Security vulnerability assessment across multiple files
+- Complex architectural decisions requiring full codebase understanding
+- Legacy code analysis and modernization strategies
+
+**Authentication Setup**:
+- Install: `npm install -g @google/gemini-cli`
+- Set API key: `export GEMINI_API_KEY="your-api-key"`
+- Generate key at: https://aistudio.google.com/app/apikey
 
 ## Development Workflow
 

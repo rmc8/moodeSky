@@ -134,7 +134,7 @@
 >
   <!-- 引用投稿カード -->
   <div
-    class="border border-subtle bg-muted/5 hover:bg-muted/10 transition-colors {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden {displayOptions.clickable ? 'cursor-pointer' : ''}"
+    class="border-subtle bg-muted/5 hover:bg-muted/10 transition-colors {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden {displayOptions.clickable ? 'cursor-pointer' : ''}"
     role={displayOptions.clickable ? "button" : undefined}
     tabindex={displayOptions.clickable ? 0 : undefined}
     onclick={handlePostClick}

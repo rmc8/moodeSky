@@ -194,7 +194,7 @@
   style="max-width: {displayOptions.maxWidth}px;"
 >
   <!-- 16:9美しい画像グリッド -->
-  <div class="relative w-full aspect-[16/9] border border-subtle rounded-lg overflow-hidden {gridLayoutClass()}">
+  <div class="relative w-full aspect-[16/9] border-subtle rounded-lg overflow-hidden {gridLayoutClass()}">
     {#each images().slice(0, 4) as image, index}
       <!-- 個別画像コンテナ -->
       <div

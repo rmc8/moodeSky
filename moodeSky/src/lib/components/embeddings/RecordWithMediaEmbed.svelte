@@ -186,7 +186,7 @@
         />
       {:else}
         <!-- 未知のメディアタイプ -->
-        <div class="p-3 border border-subtle rounded-lg bg-muted/5 text-center">
+        <div class="p-3 border-subtle rounded-lg bg-muted/5 text-center">
           <p class="text-secondary text-sm">未対応のメディアタイプ</p>
         </div>
       {/if}
@@ -239,7 +239,7 @@
         />
       {:else}
         <!-- 未知のメディアタイプ -->
-        <div class="p-2 border border-subtle rounded-lg bg-muted/5 text-center">
+        <div class="p-2 border-subtle rounded-lg bg-muted/5 text-center">
           <p class="text-secondary text-xs">未対応</p>
         </div>
       {/if}

@@ -342,6 +342,7 @@ export interface EmbedDisplayOptions {
   shadow?: boolean;
   interactive?: boolean;
   clickable?: boolean;
+  showImageCount?: boolean;
 }
 
 /**
@@ -355,5 +356,6 @@ export const DEFAULT_EMBED_DISPLAY_OPTIONS: EmbedDisplayOptions = {
   rounded: true,
   shadow: false,
   interactive: true,
-  clickable: true
+  clickable: true,
+  showImageCount: true
 };

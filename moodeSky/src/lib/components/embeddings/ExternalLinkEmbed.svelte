@@ -147,7 +147,7 @@
 >
   <!-- リンクプレビューカード -->
   <div
-    class="group border border-subtle bg-card hover:bg-muted/5 transition-colors cursor-pointer {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden {displayOptions.shadow ? 'shadow-sm hover:shadow-md' : ''}"
+    class="group border-subtle bg-card hover:bg-muted/5 transition-colors cursor-pointer {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden {displayOptions.shadow ? 'shadow-sm hover:shadow-md' : ''}"
     role="button"
     tabindex="0"
     onclick={handleLinkClick}
@@ -159,7 +159,7 @@
       <div class="flex">
         <!-- サムネイル画像 -->
         <div 
-          class="relative w-32 h-24 flex-shrink-0 bg-muted overflow-hidden cursor-pointer"
+          class="relative w-32 aspect-[4/3] flex-shrink-0 bg-muted overflow-hidden cursor-pointer"
           onclick={handleImageClick}
           role="button"
           tabindex="0"
@@ -174,7 +174,7 @@
           <img
             src={linkData().thumb}
             alt=""
-            class="w-full h-full object-cover transition-all duration-200 {imageLoaded ? 'opacity-100' : 'opacity-0'} group-hover:scale-105"
+            class="w-full h-full object-cover object-center transition-all duration-200 {imageLoaded ? 'opacity-100' : 'opacity-0'} group-hover:scale-105"
             loading={displayOptions.lazy ? 'lazy' : 'eager'}
             onload={handleImageLoad}
             onerror={handleImageError}

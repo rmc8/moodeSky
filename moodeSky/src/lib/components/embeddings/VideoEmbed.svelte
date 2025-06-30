@@ -178,7 +178,7 @@
 
 <!-- 動画埋め込みコンテナ -->
 <div 
-  class="relative w-full border border-subtle rounded-lg overflow-hidden {additionalClass} {getAspectRatioStyle(videoData().aspectRatio)}"
+  class="relative w-full border-subtle rounded-lg overflow-hidden {additionalClass} {getAspectRatioStyle(videoData().aspectRatio)}"
   style="max-width: {displayOptions.maxWidth}px; max-height: {displayOptions.maxHeight}px;"
   onmouseenter={() => showControls = true}
   onmouseleave={() => showControls = false}

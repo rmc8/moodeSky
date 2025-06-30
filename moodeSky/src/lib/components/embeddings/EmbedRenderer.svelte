@@ -283,7 +283,7 @@
           />
         {:else}
           <!-- 未知の埋め込みタイプ -->
-          <div class="p-3 border border-subtle bg-muted/5 rounded-lg text-center">
+          <div class="p-3 border-subtle bg-muted/5 rounded-lg text-center">
             <Icon icon={ICONS.HELP_CIRCLE} size="md" color="secondary" class="mx-auto mb-1" />
             <p class="text-secondary text-sm">未対応の埋め込みタイプ</p>
             {#if debug}

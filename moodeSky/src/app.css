@@ -37,7 +37,7 @@
     --secondary: 37 99 235;         /* blue-600 */
     --accent: 56 189 248;           /* sky-400 */
     --muted: 248 250 252;           /* slate-50 - 背景専用 */
-    --border: 226 232 240;          /* slate-200 - より薄い控えめな境界 */
+    --border-rgb: 226, 232, 240;    /* slate-200 - より薄い控えめな境界 */
     --input: 241 245 249;           /* slate-100 - 境界と統一 */
     --card: 255 255 255;            /* white */
     --ring: 59 130 246;             /* blue-500 */
@@ -57,7 +57,7 @@
     --secondary: 249 115 22;        /* orange-500 */
     --accent: 254 215 170;          /* orange-200 */
     --muted: 226 232 240;           /* slate-200 - 背景専用 */
-    --border: 51 65 85;             /* slate-600 - より薄い控えめな境界 */
+    --border-rgb: 51, 65, 85;       /* slate-600 - より薄い控えめな境界 */
     --input: 30 41 59;              /* slate-800 - 境界と統一 */
     --card: 51 65 85;               /* slate-600 (読みやすさ改善) */
     --ring: 251 146 60;             /* orange-400 */
@@ -76,7 +76,7 @@
     --secondary: 255 255 255;       /* white */
     --accent: 255 255 0;            /* yellow */
     --muted: 128 128 128;           /* gray - 背景専用 */
-    --border: 255 255 255;          /* white */
+    --border-rgb: 255, 255, 255;    /* white */
     --input: 255 255 255;           /* white */
     --card: 0 0 0;                  /* black */
     --ring: 255 255 0;              /* yellow */
@@ -89,7 +89,7 @@
   .dark {
     --background: 15 23 42;
     --foreground: 248 250 252;
-    --border: 30 41 59;
+    --border-rgb: 30, 41, 59;
     --input: 30 41 59;
     --card: 30 41 59;
     --muted: 51 65 85;
@@ -98,7 +98,7 @@
   .light {
     --background: 255 255 255;
     --foreground: 15 23 42;
-    --border: 241 245 249;
+    --border-rgb: 241, 245, 249;
     --input: 241 245 249;
     --card: 255 255 255;
     --muted: 248 250 252;
@@ -511,8 +511,17 @@
 
   /* 控えめな境界線専用クラス */
   .border-subtle {
-    border-color: rgb(var(--border) / 0.15);
-    border-width: 1px;
+    border: 1px solid rgba(var(--border-rgb), 1.0) !important;
+  }
+
+  /* テーマ別最適化透明度 */
+  [data-theme="sunset"] .border-subtle {
+    border: 1px solid rgba(var(--border-rgb), 1.0) !important;
+  }
+
+  /* High Contrast テーマでの境界線強化 */
+  .high-contrast .border-subtle {
+    border: 1px solid rgba(var(--border-rgb), 1.0) !important;
   }
 
   .border-primary {
