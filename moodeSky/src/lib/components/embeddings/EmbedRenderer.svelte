@@ -120,21 +120,21 @@
         }
         
         // より緩和された基本的な検証
-        if (!embed.$type || typeof embed.$type !== 'string') {
-          if (debug) console.warn(`🚫 [EmbedRenderer] Embed ${index} missing $type:`, { embed, hasType: !!embed.$type, type: embed.$type });
+        if (!(embed as any).$type || typeof (embed as any).$type !== 'string') {
+          if (debug) console.warn(`🚫 [EmbedRenderer] Embed ${index} missing $type:`, { embed, hasType: !!(embed as any).$type, type: (embed as any).$type });
           return false;
         }
         
         // 基本的なAT Protocol埋め込みタイプかどうかチェック
-        const isValidType = embed.$type.startsWith('app.bsky.embed.');
+        const isValidType = (embed as any).$type.startsWith('app.bsky.embed.');
         if (!isValidType) {
-          if (debug) console.warn(`🚫 [EmbedRenderer] Embed ${index} invalid $type:`, { embed, type: embed.$type });
+          if (debug) console.warn(`🚫 [EmbedRenderer] Embed ${index} invalid $type:`, { embed, type: (embed as any).$type });
           return false;
         }
         
         if (debug) {
           console.log(`✅ [EmbedRenderer] Embed ${index} passed validation:`, { 
-            type: embed.$type, 
+            type: (embed as any).$type, 
             hasValidStructure: !!embed,
             embedKeys: Object.keys(embed)
           });
@@ -292,7 +292,7 @@
             <p class="text-secondary text-sm">未対応の埋め込みタイプ</p>
             {#if debug}
               <p class="text-secondary text-xs mt-1 font-mono">
-                Type: {type || 'unknown'} | $type: {embed?.$type || 'missing'}
+                Type: {type || 'unknown'} | $type: {(embed as any)?.$type || 'missing'}
               </p>
             {/if}
           </div>
@@ -327,7 +327,7 @@
         </p>
         {#if normalizedEmbeds().length > 0 && normalizedEmbeds()[0]}
           <p class="font-mono">
-            Sample $type: {normalizedEmbeds()[0].$type || 'missing'}
+            Sample $type: {(normalizedEmbeds()[0] as any).$type || 'missing'}
           </p>
           <p class="font-mono">
             Sample keys: {Object.keys(normalizedEmbeds()[0] || {}).join(', ')}

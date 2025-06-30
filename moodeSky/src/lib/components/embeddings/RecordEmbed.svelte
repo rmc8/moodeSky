@@ -159,14 +159,13 @@
   style="max-width: {displayOptions.maxWidth}px;"
 >
   <!-- 引用投稿カード -->
-  <div
-    class="border-subtle bg-muted/5 hover:bg-muted/10 transition-colors {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden {displayOptions.clickable ? 'cursor-pointer' : ''}"
-    role={displayOptions.clickable ? "button" : undefined}
-    tabindex={displayOptions.clickable ? 0 : undefined}
-    onclick={handlePostClick}
-    onkeydown={handleKeyDown}
-    aria-label={hasAuthor() ? `@${recordData().author?.handle}の投稿を引用` : '引用投稿'}
-  >
+  {#if displayOptions.clickable}
+    <button
+      class="border-subtle bg-muted/5 hover:bg-muted/10 transition-colors {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden w-full text-left"
+      onclick={handlePostClick}
+      onkeydown={handleKeyDown}
+      aria-label={hasAuthor() ? `@${recordData().author?.handle}の投稿を引用` : '引用投稿'}
+    >
     {#if hasAuthor() && !isTooDeep()}
       <!-- 完全なView データがある場合 -->
       <div class="p-3">
@@ -278,7 +277,124 @@
         </div>
       </div>
     {/if}
-  </div>
+    </button>
+  {:else}
+    <div
+      class="border-subtle bg-muted/5 {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden"
+    >
+    {#if hasAuthor() && !isTooDeep()}
+      <!-- 完全なView データがある場合 -->
+      <div class="p-3">
+        <!-- ヘッダー: 作者情報 + 日時 -->
+        <header class="flex items-start gap-2 mb-2">
+          <!-- アバター -->
+          <button
+            class="flex-shrink-0 hover:opacity-80 transition-opacity"
+            onclick={handleAuthorClick}
+            aria-label="@{recordData().author?.handle}のプロフィール"
+          >
+            <Avatar 
+              src={recordData().author?.avatar}
+              displayName={recordData().author?.displayName}
+              handle={recordData().author?.handle}
+              size="sm"
+            />
+          </button>
+          
+          <!-- 作者情報と日時 -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <!-- 表示名 -->
+              {#if recordData().author?.displayName}
+                <button
+                  class="font-medium text-themed text-sm hover:underline truncate"
+                  onclick={handleAuthorClick}
+                >
+                  {recordData().author?.displayName}
+                </button>
+              {/if}
+              
+              <!-- ハンドル -->
+              <button
+                class="text-secondary text-sm hover:underline truncate"
+                onclick={handleAuthorClick}
+              >
+                @{recordData().author?.handle}
+              </button>
+              
+              <!-- 時間 -->
+              {#if relativeTime()}
+                <span class="text-secondary text-sm flex-shrink-0">
+                  · {relativeTime()}
+                </span>
+              {/if}
+            </div>
+          </div>
+          
+          <!-- 引用アイコン -->
+          <div class="flex-shrink-0">
+            <Icon icon={ICONS.LINK} size="xs" color="secondary" />
+          </div>
+        </header>
+        
+        <!-- 投稿内容 -->
+        <div class="text-themed text-sm leading-relaxed mb-2">
+          {truncateText(postText(), 280)}
+        </div>
+        
+        <!-- ネストされた埋め込み（画像・動画・外部リンクのみ表示） -->
+        {#if allowedNestedEmbeds().length > 0 && !isTooDeep()}
+          <div class="mt-2">
+            <EmbedRenderer 
+              embeds={allowedNestedEmbeds()}
+              options={{
+                ...displayOptions,
+                maxWidth: 400,
+                rounded: true,
+                clickable: false,
+                interactive: false,
+                showImageCount: false
+              }}
+              maxEmbeds={1}
+              maxImages={1}
+            />
+          </div>
+        {/if}
+      </div>
+    {:else if isTooDeep()}
+      <!-- ネストが深すぎる場合の簡略表示 -->
+      <div class="p-3 text-center">
+        <Icon icon={ICONS.MORE_HORIZ} size="md" color="secondary" class="mx-auto mb-1" />
+        <p class="text-secondary text-sm">引用が続いています...</p>
+        <button
+          class="text-primary text-xs hover:underline mt-1"
+          onclick={handlePostClick}
+        >
+          投稿を表示
+        </button>
+      </div>
+    {:else}
+      <!-- View データがない場合（参照のみ） -->
+      <div class="p-3">
+        <div class="flex items-center gap-2">
+          <Icon icon={ICONS.LINK} size="sm" color="secondary" />
+          <div class="flex-1">
+            <p class="text-secondary text-sm">引用投稿</p>
+            <p class="text-inactive text-xs font-mono truncate">
+              {recordData().uri}
+            </p>
+          </div>
+          <button
+            class="text-primary text-xs hover:underline"
+            onclick={handlePostClick}
+          >
+            表示
+          </button>
+        </div>
+      </div>
+    {/if}
+    </div>
+  {/if}
 </div>
 
 <!--
@@ -319,7 +435,7 @@
   }
   
   /* アバターボタンのホバー効果 */
-  button:hover img {
+  :global(button:hover img) {
     transform: scale(1.05);
   }
   
