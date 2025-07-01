@@ -320,7 +320,7 @@
         console.log('📋 [DeckColumn] Loading timeline for account:', targetAccount.profile.handle);
         
         // AgentManagerからAgentを取得
-        const agent = agentManager.getAgent(targetAccount);
+        const agent = await agentManager.getAgent(targetAccount);
         console.log('🎯 [DeckColumn] Got agent from AgentManager:', { 
           accountDid: targetAccount.profile.did, 
           agentStatus: agent.status 
@@ -622,7 +622,7 @@
   >
     {#if posts.length > 0}
       <!-- タイムライン表示 -->
-      <div class="space-y-2 p-2">
+      <div>
         {#each posts as post (post.uri)}
           <PostCard {post} columnWidth={column.settings.width} />
         {/each}

@@ -125,7 +125,7 @@
 </script>
 
 <!-- ポストカード -->
-<article class="bg-card border-subtle rounded-lg p-4 hover:bg-muted/5 transition-colors {className}">
+<article class="bg-card border-b border-subtle p-4 hover:bg-muted/5 transition-colors {className}">
   <!-- ヘッダー: アバター + 作者情報 + 日時 -->
   <header class="flex items-start gap-3 mb-3">
     <!-- アバター -->
