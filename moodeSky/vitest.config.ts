@@ -10,21 +10,59 @@ export default defineConfig({
     css: false, // CSS処理を無効化してテスト高速化
     coverage: {
       provider: 'v8',
-      include: ['src/lib/**/*.{ts,svelte}'],
+      include: [
+        'src/lib/**/*.{ts,svelte}',
+        '!src/lib/**/*.test.{ts,svelte}',
+        '!src/lib/**/*.spec.{ts,svelte}',
+        '!src/lib/test-utils/**'
+      ],
       exclude: [
-        'src/lib/**/*.test.{ts,svelte}',
-        'src/lib/**/*.spec.{ts,svelte}',
         'src/lib/types/**',
-        'src/paraglide/**'
+        'src/paraglide/**',
+        'src/lib/**/*.d.ts',
+        'src/lib/components/**/*.stories.{ts,svelte}'
       ],
       thresholds: {
         global: {
-          branches: 70,
-          functions: 70,
-          lines: 70,
-          statements: 70
+          branches: 90,
+          functions: 90,
+          lines: 90,
+          statements: 90
+        },
+        // セッション管理コンポーネント専用の高い閾値
+        'src/lib/services/sessionManager.ts': {
+          branches: 95,
+          functions: 95,
+          lines: 95,
+          statements: 95
+        },
+        'src/lib/services/agentManager.ts': {
+          branches: 95,
+          functions: 95,
+          lines: 95,
+          statements: 95
+        },
+        'src/lib/services/authStore.ts': {
+          branches: 95,
+          functions: 95,
+          lines: 95,
+          statements: 95
+        },
+        'src/lib/services/backgroundSessionMonitor.ts': {
+          branches: 95,
+          functions: 95,
+          lines: 95,
+          statements: 95
+        },
+        'src/lib/services/jwtTokenManager.ts': {
+          branches: 95,
+          functions: 95,
+          lines: 95,
+          statements: 95
         }
-      }
+      },
+      reporter: ['text', 'html', 'lcov'],
+      reportsDirectory: './coverage'
     }
   },
   // SvelteKit用の環境変数設定
