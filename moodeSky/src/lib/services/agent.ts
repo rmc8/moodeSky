@@ -3,7 +3,8 @@ import type {
   IAgent, 
   AgentInfo, 
   AgentStatus,
-  AgentResult
+  AgentResult,
+  PersistSessionHandler
 } from '../types/agent.js';
 import type { Account } from '../types/auth.js';
 import { authService } from './authStore.js';
@@ -19,15 +20,25 @@ export class Agent implements IAgent {
   public status: AgentStatus = 'active';
   
   private lastUsedAt: string;
+  
+  // API呼び出し統計 (Issue #90)
+  private apiStats = {
+    totalCalls: 0,
+    successfulCalls: 0,
+    failedCalls: 0,
+    responseTimes: [] as number[],
+    lastError: null as string | null,
+    errorRate: 0
+  };
 
-  constructor(account: Account) {
+  constructor(account: Account, persistSessionHandler?: PersistSessionHandler) {
     this.account = account;
     this.lastUsedAt = new Date().toISOString();
     
     // BskyAgent を初期化（セッション付き、persistSession対応）
     this.agent = new BskyAgent({
       service: account.service,
-      persistSession: authService.createPersistSessionHandler(account.id)
+      persistSession: persistSessionHandler || authService.createPersistSessionHandler(account.id)
     });
     
     // セッション情報を復元（resumeSession を使用）
@@ -94,30 +105,27 @@ export class Agent implements IAgent {
    * プロフィール情報を取得
    */
   async getProfile(actor: string): Promise<any> {
-    try {
-      this.updateLastUsed();
-      
+    this.updateLastUsed();
+    
+    return this.executeApiCall(async () => {
       const res = await this.agent.api.app.bsky.actor.getProfile({ actor });
       return res.data;
-    } catch (error) {
-      console.error('Failed to get profile:', error);
-      this.handleApiError(error);
-      throw error;
-    }
+    });
   }
 
   /**
    * 通知数を取得
    */
   async getNotificationCount(): Promise<number> {
+    this.updateLastUsed();
+    
     try {
-      this.updateLastUsed();
-      
-      const res = await this.agent.api.app.bsky.notification.getUnreadCount();
-      return res.data.count;
+      return await this.executeApiCall(async () => {
+        const res = await this.agent.api.app.bsky.notification.getUnreadCount();
+        return res.data.count;
+      });
     } catch (error) {
       console.error('Failed to get notification count:', error);
-      this.handleApiError(error);
       return 0;
     }
   }
@@ -126,14 +134,15 @@ export class Agent implements IAgent {
    * ユーザー設定を取得
    */
   async getPreferences(): Promise<any[]> {
+    this.updateLastUsed();
+    
     try {
-      this.updateLastUsed();
-      
-      const res = await this.agent.api.app.bsky.actor.getPreferences();
-      return res.data.preferences;
+      return await this.executeApiCall(async () => {
+        const res = await this.agent.api.app.bsky.actor.getPreferences();
+        return res.data.preferences;
+      });
     } catch (error) {
       console.error('Failed to get preferences:', error);
-      this.handleApiError(error);
       return [];
     }
   }
@@ -164,7 +173,10 @@ export class Agent implements IAgent {
       }
 
       // 簡単な API 呼び出しでセッションを検証
-      await this.agent.api.app.bsky.actor.getPreferences();
+      await this.executeApiCall(async () => {
+        return await this.agent.api.app.bsky.actor.getPreferences();
+      });
+      
       this.status = 'active';
       return true;
     } catch (error) {
@@ -188,6 +200,27 @@ export class Agent implements IAgent {
   }
 
   /**
+   * API統計情報を取得 (Issue #90)
+   */
+  getApiStats() {
+    const responseTimes = this.apiStats.responseTimes;
+    const avgResponseTime = responseTimes.length > 0 
+      ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length 
+      : 0;
+    
+    return {
+      totalCalls: this.apiStats.totalCalls,
+      successfulCalls: this.apiStats.successfulCalls,
+      failedCalls: this.apiStats.failedCalls,
+      errorRate: this.apiStats.errorRate,
+      avgResponseTime: Math.round(avgResponseTime),
+      minResponseTime: responseTimes.length > 0 ? Math.min(...responseTimes) : 0,
+      maxResponseTime: responseTimes.length > 0 ? Math.max(...responseTimes) : 0,
+      lastError: this.apiStats.lastError
+    };
+  }
+
+  /**
    * リソースを解放
    */
   dispose(): void {
@@ -200,6 +233,50 @@ export class Agent implements IAgent {
    */
   private updateLastUsed(): void {
     this.lastUsedAt = new Date().toISOString();
+  }
+
+  /**
+   * API呼び出しを計測実行するラッパー (Issue #90)
+   */
+  private async executeApiCall<T>(apiCall: () => Promise<T>): Promise<T> {
+    const startTime = Date.now();
+    this.apiStats.totalCalls++;
+    
+    try {
+      const result = await apiCall();
+      
+      // 成功統計を記録
+      this.apiStats.successfulCalls++;
+      const responseTime = Date.now() - startTime;
+      this.apiStats.responseTimes.push(responseTime);
+      
+      // 直近100回のレスポンス時間のみ保持
+      if (this.apiStats.responseTimes.length > 100) {
+        this.apiStats.responseTimes = this.apiStats.responseTimes.slice(-100);
+      }
+      
+      // エラー率を更新
+      this.updateErrorRate();
+      
+      return result;
+    } catch (error) {
+      // 失敗統計を記録
+      this.apiStats.failedCalls++;
+      this.apiStats.lastError = error instanceof Error ? error.message : 'Unknown error';
+      this.updateErrorRate();
+      
+      this.handleApiError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * エラー率を更新
+   */
+  private updateErrorRate(): void {
+    if (this.apiStats.totalCalls > 0) {
+      this.apiStats.errorRate = this.apiStats.failedCalls / this.apiStats.totalCalls;
+    }
   }
 
   /**

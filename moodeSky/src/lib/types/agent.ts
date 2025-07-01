@@ -41,8 +41,10 @@ export type AgentError =
   | 'AGENT_CREATION_FAILED'
   | 'AGENT_NOT_FOUND'
   | 'SESSION_INVALID'
+  | 'SESSION_ERROR'
   | 'API_ERROR'
-  | 'NETWORK_ERROR';
+  | 'NETWORK_ERROR'
+  | 'HEALTH_CHECK_FAILED';
 
 /**
  * Agent Manager の設定オプション
@@ -92,3 +94,104 @@ export type AgentStatus =
   | 'inactive'   // 非アクティブ・セッション期限切れの可能性
   | 'error'      // エラー状態・要再認証
   | 'disposed';  // 削除済み・使用不可
+
+/**
+ * Enhanced AgentManager の設定 (Issue #90で追加)
+ */
+export interface AgentManagerConfig {
+  /** 最大Agent保持数 */
+  maxAgents: number;
+  /** 非アクティブタイムアウト（ミリ秒） */
+  inactiveTimeoutMs: number;
+  /** メモリ使用量閾値（MB） */
+  memoryThresholdMB: number;
+  /** クリーンアップ間隔（ミリ秒） */
+  cleanupIntervalMs: number;
+  /** ヘルスチェック間隔（ミリ秒） */
+  healthCheckIntervalMs: number;
+  /** デバッグログを有効にするか */
+  enableDebugLogs: boolean;
+}
+
+/**
+ * Agent メタデータ (Issue #90で追加)
+ */
+export interface AgentMetadata {
+  /** 最終使用時刻 */
+  lastUsedAt: Date;
+  /** 作成時刻 */
+  createdAt: Date;
+  /** API呼び出し回数 */
+  accessCount: number;
+  /** 現在のヘルス状態 */
+  healthStatus: AgentHealthStatus;
+  /** 推定メモリ使用量（MB） */
+  memoryUsageMB: number;
+  /** パフォーマンス統計 */
+  performanceMetrics: PerformanceMetrics;
+}
+
+/**
+ * Agent ヘルス状態 (Issue #90で追加)
+ */
+export interface AgentHealthStatus {
+  /** オンライン状態 */
+  isOnline: boolean;
+  /** 最終ヘルスチェック時刻 */
+  lastHealthCheck: Date;
+  /** 平均応答時間（ミリ秒） */
+  responseTimeMs: number;
+  /** エラー率（0-1） */
+  errorRate: number;
+  /** セッション有効性 */
+  sessionValid: boolean;
+  /** API呼び出し成功回数 */
+  apiCallCount: number;
+  /** 最終エラー */
+  lastError?: AgentError;
+  /** ヘルススコア（0-100） */
+  healthScore: number;
+}
+
+/**
+ * パフォーマンス統計 (Issue #90で追加)
+ */
+export interface PerformanceMetrics {
+  /** 総API呼び出し数 */
+  totalApiCalls: number;
+  /** 成功した呼び出し数 */
+  successfulCalls: number;
+  /** 失敗した呼び出し数 */
+  failedCalls: number;
+  /** 平均応答時間 */
+  avgResponseTime: number;
+  /** 最速応答時間 */
+  minResponseTime: number;
+  /** 最遅応答時間 */
+  maxResponseTime: number;
+  /** 最終統計更新時刻 */
+  lastUpdated: Date;
+}
+
+/**
+ * persistSession ハンドラー型 (Issue #90で追加)
+ */
+export type PersistSessionHandler = (evt: any, sess?: any) => Promise<void>;
+
+/**
+ * Agent ヘルスチェック結果 (Issue #90で追加)
+ */
+export interface AgentHealthReport {
+  /** アカウントID */
+  accountId: string;
+  /** DID */
+  did: string;
+  /** ハンドル */
+  handle: string;
+  /** ヘルス状態 */
+  healthStatus: AgentHealthStatus;
+  /** 推奨アクション */
+  recommendedAction: 'none' | 'refresh' | 'restart' | 'remove';
+  /** 詳細メッセージ */
+  message?: string;
+}

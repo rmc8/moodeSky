@@ -13,6 +13,7 @@ import { authService } from './authStore.js';
 import { agentManager } from './agentManager.js';
 import type { Account } from '../types/auth.js';
 import { createComponentLogger } from '../utils/logger.js';
+import { getTokenInfo } from '../utils/jwt.js';
 
 // コンポーネント専用ログ
 const log = createComponentLogger('SessionManager');
@@ -755,7 +756,7 @@ export class SessionManager {
 
       // AgentManager の Agent も更新
       if (this.agentManager.hasAgent(account)) {
-        const agent = this.agentManager.getAgent(account);
+        const agent = await this.agentManager.getAgent(account);
         if (account.session) {
           agent.agent.resumeSession(account.session);
         }
@@ -791,7 +792,7 @@ export class SessionManager {
 
       // Agent を通じてセッション検証
       if (this.agentManager.hasAgent(account)) {
-        const agent = this.agentManager.getAgent(account);
+        const agent = await this.agentManager.getAgent(account);
         const isAgentValid = await agent.validateSession();
         
         if (!isAgentValid) {
@@ -927,6 +928,153 @@ export class SessionManager {
   private stopFocusMonitoring(): void {
     // TODO: フォーカス監視の停止
     log.debug('Stop focus monitoring - future implementation');
+  }
+
+  /**
+   * AgentManagerからのセッション更新通知を処理
+   * Issue #90: AgentManager統合強化
+   */
+  public async handleAgentSessionUpdate(accountId: string, event: any, session?: any): Promise<void> {
+    try {
+      log.debug('Received agent session update', { 
+        accountId, 
+        event: event?.type || event,
+        hasSession: !!session 
+      });
+
+      // セッション状態を更新
+      const currentState = this.sessionStates.get(accountId);
+      if (currentState) {
+        currentState.lastValidatedAt = new Date();
+        
+        // セッションイベントに応じて状態を更新
+        if (event === 'session-update' || event?.type === 'session-update') {
+          currentState.isValid = true;
+          currentState.refreshFailureCount = 0;
+          currentState.lastError = null;
+          
+          // JWT情報を更新
+          if (session?.accessJwt) {
+            const tokenInfo = getTokenInfo(session.accessJwt);
+            if (tokenInfo.expiresAt) {
+              currentState.accessTokenExpiresAt = tokenInfo.expiresAt;
+            }
+          }
+
+          if (session?.refreshJwt) {
+            const refreshTokenInfo = getTokenInfo(session.refreshJwt);
+            if (refreshTokenInfo.expiresAt) {
+              currentState.refreshTokenExpiresAt = refreshTokenInfo.expiresAt;
+            }
+          }
+
+          this.emitEvent({
+            type: 'SessionRefreshed',
+            accountId,
+            timestamp: new Date()
+          });
+        }
+      } else {
+        log.warn('Session state not found for agent update', { accountId });
+        // 新しいセッション状態を作成
+        await this.initializeSessionState(accountId);
+      }
+
+    } catch (error) {
+      log.error('Failed to handle agent session update', { error, accountId, event });
+      
+      // エラー状態を記録
+      const currentState = this.sessionStates.get(accountId);
+      if (currentState) {
+        currentState.lastError = error instanceof Error ? error.message : 'Unknown error';
+        currentState.refreshFailureCount++;
+      }
+    }
+  }
+
+  /**
+   * AgentManagerからのAgent削除通知を処理
+   * Issue #90: AgentManager統合強化
+   */
+  public async handleAgentRemoval(accountKey: string): Promise<void> {
+    try {
+      log.debug('Received agent removal notification', { accountKey });
+
+      // セッション状態をクリーンアップ
+      const sessionState = this.sessionStates.get(accountKey);
+      if (sessionState) {
+        // 進行中のリフレッシュ処理をキャンセル
+        const refreshPromise = this.refreshInProgress.get(accountKey);
+        if (refreshPromise) {
+          this.refreshInProgress.delete(accountKey);
+          log.debug('Cancelled ongoing refresh for removed agent', { accountKey });
+        }
+
+        // セッション状態を削除
+        this.sessionStates.delete(accountKey);
+        
+        this.emitEvent({
+          type: 'SessionExpired',
+          accountId: accountKey,
+          timestamp: new Date()
+        });
+
+        log.info('Session state cleaned up for removed agent', { 
+          accountKey,
+          remainingSessions: this.sessionStates.size
+        });
+      } else {
+        log.debug('No session state found for removed agent', { accountKey });
+      }
+
+    } catch (error) {
+      log.error('Failed to handle agent removal', { error, accountKey });
+    }
+  }
+
+  /**
+   * 指定されたアカウントのセッション状態を初期化
+   * AgentManager統合用のヘルパーメソッド
+   */
+  private async initializeSessionState(accountId: string): Promise<void> {
+    try {
+      // AuthServiceから現在のアカウント情報を取得
+      const accountsResult = await this.authService.getAllAccounts();
+      if (!accountsResult.success || !accountsResult.data) {
+        log.warn('Failed to get accounts from AuthService', { accountId });
+        return;
+      }
+      
+      const account = accountsResult.data.find((acc: Account) => acc.id === accountId || acc.profile.did === accountId);
+      
+      if (account && account.session) {
+        // 初期セッション状態を作成
+        const now = new Date();
+        const state: SessionState = {
+          accountId,
+          isValid: true,
+          lastValidatedAt: now,
+          accessTokenExpiresAt: null,
+          refreshTokenExpiresAt: null,
+          needsRefresh: false,
+          refreshInProgress: false,
+          lastRefreshAttemptAt: null,
+          refreshFailureCount: 0,
+          lastError: null
+        };
+        
+        this.sessionStates.set(accountId, state);
+        
+        log.debug('Initialized session state for agent', { 
+          accountId,
+          handle: account.profile.handle
+        });
+      } else {
+        log.warn('Could not initialize session state - account not found', { accountId });
+      }
+    } catch (error) {
+      log.error('Failed to initialize session state', { error, accountId });
+    }
   }
 }
 
