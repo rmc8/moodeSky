@@ -5,7 +5,7 @@
  * JWT デコード、期限管理、エラーハンドリングの全シナリオをカバー
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   decodeJWT,
   getTokenExpiration,
@@ -322,7 +322,8 @@ describe('JWT Utilities', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error.name).toBe('JWTDecodeError');
-      expect(error.message).toBe(errorMessage);
+      const actualErrorMessage = error instanceof Error ? error.message : 'Unknown error';
+      expect(actualErrorMessage).toBe(errorMessage);
     });
 
     it('should be throwable and catchable', () => {

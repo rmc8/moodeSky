@@ -699,6 +699,25 @@ describe('Resource Chaos Engineering Tests', () => {
   // ===================================================================
 
   describe('Resource Recovery and Optimization', () => {
+    let container: IntegrationTestContainer;
+    let chaosFramework: ChaosTestingFramework;
+
+    beforeEach(async () => {
+      container = new IntegrationTestContainer({
+        initialAccountCount: 6,
+        enableJWTManager: true,
+        enableBackgroundMonitor: true,
+        logLevel: 'warn'
+      });
+      await container.setup();
+
+      chaosFramework = new ChaosTestingFramework(container);
+    });
+
+    afterEach(async () => {
+      await container.teardown();
+    });
+
     it('should implement intelligent resource cleanup', async () => {
       console.log('Testing intelligent resource cleanup...');
 

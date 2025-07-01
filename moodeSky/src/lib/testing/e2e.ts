@@ -339,7 +339,7 @@ export class AvatarCacheE2EHelper {
             }
           }).catch(error => {
             metrics.errors++;
-            errors.push(error.message);
+            errors.push(error instanceof Error ? error.message : String(error));
           });
 
           testPromises.push(testPromise);

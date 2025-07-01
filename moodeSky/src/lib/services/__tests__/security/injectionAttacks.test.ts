@@ -130,7 +130,7 @@ describe('Injection Attack Prevention Tests', () => {
             payload: injection.payload,
             prevented: true,
             errorType: 'exception_thrown',
-            details: `Exception thrown - injection prevented: ${error.message.substring(0, 100)}`
+            details: `Exception thrown - injection prevented: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 100)}`
           });
 
           console.log(`  ✅ ${injection.name}: Prevented (Exception thrown)`);
@@ -233,7 +233,7 @@ describe('Injection Attack Prevention Tests', () => {
             payloadName: injection.name,
             payload: injection.payload,
             prevented: true,
-            details: `Exception thrown - NoSQL injection prevented: ${error.message.substring(0, 100)}`
+            details: `Exception thrown - NoSQL injection prevented: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 100)}`
           });
 
           console.log(`  ✅ ${injection.name}: Prevented (Exception thrown)`);
@@ -366,7 +366,7 @@ describe('Injection Attack Prevention Tests', () => {
             payload: xss.payload,
             prevented: true,
             sanitizedValue: 'EXCEPTION',
-            details: `Exception thrown - XSS prevented: ${error.message.substring(0, 100)}`
+            details: `Exception thrown - XSS prevented: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 100)}`
           });
 
           console.log(`  ✅ ${xss.name}: Prevented (Exception thrown)`);
@@ -459,7 +459,7 @@ describe('Injection Attack Prevention Tests', () => {
 
         } catch (error) {
           // エラーメッセージの確認
-          const errorMessage = error.message || '';
+          const errorMessage = error instanceof Error ? error.message : '';
           const containsScript = errorMessage.toLowerCase().includes('<script');
           const containsPayload = errorMessage.includes(xss.payload);
           const prevented = !containsScript && !containsPayload;
@@ -575,7 +575,7 @@ describe('Injection Attack Prevention Tests', () => {
             payloadName: injection.name,
             payload: injection.payload,
             prevented: true,
-            details: `Exception thrown - command injection prevented: ${error.message.substring(0, 100)}`
+            details: `Exception thrown - command injection prevented: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 100)}`
           });
 
           console.log(`  ✅ ${injection.name}: Prevented (Exception thrown)`);
@@ -731,7 +731,7 @@ describe('Injection Attack Prevention Tests', () => {
             input: test.input,
             output: 'EXCEPTION',
             properlyHandled: true,
-            details: `Exception thrown - input rejected safely: ${error.message.substring(0, 50)}`
+            details: `Exception thrown - input rejected safely: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 50)}`
           });
 
           console.log(`  ✅ ${test.name}: Input rejected (Exception thrown)`);

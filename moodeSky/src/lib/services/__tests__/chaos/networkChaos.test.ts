@@ -18,7 +18,6 @@ import { NetworkSimulator } from '../../../test-utils/mockFactories.js';
 describe('Network Chaos Engineering Tests', () => {
   let container: IntegrationTestContainer;
   let chaosFramework: ChaosTestingFramework;
-  let networkSimulator: NetworkSimulator;
 
   beforeEach(async () => {
     // ネットワーク監視を有効にした統合テスト環境
@@ -32,11 +31,10 @@ describe('Network Chaos Engineering Tests', () => {
     await container.setup();
 
     chaosFramework = new ChaosTestingFramework(container);
-    networkSimulator = new NetworkSimulator();
   });
 
   afterEach(async () => {
-    await networkSimulator.restoreNetwork();
+    await NetworkSimulator.restoreNetwork();
     await chaosFramework.cleanup();
     await container.teardown();
   });

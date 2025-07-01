@@ -46,7 +46,7 @@ describe('AuthService', () => {
   let mockStore: MockedStore;
   let mockSessionEventHandler: MockedFunction<SessionEventHandler>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
 
@@ -54,7 +54,8 @@ describe('AuthService', () => {
     mockStore = TauriStoreMockFactory.createStoreMock();
     
     // Store コンストラクタのモック
-    vi.mocked(vi.importActual('@tauri-apps/plugin-store').Store as any).mockImplementation(() => mockStore);
+    const { Store } = await vi.importActual('@tauri-apps/plugin-store') as any;
+    vi.mocked(Store).mockImplementation(() => mockStore);
 
     mockSessionEventHandler = vi.fn().mockResolvedValue(undefined);
     authService = new AuthService(mockSessionEventHandler);
@@ -244,7 +245,7 @@ describe('AuthService', () => {
     });
 
     it('should handle account without session', async () => {
-      const account = AccountTestFactory.createAccountWithoutSession();
+      const account = AccountTestFactory.createAccountWithoutSession() as Account;
       
       const result = await authService.addAccount(account);
       
@@ -358,7 +359,8 @@ describe('AuthService', () => {
   describe('Tauri Store Integration', () => {
     it('should handle store initialization failure', async () => {
       const failingStore = TauriStoreMockFactory.createFailingStoreMock('PermissionDenied');
-      vi.mocked(vi.importActual('@tauri-apps/plugin-store').Store as any).mockImplementation(() => failingStore);
+      const { Store } = await vi.importActual('@tauri-apps/plugin-store') as any;
+      vi.mocked(Store).mockImplementation(() => failingStore);
       
       const failingAuthService = new AuthService();
       const result = await failingAuthService.getAllAccounts();
@@ -486,7 +488,8 @@ describe('AuthService', () => {
     it('should timeout long-running operations', async () => {
       // 長時間のストア操作をシミュレート
       const slowStore = TauriStoreMockFactory.createSlowStoreMock(10000); // 10秒遅延
-      vi.mocked(vi.importActual('@tauri-apps/plugin-store').Store as any).mockImplementation(() => slowStore);
+      const { Store } = await vi.importActual('@tauri-apps/plugin-store') as any;
+      vi.mocked(Store).mockImplementation(() => slowStore);
       
       const slowAuthService = new AuthService();
       

@@ -593,7 +593,7 @@ describe('Timing Attack Prevention Tests', () => {
             await test.operation();
           } catch (error) {
             if (attempt === 0) {
-              errorMessage = error.message || '';
+              errorMessage = error instanceof Error ? error.message : '';
             }
           }
           

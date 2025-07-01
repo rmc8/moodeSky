@@ -157,11 +157,12 @@ describe('Token Security Tests', () => {
           });
 
         } catch (error) {
-          console.error(`  ❌ ${test.name} failed:`, error.message);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`  ❌ ${test.name} failed:`, errorMessage);
           securityResults.push({
             testName: test.name,
             success: false,
-            details: { error: error.message },
+            details: { error: errorMessage },
             securityScore: 0
           });
         }
@@ -285,11 +286,12 @@ describe('Token Security Tests', () => {
           console.log(`  ${result.detected ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          console.error(`  ❌ ${test.name} failed:`, error.message);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`  ❌ ${test.name} failed:`, errorMessage);
           manipulationResults.push({
             testName: test.name,
             detected: false,
-            details: `Test error: ${error.message}`
+            details: `Test error: ${errorMessage}`
           });
         }
       }
@@ -413,11 +415,12 @@ describe('Token Security Tests', () => {
           console.log(`  ${result.prevented ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          console.error(`  ❌ ${test.name} failed:`, error.message);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`  ❌ ${test.name} failed:`, errorMessage);
           replayResults.push({
             testName: test.name,
             prevented: false,
-            details: `Test error: ${error.message}`
+            details: `Test error: ${errorMessage}`
           });
         }
       }
@@ -547,7 +550,12 @@ describe('Token Security Tests', () => {
         
         try {
           const result = await test.test();
-          const success = result.rotated !== false && result.invalidated !== false && result.appropriate !== false;
+          const hasRotated = 'rotated' in result;
+          const hasInvalidated = 'invalidated' in result;
+          const hasAppropriate = 'appropriate' in result;
+          const success = (!hasRotated || result.rotated !== false) && 
+                         (!hasInvalidated || result.invalidated !== false) && 
+                         (!hasAppropriate || result.appropriate !== false);
           
           rotationResults.push({
             testName: test.name,
@@ -558,11 +566,12 @@ describe('Token Security Tests', () => {
           console.log(`  ${success ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          console.error(`  ❌ ${test.name} failed:`, error.message);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`  ❌ ${test.name} failed:`, errorMessage);
           rotationResults.push({
             testName: test.name,
             success: false,
-            details: `Test error: ${error.message}`
+            details: `Test error: ${errorMessage}`
           });
         }
       }
@@ -673,7 +682,10 @@ describe('Token Security Tests', () => {
         
         try {
           const result = await test.test();
-          const isProtected = result.secure !== false && result.protected !== false;
+          const hasSecure = 'secure' in result;
+          const hasProtected = 'protected' in result;
+          const isProtected = (!hasSecure || result.secure !== false) && 
+                             (!hasProtected || result.protected !== false);
           
           protectionResults.push({
             testName: test.name,
@@ -684,11 +696,12 @@ describe('Token Security Tests', () => {
           console.log(`  ${isProtected ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          console.error(`  ❌ ${test.name} failed:`, error.message);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`  ❌ ${test.name} failed:`, errorMessage);
           protectionResults.push({
             testName: test.name,
             protected: false,
-            details: `Test error: ${error.message}`
+            details: `Test error: ${errorMessage}`
           });
         }
       }
@@ -788,7 +801,7 @@ describe('Token Security Tests', () => {
             const storeMock = container.mockStore;
             
             // ストアに保存されたデータの確認
-            const storedData = storeMock._data;
+            const storedData = storeMock._getData();
             
             if (storedData && storedData.has('accounts')) {
               const accounts = storedData.get('accounts');
@@ -840,11 +853,12 @@ describe('Token Security Tests', () => {
           console.log(`  ${result.encrypted ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          console.error(`  ❌ ${test.name} failed:`, error.message);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`  ❌ ${test.name} failed:`, errorMessage);
           encryptionResults.push({
             testName: test.name,
             encrypted: false,
-            details: `Test error: ${error.message}`
+            details: `Test error: ${errorMessage}`
           });
         }
       }
@@ -968,7 +982,15 @@ describe('Token Security Tests', () => {
         
         try {
           const result = await test.test();
-          const success = result.valid !== false && result.secure !== false && result.detected !== false;
+          
+          // Union型の型ガード
+          const hasValid = 'valid' in result;
+          const hasSecure = 'secure' in result;
+          const hasDetected = 'detected' in result;
+          
+          const success = (!hasValid || result.valid !== false) && 
+                         (!hasSecure || result.secure !== false) && 
+                         (!hasDetected || result.detected !== false);
           
           signatureResults.push({
             testName: test.name,
@@ -979,11 +1001,12 @@ describe('Token Security Tests', () => {
           console.log(`  ${success ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          console.error(`  ❌ ${test.name} failed:`, error.message);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.error(`  ❌ ${test.name} failed:`, errorMessage);
           signatureResults.push({
             testName: test.name,
             success: false,
-            details: `Test error: ${error.message}`
+            details: `Test error: ${errorMessage}`
           });
         }
       }
@@ -1066,7 +1089,7 @@ describe('Token Security Tests', () => {
             // セキュアなトークンリフレッシュ
             const refreshResult = await container.authService.refreshSession(account.id);
             
-            if (refreshResult.success && refreshResult.data?.session) {
+            if (refreshResult.success && refreshResult.data && !Array.isArray(refreshResult.data) && refreshResult.data.session) {
               const newTokens = {
                 access: refreshResult.data.session.accessJwt!,
                 refresh: refreshResult.data.session.refreshJwt!
@@ -1153,11 +1176,12 @@ describe('Token Security Tests', () => {
           console.log(`  ${result.secure ? '✅' : '❌'} ${phase.name}: ${result.details}`);
 
         } catch (error) {
-          console.error(`  ❌ ${phase.name} failed:`, error.message);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.error(`  ❌ ${phase.name} failed:`, errorMessage);
           lifecycleResults.push({
             phase: phase.name,
             secure: false,
-            details: `Test error: ${error.message}`
+            details: `Test error: ${errorMessage}`
           });
         }
       }

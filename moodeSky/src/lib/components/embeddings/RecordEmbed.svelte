@@ -160,8 +160,10 @@
 >
   <!-- 引用投稿カード -->
   {#if displayOptions.clickable}
-    <button
-      class="border-subtle bg-muted/5 hover:bg-muted/10 transition-colors {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden w-full text-left"
+    <div
+      class="border-subtle bg-muted/5 hover:bg-muted/10 transition-colors {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden w-full text-left cursor-pointer"
+      role="button"
+      tabindex="0"
       onclick={handlePostClick}
       onkeydown={handleKeyDown}
       aria-label={hasAuthor() ? `@${recordData().author?.handle}の投稿を引用` : '引用投稿'}
@@ -174,7 +176,7 @@
           <!-- アバター -->
           <button
             class="flex-shrink-0 hover:opacity-80 transition-opacity"
-            onclick={handleAuthorClick}
+            onclick={(e) => { e.stopPropagation(); handleAuthorClick(e); }}
             aria-label="@{recordData().author?.handle}のプロフィール"
           >
             <Avatar 
@@ -192,7 +194,7 @@
               {#if recordData().author?.displayName}
                 <button
                   class="font-medium text-themed text-sm hover:underline truncate"
-                  onclick={handleAuthorClick}
+                  onclick={(e) => { e.stopPropagation(); handleAuthorClick(e); }}
                 >
                   {recordData().author?.displayName}
                 </button>
@@ -201,7 +203,7 @@
               <!-- ハンドル -->
               <button
                 class="text-secondary text-sm hover:underline truncate"
-                onclick={handleAuthorClick}
+                onclick={(e) => { e.stopPropagation(); handleAuthorClick(e); }}
               >
                 @{recordData().author?.handle}
               </button>
@@ -252,7 +254,7 @@
         <p class="text-secondary text-sm">引用が続いています...</p>
         <button
           class="text-primary text-xs hover:underline mt-1"
-          onclick={handlePostClick}
+          onclick={(e) => { e.stopPropagation(); handlePostClick(); }}
         >
           投稿を表示
         </button>
@@ -270,14 +272,14 @@
           </div>
           <button
             class="text-primary text-xs hover:underline"
-            onclick={handlePostClick}
+            onclick={(e) => { e.stopPropagation(); handlePostClick(); }}
           >
             表示
           </button>
         </div>
       </div>
     {/if}
-    </button>
+    </div>
   {:else}
     <div
       class="border-subtle bg-muted/5 {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden"
@@ -290,7 +292,7 @@
           <!-- アバター -->
           <button
             class="flex-shrink-0 hover:opacity-80 transition-opacity"
-            onclick={handleAuthorClick}
+            onclick={(e) => { e.stopPropagation(); handleAuthorClick(e); }}
             aria-label="@{recordData().author?.handle}のプロフィール"
           >
             <Avatar 
@@ -308,7 +310,7 @@
               {#if recordData().author?.displayName}
                 <button
                   class="font-medium text-themed text-sm hover:underline truncate"
-                  onclick={handleAuthorClick}
+                  onclick={(e) => { e.stopPropagation(); handleAuthorClick(e); }}
                 >
                   {recordData().author?.displayName}
                 </button>
@@ -317,7 +319,7 @@
               <!-- ハンドル -->
               <button
                 class="text-secondary text-sm hover:underline truncate"
-                onclick={handleAuthorClick}
+                onclick={(e) => { e.stopPropagation(); handleAuthorClick(e); }}
               >
                 @{recordData().author?.handle}
               </button>
@@ -368,7 +370,7 @@
         <p class="text-secondary text-sm">引用が続いています...</p>
         <button
           class="text-primary text-xs hover:underline mt-1"
-          onclick={handlePostClick}
+          onclick={(e) => { e.stopPropagation(); handlePostClick(); }}
         >
           投稿を表示
         </button>
@@ -386,7 +388,7 @@
           </div>
           <button
             class="text-primary text-xs hover:underline"
-            onclick={handlePostClick}
+            onclick={(e) => { e.stopPropagation(); handlePostClick(); }}
           >
             表示
           </button>

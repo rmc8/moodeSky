@@ -134,11 +134,12 @@ describe('Tauri Specific Platform Tests', () => {
             success: false,
             responseTime: 0,
             outputValid: false,
-            errorMessage: error.message,
-            details: `ERROR: ${error.message}`
+            errorMessage: error instanceof Error ? error.message : 'Unknown error',
+            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
           });
 
-          console.log(`    ❌ Command failed: ${error.message}`);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.log(`    ❌ Command failed: ${errorMessage}`);
         }
       }
 
@@ -274,10 +275,11 @@ describe('Tauri Specific Platform Tests', () => {
             dataIntegrity: false,
             errorHandling: false,
             latency: 0,
-            details: `ERROR: ${error.message}`
+            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
           });
 
-          console.log(`    ❌ IPC test failed: ${error.message}`);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.log(`    ❌ IPC test failed: ${errorMessage}`);
         }
       }
 
@@ -430,10 +432,11 @@ describe('Tauri Specific Platform Tests', () => {
             dataIntegrity: false,
             encryptionVerified: false,
             performance: 0,
-            details: `ERROR: ${error.message}`
+            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
           });
 
-          console.log(`    ❌ Store test failed: ${error.message}`);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.log(`    ❌ Store test failed: ${errorMessage}`);
         }
       }
 
@@ -575,10 +578,11 @@ describe('Tauri Specific Platform Tests', () => {
             dataConsistency: false,
             conflictResolution: false,
             averageLatency: 0,
-            details: `ERROR: ${error.message}`
+            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
           });
 
-          console.log(`    ❌ Concurrency test failed: ${error.message}`);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.log(`    ❌ Concurrency test failed: ${errorMessage}`);
         }
       }
 
@@ -744,10 +748,11 @@ describe('Tauri Specific Platform Tests', () => {
             executionTime: 0,
             resultValid: false,
             rowsAffected: 0,
-            details: `ERROR: ${error.message}`
+            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
           });
 
-          console.log(`    ❌ SQL operation failed: ${error.message}`);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.log(`    ❌ SQL operation failed: ${errorMessage}`);
         }
       }
 
@@ -876,10 +881,11 @@ describe('Tauri Specific Platform Tests', () => {
             dataValid: false,
             responseTime: 0,
             securityCompliant: false,
-            details: `ERROR: ${error.message}`
+            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
           });
 
-          console.log(`    ❌ OS feature test failed: ${error.message}`);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.log(`    ❌ OS feature test failed: ${errorMessage}`);
         }
       }
 
@@ -990,7 +996,8 @@ describe('Tauri Specific Platform Tests', () => {
               await TimeControlHelper.wait(100);
 
             } catch (error) {
-              console.log(`      Action '${action}' failed: ${error.message}`);
+              const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+              console.log(`      Action '${action}' failed: ${errorMessage}`);
               break;
             }
           }
@@ -1024,10 +1031,11 @@ describe('Tauri Specific Platform Tests', () => {
             stateConsistency: false,
             responseTime: 0,
             sessionPreservation: false,
-            details: `ERROR: ${error.message}`
+            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
           });
 
-          console.log(`    ❌ Window test failed: ${error.message}`);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.log(`    ❌ Window test failed: ${errorMessage}`);
         }
       }
 
@@ -1185,10 +1193,11 @@ describe('Tauri Specific Platform Tests', () => {
             expectedBehavior: false,
             vulnerabilityFound: true,
             responseTime: 0,
-            details: `ERROR: ${error.message}`
+            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
           });
 
-          console.log(`    ❌ Security test failed: ${error.message}`);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.log(`    ❌ Security test failed: ${errorMessage}`);
         }
       }
 

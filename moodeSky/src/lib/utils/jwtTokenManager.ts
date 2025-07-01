@@ -515,6 +515,49 @@ export class JWTTokenManager {
       log.error('Health check failed', { error });
     }
   }
+
+  /**
+   * ヘルスチェック統計を取得
+   */
+  getHealthStats() {
+    const totalTokens = this.tokens.size;
+    let validTokens = 0;
+    let expiredTokens = 0;
+
+    for (const tokenInfo of this.tokens.values()) {
+      if (tokenInfo.expiresAt && tokenInfo.expiresAt > new Date()) {
+        validTokens++;
+      } else {
+        expiredTokens++;
+      }
+    }
+
+    return {
+      totalTokens,
+      validTokens,
+      expiredTokens,
+      lastHealthCheck: new Date()
+    };
+  }
+
+  /**
+   * 設定を取得
+   */
+  getConfig() {
+    return { ...this.config };
+  }
+
+  /**
+   * 設定を更新
+   */
+  updateConfig(newConfig: Partial<TokenManagerConfig>) {
+    this.config = {
+      ...this.config,
+      ...newConfig
+    };
+    
+    log.info('Token manager config updated', newConfig);
+  }
 }
 
 // シングルトンインスタンス

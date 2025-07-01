@@ -176,7 +176,8 @@ export class IntegrationTestContainer {
 
     } catch (error) {
       this.state.metrics.errorCount++;
-      this.recordEvent('setup-error', { error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.recordEvent('setup-error', { error: errorMessage });
       throw error;
     }
   }
@@ -335,7 +336,8 @@ export class IntegrationTestContainer {
       return results;
     } catch (error) {
       this.state.metrics.errorCount++;
-      this.recordEvent('validation-error', { error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.recordEvent('validation-error', { error: errorMessage });
       throw error;
     }
   }
@@ -369,7 +371,8 @@ export class IntegrationTestContainer {
       
     } catch (error) {
       this.state.metrics.errorCount++;
-      this.recordEvent('refresh-error', { error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.recordEvent('refresh-error', { error: errorMessage });
       throw error;
     }
   }
