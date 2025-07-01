@@ -31,7 +31,7 @@ export class MultiAccountService {
 
       for (const account of accountsResult.data!) {
         try {
-          const agent = agentManager.getAgent(account);
+          const agent = await agentManager.getAgent(account);
           agents.push(agent);
         } catch (error) {
           errors.push(`Failed to initialize agent for ${account.profile.handle}: ${error}`);
@@ -64,7 +64,7 @@ export class MultiAccountService {
         return { success: true, data: null };
       }
 
-      const agent = agentManager.getAgent(activeAccountResult.data);
+      const agent = await agentManager.getAgent(activeAccountResult.data);
       return { success: true, data: agent };
     } catch (error) {
       return {
@@ -105,7 +105,7 @@ export class MultiAccountService {
 
       // エージェントを作成
       try {
-        const agent = agentManager.getAgent(accountResult.data);
+        const agent = await agentManager.getAgent(accountResult.data);
         
         return {
           success: true,
@@ -142,7 +142,7 @@ export class MultiAccountService {
       // アカウント情報を取得してからエージェントを削除
       const accountResult = await authService.getAccountById(accountId);
       if (accountResult.success && accountResult.data) {
-        agentManager.removeAgent(accountResult.data);
+        await agentManager.removeAgent(accountResult.data);
       }
       
       // アカウントを削除
@@ -189,7 +189,7 @@ export class MultiAccountService {
       const accountsWithAgents = [];
       for (const account of accountsResult.data!) {
         try {
-          const agent = agentManager.getAgent(account);
+          const agent = await agentManager.getAgent(account);
           accountsWithAgents.push({
             account,
             agent: agent
@@ -229,7 +229,7 @@ export class MultiAccountService {
 
     for (const account of accountsResult.data!) {
       try {
-        const agent = agentManager.getAgent(account);
+        const agent = await agentManager.getAgent(account);
         const isValid = await agent.validateSession();
         results.push({
           accountId: account.id,
@@ -262,8 +262,8 @@ export class MultiAccountService {
   /**
    * リソースをクリーンアップ
    */
-  cleanup(): void {
-    agentManager.removeAllAgents();
+  async cleanup(): Promise<void> {
+    await agentManager.removeAllAgents();
   }
 }
 

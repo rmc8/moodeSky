@@ -170,6 +170,9 @@ export class SessionManager {
       // 既存のアカウントを取得してセッション状態を初期化
       await this.initializeExistingSessions();
 
+      // BackgroundSessionMonitorを初期化および開始
+      await this.initializeBackgroundMonitor();
+
       // バックグラウンド監視を開始
       if (this.config.enableBackgroundMonitoring) {
         this.startSessionMonitoring();
@@ -198,11 +201,31 @@ export class SessionManager {
   }
 
   /**
+   * BackgroundSessionMonitorを初期化
+   */
+  private async initializeBackgroundMonitor(): Promise<void> {
+    try {
+      const { backgroundSessionMonitor } = await import('./backgroundSessionMonitor.js');
+      
+      // BackgroundSessionMonitorを初期化および開始
+      await backgroundSessionMonitor.initialize();
+      await backgroundSessionMonitor.startMonitoring();
+      
+      log.info('BackgroundSessionMonitor initialized and started');
+    } catch (error) {
+      log.warn('Failed to initialize BackgroundSessionMonitor', { error });
+    }
+  }
+
+  /**
    * SessionManager をシャットダウン
    * アプリケーション終了時に呼び出し
    */
   public dispose(): void {
     log.info('Disposing Session Manager');
+
+    // BackgroundSessionMonitorを停止
+    this.stopBackgroundMonitor();
 
     // バックグラウンド監視を停止
     this.stopSessionMonitoring();
@@ -224,6 +247,22 @@ export class SessionManager {
     this.emitEvent({ type: 'MonitoringStopped', timestamp: new Date() });
 
     log.info('Session Manager disposed');
+  }
+
+  /**
+   * BackgroundSessionMonitorを停止
+   */
+  private stopBackgroundMonitor(): void {
+    try {
+      // 動的インポートで循環依存を回避
+      import('./backgroundSessionMonitor.js').then(({ backgroundSessionMonitor }) => {
+        backgroundSessionMonitor.stopMonitoring();
+      }).catch(error => {
+        log.debug('Failed to stop BackgroundSessionMonitor', { error });
+      });
+    } catch (error) {
+      log.debug('Failed to stop BackgroundSessionMonitor', { error });
+    }
   }
 
   /**

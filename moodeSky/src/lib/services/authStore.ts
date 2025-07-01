@@ -99,11 +99,23 @@ export class AuthService {
     // 競合制御: 同じアカウントの同時更新を防止
     const lockKey = `session_update_${accountId}`;
     
-    // 既存の更新処理があれば待機
+    // 既存の更新処理があれば待機（タイムアウト付き）
     const existingLock = this.sessionUpdateLocks.get(lockKey);
     if (existingLock) {
       log.debug('Waiting for existing session update', { accountId });
-      await existingLock;
+      try {
+        // 最大30秒待機してからタイムアウト
+        await Promise.race([
+          existingLock,
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Session update lock timeout')), 30000)
+          )
+        ]);
+      } catch (error) {
+        log.warn('Previous session update timed out or failed', { accountId, error });
+        // 既存ロックを強制削除
+        this.sessionUpdateLocks.delete(lockKey);
+      }
     }
 
     // 新しい更新処理を開始
@@ -116,6 +128,13 @@ export class AuthService {
         accountId, 
         handle: session.handle 
       });
+    } catch (error) {
+      log.error('Session update failed', { 
+        accountId, 
+        handle: session.handle, 
+        error 
+      });
+      throw error;
     } finally {
       // ロックを解除
       this.sessionUpdateLocks.delete(lockKey);
@@ -178,6 +197,17 @@ export class AuthService {
             originalError: error, 
             accountId 
           });
+          
+          // ロールバックも失敗した場合、セッション状態の不整合を防ぐため
+          // アカウントを無効化マークして再認証を促す
+          try {
+            await this.markAccountForReAuthentication(accountId);
+          } catch (markError) {
+            log.error('Failed to mark account for re-authentication', { 
+              markError, 
+              accountId 
+            });
+          }
         }
       }
       
@@ -196,6 +226,11 @@ export class AuthService {
     
     if (!session.accessJwt || !session.refreshJwt) {
       throw new Error('Invalid session data: missing access or refresh JWT');
+    }
+
+    // refreshJwt空文字チェック（localStorage移行の不正データを検出）
+    if (session.refreshJwt.trim() === '') {
+      throw new Error('Invalid session data: refreshJwt is empty (likely from incomplete localStorage migration)');
     }
     
     // JWT形式の基本検証
@@ -216,6 +251,11 @@ export class AuthService {
         now,
         diff: now - accessPayload.exp
       });
+    }
+
+    // refreshJwtの期限検証
+    if (refreshPayload.exp && refreshPayload.exp < now) {
+      throw new Error('Invalid session data: refresh token is already expired');
     }
   }
 
@@ -966,55 +1006,36 @@ export class AuthService {
         };
       }
 
-      // AtpSessionData 形式に変換
-      const session: AtpSessionData = {
-        did: legacyData.authDid,
-        handle: legacyData.authHandle,
-        accessJwt: legacyData.authAccessJwt,
-        refreshJwt: '', // refreshJwtは必須だが、レガシーデータにはないため空文字
-        active: true,
-      };
-
-      const profile = {
-        did: legacyData.authDid,
-        handle: legacyData.authHandle,
-        displayName: legacyData.authDisplayName,
-        avatar: legacyData.authAvatar,
-      };
-
-      // Store Pluginに保存
-      const saveResult = await this.saveAccount(
-        'https://bsky.social', // デフォルトサービス
-        session,
-        profile
-      );
-
-      if (saveResult.success) {
-        // 移行成功後、localStorageをクリア
-        localStorage.removeItem('authDid');
-        localStorage.removeItem('authHandle');
-        localStorage.removeItem('authAccessJwt');
-        localStorage.removeItem('authDisplayName');
-        localStorage.removeItem('authAvatar');
-
-        // 移行完了フラグを設定
-        await this.saveToStore('migration_status', {
-          completed: true,
-          completedAt: new Date().toISOString(),
-          reason: 'success',
-          migratedAccount: {
-            did: legacyData.authDid,
-            handle: legacyData.authHandle
-          }
-        });
-
-        console.log('localStorage migration completed successfully:', {
+      // refreshJwtが不足しているレガシーデータは移行不可
+      // 再ログインが必要であることをユーザーに通知
+      console.warn('Legacy data lacks refreshJwt - migration requires re-authentication');
+      
+      // 移行完了フラグを設定（再認証が必要）
+      await this.saveToStore('migration_status', {
+        completed: true,
+        completedAt: new Date().toISOString(),
+        reason: 're_authentication_required',
+        migratedAccount: {
           did: legacyData.authDid,
           handle: legacyData.authHandle
-        });
-      }
+        }
+      });
 
-      return saveResult;
+      // localStorageをクリア（不完全なセッションデータを削除）
+      localStorage.removeItem('authDid');
+      localStorage.removeItem('authHandle');
+      localStorage.removeItem('authAccessJwt');
+      localStorage.removeItem('authDisplayName');
+      localStorage.removeItem('authAvatar');
+
+      // 再認証が必要であることを示すエラーを返す
+      return {
+        success: false,
+        error: {
+          type: 'RE_AUTHENTICATION_REQUIRED',
+          message: 'Legacy session data is incomplete. Please log in again to restore access.'
+        }
+      };
     } catch (error) {
       console.error('Migration error:', error);
       
@@ -1135,6 +1156,178 @@ export class AuthService {
           message: `Failed to reset migration status: ${error}`,
         },
       };
+    }
+  }
+
+  /**
+   * 不正なセッション（refreshJwt空文字）を検出
+   * 既存のlocalStorage移行アカウントの修復用
+   */
+  async detectInvalidSessions(): Promise<AuthResult<Array<{
+    accountId: string;
+    handle: string;
+    did: string;
+    hasInvalidRefreshJwt: boolean;
+    needsReAuthentication: boolean;
+  }>>> {
+    try {
+      const accountsResult = await this.getAllAccounts();
+      if (!accountsResult.success) {
+        return {
+          success: false,
+          error: accountsResult.error
+        } as AuthResult<Array<{
+          accountId: string;
+          handle: string;
+          did: string;
+          hasInvalidRefreshJwt: boolean;
+          needsReAuthentication: boolean;
+        }>>;
+      }
+
+      const accounts = accountsResult.data || [];
+      const invalidSessions = accounts.map(account => {
+        const hasInvalidRefreshJwt = !account.session?.refreshJwt || 
+                                     account.session.refreshJwt.trim() === '';
+        
+        return {
+          accountId: account.id,
+          handle: account.profile.handle,
+          did: account.profile.did,
+          hasInvalidRefreshJwt,
+          needsReAuthentication: hasInvalidRefreshJwt
+        };
+      });
+
+      const invalidCount = invalidSessions.filter(s => s.hasInvalidRefreshJwt).length;
+      
+      if (invalidCount > 0) {
+        log.warn('Invalid sessions detected', {
+          totalAccounts: accounts.length,
+          invalidSessions: invalidCount,
+          invalidHandles: invalidSessions
+            .filter(s => s.hasInvalidRefreshJwt)
+            .map(s => s.handle)
+        });
+      }
+
+      return {
+        success: true,
+        data: invalidSessions
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          type: 'STORE_LOAD_FAILED',
+          message: `Failed to detect invalid sessions: ${error}`
+        }
+      };
+    }
+  }
+
+  /**
+   * 不正なセッションを持つアカウントを修復（削除）
+   * ユーザーに再ログインを促すため
+   */
+  async repairInvalidSessions(): Promise<AuthResult<{
+    repairedAccounts: number;
+    removedAccountHandles: string[];
+  }>> {
+    try {
+      const detectionResult = await this.detectInvalidSessions();
+      if (!detectionResult.success) {
+        return {
+          success: false,
+          error: detectionResult.error
+        } as AuthResult<{
+          repairedAccounts: number;
+          removedAccountHandles: string[];
+        }>;
+      }
+
+      const invalidAccounts = detectionResult.data!.filter(s => s.needsReAuthentication);
+      const removedHandles: string[] = [];
+
+      for (const account of invalidAccounts) {
+        try {
+          const deleteResult = await this.deleteAccount(account.accountId);
+          if (deleteResult.success) {
+            removedHandles.push(account.handle);
+            log.info('Removed invalid session account', {
+              handle: account.handle,
+              did: account.did
+            });
+          } else {
+            log.error('Failed to remove invalid session account', {
+              handle: account.handle,
+              error: deleteResult.error
+            });
+          }
+        } catch (error) {
+          log.error('Error removing invalid session account', {
+            handle: account.handle,
+            error
+          });
+        }
+      }
+
+      return {
+        success: true,
+        data: {
+          repairedAccounts: removedHandles.length,
+          removedAccountHandles: removedHandles
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          type: 'STORE_SAVE_FAILED',
+          message: `Failed to repair invalid sessions: ${error}`
+        }
+      };
+    }
+  }
+
+  /**
+   * アカウントを再認証要求状態にマーク
+   * セッション更新の致命的エラー時に使用
+   */
+  private async markAccountForReAuthentication(accountId: string): Promise<void> {
+    try {
+      const store = await this.getStore();
+      const authStoreResult = await this.loadFromStore<AuthStore>('auth');
+      
+      if (!authStoreResult.success || !authStoreResult.data) {
+        throw new Error('Failed to load auth store for marking re-authentication');
+      }
+      
+      const authStore = authStoreResult.data;
+      const accountIndex = authStore.accounts.findIndex(acc => acc.id === accountId);
+      
+      if (accountIndex >= 0) {
+        // セッション情報をクリアして再認証を促す
+        const account = authStore.accounts[accountIndex];
+        account.session = {
+          ...account.session,
+          accessJwt: '',
+          refreshJwt: '',
+          active: false
+        };
+        
+        authStore.accounts[accountIndex] = account;
+        
+        const saveResult = await this.saveToStore('auth', authStore);
+        if (saveResult.success) {
+          log.info('Account marked for re-authentication', { accountId });
+        } else {
+          throw new Error('Failed to save account re-authentication mark');
+        }
+      }
+    } catch (error) {
+      log.error('Failed to mark account for re-authentication', { error, accountId });
+      throw error;
     }
   }
 

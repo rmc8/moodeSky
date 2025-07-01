@@ -90,7 +90,8 @@ export type AuthError =
   | 'MIGRATION_FAILED'
   | 'AUTH_FAILED'
   | 'NETWORK_ERROR'
-  | 'RATE_LIMITED';
+  | 'RATE_LIMITED'
+  | 'RE_AUTHENTICATION_REQUIRED';
 
 /**
  * 認証操作結果
