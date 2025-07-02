@@ -1,70 +1,80 @@
 /**
- * Vitest型定義ファイル
- * jest-domマッチャーをVitestのMatchersインターフェースに追加
- * Vitest 3.2.0以降の新しい型拡張方法を使用
+ * Vitest型定義ファイル - jest-domマッチャー拡張
+ * Vitest 3.0+ 互換性のため、AssertionとAsymmetricMatchersContainingの両方を拡張
  */
 
 import 'vitest'
 
-// Vitest の Matchers インターフェースを jest-dom マッチャーで拡張
+// jest-domマッチャーの型定義
+interface JestDomMatchers<R = unknown> {
+  // DOM要素の存在確認
+  toBeInTheDocument(): R
+  
+  // CSSクラスの確認
+  toHaveClass(...classNames: string[]): R
+  
+  // 属性の確認
+  toHaveAttribute(attr: string, value?: string): R
+  
+  // 有効/無効状態の確認
+  toBeDisabled(): R
+  toBeEnabled(): R
+  
+  // DOM要素の内容確認
+  toBeEmptyDOMElement(): R
+  
+  // 可視性の確認
+  toBeVisible(): R
+  
+  // 要素の包含関係確認
+  toContainElement(element: HTMLElement | SVGElement | null): R
+  
+  // HTMLコンテンツの確認
+  toContainHTML(htmlText: string): R
+  
+  // アクセシビリティ関連
+  toHaveAccessibleDescription(expectedDescription?: string | RegExp): R
+  toHaveAccessibleName(expectedName?: string | RegExp): R
+  toHaveAccessibleErrorMessage(message?: string | RegExp): R
+  
+  // フォーム要素の値確認
+  toHaveDisplayValue(value: string | RegExp | Array<string | RegExp>): R
+  toHaveValue(value?: string | string[] | number): R
+  toHaveFormValues(expectedValues: Record<string, any>): R
+  
+  // フォーカス状態の確認
+  toHaveFocus(): R
+  
+  // スタイルの確認
+  toHaveStyle(css: string | Record<string, any>): R
+  
+  // テキストコンテンツの確認
+  toHaveTextContent(text: string | RegExp, options?: { normalizeWhitespace: boolean }): R
+  
+  // チェックボックス/ラジオボタンの状態確認
+  toBeChecked(): R
+  toBePartiallyChecked(): R
+  
+  // エラーメッセージの確認
+  toHaveErrorMessage(text?: string | RegExp): R
+  
+  // その他のDOM関連マッチャー
+  toBeInvalid(): R
+  toBeRequired(): R
+  toBeValid(): R
+  toHaveDescription(text?: string | RegExp): R
+  toHaveRole(role: string): R
+  toHaveSelection(text?: string): R
+}
+
+// Vitestの型を拡張
 declare module 'vitest' {
-  interface Matchers<T = any> {
-    // DOM要素の存在確認
-    toBeInTheDocument(): T
-    
-    // CSSクラスの確認
-    toHaveClass(...classNames: string[]): T
-    
-    // 属性の確認
-    toHaveAttribute(attr: string, value?: string): T
-    
-    // 有効/無効状態の確認
-    toBeDisabled(): T
-    toBeEnabled(): T
-    
-    // DOM要素の内容確認
-    toBeEmptyDOMElement(): T
-    
-    // 可視性の確認
-    toBeVisible(): T
-    
-    // 要素の包含関係確認
-    toContainElement(element: HTMLElement | SVGElement | null): T
-    
-    // HTMLコンテンツの確認
-    toContainHTML(htmlText: string): T
-    
-    // アクセシビリティ関連
-    toHaveAccessibleDescription(expectedDescription?: string | RegExp): T
-    toHaveAccessibleName(expectedName?: string | RegExp): T
-    
-    // フォーム要素の値確認
-    toHaveDisplayValue(value: string | RegExp | Array<string | RegExp>): T
-    toHaveValue(value?: string | string[] | number): T
-    toHaveFormValues(expectedValues: Record<string, any>): T
-    
-    // フォーカス状態の確認
-    toHaveFocus(): T
-    
-    // スタイルの確認
-    toHaveStyle(css: string | Record<string, any>): T
-    
-    // テキストコンテンツの確認
-    toHaveTextContent(text: string | RegExp, options?: { normalizeWhitespace: boolean }): T
-    
-    // チェックボックス/ラジオボタンの状態確認
-    toBeChecked(): T
-    toBePartiallyChecked(): T
-    
-    // エラーメッセージの確認
-    toHaveErrorMessage(text?: string | RegExp): T
-    
-    // その他のDOM関連マッチャー
-    toBeInvalid(): T
-    toBeRequired(): T
-    toBeValid(): T
-    toHaveDescription(text?: string | RegExp): T
-    toHaveRole(role: string): T
-    toHaveSelection(text?: string): T
-  }
+  // expect()の戻り値の型を拡張（主要な修正）
+  interface Assertion<T = any> extends JestDomMatchers<Assertion<T>> {}
+  
+  // 非対称マッチャーの型を拡張
+  interface AsymmetricMatchersContaining extends JestDomMatchers {}
+  
+  // expect.extendで使用される型も拡張（Vitest 3.2+互換）
+  interface Matchers<T = any> extends JestDomMatchers<T> {}
 }
