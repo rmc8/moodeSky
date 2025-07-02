@@ -5,7 +5,6 @@ export default defineConfig({
   plugins: [sveltekit()],
   test: {
     environment: 'jsdom',
-    setupFiles: ['./src/test-setup.ts'],
     globals: true,
     css: false, // CSS処理を無効化してテスト高速化
     // モジュール解決設定
