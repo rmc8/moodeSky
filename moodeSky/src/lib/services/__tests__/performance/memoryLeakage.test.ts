@@ -371,49 +371,12 @@ describe('Memory Leakage Detection Tests', () => {
       console.log('✅ Garbage collection effectiveness validated');
     });
 
-    // ヘルパーメソッド：メモリ増加傾向の計算（線形回帰）
-    private calculateMemoryTrend(snapshots: Array<{ timestamp: number; heapUsed: number }>): {
-      slope: number;
-      intercept: number;
-      rSquared: number;
-    } {
-      const n = snapshots.length;
-      if (n < 2) return { slope: 0, intercept: 0, rSquared: 0 };
+    // ===================================================================
+    // 長期間メモリ監視テスト
+    // ===================================================================
 
-      // 時間を0からの経過秒に正規化
-      const startTime = snapshots[0].timestamp;
-      const xValues = snapshots.map(s => (s.timestamp - startTime) / 1000);
-      const yValues = snapshots.map(s => s.heapUsed);
-
-      // 線形回帰の計算
-      const sumX = xValues.reduce((sum, x) => sum + x, 0);
-      const sumY = yValues.reduce((sum, y) => sum + y, 0);
-      const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
-      const sumXX = xValues.reduce((sum, x) => sum + x * x, 0);
-      const sumYY = yValues.reduce((sum, y) => sum + y * y, 0);
-
-      const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-      const intercept = (sumY - slope * sumX) / n;
-
-      // 決定係数（R²）の計算
-      const yMean = sumY / n;
-      const ssRes = yValues.reduce((sum, y, i) => {
-        const predicted = slope * xValues[i] + intercept;
-        return sum + Math.pow(y - predicted, 2);
-      }, 0);
-      const ssTot = yValues.reduce((sum, y) => sum + Math.pow(y - yMean, 2), 0);
-      const rSquared = ssTot > 0 ? 1 - (ssRes / ssTot) : 0;
-
-      return { slope, intercept, rSquared };
-    }
-  });
-
-  // ===================================================================
-  // 長期間メモリ監視テスト
-  // ===================================================================
-
-  describe('Long-term Memory Monitoring', () => {
-    it('should maintain stable memory usage over extended periods', async () => {
+    describe('Long-term Memory Monitoring', () => {
+      it('should maintain stable memory usage over extended periods', async () => {
       console.log('Testing stable memory usage over extended periods...');
 
       const longTermConfig = {
