@@ -16,8 +16,7 @@ export default defineConfig({
       include: [
         'src/lib/**/*.{ts,svelte}',
         '!src/lib/**/*.test.{ts,svelte}',
-        '!src/lib/**/*.spec.{ts,svelte}',
-        '!src/lib/test-utils/**'
+        '!src/lib/**/*.spec.{ts,svelte}'
       ],
       exclude: [
         'src/lib/types/**',
