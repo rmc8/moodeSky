@@ -6,6 +6,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    setupFiles: ['./src/test-setup.ts'],
     css: false, // CSS処理を無効化してテスト高速化
     // モジュール解決設定
     alias: {
