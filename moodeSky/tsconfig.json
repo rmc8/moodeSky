@@ -11,8 +11,13 @@
     "strict": true,
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "noEmit": true
-  }
+    "noEmit": true,
+    "types": ["vitest/globals", "@testing-library/jest-dom"]
+  },
+  "include": [
+    "src/**/*",
+    "./src/test-setup.ts"
+  ]
   // Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
   // except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
   //
