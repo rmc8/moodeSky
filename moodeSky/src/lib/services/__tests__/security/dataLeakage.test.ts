@@ -11,10 +11,10 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { SecurityTestingSuite, type SecurityTestConfig, SecurityTestHelpers } from '../../../test-utils/securityTestingSuite.js';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
-import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.js';
-import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.js';
+import { SecurityTestingSuite, type SecurityTestConfig, SecurityTestHelpers } from '../../../test-utils/securityTestingSuite.ts';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
+import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.ts';
+import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.ts';
 
 describe('Data Leakage Prevention Tests', () => {
   let container: IntegrationTestContainer;
@@ -564,7 +564,7 @@ describe('Data Leakage Prevention Tests', () => {
         }
 
         // ヘッダーでの機密データ漏洩チェック
-        Object.entries(request.headers).forEach(([key, value]) => {
+        Object.entries(request.headers).forEach(([key, value]: any) => {
           if (key.toLowerCase().includes('authorization') && !request.encrypted) {
             plaintextLeaks.push({
               url: request.url,
@@ -900,7 +900,7 @@ describe('Data Leakage Prevention Tests', () => {
 
       const foundSensitiveData: string[] = [];
 
-      sensitivePatterns.forEach((pattern, index) => {
+      sensitivePatterns.forEach((pattern: any, index: number) => {
         const matches = debugContent.match(pattern);
         if (matches) {
           foundSensitiveData.push(`Pattern ${index + 1}: ${matches[0].substring(0, 20)}...`);

@@ -6,11 +6,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { IntegrationTestContainer, IntegrationTestHelpers } from '../../../test-utils/integrationTestContainer.js';
-import { AccountTestFactory, TimeControlHelper } from '../../../test-utils/sessionTestUtils.js';
-import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.js';
-import type { Account } from '../../../types/auth.js';
-import type { SessionState, ValidationResult } from '../../sessionManager.js';
+import { IntegrationTestContainer, IntegrationTestHelpers } from '../../../test-utils/integrationTestContainer.ts';
+import { AccountTestFactory, TimeControlHelper } from '../../../test-utils/sessionTestUtils.ts';
+import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.ts';
+import type { Account } from '../../../types/auth.ts';
+import type { SessionState, ValidationResult } from '../../sessionManager.ts';
 
 describe('Session Management Integration Tests', () => {
   let container: IntegrationTestContainer;

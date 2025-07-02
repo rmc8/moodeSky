@@ -6,13 +6,13 @@
  */
 
 import { beforeEach, afterEach, vi, type MockedFunction } from 'vitest';
-import { SessionManager } from '../services/sessionManager.js';
-import { AuthService } from '../services/authStore.js';
-import { JWTTokenManager } from '../utils/jwtTokenManager.js';
-import type { Account } from '../types/auth.js';
-import type { SessionState, ValidationResult } from '../services/sessionManager.js';
-import { TauriStoreMockFactory, type MockedStore } from './mockFactories.js';
-import { AccountTestFactory, TimeControlHelper } from './sessionTestUtils.js';
+import { SessionManager } from '../services/sessionManager.ts';
+import { AuthService } from '../services/authStore.ts';
+import { JWTTokenManager } from '../utils/jwtTokenManager.ts';
+import type { Account } from '../types/auth.ts';
+import type { SessionState, ValidationResult } from '../services/sessionManager.ts';
+import { TauriStoreMockFactory, type MockedStore } from './mockFactories.ts';
+import { AccountTestFactory, TimeControlHelper } from './sessionTestUtils.ts';
 
 /**
  * 統合テストコンテナの設定

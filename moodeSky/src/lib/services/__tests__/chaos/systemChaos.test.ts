@@ -10,9 +10,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { ChaosTestingFramework, type ChaosInjectionConfig, ChaosTestHelpers } from '../../../test-utils/chaosTestingFramework.js';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
-import { TimeControlHelper } from '../../../test-utils/sessionTestUtils.js';
+import { ChaosTestingFramework, type ChaosInjectionConfig, ChaosTestHelpers } from '../../../test-utils/chaosTestingFramework.ts';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
+import { TimeControlHelper } from '../../../test-utils/sessionTestUtils.ts';
 
 describe('System Chaos Engineering Tests', () => {
   let container: IntegrationTestContainer;
@@ -454,7 +454,7 @@ describe('System Chaos Engineering Tests', () => {
       // 弱点が検出されていることを確認
       if (assessment.detailedAnalysis.weaknesses.length > 0) {
         console.log('Detected weaknesses:');
-        assessment.detailedAnalysis.weaknesses.forEach((weakness, index) => {
+        assessment.detailedAnalysis.weaknesses.forEach((weakness: any, index: number) => {
           console.log(`  ${index + 1}. ${weakness}`);
         });
       }
@@ -471,7 +471,7 @@ describe('System Chaos Engineering Tests', () => {
       );
 
       console.log('System improvement recommendations:');
-      assessment.recommendations.forEach((rec, index) => {
+      assessment.recommendations.forEach((rec: any, index: number) => {
         console.log(`  ${index + 1}. ${rec}`);
       });
     });

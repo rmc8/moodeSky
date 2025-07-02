@@ -10,9 +10,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { PerformanceBenchmarkSuite, type PerformanceTestConfig, PerformanceTestHelpers } from '../../../test-utils/performanceBenchmarkSuite.js';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
-import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.js';
+import { PerformanceBenchmarkSuite, type PerformanceTestConfig, PerformanceTestHelpers } from '../../../test-utils/performanceBenchmarkSuite.ts';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
+import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.ts';
 
 describe('Massive Scale Performance Tests', () => {
   let container: IntegrationTestContainer;
@@ -201,7 +201,7 @@ describe('Massive Scale Performance Tests', () => {
 
       // 線形スケーリング分析
       console.log('\nScaling Analysis:');
-      scalingMetrics.forEach((metric, index) => {
+      scalingMetrics.forEach((metric: any, index: number) => {
         console.log(`${metric.accountCount} accounts: ${metric.responseTime}ms, ${metric.throughput.toFixed(2)} req/s, ${metric.memoryUsageMB.toFixed(1)}MB, ${metric.errorRate.toFixed(1)}% errors`);
       });
 

@@ -10,9 +10,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { ChaosTestingFramework, type ChaosInjectionConfig } from '../../../test-utils/chaosTestingFramework.js';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
-import { TimeControlHelper } from '../../../test-utils/sessionTestUtils.js';
+import { ChaosTestingFramework, type ChaosInjectionConfig } from '../../../test-utils/chaosTestingFramework.ts';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
+import { TimeControlHelper } from '../../../test-utils/sessionTestUtils.ts';
 
 describe('Resource Chaos Engineering Tests', () => {
   let container: IntegrationTestContainer;
@@ -234,7 +234,7 @@ describe('Resource Chaos Engineering Tests', () => {
       });
 
       console.log('Memory usage trend:');
-      memorySnapshots.forEach((snapshot, index) => {
+      memorySnapshots.forEach((snapshot: any, index: number) => {
         console.log(`  ${(snapshot.time / 1000).toFixed(1)}s: ${snapshot.usage.toFixed(1)}MB (+${memoryTrend[index].toFixed(1)}MB)`);
       });
 
@@ -609,7 +609,7 @@ describe('Resource Chaos Engineering Tests', () => {
       }> = [];
 
       // フェーズ1：ベースライン
-      const baselineResults = await this.measurePhasePerformance(container, 'baseline', 3);
+      const baselineResults = await measurePhasePerformance(container, 'baseline', 3);
       adaptationMetrics.push(baselineResults);
 
       // リソース制約の段階的適用
@@ -617,19 +617,19 @@ describe('Resource Chaos Engineering Tests', () => {
 
       // フェーズ2：軽度制約
       await TimeControlHelper.wait(2000);
-      const lightConstraintResults = await this.measurePhasePerformance(container, 'light-constraint', 2);
+      const lightConstraintResults = await measurePhasePerformance(container, 'light-constraint', 2);
       adaptationMetrics.push(lightConstraintResults);
 
       // フェーズ3：中度制約
       await TimeControlHelper.wait(3000);
-      const mediumConstraintResults = await this.measurePhasePerformance(container, 'medium-constraint', 2);
+      const mediumConstraintResults = await measurePhasePerformance(container, 'medium-constraint', 2);
       adaptationMetrics.push(mediumConstraintResults);
 
       // 制約終了まで待機
       await TimeControlHelper.wait(15000);
 
       // フェーズ4：回復後
-      const recoveryResults = await this.measurePhasePerformance(container, 'recovery', 3);
+      const recoveryResults = await measurePhasePerformance(container, 'recovery', 3);
       adaptationMetrics.push(recoveryResults);
 
       // 適応性能の分析
@@ -831,7 +831,7 @@ describe('Resource Chaos Engineering Tests', () => {
       expect(assessment.recommendations.length).toBeGreaterThan(0);
       
       console.log('\nResource optimization recommendations:');
-      assessment.recommendations.forEach((rec, index) => {
+      assessment.recommendations.forEach((rec: any, index: number) => {
         console.log(`  ${index + 1}. ${rec}`);
       });
 

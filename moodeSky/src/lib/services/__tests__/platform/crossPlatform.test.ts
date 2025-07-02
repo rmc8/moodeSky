@@ -13,9 +13,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
-import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.js';
-import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.js';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
+import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.ts';
+import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.ts';
 
 describe('Cross-Platform Consistency Tests', () => {
   let container: IntegrationTestContainer;
@@ -1131,7 +1131,7 @@ describe('Cross-Platform Consistency Tests', () => {
       console.log('Platform Performance Ranking:');
       Object.entries(platformTotalScores)
         .sort(([_, a], [__, b]) => b - a)
-        .forEach(([platform, score]) => {
+        .forEach(([platform, score]: any) => {
           console.log(`  ${platform}: ${score.toFixed(1)} points`);
         });
 
@@ -1332,7 +1332,7 @@ describe('Cross-Platform Consistency Tests', () => {
   private detectFormatViolations(platformResults: { [platform: string]: any }, dataType: string): string[] {
     const violations: string[] = [];
     
-    Object.entries(platformResults).forEach(([platform, result]) => {
+    Object.entries(platformResults).forEach(([platform, result]: any) => {
       if (result.error) {
         violations.push(`${platform}: ${result.error}`);
       }

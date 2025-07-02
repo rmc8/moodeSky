@@ -10,9 +10,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { PerformanceBenchmarkSuite, type PerformanceTestConfig, PerformanceTestHelpers } from '../../../test-utils/performanceBenchmarkSuite.js';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
-import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.js';
+import { PerformanceBenchmarkSuite, type PerformanceTestConfig, PerformanceTestHelpers } from '../../../test-utils/performanceBenchmarkSuite.ts';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
+import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.ts';
 
 describe('Latency Benchmark Tests', () => {
   let container: IntegrationTestContainer;
@@ -262,7 +262,7 @@ describe('Latency Benchmark Tests', () => {
       // ヒストグラム分析
       const histogram = this.createHistogram(latencies, 20);
       console.log('\nLatency Histogram (20 bins):');
-      histogram.forEach((bin, index) => {
+      histogram.forEach((bin: any, index: number) => {
         const bar = '█'.repeat(Math.floor(bin.percentage * 20));
         console.log(`  ${bin.min.toFixed(0)}-${bin.max.toFixed(0)}ms: ${bin.count.toString().padStart(3)} ${bar} ${bin.percentage.toFixed(1)}%`);
       });
@@ -792,7 +792,7 @@ describe('Latency Benchmark Tests', () => {
         // 最適化優先度の計算
         const sortedByPriority = [...bottlenecks].sort((a, b) => b.optimizationPotential - a.optimizationPotential);
         console.log('\nOptimization priority:');
-        sortedByPriority.forEach((item, index) => {
+        sortedByPriority.forEach((item: any, index: number) => {
           console.log(`  ${index + 1}. ${item.component} (${item.optimizationPotential.toFixed(1)}% potential)`);
         });
       } else {

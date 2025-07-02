@@ -7,25 +7,25 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi, type MockedFunction } from 'vitest';
 import type { AtpSessionData, AtpSessionEvent } from '@atproto/api';
-import { AuthService } from '../authStore.js';
-import type { Account, AuthResult, SessionEventHandler } from '../../types/auth.js';
+import { AuthService } from '../authStore.ts';
+import type { Account, AuthResult, SessionEventHandler } from '../../types/auth.ts';
 import { 
   AccountTestFactory, 
   SessionTestAssertions,
   TimeControlHelper 
-} from '../../test-utils/sessionTestUtils.js';
+} from '../../test-utils/sessionTestUtils.ts';
 import { 
   TauriStoreMockFactory, 
   AtProtocolMockFactory,
   type MockedStore 
-} from '../../test-utils/mockFactories.js';
+} from '../../test-utils/mockFactories.ts';
 
 // モック化対象のモジュール
 vi.mock('@tauri-apps/plugin-store', () => ({
   Store: vi.fn()
 }));
 
-vi.mock('../../utils/logger.js', () => ({
+vi.mock('../../utils/logger.ts', () => ({
   createComponentLogger: vi.fn(() => ({
     info: vi.fn(),
     debug: vi.fn(),
@@ -34,7 +34,7 @@ vi.mock('../../utils/logger.js', () => ({
   }))
 }));
 
-vi.mock('../profileService.js', () => ({
+vi.mock('../profileService.ts', () => ({
   profileService: {
     getProfile: vi.fn(),
     updateProfile: vi.fn()
@@ -274,7 +274,7 @@ describe('AuthService', () => {
         resumeSession: vi.fn().mockResolvedValue(refreshedSession)
       };
       
-      vi.doMock('../agent.js', () => ({
+      vi.doMock('../agent.ts', () => ({
         Agent: vi.fn().mockImplementation(() => ({
           agent: mockAgent
         }))
@@ -294,7 +294,7 @@ describe('AuthService', () => {
         resumeSession: vi.fn().mockRejectedValue(refreshError)
       };
       
-      vi.doMock('../agent.js', () => ({
+      vi.doMock('../agent.ts', () => ({
         Agent: vi.fn().mockImplementation(() => ({
           agent: mockAgent
         }))
@@ -313,7 +313,7 @@ describe('AuthService', () => {
         resumeSession: vi.fn().mockResolvedValue(rotatedSession)
       };
       
-      vi.doMock('../agent.js', () => ({
+      vi.doMock('../agent.ts', () => ({
         Agent: vi.fn().mockImplementation(() => ({
           agent: mockAgent
         }))

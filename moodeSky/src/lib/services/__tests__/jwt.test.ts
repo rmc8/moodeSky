@@ -14,8 +14,8 @@ import {
   getTokenInfo,
   JWTDecodeError,
   type JWTPayload
-} from '../../utils/jwt.js';
-import { JWTTestFactory } from '../../test-utils/sessionTestUtils.js';
+} from '../../utils/jwt.ts';
+import { JWTTestFactory } from '../../test-utils/sessionTestUtils.ts';
 
 describe('JWT Utilities', () => {
   beforeEach(() => {
@@ -376,7 +376,7 @@ describe('JWT Utilities', () => {
         }))
       );
 
-      results.forEach((result, index) => {
+      results.forEach((result: any, index: number) => {
         expect(result.decoded).toBeDefined();
         expect(result.expired).toBe(false);
         expect(result.remaining).toBeGreaterThan(0);

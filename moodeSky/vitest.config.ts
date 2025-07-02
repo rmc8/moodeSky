@@ -8,6 +8,10 @@ export default defineConfig({
     setupFiles: ['./src/test-setup.ts'],
     globals: true,
     css: false, // CSS処理を無効化してテスト高速化
+    // モジュール解決設定
+    alias: {
+      '$lib': './src/lib'
+    },
     coverage: {
       provider: 'v8',
       include: [

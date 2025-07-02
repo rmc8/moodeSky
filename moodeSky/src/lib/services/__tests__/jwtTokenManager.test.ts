@@ -6,11 +6,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi, type MockedFunction } from 'vitest';
-import { JWTTokenManager, type TokenInfo, type RefreshSchedule, type TokenManagerConfig } from '../../utils/jwtTokenManager.js';
-import { JWTTestFactory, PerformanceTestHelper, TimeControlHelper } from '../../test-utils/sessionTestUtils.js';
+import { JWTTokenManager, type TokenInfo, type RefreshSchedule, type TokenManagerConfig } from '../../utils/jwtTokenManager.ts';
+import { JWTTestFactory, PerformanceTestHelper, TimeControlHelper } from '../../test-utils/sessionTestUtils.ts';
 
 // モック化対象のモジュール
-vi.mock('../../utils/logger.js', () => ({
+vi.mock('../../utils/logger.ts', () => ({
   createComponentLogger: vi.fn(() => ({
     info: vi.fn(),
     debug: vi.fn(),

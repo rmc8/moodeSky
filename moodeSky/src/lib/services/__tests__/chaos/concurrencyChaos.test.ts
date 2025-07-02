@@ -10,9 +10,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { ChaosTestingFramework, type ChaosInjectionConfig } from '../../../test-utils/chaosTestingFramework.js';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
-import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.js';
+import { ChaosTestingFramework, type ChaosInjectionConfig } from '../../../test-utils/chaosTestingFramework.ts';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
+import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.ts';
 
 describe('Concurrency Chaos Engineering Tests', () => {
   let container: IntegrationTestContainer;
