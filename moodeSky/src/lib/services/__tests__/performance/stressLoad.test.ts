@@ -422,7 +422,14 @@ describe('Stress Load Performance Tests', () => {
           sessionCount: container.state.activeAccounts.length,
           tokenCount: container.state.activeAccounts.length * 2
         },
-        loadPattern: 'constant'
+        loadPattern: 'constant',
+        expectations: {
+          maxResponseTimeMs: 5000,
+          maxMemoryUsageMB: 300,
+          maxCpuUsage: 70,
+          maxErrorRate: 5,
+          minThroughput: 20
+        }
       };
 
       const baselineMetrics = await performanceSuite.runPerformanceTest(baselineConfig);
@@ -773,13 +780,13 @@ describe('Stress Load Performance Tests', () => {
           // 枯渇の判定
           switch (scenario.type) {
             case 'memory_exhaustion':
-              exhaustionAchieved = memoryIncrease > scenario.expectedMemoryIncrease;
+              exhaustionAchieved = memoryIncrease > (scenario.expectedMemoryIncrease || 100);
               break;
             case 'cpu_exhaustion':
-              exhaustionAchieved = exhaustionMetrics.resourceUsage.cpu.peak > scenario.expectedCpuUsage;
+              exhaustionAchieved = exhaustionMetrics.resourceUsage.cpu.peak > (scenario.expectedCpuUsage || 80);
               break;
             case 'connection_exhaustion':
-              exhaustionAchieved = exhaustionMetrics.errors.errorRate > scenario.expectedErrorRate;
+              exhaustionAchieved = exhaustionMetrics.errors.errorRate > (scenario.expectedErrorRate || 50);
               break;
           }
 

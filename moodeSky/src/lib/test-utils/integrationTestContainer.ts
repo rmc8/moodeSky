@@ -26,6 +26,8 @@ export interface IntegrationTestConfig {
   enableBackgroundMonitor?: boolean;
   /** ネットワークシミュレーションを有効にするか */
   enableNetworkSimulation?: boolean;
+  /** 高精度タイミング測定を有効にするか */
+  highPrecisionTiming?: boolean;
   /** ログレベル */
   logLevel?: 'debug' | 'info' | 'warn' | 'error';
 }
@@ -91,6 +93,7 @@ export class IntegrationTestContainer {
       enableJWTManager: true,
       enableBackgroundMonitor: false,
       enableNetworkSimulation: false,
+      highPrecisionTiming: false,
       logLevel: 'info',
       ...config
     };

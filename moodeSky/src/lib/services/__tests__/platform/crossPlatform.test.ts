@@ -16,6 +16,44 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
 import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.js';
 import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.js';
+import * as CrossPlatformHelpers from '../../../test-utils/crossPlatformTestHelpers.js';
+
+// Import all helper functions into the global scope for test convenience
+const {
+  setupCrossPlatformEnvironment,
+  teardownCrossPlatformEnvironment,
+  simulatePlatform,
+  detectTokenEncoding,
+  parseJWTHeader,
+  parseJWTPayload,
+  extractTimestamps,
+  extractIdentifiers,
+  extractFlags,
+  analyzeCharacterSet,
+  validateDIDChecksum,
+  analyzeHandleFormat,
+  detectStringEncoding,
+  normalizeHandle,
+  validateHandleDomain,
+  calculateConsistencyScore,
+  detectFormatViolations,
+  serializeDataForPlatform,
+  detectDataEncoding,
+  validateDataEncoding,
+  prepareSessionForTransfer,
+  exportSessionData,
+  importSessionData,
+  verifyTransferredDataIntegrity,
+  calculateVariance,
+  setupMultiDeviceSync,
+  executeMultiDeviceOperation,
+  verifyMultiDeviceConsistency,
+  testFeatureOperation,
+  detectPlatformFeature,
+  testGracefulDegradation,
+  testFallbackFunction,
+  executePerformanceOperation
+} = CrossPlatformHelpers;
 
 describe('Cross-Platform Consistency Tests', () => {
   let container: IntegrationTestContainer;
@@ -31,11 +69,11 @@ describe('Cross-Platform Consistency Tests', () => {
     await container.setup();
 
     // プラットフォーム環境シミュレーションの初期化
-    await this.setupCrossPlatformEnvironment();
+    await setupCrossPlatformEnvironment();
   });
 
   afterEach(async () => {
-    await this.teardownCrossPlatformEnvironment();
+    await teardownCrossPlatformEnvironment();
     await container.teardown();
   });
 
@@ -56,9 +94,9 @@ describe('Cross-Platform Consistency Tests', () => {
           dataType: 'session_token',
           extractFunction: (session: any) => ({
             structure: session.accessJwt?.split('.').length,
-            encoding: this.detectTokenEncoding(session.accessJwt),
-            header: this.parseJWTHeader(session.accessJwt),
-            payload: this.parseJWTPayload(session.accessJwt)
+            encoding: session.accessJwt ? detectTokenEncoding(session.accessJwt) : 'unknown',
+            header: session.accessJwt ? parseJWTHeader(session.accessJwt) : null,
+            payload: session.accessJwt ? parseJWTPayload(session.accessJwt) : null
           }),
           expectedConsistency: true,
           description: 'JWT token structure and encoding consistency'
@@ -67,9 +105,9 @@ describe('Cross-Platform Consistency Tests', () => {
           name: 'Session Metadata Format',
           dataType: 'session_metadata',
           extractFunction: (session: any) => ({
-            timestamps: this.extractTimestamps(session),
-            identifiers: this.extractIdentifiers(session),
-            flags: this.extractFlags(session),
+            timestamps: extractTimestamps(session),
+            identifiers: extractIdentifiers(session),
+            flags: extractFlags(session),
             version: session.version || 'unknown'
           }),
           expectedConsistency: true,
@@ -81,8 +119,8 @@ describe('Cross-Platform Consistency Tests', () => {
           extractFunction: (account: any) => ({
             prefix: account.profile.did.substring(0, 8),
             length: account.profile.did.length,
-            characterSet: this.analyzeCharacterSet(account.profile.did),
-            checksumValid: this.validateDIDChecksum(account.profile.did)
+            characterSet: analyzeCharacterSet(account.profile.did),
+            checksumValid: validateDIDChecksum(account.profile.did)
           }),
           expectedConsistency: true,
           description: 'Account DID format standardization'
@@ -91,10 +129,10 @@ describe('Cross-Platform Consistency Tests', () => {
           name: 'Handle Format Normalization',
           dataType: 'account_handle',
           extractFunction: (account: any) => ({
-            format: this.analyzeHandleFormat(account.profile.handle),
-            encoding: this.detectStringEncoding(account.profile.handle),
-            normalized: this.normalizeHandle(account.profile.handle),
-            domainValid: this.validateHandleDomain(account.profile.handle)
+            format: analyzeHandleFormat(account.profile.handle),
+            encoding: detectStringEncoding(account.profile.handle),
+            normalized: normalizeHandle(account.profile.handle),
+            domainValid: validateHandleDomain(account.profile.handle)
           }),
           expectedConsistency: true,
           description: 'Account handle format consistency'
@@ -120,7 +158,7 @@ describe('Cross-Platform Consistency Tests', () => {
         for (const platform of platforms) {
           try {
             // プラットフォーム固有の環境設定
-            await this.simulatePlatform(platform);
+            await simulatePlatform(platform);
 
             // セッションまたはアカウント情報の取得
             let targetData;
@@ -146,10 +184,10 @@ describe('Cross-Platform Consistency Tests', () => {
         }
 
         // プラットフォーム間の一貫性分析
-        const consistencyScore = this.calculateConsistencyScore(platformResults);
+        const consistencyScore = calculateConsistencyScore(platformResults);
         
         // 形式違反の検出
-        const additionalViolations = this.detectFormatViolations(platformResults, test.dataType);
+        const additionalViolations = detectFormatViolations(platformResults, test.dataType);
         formatViolations.push(...additionalViolations);
 
         formatResults.push({
@@ -258,12 +296,12 @@ describe('Cross-Platform Consistency Tests', () => {
 
         for (const platform of platforms) {
           try {
-            await this.simulatePlatform(platform);
+            await simulatePlatform(platform);
 
             // データのシリアライゼーションとエンコーディング
-            const serialized = await this.serializeDataForPlatform(test.testData, platform);
-            const encoding = this.detectDataEncoding(serialized);
-            const valid = this.validateDataEncoding(serialized, test.expectedEncoding || test.expectedFormat);
+            const serialized = await serializeDataForPlatform(test.testData, platform);
+            const encoding = detectDataEncoding(serialized);
+            const valid = validateDataEncoding(serialized, test.expectedEncoding || test.expectedFormat || 'json');
 
             platformEncodings[platform] = {
               encoding,
@@ -406,17 +444,17 @@ describe('Cross-Platform Consistency Tests', () => {
           const migrationIssues: string[] = [];
 
           // ソースプラットフォームでのセッション準備
-          await this.simulatePlatform(scenario.sourcePlatform);
-          const sourceSession = await this.prepareSessionForTransfer(scenario.accountCount || 1);
+          await simulatePlatform(scenario.sourcePlatform);
+          const sourceSession = await prepareSessionForTransfer(scenario.accountCount || 1);
 
           // セッションデータのエクスポート
-          const exportedData = await this.exportSessionData(sourceSession, scenario.transferMethod);
+          const exportedData = await exportSessionData(sourceSession, scenario.transferMethod);
           
           // ターゲットプラットフォームへの移行
-          await this.simulatePlatform(scenario.targetPlatform);
+          await simulatePlatform(scenario.targetPlatform);
           
           // セッションデータのインポート
-          const importResult = await this.importSessionData(exportedData, scenario.transferMethod);
+          const importResult = await importSessionData(exportedData, scenario.transferMethod);
           transferSuccess = importResult.success;
 
           if (transferSuccess) {
@@ -426,7 +464,7 @@ describe('Cross-Platform Consistency Tests', () => {
             sessionValidity = sessionState?.isValid || false;
 
             // データ整合性の確認
-            dataIntegrity = await this.verifyTransferredDataIntegrity(sourceSession, importResult.sessionData);
+            dataIntegrity = await verifyTransferredDataIntegrity(sourceSession, importResult.sessionData);
 
             // 移行問題の収集
             migrationIssues.push(...(importResult.issues || []));
@@ -557,7 +595,7 @@ describe('Cross-Platform Consistency Tests', () => {
           const startTime = performance.now();
           
           // デバイス間同期のセットアップ
-          const deviceStates = await this.setupMultiDeviceSync(scenario.devices);
+          const deviceStates = await setupMultiDeviceSync(scenario.devices);
           
           let syncSuccess = false;
           let consistencyAchieved = false;
@@ -566,7 +604,7 @@ describe('Cross-Platform Consistency Tests', () => {
 
           // 同期操作の実行
           for (const operation of scenario.operations) {
-            const operationResult = await this.executeMultiDeviceOperation(
+            const operationResult = await executeMultiDeviceOperation(
               operation, 
               deviceStates, 
               scenario.syncMethod
@@ -579,7 +617,7 @@ describe('Cross-Platform Consistency Tests', () => {
           }
 
           // 同期結果の確認
-          const finalConsistency = await this.verifyMultiDeviceConsistency(deviceStates);
+          const finalConsistency = await verifyMultiDeviceConsistency(deviceStates);
           syncSuccess = finalConsistency.syncCompleted;
           consistencyAchieved = finalConsistency.consistent;
 
@@ -714,7 +752,7 @@ describe('Cross-Platform Consistency Tests', () => {
 
         for (const platform of platforms) {
           try {
-            await this.simulatePlatform(platform);
+            await simulatePlatform(platform);
 
             let available = true;
             let totalPerformance = 0;
@@ -725,7 +763,7 @@ describe('Cross-Platform Consistency Tests', () => {
               const startTime = performance.now();
               
               try {
-                const operationSuccess = await this.testFeatureOperation(feature.feature, operation);
+                const operationSuccess = await testFeatureOperation(feature.feature, operation);
                 if (!operationSuccess) {
                   available = false;
                   issues.push(`Operation '${operation}' failed`);
@@ -768,7 +806,7 @@ describe('Cross-Platform Consistency Tests', () => {
         const performances = Object.values(platformAvailability)
           .filter(p => p.available)
           .map(p => p.performance);
-        const performanceVariance = this.calculateVariance(performances);
+        const performanceVariance = calculateVariance(performances);
         const performanceConsistency = performanceVariance < (feature.performanceThreshold * 0.3); // 30% threshold variance
 
         parityResults.push({
@@ -882,20 +920,20 @@ describe('Cross-Platform Consistency Tests', () => {
           totalTests++;
           
           try {
-            await this.simulatePlatform(platform);
+            await simulatePlatform(platform);
 
             // 機能検出の確認
-            const detectedAvailability = await this.detectPlatformFeature(feature.name);
+            const detectedAvailability = await detectPlatformFeature(feature.name);
             const detectionCorrect = detectedAvailability === platformConfig.available;
             if (detectionCorrect) correctDetections++;
 
             // 機能が利用不可能な場合の graceful degradation
             if (!platformConfig.available) {
-              const degradationHandled = await this.testGracefulDegradation(feature.name, feature.fallback);
+              const degradationHandled = await testGracefulDegradation(feature.name, feature.fallback);
               if (degradationHandled) gracefulDegradations++;
 
               // フォールバック機能の効果確認
-              const fallbackSuccess = await this.testFallbackFunction(feature.fallback);
+              const fallbackSuccess = await testFallbackFunction(feature.fallback);
               if (fallbackSuccess) fallbackSuccesses++;
             } else {
               gracefulDegradations++; // 機能が利用可能な場合は自動的に成功
@@ -1035,14 +1073,14 @@ describe('Cross-Platform Consistency Tests', () => {
 
         for (const platform of platforms) {
           try {
-            await this.simulatePlatform(platform);
+            await simulatePlatform(platform);
 
             const timings: number[] = [];
             
             // 複数回実行して統計を取得
             for (let i = 0; i < test.iterations; i++) {
               const startTime = performance.now();
-              await this.executePerformanceOperation(test.operation);
+              await executePerformanceOperation(test.operation);
               const endTime = performance.now();
               timings.push(endTime - startTime);
               
@@ -1082,7 +1120,7 @@ describe('Cross-Platform Consistency Tests', () => {
 
         // パフォーマンス分析
         const avgTimes = Object.values(platformPerformance).map((p: any) => p.averageTime).filter(t => t > 0);
-        const overallVariance = this.calculateVariance(avgTimes);
+        const overallVariance = calculateVariance(avgTimes);
         const performanceRank = Object.entries(platformPerformance)
           .filter(([_, p]: [string, any]) => p.averageTime > 0)
           .sort(([_, a]: [string, any], [__, b]: [string, any]) => a.averageTime - b.averageTime)

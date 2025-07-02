@@ -24,8 +24,8 @@ describe('Latency Benchmark Tests', () => {
       initialAccountCount: 10, // レイテンシ測定用
       enableJWTManager: true,
       enableBackgroundMonitor: false, // バックグラウンド処理によるノイズ除去
-      logLevel: 'error',
-      highPrecisionTiming: true // 高精度タイミング測定を有効化
+      highPrecisionTiming: true, // 高精度タイミング測定を有効化
+      logLevel: 'error'
     });
     await container.setup();
 
@@ -153,10 +153,10 @@ describe('Latency Benchmark Tests', () => {
 
         // レイテンシ統計の計算
         const sortedLatencies = [...latencies].sort((a, b) => a - b);
-        const percentiles = this.calculatePercentiles(sortedLatencies);
-        const statistics = this.calculateStatistics(latencies);
+        const percentiles = calculatePercentiles(sortedLatencies);
+        const statistics = calculateStatistics(latencies);
 
-        const performance = {
+        const performanceResult = {
           withinP50: percentiles.p50 <= benchmark.expectedP50,
           withinP95: percentiles.p95 <= benchmark.expectedP95,
           withinP99: percentiles.p99 <= benchmark.expectedP99
@@ -168,7 +168,7 @@ describe('Latency Benchmark Tests', () => {
           latencies: sortedLatencies,
           percentiles,
           statistics,
-          performance
+          performance: performanceResult
         };
 
         benchmarkResults.push(result);
@@ -176,9 +176,9 @@ describe('Latency Benchmark Tests', () => {
         // 結果の表示
         console.log(`  Results for ${benchmark.name}:`);
         console.log(`    Samples: ${successfulSamples}/${benchmark.samples}`);
-        console.log(`    P50: ${percentiles.p50.toFixed(1)}ms (target: ${benchmark.expectedP50}ms) ${performance.withinP50 ? '✅' : '❌'}`);
-        console.log(`    P95: ${percentiles.p95.toFixed(1)}ms (target: ${benchmark.expectedP95}ms) ${performance.withinP95 ? '✅' : '❌'}`);
-        console.log(`    P99: ${percentiles.p99.toFixed(1)}ms (target: ${benchmark.expectedP99}ms) ${performance.withinP99 ? '✅' : '❌'}`);
+        console.log(`    P50: ${percentiles.p50.toFixed(1)}ms (target: ${benchmark.expectedP50}ms) ${performanceResult.withinP50 ? '✅' : '❌'}`);
+        console.log(`    P95: ${percentiles.p95.toFixed(1)}ms (target: ${benchmark.expectedP95}ms) ${performanceResult.withinP95 ? '✅' : '❌'}`);
+        console.log(`    P99: ${percentiles.p99.toFixed(1)}ms (target: ${benchmark.expectedP99}ms) ${performanceResult.withinP99 ? '✅' : '❌'}`);
         console.log(`    Average: ${statistics.avg.toFixed(1)}ms`);
         console.log(`    Std Dev: ${statistics.stdDev.toFixed(1)}ms`);
 
@@ -247,9 +247,9 @@ describe('Latency Benchmark Tests', () => {
       }
 
       // 分布分析の実行
-      const distributionStats = this.analyzeDistribution(latencies);
-      const outliers = this.detectOutliers(latencies, distributionAnalysis.expectedPatterns.outlierThreshold);
-      const timeSeriesAnalysis = this.analyzeTimeSeriesPattern(latencies, timestamps);
+      const distributionStats = analyzeDistribution(latencies);
+      const outliers = detectOutliers(latencies, distributionAnalysis.expectedPatterns.outlierThreshold);
+      const timeSeriesAnalysis = analyzeTimeSeriesPattern(latencies, timestamps);
 
       console.log('\nLatency Distribution Analysis:');
       console.log(`  Sample count: ${latencies.length}`);
@@ -260,7 +260,7 @@ describe('Latency Benchmark Tests', () => {
       console.log(`  Time series trend: ${timeSeriesAnalysis.trend}`);
 
       // ヒストグラム分析
-      const histogram = this.createHistogram(latencies, 20);
+      const histogram = createHistogram(latencies, 20);
       console.log('\nLatency Histogram (20 bins):');
       histogram.forEach((bin: any, index: number) => {
         const bar = '█'.repeat(Math.floor(bin.percentage * 20));
@@ -321,7 +321,7 @@ describe('Latency Benchmark Tests', () => {
 
         // コールドスタート測定（システム再起動直後をシミュレーション）
         console.log('  Measuring cold start performance...');
-        await this.simulateColdStart();
+        await simulateColdStart();
         
         const coldStartLatencies: number[] = [];
         for (let i = 0; i < coldWarmComparison.coldStartSamples; i++) {
@@ -368,13 +368,13 @@ describe('Latency Benchmark Tests', () => {
         const coldStats = {
           latencies: coldStartLatencies,
           avg: coldStartLatencies.reduce((sum, l) => sum + l, 0) / coldStartLatencies.length || 0,
-          p95: this.calculatePercentiles(coldStartLatencies).p95
+          p95: calculatePercentiles(coldStartLatencies).p95
         };
 
         const warmStats = {
           latencies: warmLatencies,
           avg: warmLatencies.reduce((sum, l) => sum + l, 0) / warmLatencies.length || 0,
-          p95: this.calculatePercentiles(warmLatencies).p95
+          p95: calculatePercentiles(warmLatencies).p95
         };
 
         const improvement = {
@@ -413,12 +413,13 @@ describe('Latency Benchmark Tests', () => {
 
       console.log('✅ Cold start vs warm performance comparison completed');
     });
+  });
 
-    // ===================================================================
-    // 操作別レイテンシ最適化テスト
-    // ===================================================================
+  // ===================================================================
+  // 操作別レイテンシ最適化テスト
+  // ===================================================================
 
-    describe('Operation-specific Latency Optimization', () => {
+  describe('Operation-specific Latency Optimization', () => {
       it('should validate session validation latency optimization', async () => {
       console.log('Validating session validation latency optimization...');
 
@@ -482,10 +483,10 @@ describe('Latency Benchmark Tests', () => {
         }
 
         // 統計計算
-        const baselineStats = this.calculateStatistics(baselineLatencies);
-        const optimizedStats = this.calculateStatistics(optimizedLatencies);
-        const baselineP95 = this.calculatePercentiles(baselineLatencies).p95;
-        const optimizedP95 = this.calculatePercentiles(optimizedLatencies).p95;
+        const baselineStats = calculateStatistics(baselineLatencies);
+        const optimizedStats = calculateStatistics(optimizedLatencies);
+        const baselineP95 = calculatePercentiles(baselineLatencies).p95;
+        const optimizedP95 = calculatePercentiles(optimizedLatencies).p95;
 
         const improvement = {
           avgPercent: (baselineStats.avg - optimizedStats.avg) / baselineStats.avg,
@@ -663,3 +664,159 @@ describe('Latency Benchmark Tests', () => {
     });
   });
 });
+
+// ヘルパー関数: パーセンタイル計算
+function calculatePercentiles(sortedLatencies: number[]) {
+  const length = sortedLatencies.length;
+  const getPercentile = (percentile: number) => {
+    const index = Math.ceil(length * percentile / 100) - 1;
+    return sortedLatencies[Math.max(0, index)];
+  };
+
+  return {
+    p50: getPercentile(50),
+    p90: getPercentile(90),
+    p95: getPercentile(95),
+    p99: getPercentile(99),
+    p99_9: getPercentile(99.9)
+  };
+}
+
+// ヘルパー関数: 統計計算
+function calculateStatistics(latencies: number[]) {
+  const avg = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
+  const variance = latencies.reduce((sum, lat) => sum + Math.pow(lat - avg, 2), 0) / latencies.length;
+  const stdDev = Math.sqrt(variance);
+
+  return {
+    avg,
+    stdDev,
+    min: Math.min(...latencies),
+    max: Math.max(...latencies)
+  };
+}
+
+// ヘルパー関数: 分布分析
+function analyzeDistribution(latencies: number[]) {
+  const stats = calculateStatistics(latencies);
+  const skewness = calculateSkewness(latencies, stats.avg, stats.stdDev);
+  const kurtosis = calculateKurtosis(latencies, stats.avg, stats.stdDev);
+  
+  return {
+    type: skewness > 0.5 ? 'right-skewed' : skewness < -0.5 ? 'left-skewed' : 'normal',
+    skewness,
+    kurtosis
+  };
+}
+
+// ヘルパー関数: 歪度計算
+function calculateSkewness(values: number[], mean: number, stdDev: number): number {
+  const n = values.length;
+  const skewness = values.reduce((sum, value) => {
+    return sum + Math.pow((value - mean) / stdDev, 3);
+  }, 0) / n;
+  return skewness;
+}
+
+// ヘルパー関数: 尖度計算
+function calculateKurtosis(values: number[], mean: number, stdDev: number): number {
+  const n = values.length;
+  const kurtosis = values.reduce((sum, value) => {
+    return sum + Math.pow((value - mean) / stdDev, 4);
+  }, 0) / n;
+  return kurtosis - 3; // 正規分布の尖度（3）を差し引く
+}
+
+// ヘルパー関数: アウトライヤー検出
+function detectOutliers(latencies: number[], threshold: number) {
+  const stats = calculateStatistics(latencies);
+  const outlierBoundary = stats.avg + (threshold * stats.stdDev);
+  const outliers = latencies.filter(lat => lat > outlierBoundary);
+  
+  return {
+    count: outliers.length,
+    percentage: outliers.length / latencies.length,
+    values: outliers
+  };
+}
+
+// ヘルパー関数: 時系列分析
+function analyzeTimeSeriesPattern(latencies: number[], timestamps: number[]) {
+  if (latencies.length < 10) {
+    return { trend: 'insufficient-data' };
+  }
+  
+  // 簡単な線形回帰で傾向を分析
+  const n = latencies.length;
+  const meanLatency = latencies.reduce((sum, lat) => sum + lat, 0) / n;
+  const meanTime = timestamps.reduce((sum, time) => sum + time, 0) / n;
+  
+  let numerator = 0;
+  let denominator = 0;
+  
+  for (let i = 0; i < n; i++) {
+    numerator += (timestamps[i] - meanTime) * (latencies[i] - meanLatency);
+    denominator += Math.pow(timestamps[i] - meanTime, 2);
+  }
+  
+  const slope = denominator !== 0 ? numerator / denominator : 0;
+  
+  let trend: string;
+  if (Math.abs(slope) < 0.001) {
+    trend = 'stable';
+  } else if (slope > 0) {
+    trend = 'increasing';
+  } else {
+    trend = 'decreasing';
+  }
+  
+  return { trend, slope };
+}
+
+// ヘルパー関数: ヒストグラム作成
+function createHistogram(latencies: number[], binCount: number) {
+  if (latencies.length === 0) return [];
+  
+  const min = Math.min(...latencies);
+  const max = Math.max(...latencies);
+  const binWidth = (max - min) / binCount;
+  
+  const bins = Array(binCount).fill(0).map((_, i) => ({
+    min: min + i * binWidth,
+    max: min + (i + 1) * binWidth,
+    count: 0,
+    percentage: 0
+  }));
+  
+  // データを各ビンに分類
+  latencies.forEach(latency => {
+    const binIndex = Math.min(
+      Math.floor((latency - min) / binWidth),
+      binCount - 1
+    );
+    bins[binIndex].count++;
+  });
+  
+  // パーセンテージを計算
+  bins.forEach(bin => {
+    bin.percentage = bin.count / latencies.length;
+  });
+  
+  return bins;
+}
+
+// ヘルパー関数: コールドスタートシミュレーション
+async function simulateColdStart(): Promise<void> {
+  // コールドスタートの条件をシミュレート
+  // - キャッシュクリア
+  // - 短い待機時間
+  // - メモリ使用量リセット（シミュレート）
+  
+  // ガベージコレクションの強制実行（可能な場合）
+  if (global.gc) {
+    global.gc();
+  }
+  
+  // コールドスタート条件の待機
+  await TimeControlHelper.wait(2000);
+}

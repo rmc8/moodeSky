@@ -24,8 +24,7 @@ describe('Memory Leakage Detection Tests', () => {
       initialAccountCount: 15, // 適度なアカウント数
       enableJWTManager: true,
       enableBackgroundMonitor: false, // バックグラウンド処理によるメモリ変動を回避
-      logLevel: 'error',
-      memoryMonitoring: true // メモリ監視を有効化
+      logLevel: 'error'
     });
     await container.setup();
 
@@ -143,7 +142,12 @@ describe('Memory Leakage Detection Tests', () => {
       console.log(`  Operations per MB: ${(operationCount / Math.max(1, totalMemoryIncrease)).toFixed(0)}`);
 
       // メモリ増加傾向の分析（線形回帰）
-      const memoryTrend = this.calculateMemoryTrend(memorySnapshots);
+      const memoryTrend = calculateMemoryTrend(
+        memorySnapshots.map(snapshot => ({
+          memoryUsage: snapshot.heapUsed,
+          timestamp: snapshot.timestamp
+        }))
+      );
       console.log(`  Memory trend slope: ${memoryTrend.slope.toFixed(4)}MB/sample`);
       console.log(`  R-squared: ${memoryTrend.rSquared.toFixed(3)}`);
 
@@ -370,12 +374,13 @@ describe('Memory Leakage Detection Tests', () => {
 
       console.log('✅ Garbage collection effectiveness validated');
     });
+  });
 
-    // ===================================================================
-    // 長期間メモリ監視テスト
-    // ===================================================================
+  // ===================================================================
+  // 長期間メモリ監視テスト
+  // ===================================================================
 
-    describe('Long-term Memory Monitoring', () => {
+  describe('Long-term Memory Monitoring', () => {
       it('should maintain stable memory usage over extended periods', async () => {
       console.log('Testing stable memory usage over extended periods...');
 
@@ -746,7 +751,8 @@ describe('Memory Leakage Detection Tests', () => {
           try {
             JSON.stringify(sessionObj);
           } catch (error) {
-            if (error instanceof Error ? error.message : String(error).includes('circular') || error instanceof Error ? error.message : String(error).includes('Converting circular structure')) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            if (errorMessage.includes('circular') || errorMessage.includes('Converting circular structure')) {
               detectedReferences++;
             }
           }
@@ -803,3 +809,51 @@ describe('Memory Leakage Detection Tests', () => {
     });
   });
 });
+
+// ヘルパー関数: メモリ傾向計算（線形回帰）
+function calculateMemoryTrend(memorySnapshots: Array<{ memoryUsage: number; timestamp: number }>) {
+  if (memorySnapshots.length < 2) {
+    return { slope: 0, rSquared: 0, trend: 'insufficient-data' };
+  }
+
+  const n = memorySnapshots.length;
+  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+
+  memorySnapshots.forEach((snapshot, index) => {
+    const x = index; // 時間軸として配列インデックスを使用
+    const y = snapshot.memoryUsage;
+    
+    sumX += x;
+    sumY += y;
+    sumXY += x * y;
+    sumX2 += x * x;
+    sumY2 += y * y;
+  });
+
+  // 線形回帰の計算
+  const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  const intercept = (sumY - slope * sumX) / n;
+
+  // 決定係数（R²）の計算
+  const meanY = sumY / n;
+  let ssRes = 0, ssTot = 0;
+  
+  memorySnapshots.forEach((snapshot, index) => {
+    const predicted = slope * index + intercept;
+    ssRes += Math.pow(snapshot.memoryUsage - predicted, 2);
+    ssTot += Math.pow(snapshot.memoryUsage - meanY, 2);
+  });
+
+  const rSquared = ssTot > 0 ? 1 - (ssRes / ssTot) : 0;
+
+  let trend: string;
+  if (Math.abs(slope) < 0.1) {
+    trend = 'stable';
+  } else if (slope > 0) {
+    trend = 'increasing';
+  } else {
+    trend = 'decreasing';
+  }
+
+  return { slope, rSquared, trend, intercept };
+}
