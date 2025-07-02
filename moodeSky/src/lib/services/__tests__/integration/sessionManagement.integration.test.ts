@@ -6,9 +6,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { IntegrationTestContainer, IntegrationTestHelpers } from '../../../test-utils/integrationTestContainer.ts';
-import { AccountTestFactory, TimeControlHelper } from '../../../test-utils/sessionTestUtils.ts';
-import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.ts';
+import { IntegrationTestContainer, IntegrationTestHelpers } from '../../../test-utils/integrationTestContainer.js';
+import { AccountTestFactory, TimeControlHelper } from '../../../test-utils/sessionTestUtils.js';
+import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.js';
 import type { Account } from '../../../types/auth.ts';
 import type { SessionState, ValidationResult } from '../../sessionManager.ts';
 
@@ -152,7 +152,7 @@ describe('Session Management Integration Tests', () => {
       // リフレッシュ前の状態を確認
       const beforeRefresh = await container.validateAllSessions();
       const beforeState = beforeRefresh.find(v => v.accountId === accountId);
-      expect(beforeState?.needsRefresh || beforeState?.requiredAction === 'refresh').toBe(true);
+      expect(beforeState?.requiredAction === 'refresh').toBe(true);
 
       // プロアクティブリフレッシュを実行
       const refreshSuccess = await container.sessionManager.proactiveRefresh(accountId);

@@ -10,9 +10,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { ChaosTestingFramework, type ChaosInjectionConfig } from '../../../test-utils/chaosTestingFramework.ts';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
-import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.ts';
+import { ChaosTestingFramework, type ChaosInjectionConfig } from '../../../test-utils/chaosTestingFramework.js';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
+import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.js';
 
 describe('Concurrency Chaos Engineering Tests', () => {
   let container: IntegrationTestContainer;
@@ -382,7 +382,7 @@ describe('Concurrency Chaos Engineering Tests', () => {
         r.status === 'fulfilled' && r.value.completed
       ).length;
       const timedOutOps = deadlockResults.filter(r => 
-        r.status === 'fulfilled' && r.value.timeout
+        r.status === 'fulfilled' && (r.value as any).timeout
       ).length;
       const totalDuration = Math.max(...deadlockResults
         .filter(r => r.status === 'fulfilled')
@@ -583,7 +583,7 @@ describe('Concurrency Chaos Engineering Tests', () => {
           type: 'cpu_spike',
           durationMs: 8000,
           intensity: 0.5,
-          pattern: 'spike',
+          pattern: 'escalating',
           delayMs: 4000
         }
       ];

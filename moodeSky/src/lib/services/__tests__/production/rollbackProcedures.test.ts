@@ -14,9 +14,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
-import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.ts';
-import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.ts';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
+import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.js';
+import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.js';
 
 describe('Rollback Procedures Tests', () => {
   let container: IntegrationTestContainer;

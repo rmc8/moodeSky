@@ -10,9 +10,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { PerformanceBenchmarkSuite, type PerformanceTestConfig, PerformanceTestHelpers } from '../../../test-utils/performanceBenchmarkSuite.ts';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
-import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.ts';
+import { PerformanceBenchmarkSuite, type PerformanceTestConfig, PerformanceTestHelpers } from '../../../test-utils/performanceBenchmarkSuite.js';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
+import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.js';
 
 describe('Memory Leakage Detection Tests', () => {
   let container: IntegrationTestContainer;

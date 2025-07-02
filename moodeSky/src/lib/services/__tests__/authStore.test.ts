@@ -13,12 +13,12 @@ import {
   AccountTestFactory, 
   SessionTestAssertions,
   TimeControlHelper 
-} from '../../test-utils/sessionTestUtils.ts';
+} from '../../test-utils/sessionTestUtils.js';
 import { 
   TauriStoreMockFactory, 
   AtProtocolMockFactory,
   type MockedStore 
-} from '../../test-utils/mockFactories.ts';
+} from '../../test-utils/mockFactories.js';
 
 // モック化対象のモジュール
 vi.mock('@tauri-apps/plugin-store', () => ({

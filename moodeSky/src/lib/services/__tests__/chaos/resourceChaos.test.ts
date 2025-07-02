@@ -10,9 +10,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { ChaosTestingFramework, type ChaosInjectionConfig } from '../../../test-utils/chaosTestingFramework.ts';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
-import { TimeControlHelper } from '../../../test-utils/sessionTestUtils.ts';
+import { ChaosTestingFramework, type ChaosInjectionConfig } from '../../../test-utils/chaosTestingFramework.js';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
+import { TimeControlHelper } from '../../../test-utils/sessionTestUtils.js';
 
 describe('Resource Chaos Engineering Tests', () => {
   let container: IntegrationTestContainer;
@@ -326,7 +326,7 @@ describe('Resource Chaos Engineering Tests', () => {
         type: 'cpu_spike',
         durationMs: 12000,
         intensity: 1.0, // 最大負荷
-        pattern: 'spike' // スパイクパターン
+        pattern: 'escalating' // スパイクパターン
       };
 
       const responseTimeBefore: number[] = [];
@@ -655,12 +655,14 @@ describe('Resource Chaos Engineering Tests', () => {
       console.log('✅ Adaptive resource management validated');
     });
 
-    // ヘルパーメソッド：フェーズ性能測定
-    async function measurePhasePerformance(
-      container: IntegrationTestContainer, 
-      phase: string, 
-      iterations: number
-    ): Promise<{ phase: string; responseTime: number; memoryUsage: number; successRate: number }> {
+  });
+
+  // ヘルパー関数：フェーズ性能測定
+  async function measurePhasePerformance(
+    container: IntegrationTestContainer, 
+    phase: string, 
+    iterations: number
+  ): Promise<{ phase: string; responseTime: number; memoryUsage: number; successRate: number }> {
       const responseTimes: number[] = [];
       let successCount = 0;
 
@@ -797,7 +799,7 @@ describe('Resource Chaos Engineering Tests', () => {
           type: 'cpu_spike',
           durationMs: 6000,
           intensity: 0.8,
-          pattern: 'spike',
+          pattern: 'escalating',
           delayMs: 3000
         },
         {

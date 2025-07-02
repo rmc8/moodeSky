@@ -10,9 +10,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { ChaosTestingFramework, type ChaosInjectionConfig, ChaosTestHelpers } from '../../../test-utils/chaosTestingFramework.ts';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
-import { TimeControlHelper } from '../../../test-utils/sessionTestUtils.ts';
+import { ChaosTestingFramework, type ChaosInjectionConfig, ChaosTestHelpers } from '../../../test-utils/chaosTestingFramework.js';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
+import { TimeControlHelper } from '../../../test-utils/sessionTestUtils.js';
 
 describe('System Chaos Engineering Tests', () => {
   let container: IntegrationTestContainer;
@@ -101,7 +101,7 @@ describe('System Chaos Engineering Tests', () => {
       // レジリエンス評価
       const injectionResults = injectionIds.map(id => 
         chaosFramework.getActiveInjections().find(inj => inj.injectionId === id)
-      ).filter(Boolean);
+      ).filter(Boolean) as any[];
 
       const assessment = await chaosFramework.assessResilience(injectionResults);
       expect(assessment.overallScore).toBeGreaterThan(60); // 60点以上のレジリエンス
@@ -267,7 +267,7 @@ describe('System Chaos Engineering Tests', () => {
           type: 'network_loss',
           durationMs: 12000,
           intensity: 0.7, // 70%パケットロス
-          pattern: 'wave',
+          pattern: 'intermittent',
           delayMs: 5000
         }
       ];

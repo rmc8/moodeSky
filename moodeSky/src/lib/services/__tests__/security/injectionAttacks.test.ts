@@ -12,10 +12,10 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { SecurityTestingSuite, type SecurityTestConfig, SecurityTestHelpers } from '../../../test-utils/securityTestingSuite.ts';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
-import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.ts';
-import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.ts';
+import { SecurityTestingSuite, type SecurityTestConfig, SecurityTestHelpers } from '../../../test-utils/securityTestingSuite.js';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
+import { TimeControlHelper, AccountTestFactory } from '../../../test-utils/sessionTestUtils.js';
+import { AtProtocolMockFactory } from '../../../test-utils/mockFactories.js';
 
 describe('Injection Attack Prevention Tests', () => {
   let container: IntegrationTestContainer;

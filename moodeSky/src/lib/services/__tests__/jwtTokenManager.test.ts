@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi, type MockedFunction } from 'vitest';
 import { JWTTokenManager, type TokenInfo, type RefreshSchedule, type TokenManagerConfig } from '../../utils/jwtTokenManager.ts';
-import { JWTTestFactory, PerformanceTestHelper, TimeControlHelper } from '../../test-utils/sessionTestUtils.ts';
+import { JWTTestFactory, PerformanceTestHelper, TimeControlHelper } from '../../test-utils/sessionTestUtils.js';
 
 // モック化対象のモジュール
 vi.mock('../../utils/logger.ts', () => ({

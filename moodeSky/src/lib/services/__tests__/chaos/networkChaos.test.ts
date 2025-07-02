@@ -10,10 +10,10 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { ChaosTestingFramework, type ChaosInjectionConfig } from '../../../test-utils/chaosTestingFramework.ts';
-import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.ts';
-import { TimeControlHelper } from '../../../test-utils/sessionTestUtils.ts';
-import { NetworkSimulator } from '../../../test-utils/mockFactories.ts';
+import { ChaosTestingFramework, type ChaosInjectionConfig } from '../../../test-utils/chaosTestingFramework.js';
+import { IntegrationTestContainer } from '../../../test-utils/integrationTestContainer.js';
+import { TimeControlHelper } from '../../../test-utils/sessionTestUtils.js';
+import { NetworkSimulator } from '../../../test-utils/mockFactories.js';
 
 describe('Network Chaos Engineering Tests', () => {
   let container: IntegrationTestContainer;
@@ -588,7 +588,7 @@ describe('Network Chaos Engineering Tests', () => {
           type: 'network_delay',
           durationMs: 4000,
           intensity: 0.4,
-          pattern: 'wave',
+          pattern: 'intermittent',
           delayMs: 4000
         },
         {
@@ -676,7 +676,7 @@ describe('Network Chaos Engineering Tests', () => {
           type: 'network_loss',
           durationMs: 10000,
           intensity: 0.6,
-          pattern: 'wave',
+          pattern: 'intermittent',
           delayMs: 6000
         }
       ];
