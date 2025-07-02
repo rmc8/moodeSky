@@ -135,3 +135,6 @@ mcp_logs/
 .turbo/
 
 .gemini/settings.json
+
+# Claude Code ローカル設定
+.claude/settings.local.json
