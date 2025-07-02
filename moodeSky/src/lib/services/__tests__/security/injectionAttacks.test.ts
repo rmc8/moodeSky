@@ -35,7 +35,8 @@ describe('Injection Attack Prevention Tests', () => {
   });
 
   afterEach(async () => {
-    await securitySuite.cleanup();
+    // TODO: securitySuite.cleanup() implementation
+    // await securitySuite.cleanup();
     await container.teardown();
   });
 
@@ -559,7 +560,7 @@ describe('Injection Attack Prevention Tests', () => {
           
           // コマンドインジェクションが防御されているか確認
           // 実際の実装では、ファイル操作やログ出力時のサニタイゼーションを確認
-          const prevented = !result.success || (result.data && !result.data.id.includes(injection.payload));
+          const prevented: boolean = !result.success || (result.data && !result.data.id.includes(injection.payload)) || false;
 
           commandResults.push({
             payloadName: injection.name,

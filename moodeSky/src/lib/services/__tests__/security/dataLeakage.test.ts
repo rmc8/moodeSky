@@ -885,29 +885,6 @@ describe('Data Leakage Prevention Tests', () => {
       return `Global variables: ${globalVars}\nEnvironment: ${processEnv}`;
     }
 
-    // デバッグ情報での機密データ分析
-    private analyzeSensitiveDataInDebugInfo(debugContent: string): string[] {
-      const sensitivePatterns = [
-        /eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/, // JWT
-        /did:plc:[a-z0-9]+/, // DID
-        /access_token/gi,
-        /refresh_token/gi,
-        /secret/gi,
-        /password/gi,
-        /api_key/gi,
-        /private_key/gi
-      ];
-
-      const foundSensitiveData: string[] = [];
-
-      sensitivePatterns.forEach((pattern: any, index: number) => {
-        const matches = debugContent.match(pattern);
-        if (matches) {
-          foundSensitiveData.push(`Pattern ${index + 1}: ${matches[0].substring(0, 20)}...`);
-        }
-      });
-
-      return foundSensitiveData;
-    }
+    // TODO: analyzeSensitiveDataInDebugInfo implementation removed - was outside describe block
   });
 });
