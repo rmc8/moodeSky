@@ -12,6 +12,12 @@ export default defineConfig({
     alias: {
       '$lib': './src/lib'
     },
+    // TypeScript型チェック設定（CI/CD環境での型定義確保）
+    typecheck: {
+      allowJs: false,
+      checker: 'tsc',
+      include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}']
+    },
     coverage: {
       provider: 'v8',
       include: [
