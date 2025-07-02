@@ -236,10 +236,10 @@ describe('Maintenance Mode Tests', () => {
             serviceRestored: false,
             dataIntegrity: false,
             communicationEffective: false,
-            details: `Planned maintenance test failed: ${error.message.substring(0, 100)}`
+            details: `Planned maintenance test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -455,10 +455,10 @@ describe('Maintenance Mode Tests', () => {
             issueResolved: false,
             systemStabilized: false,
             communicationTimely: false,
-            details: `Emergency maintenance test failed: ${error.message.substring(0, 100)}`
+            details: `Emergency maintenance test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -665,10 +665,10 @@ describe('Maintenance Mode Tests', () => {
             gracefulShutdownAchieved: false,
             dataConsistencyMaintained: false,
             userSatisfactionScore: 0,
-            details: `Graceful shutdown test failed: ${error.message.substring(0, 100)}`
+            details: `Graceful shutdown test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -875,10 +875,10 @@ describe('Maintenance Mode Tests', () => {
             finalHealthScore: 0,
             serviceFullyRestored: false,
             userAccessRestored: false,
-            details: `Staged restart test failed: ${error.message.substring(0, 100)}`
+            details: `Staged restart test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 

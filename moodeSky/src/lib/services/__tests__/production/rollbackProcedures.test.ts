@@ -234,10 +234,10 @@ describe('Rollback Procedures Tests', () => {
             serviceRestored: false,
             rollbackStrategy: scenario.rollbackStrategy,
             impactMinimized: false,
-            details: `Rollback test failed: ${error.message.substring(0, 100)}`
+            details: `Rollback test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -496,10 +496,10 @@ describe('Rollback Procedures Tests', () => {
             manualInterventionNeeded: true,
             documentationAccurate: false,
             procedureEffectiveness: 0,
-            details: `Manual rollback test failed: ${error.message.substring(0, 100)}`
+            details: `Manual rollback test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -736,16 +736,16 @@ describe('Rollback Procedures Tests', () => {
             finalOutcome: 'deployment_failure',
             rollbackTriggered: false,
             rollbackStage: -1,
-            rollbackReason: error.message,
+            rollbackReason: error instanceof Error ? error.message : String(error),
             deploymentTime: 9999999,
             rollbackTime: 0,
             dataIntegrityMaintained: false,
             userImpactMinimized: false,
             monitoringEffective: false,
-            details: `Canary deployment test failed: ${error.message.substring(0, 100)}`
+            details: `Canary deployment test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 

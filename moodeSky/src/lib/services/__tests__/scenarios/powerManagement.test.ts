@@ -146,7 +146,7 @@ describe('Power Management Scenario Tests', () => {
           console.log(`    Power efficiency: ${powerEfficiency.toFixed(1)}%`);
 
         } catch (error) {
-          console.log(`    Test error: ${error.message}`);
+          console.log(`    Test error: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         batteryTestResults.push({
@@ -414,7 +414,7 @@ describe('Power Management Scenario Tests', () => {
           }
 
         } catch (error) {
-          console.log(`    Wakeup recovery failed: ${error.message}`);
+          console.log(`    Wakeup recovery failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         sleepWakeResults.push({
@@ -548,7 +548,7 @@ describe('Power Management Scenario Tests', () => {
           console.log(`    User experience score: ${userExperienceScore.toFixed(1)}/10`);
 
         } catch (error) {
-          console.log(`    Transition measurement failed: ${error.message}`);
+          console.log(`    Transition measurement failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         transitionResults.push({

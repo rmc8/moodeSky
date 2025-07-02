@@ -245,13 +245,13 @@ describe('Deployment Readiness Tests', () => {
             requiredSettings: aspect.requiredSettings,
             configurationStatus: {},
             overallCompliance: 0,
-            criticalIssues: [`Configuration validation failed: ${error.message}`],
+            criticalIssues: [`Configuration validation failed: ${error instanceof Error ? error.message : String(error)}`],
             recommendations: ['Fix configuration validation errors'],
             deploymentReady: false,
-            details: `Configuration validation failed: ${error.message.substring(0, 100)}`
+            details: `Configuration validation failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${aspect.name} failed: ${error.message}`);
+          console.log(`  ❌ ${aspect.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -453,10 +453,10 @@ describe('Deployment Readiness Tests', () => {
             incompatibleVersions: [],
             platformSupported: false,
             deploymentBlocking: true,
-            details: `Dependency check failed: ${error.message.substring(0, 100)}`
+            details: `Dependency check failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${check.name} failed: ${error.message}`);
+          console.log(`  ❌ ${check.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -678,10 +678,10 @@ describe('Deployment Readiness Tests', () => {
             criticalFindings: 1,
             highRiskFindings: 0,
             securityApproved: false,
-            details: `Security validation failed: ${error.message.substring(0, 100)}`
+            details: `Security validation failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${aspect.name} failed: ${error.message}`);
+          console.log(`  ❌ ${aspect.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -928,11 +928,11 @@ describe('Deployment Readiness Tests', () => {
             criticalFailures: 999,
             performanceGrade: 'F',
             productionReady: false,
-            recommendations: [`Performance test failed: ${error.message}`],
-            details: `Performance benchmark failed: ${error.message.substring(0, 100)}`
+            recommendations: [`Performance test failed: ${error instanceof Error ? error.message : String(error)}`],
+            details: `Performance benchmark failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${benchmark.name} failed: ${error.message}`);
+          console.log(`  ❌ ${benchmark.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 

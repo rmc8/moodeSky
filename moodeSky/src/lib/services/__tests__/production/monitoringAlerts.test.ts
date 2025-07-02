@@ -257,11 +257,11 @@ describe('Monitoring and Alerts Tests', () => {
             aggregationSuccess: 0,
             overallAccuracy: 0,
             dataQuality: 'poor',
-            issues: [`Metrics test failed: ${error.message}`],
-            details: `Metrics collection test failed: ${error.message.substring(0, 100)}`
+            issues: [`Metrics test failed: ${error instanceof Error ? error.message : String(error)}`],
+            details: `Metrics collection test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${category.name} failed: ${error.message}`);
+          console.log(`  ❌ ${category.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -438,10 +438,10 @@ describe('Monitoring and Alerts Tests', () => {
             connectionStability: 0,
             performanceGrade: 'F',
             streamingReliable: false,
-            details: `Streaming test failed: ${error.message.substring(0, 100)}`
+            details: `Streaming test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${test.name} failed: ${error.message}`);
+          console.log(`  ❌ ${test.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -732,11 +732,11 @@ describe('Monitoring and Alerts Tests', () => {
             averageResponseTime: 9999,
             notificationSuccess: 0,
             alertSystemReliability: 0,
-            criticalIssues: [`Alert test failed: ${error.message}`],
-            details: `Alert generation test failed: ${error.message.substring(0, 100)}`
+            criticalIssues: [`Alert test failed: ${error instanceof Error ? error.message : String(error)}`],
+            details: `Alert generation test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -963,10 +963,10 @@ describe('Monitoring and Alerts Tests', () => {
             stakeholdersNotified: false,
             trendAnalysis: { trend: 'degrading', confidence: 0, projectedCompliance: 0 },
             remediationRequired: true,
-            details: `SLA monitoring failed: ${error.message.substring(0, 100)}`
+            details: `SLA monitoring failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${sla.name} failed: ${error.message}`);
+          console.log(`  ❌ ${sla.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 

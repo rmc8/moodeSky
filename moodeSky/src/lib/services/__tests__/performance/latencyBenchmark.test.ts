@@ -139,7 +139,7 @@ describe('Latency Benchmark Tests', () => {
             }
 
           } catch (error) {
-            console.warn(`Benchmark sample failed: ${error.message}`);
+            console.warn(`Benchmark sample failed: ${error instanceof Error ? error.message : String(error)}`);
           }
 
           // サンプル間の短い間隔
@@ -240,7 +240,7 @@ describe('Latency Benchmark Tests', () => {
           }
 
         } catch (error) {
-          console.warn(`Distribution sample failed: ${error.message}`);
+          console.warn(`Distribution sample failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         await TimeControlHelper.wait(20);
@@ -334,7 +334,7 @@ describe('Latency Benchmark Tests', () => {
             // コールドスタート間隔
             await TimeControlHelper.wait(1000);
           } catch (error) {
-            console.warn(`Cold start sample failed: ${error.message}`);
+            console.warn(`Cold start sample failed: ${error instanceof Error ? error.message : String(error)}`);
           }
         }
 
@@ -359,7 +359,7 @@ describe('Latency Benchmark Tests', () => {
             const endTime = performance.now();
             warmLatencies.push(endTime - startTime);
           } catch (error) {
-            console.warn(`Warm sample failed: ${error.message}`);
+            console.warn(`Warm sample failed: ${error instanceof Error ? error.message : String(error)}`);
           }
           await TimeControlHelper.wait(50);
         }
@@ -749,7 +749,7 @@ describe('Latency Benchmark Tests', () => {
             await component.operation();
             componentLatencies.push(performance.now() - startTime);
           } catch (error) {
-            console.warn(`Component analysis failed: ${error.message}`);
+            console.warn(`Component analysis failed: ${error instanceof Error ? error.message : String(error)}`);
           }
           await TimeControlHelper.wait(20);
         }

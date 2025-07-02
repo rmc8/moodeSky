@@ -379,7 +379,7 @@ describe('Data Leakage Prevention Tests', () => {
           memoryResults.push({
             testName: test.name,
             memoryLeakDetected: false,
-            details: `Test error: ${error.message}`
+            details: `Test error: ${error instanceof Error ? error.message : String(error)}`
           });
         }
       }
@@ -678,7 +678,7 @@ describe('Data Leakage Prevention Tests', () => {
         try {
           await test.operation();
         } catch (error) {
-          errorMessage = error.message || error.toString();
+          errorMessage = error instanceof Error ? error.message : String(error) || error.toString();
         }
 
         // 機密情報の露出チェック

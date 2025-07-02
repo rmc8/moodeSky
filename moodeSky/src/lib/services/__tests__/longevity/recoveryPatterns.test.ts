@@ -208,10 +208,10 @@ describe('Recovery Patterns Tests', () => {
             recoverySuccess: false,
             dataIntegrityMaintained: false,
             performanceAfterRecovery: 0,
-            details: `Recovery test failed: ${error.message.substring(0, 100)}`
+            details: `Recovery test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // 次のテストのための安定化待機
@@ -378,10 +378,10 @@ describe('Recovery Patterns Tests', () => {
             overallRecoverySuccess: false,
             totalRecoveryTime: -1,
             progressAccuracy: 0,
-            details: `Progressive recovery failed: ${error.message.substring(0, 100)}`
+            details: `Progressive recovery failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -547,10 +547,10 @@ describe('Recovery Patterns Tests', () => {
             failoverSuccess: false,
             failbackSuccess: false,
             dataConsistency: false,
-            details: `Failover test failed: ${error.message.substring(0, 100)}`
+            details: `Failover test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -715,10 +715,10 @@ describe('Recovery Patterns Tests', () => {
             learningEffectiveness: 0,
             convergenceRate: 0,
             adaptationStability: false,
-            details: `Learning test failed: ${error.message.substring(0, 100)}`
+            details: `Learning test failed: ${error instanceof Error ? error.message : String(error).substring(0, 100)}`
           });
 
-          console.log(`  ❌ ${scenario.name} failed: ${error.message}`);
+          console.log(`  ❌ ${scenario.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 

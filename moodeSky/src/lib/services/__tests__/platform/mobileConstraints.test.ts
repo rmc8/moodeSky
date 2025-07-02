@@ -140,7 +140,7 @@ describe('Mobile Constraints Tests', () => {
             console.log(`      Account ${account.profile.handle}: ${sessionState?.isValid ? 'Active' : 'Inactive'} (${responseTime}ms)`);
 
           } catch (error) {
-            console.log(`      Account ${account.profile.handle}: Error - ${error.message}`);
+            console.log(`      Account ${account.profile.handle}: Error - ${error instanceof Error ? error.message : String(error)}`);
           }
         }
 
@@ -410,7 +410,7 @@ describe('Mobile Constraints Tests', () => {
           console.log(`    Background activity limited: ${backgroundActivityLimited}`);
 
         } catch (error) {
-          console.log(`    Error in background state: ${error.message}`);
+          console.log(`    Error in background state: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         iOSResults.push({
@@ -560,7 +560,7 @@ describe('Mobile Constraints Tests', () => {
           console.log(`    Sync completed: ${syncCompleted}`);
 
         } catch (error) {
-          console.log(`    Power management error: ${error.message}`);
+          console.log(`    Power management error: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         androidResults.push({
@@ -729,10 +729,10 @@ describe('Mobile Constraints Tests', () => {
             responseTime: Date.now() - startTime,
             optimizationLevel: 'error',
             functionalityReduced: true,
-            details: `Error: ${error.message.substring(0, 50)}`
+            details: `Error: ${error instanceof Error ? error.message : String(error).substring(0, 50)}`
           });
 
-          console.log(`    Error: ${error.message}`);
+          console.log(`    Error: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // テスト間の待機
@@ -889,10 +889,10 @@ describe('Mobile Constraints Tests', () => {
             reconnectionTime: Date.now() - reconnectionStartTime,
             dataUsageIncrease: 0,
             switchingLatency,
-            details: `Failed: ${error.message.substring(0, 50)}`
+            details: `Failed: ${error instanceof Error ? error.message : String(error).substring(0, 50)}`
           });
 
-          console.log(`    ❌ Network switch failed: ${error.message}`);
+          console.log(`    ❌ Network switch failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // テスト間の待機

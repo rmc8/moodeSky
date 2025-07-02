@@ -134,11 +134,11 @@ describe('Tauri Specific Platform Tests', () => {
             success: false,
             responseTime: 0,
             outputValid: false,
-            errorMessage: error instanceof Error ? error.message : 'Unknown error',
-            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
+            errorMessage: error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error',
+            details: `ERROR: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ Command failed: ${errorMessage}`);
         }
       }
@@ -275,10 +275,10 @@ describe('Tauri Specific Platform Tests', () => {
             dataIntegrity: false,
             errorHandling: false,
             latency: 0,
-            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
+            details: `ERROR: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ IPC test failed: ${errorMessage}`);
         }
       }
@@ -432,10 +432,10 @@ describe('Tauri Specific Platform Tests', () => {
             dataIntegrity: false,
             encryptionVerified: false,
             performance: 0,
-            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
+            details: `ERROR: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ Store test failed: ${errorMessage}`);
         }
       }
@@ -578,10 +578,10 @@ describe('Tauri Specific Platform Tests', () => {
             dataConsistency: false,
             conflictResolution: false,
             averageLatency: 0,
-            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
+            details: `ERROR: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ Concurrency test failed: ${errorMessage}`);
         }
       }
@@ -748,10 +748,10 @@ describe('Tauri Specific Platform Tests', () => {
             executionTime: 0,
             resultValid: false,
             rowsAffected: 0,
-            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
+            details: `ERROR: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ SQL operation failed: ${errorMessage}`);
         }
       }
@@ -881,10 +881,10 @@ describe('Tauri Specific Platform Tests', () => {
             dataValid: false,
             responseTime: 0,
             securityCompliant: false,
-            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
+            details: `ERROR: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ OS feature test failed: ${errorMessage}`);
         }
       }
@@ -996,7 +996,7 @@ describe('Tauri Specific Platform Tests', () => {
               await TimeControlHelper.wait(100);
 
             } catch (error) {
-              const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+              const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
               console.log(`      Action '${action}' failed: ${errorMessage}`);
               break;
             }
@@ -1031,10 +1031,10 @@ describe('Tauri Specific Platform Tests', () => {
             stateConsistency: false,
             responseTime: 0,
             sessionPreservation: false,
-            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
+            details: `ERROR: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ Window test failed: ${errorMessage}`);
         }
       }
@@ -1134,7 +1134,7 @@ describe('Tauri Specific Platform Tests', () => {
                 securityEnforced = false; // コマンドが実行されてしまった
                 vulnerabilityFound = true;
               } catch (error) {
-                securityEnforced = error.message.includes('permission') || error.message.includes('unauthorized');
+                securityEnforced = error instanceof Error ? error.message : String(error).includes('permission') || error instanceof Error ? error.message : String(error).includes('unauthorized');
               }
               break;
 
@@ -1150,7 +1150,7 @@ describe('Tauri Specific Platform Tests', () => {
                 securityEnforced = false;
                 vulnerabilityFound = true;
               } catch (error) {
-                securityEnforced = error.message.includes('access denied') || error.message.includes('permission');
+                securityEnforced = error instanceof Error ? error.message : String(error).includes('access denied') || error instanceof Error ? error.message : String(error).includes('permission');
               }
               break;
 
@@ -1193,10 +1193,10 @@ describe('Tauri Specific Platform Tests', () => {
             expectedBehavior: false,
             vulnerabilityFound: true,
             responseTime: 0,
-            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
+            details: `ERROR: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ Security test failed: ${errorMessage}`);
         }
       }

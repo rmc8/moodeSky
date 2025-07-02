@@ -250,7 +250,7 @@ describe('Offline ↔ Online Transition Tests', () => {
           sessionMaintained = postRecoverySession?.isValid || false;
 
         } catch (error) {
-          console.log(`    Recovery attempt failed: ${error.message}`);
+          console.log(`    Recovery attempt failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         disconnectionResults.push({
@@ -380,7 +380,7 @@ describe('Offline ↔ Online Transition Tests', () => {
           dataAccessible = cachedAccount.success;
           cacheEffective = dataAccessible;
         } catch (error) {
-          console.log(`    Offline data access failed: ${error.message}`);
+          console.log(`    Offline data access failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         console.log(`    Session valid during offline: ${sessionValidDuring}`);
@@ -507,7 +507,7 @@ describe('Offline ↔ Online Transition Tests', () => {
 
         } catch (error) {
           syncDuration = Date.now() - syncStartTime;
-          console.log(`    Sync failed: ${error.message}`);
+          console.log(`    Sync failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         syncResults.push({

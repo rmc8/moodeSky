@@ -180,7 +180,7 @@ describe('User Behavior Pattern Tests', () => {
               await this.executeUserAction(action, account);
               successfulActions++;
             } catch (error) {
-              console.warn(`    Action ${action} failed: ${error.message}`);
+              console.warn(`    Action ${action} failed: ${error instanceof Error ? error.message : String(error)}`);
             }
             totalActions++;
           }
@@ -204,7 +204,7 @@ describe('User Behavior Pattern Tests', () => {
           await TimeControlHelper.wait(100);
 
         } catch (error) {
-          console.warn(`    Session at ${session.startHour}:00 failed: ${error.message}`);
+          console.warn(`    Session at ${session.startHour}:00 failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -310,7 +310,7 @@ describe('User Behavior Pattern Tests', () => {
           await TimeControlHelper.wait(50);
 
         } catch (error) {
-          console.warn(`    Account switch ${i + 1} failed: ${error.message}`);
+          console.warn(`    Account switch ${i + 1} failed: ${error instanceof Error ? error.message : String(error)}`);
           completedSwitches++;
         }
       }
@@ -379,7 +379,7 @@ describe('User Behavior Pattern Tests', () => {
           console.log(`    ${sessionId}: Completed successfully`);
 
         } catch (error) {
-          console.warn(`    ${sessionId}: Failed - ${error.message}`);
+          console.warn(`    ${sessionId}: Failed - ${error instanceof Error ? error.message : String(error)}`);
           sessionResults.endTime = Date.now();
         }
 
@@ -448,7 +448,7 @@ describe('User Behavior Pattern Tests', () => {
           totalActions++;
 
         } catch (error) {
-          console.warn(`    Action ${i + 1} failed: ${error.message}`);
+          console.warn(`    Action ${i + 1} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // アクション間隔
@@ -512,7 +512,7 @@ describe('User Behavior Pattern Tests', () => {
           await container.authService.getAccount(account.id);
           normalOperationsCompleted++;
         } catch (error) {
-          console.warn(`    Normal operation ${i + 1} failed: ${error.message}`);
+          console.warn(`    Normal operation ${i + 1} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
         await TimeControlHelper.wait(100);
       }
@@ -531,7 +531,7 @@ describe('User Behavior Pattern Tests', () => {
           // 障害発生中のアクション試行
           await container.authService.getAccount(account.id);
         } catch (error) {
-          console.log(`    Network error detected: ${error.message}`);
+          console.log(`    Network error detected: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // ネットワーク復旧
@@ -549,7 +549,7 @@ describe('User Behavior Pattern Tests', () => {
             console.log(`    Recovery successful on attempt ${attempt + 1}`);
             break;
           } catch (error) {
-            console.log(`    Recovery attempt ${attempt + 1} failed: ${error.message}`);
+            console.log(`    Recovery attempt ${attempt + 1} failed: ${error instanceof Error ? error.message : String(error)}`);
             if (attempt === recoveryPattern.recoveryAttempts - 1) {
               console.log(`    Recovery failed after ${recoveryPattern.recoveryAttempts} attempts`);
             }
@@ -601,7 +601,7 @@ describe('User Behavior Pattern Tests', () => {
           successfulLogins++;
           console.log(`    Login ${i + 1}: Success`);
         } catch (error) {
-          console.warn(`    Login ${i + 1}: Unexpected failure - ${error.message}`);
+          console.warn(`    Login ${i + 1}: Unexpected failure - ${error instanceof Error ? error.message : String(error)}`);
         }
         await TimeControlHelper.wait(200);
       }
@@ -616,7 +616,7 @@ describe('User Behavior Pattern Tests', () => {
         try {
           await container.authService.getAccount('invalid-account-id');
         } catch (error) {
-          console.log(`    Authentication failed as expected: ${error.message}`);
+          console.log(`    Authentication failed as expected: ${error instanceof Error ? error.message : String(error)}`);
           authFailuresHandled++;
 
           // リトライパターン
@@ -712,7 +712,7 @@ describe('User Behavior Pattern Tests', () => {
           console.log(`    Activity ${i + 1}/${extendedPattern.totalActivities}: Complete`);
 
         } catch (error) {
-          console.warn(`    Activity ${i + 1} failed: ${error.message}`);
+          console.warn(`    Activity ${i + 1} failed: ${error instanceof Error ? error.message : String(error)}`);
           sessionMaintained = false;
         }
 
@@ -776,7 +776,7 @@ describe('User Behavior Pattern Tests', () => {
             successfulReactivations++;
             console.log(`    Reactivation ${totalReactivations}: Success after ${period.dormancy}min dormancy`);
           } catch (error) {
-            console.log(`    Reactivation ${totalReactivations}: Failed - ${error.message}`);
+            console.log(`    Reactivation ${totalReactivations}: Failed - ${error instanceof Error ? error.message : String(error)}`);
             
             // セッション回復を試行
             totalSessionRecoveries++;
@@ -798,7 +798,7 @@ describe('User Behavior Pattern Tests', () => {
               await this.executeUserAction('browse', account);
               console.log(`      Action ${action + 1}/${period.actions}: Complete`);
             } catch (error) {
-              console.warn(`      Action ${action + 1}: Failed - ${error.message}`);
+              console.warn(`      Action ${action + 1}: Failed - ${error instanceof Error ? error.message : String(error)}`);
             }
             
             // アクション間隔

@@ -186,10 +186,10 @@ describe('Desktop Features Tests', () => {
             dataConsistency: false,
             windowCommunication: false,
             memoryUsage: 0,
-            details: `Error: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 50)}`
+            details: `Error: ${(error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error').substring(0, 50)}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ Multi-window test failed: ${errorMessage}`);
         } finally {
           // ウィンドウのクリーンアップ
@@ -349,10 +349,10 @@ describe('Desktop Features Tests', () => {
             stateRestored: false,
             sessionMaintained: false,
             restorationTime: 0,
-            details: `Error: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 50)}`
+            details: `Error: ${(error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error').substring(0, 50)}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ Window state test failed: ${errorMessage}`);
         }
 
@@ -510,10 +510,10 @@ describe('Desktop Features Tests', () => {
             integrationWorking: false,
             sessionContextMaintained: false,
             responseTime: Date.now() - startTime,
-            details: `Error: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 50)}`
+            details: `Error: ${(error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error').substring(0, 50)}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ System integration test failed: ${errorMessage}`);
         }
 
@@ -680,10 +680,10 @@ describe('Desktop Features Tests', () => {
             actionExecuted: false,
             sessionContextCorrect: false,
             executionTime: Date.now() - startTime,
-            details: `Error: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 50)}`
+            details: `Error: ${(error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error').substring(0, 50)}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ Keyboard shortcut test failed: ${errorMessage}`);
         }
 
@@ -872,10 +872,10 @@ describe('Desktop Features Tests', () => {
             sessionContextMaintained: false,
             cpuUsageAcceptable: false,
             memoryUsageAcceptable: false,
-            details: `Error: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 50)}`
+            details: `Error: ${(error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error').substring(0, 50)}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ Background process test failed: ${errorMessage}`);
         }
 

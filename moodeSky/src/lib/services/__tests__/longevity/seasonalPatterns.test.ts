@@ -180,10 +180,10 @@ describe('Seasonal Patterns Tests', () => {
             resourceOptimization: false,
             userSatisfaction: 0,
             systemStability: 0,
-            details: `Seasonal test failed: ${error.message.substring(0, 50)}`
+            details: `Seasonal test failed: ${error instanceof Error ? error.message : String(error).substring(0, 50)}`
           });
 
-          console.log(`    ❌ Seasonal pattern test failed: ${error.message}`);
+          console.log(`    ❌ Seasonal pattern test failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // テスト間の待機
@@ -360,10 +360,10 @@ describe('Seasonal Patterns Tests', () => {
             userExperienceSmooth: false,
             dataConsistency: false,
             automaticAdjustment: false,
-            details: `Timezone test failed: ${error.message.substring(0, 50)}`
+            details: `Timezone test failed: ${error instanceof Error ? error.message : String(error).substring(0, 50)}`
           });
 
-          console.log(`    ❌ Timezone transition test failed: ${error.message}`);
+          console.log(`    ❌ Timezone transition test failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // テスト間の待機
@@ -556,10 +556,10 @@ describe('Seasonal Patterns Tests', () => {
             performanceStability: false,
             userEngagement: 0,
             resourceEfficiency: 0,
-            details: `Regional test failed: ${error.message.substring(0, 50)}`
+            details: `Regional test failed: ${error instanceof Error ? error.message : String(error).substring(0, 50)}`
           });
 
-          console.log(`    ❌ Regional pattern test failed: ${error.message}`);
+          console.log(`    ❌ Regional pattern test failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // テスト間の待機
@@ -748,10 +748,10 @@ describe('Seasonal Patterns Tests', () => {
             complianceAdherence: false,
             costEfficiency: 0,
             dataIntegrity: false,
-            details: `Retention test failed: ${error.message.substring(0, 50)}`
+            details: `Retention test failed: ${error instanceof Error ? error.message : String(error).substring(0, 50)}`
           });
 
-          console.log(`    ❌ Data retention test failed: ${error.message}`);
+          console.log(`    ❌ Data retention test failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // テスト間の待機

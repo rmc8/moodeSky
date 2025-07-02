@@ -108,7 +108,7 @@ describe('Memory Leakage Detection Tests', () => {
           await TimeControlHelper.wait(leakDetectionConfig.operationInterval);
 
         } catch (error) {
-          console.warn(`Operation failed: ${error.message}`);
+          console.warn(`Operation failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -211,7 +211,7 @@ describe('Memory Leakage Detection Tests', () => {
             await pattern.operation();
             operationsCount++;
           } catch (error) {
-            console.warn(`Pattern operation failed: ${error.message}`);
+            console.warn(`Pattern operation failed: ${error instanceof Error ? error.message : String(error)}`);
           }
 
           // 10回ごとに短い休憩
@@ -295,7 +295,7 @@ describe('Memory Leakage Detection Tests', () => {
           }
 
         } catch (error) {
-          console.warn(`Preload operation failed: ${error.message}`);
+          console.warn(`Preload operation failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -477,7 +477,7 @@ describe('Memory Leakage Detection Tests', () => {
           await TimeControlHelper.wait(longTermConfig.operationInterval);
 
         } catch (error) {
-          console.warn(`Long-term operation failed: ${error.message}`);
+          console.warn(`Long-term operation failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -550,7 +550,7 @@ describe('Memory Leakage Detection Tests', () => {
 
             await TimeControlHelper.wait(cycle.interval);
           } catch (error) {
-            console.warn(`Pressure cycle operation failed: ${error.message}`);
+            console.warn(`Pressure cycle operation failed: ${error instanceof Error ? error.message : String(error)}`);
           }
         }
 
@@ -673,7 +673,7 @@ describe('Memory Leakage Detection Tests', () => {
             await TimeControlHelper.wait(50);
 
           } catch (error) {
-            console.warn(`Lifecycle operation failed in cycle ${cycle}: ${error.message}`);
+            console.warn(`Lifecycle operation failed in cycle ${cycle}: ${error instanceof Error ? error.message : String(error)}`);
           }
 
           // 10サイクルごとに進捗表示
@@ -783,7 +783,7 @@ describe('Memory Leakage Detection Tests', () => {
           try {
             JSON.stringify(sessionObj);
           } catch (error) {
-            if (error.message.includes('circular') || error.message.includes('Converting circular structure')) {
+            if (error instanceof Error ? error.message : String(error).includes('circular') || error instanceof Error ? error.message : String(error).includes('Converting circular structure')) {
               detectedReferences++;
             }
           }
@@ -794,7 +794,7 @@ describe('Memory Leakage Detection Tests', () => {
           }
 
         } catch (error) {
-          console.warn(`Circular reference test iteration ${i} failed: ${error.message}`);
+          console.warn(`Circular reference test iteration ${i} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 

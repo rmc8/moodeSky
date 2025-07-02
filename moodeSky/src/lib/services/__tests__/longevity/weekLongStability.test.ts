@@ -164,7 +164,7 @@ describe('Week-Long Stability Tests', () => {
 
             } catch (error) {
               errorsOccurred++;
-              console.log(`      Error during stability test: ${error.message}`);
+              console.log(`      Error during stability test: ${error instanceof Error ? error.message : String(error)}`);
               
               // 自動回復の試行
               try {
@@ -224,10 +224,10 @@ describe('Week-Long Stability Tests', () => {
             errorsOccurred: errorsOccurred + 1,
             recoveryAttempts,
             finalStability: 'unstable',
-            details: `Critical failure: ${error.message.substring(0, 50)}`
+            details: `Critical failure: ${error instanceof Error ? error.message : String(error).substring(0, 50)}`
           });
 
-          console.log(`    ❌ Stability test failed: ${error.message}`);
+          console.log(`    ❌ Stability test failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // テスト間の回復時間
@@ -408,10 +408,10 @@ describe('Week-Long Stability Tests', () => {
             peakMemoryMB: initialMemory.total,
             memoryLeakDetected: true,
             garbageCollectionEffective: false,
-            details: `Test failed: ${error.message.substring(0, 50)}`
+            details: `Test failed: ${error instanceof Error ? error.message : String(error).substring(0, 50)}`
           });
 
-          console.log(`    ❌ Memory leak test failed: ${error.message}`);
+          console.log(`    ❌ Memory leak test failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // テスト間の待機とメモリクリーンアップ
@@ -565,7 +565,7 @@ describe('Week-Long Stability Tests', () => {
 
             } catch (error) {
               systemStabilityScore -= 2;
-              console.log(`      Unexpected error: ${error.message}`);
+              console.log(`      Unexpected error: ${error instanceof Error ? error.message : String(error)}`);
             }
           }
 
@@ -604,10 +604,10 @@ describe('Week-Long Stability Tests', () => {
             averageRecoveryTime: 0,
             selfHealingEffective: false,
             systemStabilityMaintained: false,
-            details: `Test failed: ${error.message.substring(0, 50)}`
+            details: `Test failed: ${error instanceof Error ? error.message : String(error).substring(0, 50)}`
           });
 
-          console.log(`    ❌ Error recovery test failed: ${error.message}`);
+          console.log(`    ❌ Error recovery test failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         // テスト間の待機

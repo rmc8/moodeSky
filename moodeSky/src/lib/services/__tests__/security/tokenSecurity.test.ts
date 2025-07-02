@@ -157,7 +157,7 @@ describe('Token Security Tests', () => {
           });
 
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.error(`  ❌ ${test.name} failed:`, errorMessage);
           securityResults.push({
             testName: test.name,
@@ -286,7 +286,7 @@ describe('Token Security Tests', () => {
           console.log(`  ${result.detected ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.error(`  ❌ ${test.name} failed:`, errorMessage);
           manipulationResults.push({
             testName: test.name,
@@ -415,7 +415,7 @@ describe('Token Security Tests', () => {
           console.log(`  ${result.prevented ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.error(`  ❌ ${test.name} failed:`, errorMessage);
           replayResults.push({
             testName: test.name,
@@ -566,7 +566,7 @@ describe('Token Security Tests', () => {
           console.log(`  ${success ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.error(`  ❌ ${test.name} failed:`, errorMessage);
           rotationResults.push({
             testName: test.name,
@@ -696,7 +696,7 @@ describe('Token Security Tests', () => {
           console.log(`  ${isProtected ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.error(`  ❌ ${test.name} failed:`, errorMessage);
           protectionResults.push({
             testName: test.name,
@@ -853,7 +853,7 @@ describe('Token Security Tests', () => {
           console.log(`  ${result.encrypted ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.error(`  ❌ ${test.name} failed:`, errorMessage);
           encryptionResults.push({
             testName: test.name,
@@ -1001,7 +1001,7 @@ describe('Token Security Tests', () => {
           console.log(`  ${success ? '✅' : '❌'} ${test.name}: ${result.details}`);
 
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error);
           console.error(`  ❌ ${test.name} failed:`, errorMessage);
           signatureResults.push({
             testName: test.name,
@@ -1176,7 +1176,7 @@ describe('Token Security Tests', () => {
           console.log(`  ${result.secure ? '✅' : '❌'} ${phase.name}: ${result.details}`);
 
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error);
           console.error(`  ❌ ${phase.name} failed:`, errorMessage);
           lifecycleResults.push({
             phase: phase.name,

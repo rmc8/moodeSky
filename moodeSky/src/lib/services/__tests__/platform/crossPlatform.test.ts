@@ -138,9 +138,9 @@ describe('Cross-Platform Consistency Tests', () => {
             console.log(`    ${platform}: ${JSON.stringify(formatData).substring(0, 60)}...`);
 
           } catch (error) {
-            platformResults[platform] = { error: error instanceof Error ? error.message : 'Unknown error' };
-            formatViolations.push(`${platform}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            platformResults[platform] = { error: error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error' };
+            formatViolations.push(`${platform}: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'}`);
+            const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
             console.log(`    ${platform}: ❌ ${errorMessage}`);
           }
         }
@@ -279,7 +279,7 @@ describe('Cross-Platform Consistency Tests', () => {
               serialized: '',
               valid: false
             };
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
             console.log(`    ${platform}: ❌ ${errorMessage}`);
           }
         }
@@ -465,11 +465,11 @@ describe('Cross-Platform Consistency Tests', () => {
             sessionValidity: false,
             dataIntegrity: false,
             transferTime: 0,
-            migrationIssues: [error instanceof Error ? error.message : 'Unknown error'],
-            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
+            migrationIssues: [error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'],
+            details: `ERROR: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ Transfer failed: ${errorMessage}`);
         }
       }
@@ -610,10 +610,10 @@ describe('Cross-Platform Consistency Tests', () => {
             conflictsDetected: 0,
             conflictsResolved: 0,
             syncLatency: 0,
-            details: `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`
+            details: `ERROR: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`    ❌ Sync test failed: ${errorMessage}`);
         }
       }
@@ -732,7 +732,7 @@ describe('Cross-Platform Consistency Tests', () => {
                 }
               } catch (error) {
                 available = false;
-                issues.push(`Operation '${operation}' error: ${error.message}`);
+                issues.push(`Operation '${operation}' error: ${error instanceof Error ? error.message : String(error)}`);
               }
 
               const operationTime = performance.now() - startTime;
@@ -753,10 +753,10 @@ describe('Cross-Platform Consistency Tests', () => {
             platformAvailability[platform] = {
               available: false,
               performance: 0,
-              issues: [error.message]
+              issues: [error instanceof Error ? error.message : String(error)]
             };
-            featureGaps.push(`${platform}: ${error.message}`);
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            featureGaps.push(`${platform}: ${error instanceof Error ? error.message : String(error)}`);
+            const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
             console.log(`    ${platform}: ❌ ${errorMessage}`);
           }
         }
@@ -905,7 +905,7 @@ describe('Cross-Platform Consistency Tests', () => {
             console.log(`    ${platform}: Detection=${detectionCorrect ? '✅' : '❌'}, Available=${platformConfig.available}`);
 
           } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
             console.log(`    ${platform}: ❌ ${errorMessage}`);
           }
         }
@@ -1075,7 +1075,7 @@ describe('Cross-Platform Consistency Tests', () => {
               standardDeviation: 0,
               meetsTarget: false
             };
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
             console.log(`    ${platform}: ❌ ${errorMessage}`);
           }
         }

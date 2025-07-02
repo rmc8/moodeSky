@@ -322,7 +322,7 @@ describe('JWT Utilities', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error.name).toBe('JWTDecodeError');
-      const actualErrorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const actualErrorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
       expect(actualErrorMessage).toBe(errorMessage);
     });
 

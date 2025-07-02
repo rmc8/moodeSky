@@ -504,7 +504,7 @@ describe('JWT Token Manager', () => {
       expect(results).toHaveLength(concurrentOperations);
       expect(totalTime).toBeLessThan(1000); // 1秒未満
       
-      results.forEach(result => {
+      results.forEach((result: any) => {
         expect(result).toBeDefined();
       });
     });

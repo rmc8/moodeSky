@@ -116,7 +116,7 @@ describe('Stress Load Performance Tests', () => {
           expect(result.responseTime).toBeLessThan(30000); // 30秒以内
 
         } catch (error) {
-          console.log(`  Level ${stress.level} failed: ${error.message}`);
+          console.log(`  Level ${stress.level} failed: ${error instanceof Error ? error.message : String(error)}`);
           stressResults.push({
             level: stress.level,
             throughput: 0,
@@ -255,10 +255,10 @@ describe('Stress Load Performance Tests', () => {
           }
 
         } catch (error) {
-          console.log(`  ${currentConcurrent} users: FAILED - ${error.message}`);
+          console.log(`  ${currentConcurrent} users: FAILED - ${error instanceof Error ? error.message : String(error)}`);
           breakingPoint = {
             concurrentUsers: currentConcurrent,
-            reason: `Test execution failed: ${error.message}`,
+            reason: `Test execution failed: ${error instanceof Error ? error.message : String(error)}`,
             metrics: { errorRate: 100, responseTime: 30000, throughput: 0 },
             severity: 'hard'
           };
@@ -367,7 +367,7 @@ describe('Stress Load Performance Tests', () => {
           expect(degradationData.efficiency).toBeGreaterThan(25); // 最低25%の効率
 
         } catch (error) {
-          console.log(`  Stage ${stage.stage} failed: ${error.message}`);
+          console.log(`  Stage ${stage.stage} failed: ${error instanceof Error ? error.message : String(error)}`);
           degradationMetrics.push({
             stage: stage.stage,
             actualThroughput: 0,
@@ -788,7 +788,7 @@ describe('Stress Load Performance Tests', () => {
           console.log(`  Memory increase: ${memoryIncrease.toFixed(1)}MB`);
 
         } catch (error) {
-          console.log(`  Exhaustion test failed: ${error.message}`);
+          console.log(`  Exhaustion test failed: ${error instanceof Error ? error.message : String(error)}`);
           exhaustionAchieved = true; // 失敗も枯渇の一形態
         }
 

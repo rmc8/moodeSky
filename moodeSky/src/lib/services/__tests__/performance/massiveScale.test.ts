@@ -90,7 +90,7 @@ describe('Massive Scale Performance Tests', () => {
             console.log(`  Progress: ${progress}% (${i + 1}/${targetAccountCount} accounts)`);
           }
         } catch (error) {
-          console.warn(`Failed to add account ${i}: ${error.message}`);
+          console.warn(`Failed to add account ${i}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -157,7 +157,7 @@ describe('Massive Scale Performance Tests', () => {
             try {
               await container.addAccount(`did:plc:linear${i}`, `linear${i}.bsky.social`);
             } catch (error) {
-              console.warn(`Failed to add account ${i}: ${error.message}`);
+              console.warn(`Failed to add account ${i}: ${error instanceof Error ? error.message : String(error)}`);
             }
           }
         }
@@ -261,7 +261,7 @@ describe('Massive Scale Performance Tests', () => {
           try {
             await container.addAccount(`did:plc:breaking${i}`, `breaking${i}.bsky.social`);
           } catch (error) {
-            console.warn(`Failed to add account ${i}: ${error.message}`);
+            console.warn(`Failed to add account ${i}: ${error instanceof Error ? error.message : String(error)}`);
           }
         }
 
@@ -704,7 +704,7 @@ describe('Massive Scale Performance Tests', () => {
           }
 
         } catch (error) {
-          console.warn(`Operation failed at ${currentTime}ms: ${error.message}`);
+          console.warn(`Operation failed at ${currentTime}ms: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         await TimeControlHelper.wait(operationInterval);

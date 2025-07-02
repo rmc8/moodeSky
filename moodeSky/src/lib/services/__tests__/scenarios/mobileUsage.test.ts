@@ -77,7 +77,7 @@ describe('Mobile Usage Scenario Tests', () => {
         }
 
       } catch (error) {
-        console.error('    ❌ Failed to establish active session:', error.message);
+        console.error('    ❌ Failed to establish active session:', error instanceof Error ? error.message : String(error));
       }
 
       console.log('  Phase 2: App backgrounding simulation...');
@@ -96,7 +96,7 @@ describe('Mobile Usage Scenario Tests', () => {
         console.log(`    Session persistence: ${sessionPersisted ? '✅ Maintained' : '❌ Lost'}`);
 
       } catch (error) {
-        console.error('    ❌ Background transition failed:', error.message);
+        console.error('    ❌ Background transition failed:', error instanceof Error ? error.message : String(error));
       }
 
       console.log('  Phase 3: Foreground resumption...');
@@ -115,7 +115,7 @@ describe('Mobile Usage Scenario Tests', () => {
         console.log('    ✅ Post-resumption activity successful');
 
       } catch (error) {
-        console.error('    ❌ Foreground resumption failed:', error.message);
+        console.error('    ❌ Foreground resumption failed:', error instanceof Error ? error.message : String(error));
       }
 
       // 結果評価
@@ -186,7 +186,7 @@ describe('Mobile Usage Scenario Tests', () => {
           console.log(`    Cycle ${i + 1}: Complete (${(cycleEnd - cycleStart).toFixed(1)}ms)`);
 
         } catch (error) {
-          console.warn(`    Cycle ${i + 1}: Failed - ${error.message}`);
+          console.warn(`    Cycle ${i + 1}: Failed - ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -272,7 +272,7 @@ describe('Mobile Usage Scenario Tests', () => {
           }
 
         } catch (error) {
-          console.error(`    ❌ Recovery failed: ${error.message}`);
+          console.error(`    ❌ Recovery failed: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         const recoveryEnd = performance.now();
@@ -425,7 +425,7 @@ describe('Mobile Usage Scenario Tests', () => {
         await container.authService.getAccount(account.id);
         console.log('    ✅ Session established on cellular');
       } catch (error) {
-        console.error('    ❌ Failed to establish session on cellular:', error.message);
+        console.error('    ❌ Failed to establish session on cellular:', error instanceof Error ? error.message : String(error));
         connectionMaintained = false;
       }
 
@@ -437,7 +437,7 @@ describe('Mobile Usage Scenario Tests', () => {
           await this.simulateMobileUserAction('scroll_timeline', account);
           cellularOperationTimes.push(performance.now() - operationStart);
         } catch (error) {
-          console.warn(`    Cellular operation ${i + 1} failed: ${error.message}`);
+          console.warn(`    Cellular operation ${i + 1} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -461,7 +461,7 @@ describe('Mobile Usage Scenario Tests', () => {
         }
 
       } catch (error) {
-        console.error('    ❌ Session validation failed on WiFi:', error.message);
+        console.error('    ❌ Session validation failed on WiFi:', error instanceof Error ? error.message : String(error));
         sessionPersistent = false;
       }
 
@@ -473,7 +473,7 @@ describe('Mobile Usage Scenario Tests', () => {
           await this.simulateMobileUserAction('scroll_timeline', account);
           wifiOperationTimes.push(performance.now() - operationStart);
         } catch (error) {
-          console.warn(`    WiFi operation ${i + 1} failed: ${error.message}`);
+          console.warn(`    WiFi operation ${i + 1} failed: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -529,7 +529,7 @@ describe('Mobile Usage Scenario Tests', () => {
         await this.simulateMobileUserAction('scroll_timeline', account);
       } catch (error) {
         offlineHandled = true;
-        console.log(`    ✅ Offline state handled gracefully: ${error.message}`);
+        console.log(`    ✅ Offline state handled gracefully: ${error instanceof Error ? error.message : String(error)}`);
       }
 
       console.log('  Phase 3: Attempting reconnection...');
@@ -549,7 +549,7 @@ describe('Mobile Usage Scenario Tests', () => {
           break;
 
         } catch (error) {
-          console.log(`    Attempt ${attempt} failed: ${error.message}`);
+          console.log(`    Attempt ${attempt} failed: ${error instanceof Error ? error.message : String(error)}`);
           if (attempt < disconnectionTest.reconnectionAttempts) {
             await TimeControlHelper.wait(1000 * attempt); // 指数バックオフ
           }
@@ -574,7 +574,7 @@ describe('Mobile Usage Scenario Tests', () => {
           }
 
         } catch (error) {
-          console.error('    ❌ Data integrity validation failed:', error.message);
+          console.error('    ❌ Data integrity validation failed:', error instanceof Error ? error.message : String(error));
           dataIntegrity = false;
         }
       }
@@ -681,7 +681,7 @@ describe('Mobile Usage Scenario Tests', () => {
           operationSuccess = true;
 
         } catch (error) {
-          console.warn(`    Operation failed at ${batteryLevel}% battery: ${error.message}`);
+          console.warn(`    Operation failed at ${batteryLevel}% battery: ${error instanceof Error ? error.message : String(error)}`);
         }
 
         const operationEnd = performance.now();
@@ -811,7 +811,7 @@ describe('Mobile Usage Scenario Tests', () => {
               }
 
             } catch (error) {
-              console.warn(`    Operation ${i + 1}: ❌ Failed - ${error.message}`);
+              console.warn(`    Operation ${i + 1}: ❌ Failed - ${error instanceof Error ? error.message : String(error)}`);
             }
           }
 
@@ -823,7 +823,7 @@ describe('Mobile Usage Scenario Tests', () => {
           }
 
         } catch (error) {
-          console.error(`    Orientation change to ${orientation} failed: ${error.message}`);
+          console.error(`    Orientation change to ${orientation} failed: ${error instanceof Error ? error.message : String(error)}`);
           sessionStable = false;
         }
       }
@@ -834,7 +834,7 @@ describe('Mobile Usage Scenario Tests', () => {
         console.log('    ✅ Final data consistency check passed');
       } catch (error) {
         dataConsistent = false;
-        console.error('    ❌ Final data consistency check failed:', error.message);
+        console.error('    ❌ Final data consistency check failed:', error instanceof Error ? error.message : String(error));
       }
 
       console.log('\nScreen Orientation Results:');

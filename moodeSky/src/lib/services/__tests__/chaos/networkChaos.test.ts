@@ -70,7 +70,7 @@ describe('Network Chaos Engineering Tests', () => {
         expect(duringPartition).toBeDefined();
       } catch (error) {
         // ネットワーク分断中のエラーは期待される動作
-        expect(error.message).toContain('network');
+        expect(error instanceof Error ? error.message : String(error)).toContain('network');
       }
 
       // 分断終了後の回復を待機
@@ -705,7 +705,7 @@ describe('Network Chaos Engineering Tests', () => {
       expect(assessment.recommendations.length).toBeGreaterThan(0);
       
       console.log('\nNetwork resilience recommendations:');
-      assessment.recommendations.forEach((rec, index) => {
+      assessment.recommendations.forEach((rec: string, index: number) => {
         console.log(`  ${index + 1}. ${rec}`);
       });
 

@@ -656,7 +656,7 @@ describe('Resource Chaos Engineering Tests', () => {
     });
 
     // ヘルパーメソッド：フェーズ性能測定
-    private async measurePhasePerformance(
+    async function measurePhasePerformance(
       container: IntegrationTestContainer, 
       phase: string, 
       iterations: number

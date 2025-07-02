@@ -70,7 +70,7 @@ describe('Concurrency Chaos Engineering Tests', () => {
             return {
               success: false,
               duration: Date.now() - operationStart,
-              error: error.message,
+              error: error instanceof Error ? error.message : String(error),
               index
             };
           }
@@ -141,7 +141,7 @@ describe('Concurrency Chaos Engineering Tests', () => {
               return { type: 'unknown', success: false, index };
           }
         } catch (error) {
-          return { type: 'error', success: false, error: error.message, index };
+          return { type: 'error', success: false, error: error instanceof Error ? error.message : String(error), index };
         }
       });
 
@@ -217,7 +217,7 @@ describe('Concurrency Chaos Engineering Tests', () => {
               return { type: 'unknown', success: false };
           }
         } catch (error) {
-          return { type: 'error', success: false, error: error.message };
+          return { type: 'error', success: false, error: error instanceof Error ? error.message : String(error) };
         }
       });
 
@@ -297,7 +297,7 @@ describe('Concurrency Chaos Engineering Tests', () => {
           return {
             index,
             success: false,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
             duration: Date.now() - startTime,
             timestamp: Date.now()
           };
@@ -446,7 +446,7 @@ describe('Concurrency Chaos Engineering Tests', () => {
           return {
             type: 'error',
             success: false,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
             index
           };
         }
@@ -528,7 +528,7 @@ describe('Concurrency Chaos Engineering Tests', () => {
               return { type: 'unknown', success: false, duration: Date.now() - startTime };
           }
         } catch (error) {
-          return { type: 'error', success: false, error: error.message, duration: Date.now() - startTime };
+          return { type: 'error', success: false, error: error instanceof Error ? error.message : String(error), duration: Date.now() - startTime };
         }
       });
 
@@ -674,7 +674,7 @@ describe('Concurrency Chaos Engineering Tests', () => {
       expect(assessment.recommendations.length).toBeGreaterThan(0);
       
       console.log('\nConcurrency optimization recommendations:');
-      assessment.recommendations.forEach((rec, index) => {
+      assessment.recommendations.forEach((rec: string, index: number) => {
         console.log(`  ${index + 1}. ${rec}`);
       });
 

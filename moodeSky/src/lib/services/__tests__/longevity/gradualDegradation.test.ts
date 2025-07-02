@@ -177,10 +177,10 @@ describe('Gradual Degradation Tests', () => {
             degradationDetected: true,
             countermeasuresActivated: false,
             performanceWithinBounds: false,
-            details: `Stage failed with error: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 100)}`
+            details: `Stage failed with error: ${(error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error').substring(0, 100)}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`  ❌ ${stage.name} failed: ${errorMessage}`);
         }
 
@@ -319,10 +319,10 @@ describe('Gradual Degradation Tests', () => {
             measuredThresholds: { responseTime: 0, errorRate: 1, memoryGrowth: 0 },
             adaptationAccuracy: 0,
             thresholdStability: false,
-            details: `Threshold adaptation failed: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 100)}`
+            details: `Threshold adaptation failed: ${(error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error').substring(0, 100)}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`  ❌ ${test.name} failed: ${errorMessage}`);
         }
       }
@@ -471,10 +471,10 @@ describe('Gradual Degradation Tests', () => {
             interventionTriggered: false,
             cleanupEffectiveness: 0,
             memoryStable: false,
-            details: `Fragmentation test failed: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 100)}`
+            details: `Fragmentation test failed: ${(error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error').substring(0, 100)}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`  ❌ ${stage.name} failed: ${errorMessage}`);
         }
       }
@@ -626,10 +626,10 @@ describe('Gradual Degradation Tests', () => {
             optimizationTriggered: false,
             optimizationEffectiveness: 0,
             performanceImpact: 1,
-            details: `Database test failed: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 100)}`
+            details: `Database test failed: ${(error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error').substring(0, 100)}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`  ❌ ${stage.name} failed: ${errorMessage}`);
         }
       }
@@ -799,10 +799,10 @@ describe('Gradual Degradation Tests', () => {
             stageResults: [],
             overallQualityMaintenance: 0,
             adaptationSuccess: 0,
-            details: `Quality degradation test failed: ${(error instanceof Error ? error.message : 'Unknown error').substring(0, 100)}`
+            details: `Quality degradation test failed: ${(error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error').substring(0, 100)}`
           });
 
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
           console.log(`  ❌ ${scenario.name} failed: ${errorMessage}`);
         }
       }
