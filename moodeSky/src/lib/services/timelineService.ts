@@ -160,7 +160,7 @@ export class TimelineService {
       }
 
       const { feed, cursor: nextCursor } = response.data;
-      const hasMore = !!nextCursor && feed.length >= safeLimit;
+      const hasMore = !!nextCursor;
       
       log.info('Timeline API response', {
         postsCount: feed.length,
