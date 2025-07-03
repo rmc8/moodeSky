@@ -115,7 +115,7 @@
 <!-- 外部リンク埋め込みコンテナ -->
 <div 
   class="w-full {additionalClass}"
-  style="max-width: {displayOptions.maxWidth}px;"
+  style="{displayOptions.maxWidth ? `max-width: ${displayOptions.maxWidth}px;` : ''}"
 >
   <!-- リンクプレビューカード -->
   <div

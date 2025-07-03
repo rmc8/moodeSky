@@ -4,6 +4,7 @@
   段階的実装: 作者名、テキスト、日時、アクションボタン、埋め込みコンテンツ
 -->
 <script lang="ts">
+  import { onMount } from 'svelte';
   import Avatar from './Avatar.svelte';
   import PostActionButton from './post/PostActionButton.svelte';
   import RepostBadge from './post/RepostBadge.svelte';
@@ -21,6 +22,22 @@
   }
   
   const { post, class: className = '', columnWidth }: Props = $props();
+  
+  // モバイル判定用
+  let windowWidth = $state(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  const isMobile = $derived(windowWidth < 768);
+  
+  onMount(() => {
+    const handleResize = () => {
+      windowWidth = window.innerWidth;
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  });
 
   // デッキサイズに応じたアクションボタンのギャップクラスを計算
   // 黄金比・フィボナッチ数列を意識した美しい配置
@@ -196,8 +213,7 @@
       <EmbedRenderer 
         embeds={embedsData()}
         options={{
-          maxWidth: columnWidth === 'xxs' ? 220 : 
-                   columnWidth === 'xs' ? 280 :
+          maxWidth: isMobile ? undefined : 
                    columnWidth === 'small' ? 350 :
                    columnWidth === 'medium' ? 450 :
                    columnWidth === 'large' ? 550 :
