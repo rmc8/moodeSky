@@ -101,7 +101,7 @@
 
   // 個別画像のスタイルクラス（16:9レイアウト対応）
   const getImageClass = (index: number, totalCount: number) => {
-    let baseClass = 'relative overflow-hidden transition-all duration-200 bg-muted';
+    let baseClass = 'relative overflow-hidden transition-all duration-200 bg-muted border border-subtle';
     
     // 角丸設定
     if (displayOptions.rounded) {
@@ -197,7 +197,7 @@
   style="max-width: {displayOptions.maxWidth}px;"
 >
   <!-- 16:9美しい画像グリッド -->
-  <div class="relative w-full aspect-[16/9] border-subtle rounded-lg overflow-hidden {gridLayoutClass()}">
+  <div class="relative w-full aspect-[16/9] rounded-lg overflow-hidden {gridLayoutClass()}">
     {#each images().slice(0, maxImages) as image, index}
       <!-- 個別画像コンテナ -->
       {#if displayOptions.clickable}
