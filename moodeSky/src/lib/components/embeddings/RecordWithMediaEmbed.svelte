@@ -63,13 +63,8 @@
   // 表示設定のマージ
   const displayOptions = $derived({ ...DEFAULT_EMBED_DISPLAY_OPTIONS, ...options });
 
-  // 記録データの抽出
-  const recordData = $derived(() => ({
-    uri: embed.record.uri,
-    cid: embed.record.cid,
-    // RecordWithMediaEmbedView の場合は追加データが含まれる
-    ...('author' in embed.record ? embed.record : {})
-  }));
+  // 記録データの抽出（RecordEmbedに委譲）
+  const recordData = $derived(() => embed.record);
 
   // メディアデータの抽出と型判定
   const mediaData = $derived(() => {
@@ -157,6 +152,18 @@
   };
 </script>
 
+<!-- RecordEmbed表示用の共通スニペット -->
+{#snippet recordContent()}
+  <RecordEmbed 
+    embed={{ $type: 'app.bsky.embed.record', record: recordData() }}
+    options={recordOptions()}
+    {onPostClick}
+    {onAuthorClick}
+    maxDepth={2}
+    currentDepth={1}
+  />
+{/snippet}
+
 <!-- 記録+メディア埋め込みコンテナ -->
 <div 
   class={containerClass()}
@@ -194,12 +201,7 @@
     
     <!-- 記録部分 -->
     <div class={recordClass()}>
-      <RecordEmbed 
-        embed={{ $type: 'app.bsky.embed.record', record: recordData() }}
-        options={recordOptions()}
-        {onPostClick}
-        {onAuthorClick}
-      />
+      {@render recordContent()}
     </div>
     
   {:else}
@@ -207,12 +209,7 @@
     
     <!-- 記録部分 -->
     <div class={recordClass()}>
-      <RecordEmbed 
-        embed={{ $type: 'app.bsky.embed.record', record: recordData() }}
-        options={recordOptions()}
-        {onPostClick}
-        {onAuthorClick}
-      />
+      {@render recordContent()}
     </div>
     
     <!-- メディア部分 -->
