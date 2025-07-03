@@ -8,6 +8,7 @@
   import PostActionButton from './post/PostActionButton.svelte';
   import RepostBadge from './post/RepostBadge.svelte';
   import EmbedRenderer from './embeddings/EmbedRenderer.svelte';
+  import RichText from './post/RichText.svelte';
   import { formatRelativeTime, formatAbsoluteTime } from '$lib/utils/relativeTime.js';
   import { ICONS } from '$lib/types/icon.js';
   import type { SimplePost } from '$lib/types/post.js';
@@ -181,8 +182,12 @@
   </header>
   
   <!-- 投稿内容 -->
-  <div class="text-themed text-sm leading-relaxed whitespace-pre-wrap break-words mb-3">
-    {post.text}
+  <div class="text-themed text-sm leading-relaxed mb-3">
+    <RichText 
+      text={post.text}
+      facets={post.facets}
+      class="break-words"
+    />
   </div>
 
   <!-- 埋め込みコンテンツエリア -->

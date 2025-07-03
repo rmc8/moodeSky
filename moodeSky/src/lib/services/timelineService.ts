@@ -15,6 +15,8 @@
 import type { Agent } from './agent.js';
 import type { Account } from '$lib/types/auth.js';
 import { createComponentLogger } from '../utils/logger.js';
+import { convertMcpTimelineToSimplePosts } from '../utils/mcpDataConverter.js';
+import type { SimplePost } from '$lib/types/post.js';
 
 const log = createComponentLogger('TimelineService');
 
@@ -369,6 +371,33 @@ export class TimelineService {
     }
     
     return newPostsCount;
+  }
+
+  /**
+   * MCPから取得したタイムラインデータを処理
+   * @param mcpTimelineData - MCPのタイムラインレスポンス
+   * @returns SimplePost配列
+   */
+  processMcpTimeline(mcpTimelineData: any): SimplePost[] {
+    try {
+      log.info('Processing MCP timeline data', {
+        hasData: !!mcpTimelineData?.data,
+        feedLength: mcpTimelineData?.data?.feed?.length || 0
+      });
+
+      const posts = convertMcpTimelineToSimplePosts(mcpTimelineData);
+      
+      log.info('MCP timeline processed', {
+        originalCount: mcpTimelineData?.data?.feed?.length || 0,
+        convertedCount: posts.length,
+        postsWithFacets: posts.filter(p => p.facets && p.facets.length > 0).length
+      });
+
+      return posts;
+    } catch (error) {
+      log.error('Failed to process MCP timeline data', { error });
+      return [];
+    }
   }
 
   /**
