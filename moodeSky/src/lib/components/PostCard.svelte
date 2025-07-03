@@ -6,6 +6,7 @@
 <script lang="ts">
   import Avatar from './Avatar.svelte';
   import PostActionButton from './post/PostActionButton.svelte';
+  import RepostBadge from './post/RepostBadge.svelte';
   import EmbedRenderer from './embeddings/EmbedRenderer.svelte';
   import { formatRelativeTime, formatAbsoluteTime } from '$lib/utils/relativeTime.js';
   import { ICONS } from '$lib/types/icon.js';
@@ -122,13 +123,22 @@
     console.warn('Embed rendering error:', error, embed);
     // TODO: エラー報告システム実装
   }
+
+  // リポストユーザークリックハンドラー
+  function handleRepostUserClick(did: string, handle: string) {
+    console.log('Navigate to repost user profile:', did, handle);
+    // TODO: プロフィールページへのナビゲーション実装
+  }
 </script>
 
-<!-- ポストカード -->
 <article class="bg-card border-b border-subtle p-4 hover:bg-muted/5 transition-colors {className}">
-  <!-- ヘッダー: アバター + 作者情報 + 日時 -->
+  <RepostBadge 
+    reason={post.reason}
+    onClick={handleRepostUserClick}
+    class="mb-2"
+  />
+  
   <header class="flex items-start gap-3 mb-3">
-    <!-- アバター -->
     <Avatar 
       src={post.author.avatar}
       displayName={post.author.displayName}
@@ -136,10 +146,7 @@
       size="sm"
       class="mt-1"
     />
-    
-    <!-- 作者情報と日時 -->
     <div class="flex-1 min-w-0">
-      <!-- 1行目: 表示名と日時 (displayNameが有効な場合のみ) -->
       {#if hasValidDisplayName}
         <div class="flex items-center justify-between gap-2">
           <h3 class="font-semibold text-themed text-sm truncate">
