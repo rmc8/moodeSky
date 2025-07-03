@@ -5,6 +5,7 @@
   import Navigation from '$lib/components/Navigation.svelte';
   import Avatar from '$lib/components/Avatar.svelte';
   import DeckContainer from '$lib/deck/components/DeckContainer.svelte';
+  import FloatingPostButton from '$lib/components/FloatingPostButton.svelte';
   import { authService } from '$lib/services/authStore.js';
   import type { Account } from '$lib/types/auth.js';
   import { useTranslation } from '$lib/utils/reactiveTranslation.svelte.js';
@@ -319,6 +320,9 @@
         />
       </div>
     </main>
+    
+    <!-- モバイル用フローティング投稿ボタン -->
+    <FloatingPostButton />
   </div>
 {:else}
   <!-- フォールバック画面 - 条件に当てはまらない場合 -->
