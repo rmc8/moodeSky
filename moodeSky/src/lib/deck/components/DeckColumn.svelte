@@ -12,6 +12,7 @@
   import AvatarGroup from '$lib/components/AvatarGroup.svelte';
   import AccountSwitcher from '$lib/components/AccountSwitcher.svelte';
   import PostCard from '$lib/components/PostCard.svelte';
+  import InfiniteScroll from '$lib/components/timeline/InfiniteScroll.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { deckStore } from '../store.svelte.js';
   import type { Column, ColumnWidth } from '../types.js';
@@ -62,7 +63,7 @@
   // 新しいポスト取得機能関連
   let showNewPostsIndicator = $state(false);
   let lastRefreshTime = $state<Date | null>(null);
-  let autoRefreshInterval: number | null = null;
+  let autoRefreshInterval: ReturnType<typeof setInterval> | null = null;
 
   // ===================================================================
   // アバター表示用のロジック - アバターキャッシュ統合

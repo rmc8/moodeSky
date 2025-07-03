@@ -95,7 +95,7 @@
   }
 
   function createDebounceFunction(fn: () => void, delay: number): () => void {
-    let timeoutId: number | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     
     return () => {
       if (timeoutId !== null) {

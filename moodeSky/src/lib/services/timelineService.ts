@@ -337,7 +337,9 @@ export class TimelineService {
     // メモリ制限: 最大50エントリー
     if (this.cache.size > 50) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey) {
+        this.cache.delete(firstKey);
+      }
     }
   }
 
