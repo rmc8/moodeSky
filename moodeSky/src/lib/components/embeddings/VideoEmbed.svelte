@@ -5,7 +5,8 @@
   最大100MBサイズ、HLS (m3u8) プレイリスト、キャプション対応
 -->
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
+  import Hls from 'hls.js';
   import Icon from '$lib/components/Icon.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import type { VideoEmbed, VideoEmbedView, EmbedDisplayOptions, AspectRatio } from './types.js';
@@ -37,14 +38,18 @@
 
   // 内部状態
   let videoElement: HTMLVideoElement;
+  let hlsInstance: Hls | null = null;
   let isPlaying = $state(false);
   let isLoading = $state(true);
   let hasError = $state(false);
+  let errorMessage = $state('');
   let currentTime = $state(0);
   let duration = $state(0);
   let volume = $state(muted ? 0 : 0.5);
   let showControls = $state(false);
   let isFullscreen = $state(false);
+  let useHlsJs = $state(false);
+  let useNativeHls = $state(false);
 
   // 表示設定のマージ
   const displayOptions = $derived({ ...DEFAULT_EMBED_DISPLAY_OPTIONS, ...options });
@@ -118,14 +123,109 @@
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // HLS.jsによる動画初期化
+  const initializeVideo = () => {
+    if (!videoElement || !videoData().url || videoData().url === '#') return;
+
+    const videoSrc = videoData().url;
+    
+    // ブラウザサポート検出
+    if (Hls.isSupported()) {
+      // HLS.js使用（Chrome, Firefox等）
+      useHlsJs = true;
+      useNativeHls = false;
+      
+      try {
+        hlsInstance = new Hls({
+          debug: false,
+          autoStartLoad: true,
+          startPosition: -1,
+          capLevelToPlayerSize: true,
+          maxBufferLength: 30,
+          maxMaxBufferLength: 600,
+          maxBufferHole: 0.5
+        });
+
+        // HLS.jsイベントハンドラー
+        hlsInstance.on(Hls.Events.MEDIA_ATTACHED, () => {
+          console.log('HLS.js: メディア要素に接続されました');
+        });
+
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+          console.log('HLS.js: マニフェスト解析完了', data.levels.length + ' quality levels');
+          isLoading = false;
+        });
+
+        hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+          console.error('HLS.js: エラー発生', data);
+          
+          if (data.fatal) {
+            isLoading = false;
+            hasError = true;
+            
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                errorMessage = 'ネットワークエラーが発生しました';
+                // 軽微なネットワークエラーの場合はリカバリを試行
+                if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
+                  hlsInstance?.startLoad();
+                }
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                errorMessage = 'メディアエラーが発生しました';
+                // メディアエラーの場合はリカバリを試行
+                hlsInstance?.recoverMediaError();
+                break;
+              default:
+                errorMessage = '動画の読み込みに失敗しました';
+                break;
+            }
+          }
+        });
+
+        hlsInstance.loadSource(videoSrc);
+        hlsInstance.attachMedia(videoElement);
+        
+      } catch (error) {
+        console.error('HLS.js初期化エラー:', error);
+        hasError = true;
+        errorMessage = 'HLS.js初期化に失敗しました';
+      }
+      
+    } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+      // ネイティブHLSサポート（Safari）
+      useHlsJs = false;
+      useNativeHls = true;
+      
+      try {
+        videoElement.src = videoSrc;
+        console.log('ネイティブHLS: Safari向けの直接再生');
+      } catch (error) {
+        console.error('ネイティブHLS初期化エラー:', error);
+        hasError = true;
+        errorMessage = 'ネイティブHLS初期化に失敗しました';
+      }
+      
+    } else {
+      // HLSサポートなし
+      hasError = true;
+      errorMessage = 'お使いのブラウザはHLS動画の再生をサポートしていません';
+      console.error('HLS非サポート: ', {
+        hlsSupported: Hls.isSupported(),
+        nativeHls: videoElement.canPlayType('application/vnd.apple.mpegurl')
+      });
+    }
+  };
+
   // コンポーネントマウント時の処理
   onMount(() => {
     if (!videoElement) return;
 
-    // イベントリスナーの設定
+    // 基本的なイベントリスナーの設定
     const handleLoadStart = () => {
       isLoading = true;
       hasError = false;
+      errorMessage = '';
     };
 
     const handleLoadedData = () => {
@@ -145,9 +245,33 @@
       currentTime = videoElement.currentTime;
     };
 
-    const handleError = () => {
+    const handleError = (event: Event) => {
       isLoading = false;
       hasError = true;
+      
+      // エラーの詳細を取得
+      const target = event.target as HTMLVideoElement;
+      const error = target.error;
+      
+      if (error) {
+        switch (error.code) {
+          case MediaError.MEDIA_ERR_NETWORK:
+            errorMessage = 'ネットワークエラー: 動画の読み込みに失敗しました';
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            errorMessage = 'デコードエラー: 動画の再生に失敗しました';
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage = 'フォーマットエラー: 動画フォーマットがサポートされていません';
+            break;
+          default:
+            errorMessage = '不明なエラーが発生しました';
+        }
+      } else {
+        errorMessage = '動画の読み込みに失敗しました';
+      }
+      
+      console.error('Video Element Error:', error);
     };
 
     const handleFullscreenChange = () => {
@@ -163,6 +287,9 @@
     videoElement.addEventListener('error', handleError);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
+    // 動画初期化
+    initializeVideo();
+
     // クリーンアップ
     return () => {
       videoElement?.removeEventListener('loadstart', handleLoadStart);
@@ -173,6 +300,14 @@
       videoElement?.removeEventListener('error', handleError);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
+  });
+
+  // コンポーネント破棄時のクリーンアップ
+  onDestroy(() => {
+    if (hlsInstance) {
+      hlsInstance.destroy();
+      hlsInstance = null;
+    }
   });
 </script>
 
@@ -197,10 +332,10 @@
     aria-label={videoData().alt || '動画コンテンツ'}
     poster={videoData().thumbnail}
   >
-    <!-- HLS プレイリスト (m3u8) の場合 -->
-    {#if videoData().url.endsWith('.m3u8')}
+    <!-- ネイティブHLS使用時のみソース要素を追加 -->
+    {#if useNativeHls && videoData().url.endsWith('.m3u8')}
       <source src={videoData().url} type="application/x-mpegURL" />
-    {:else}
+    {:else if !useHlsJs && !useNativeHls && !videoData().url.endsWith('.m3u8')}
       <source src={videoData().url} type="video/mp4" />
     {/if}
     
@@ -222,9 +357,17 @@
   <!-- エラー表示 -->
   {#if hasError}
     <div class="absolute inset-0 bg-muted flex items-center justify-center {displayOptions.rounded ? 'rounded-lg' : ''}">
-      <div class="text-center text-secondary">
+      <div class="text-center text-secondary max-w-xs px-4">
         <Icon icon={ICONS.ERROR} size="lg" class="mx-auto mb-2" />
-        <p>動画を読み込めませんでした</p>
+        <p class="text-sm font-medium mb-1">動画を読み込めませんでした</p>
+        {#if errorMessage}
+          <p class="text-xs text-secondary">{errorMessage}</p>
+        {/if}
+        {#if useHlsJs}
+          <p class="text-xs text-inactive mt-2">HLS.js使用中</p>
+        {:else if useNativeHls}
+          <p class="text-xs text-inactive mt-2">ネイティブHLS使用中</p>
+        {/if}
       </div>
     </div>
   {/if}
