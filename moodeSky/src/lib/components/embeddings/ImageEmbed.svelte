@@ -194,7 +194,7 @@
 <!-- 画像埋め込みコンテナ（16:9美しいレイアウト） -->
 <div 
   class="w-full {additionalClass}"
-  style="max-width: {displayOptions.maxWidth}px;"
+  style="{displayOptions.maxWidth ? `max-width: ${displayOptions.maxWidth}px;` : ''}"
 >
   <!-- 16:9美しい画像グリッド -->
   <div class="relative w-full aspect-[16/9] rounded-lg overflow-hidden {gridLayoutClass()}">

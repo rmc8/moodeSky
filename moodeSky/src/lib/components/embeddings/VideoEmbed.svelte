@@ -314,7 +314,7 @@
 <!-- 動画埋め込みコンテナ -->
 <div 
   class="relative w-full border-subtle rounded-lg overflow-hidden {additionalClass} {getAspectRatioStyle(videoData().aspectRatio)}"
-  style="max-width: {displayOptions.maxWidth}px; max-height: {displayOptions.maxHeight}px;"
+  style="{displayOptions.maxWidth ? `max-width: ${displayOptions.maxWidth}px;` : ''} {displayOptions.maxHeight ? `max-height: ${displayOptions.maxHeight}px;` : ''}"
   role="region"
   aria-label="動画コンテンツ"
   onmouseenter={() => showControls = true}

@@ -167,7 +167,7 @@
 <!-- 記録+メディア埋め込みコンテナ -->
 <div 
   class={containerClass()}
-  style="max-width: {displayOptions.maxWidth}px;"
+  style="{displayOptions.maxWidth ? `max-width: ${displayOptions.maxWidth}px;` : ''}"
 >
   {#if layout === 'vertical'}
     <!-- 縦レイアウト: メディア → 記録 -->
