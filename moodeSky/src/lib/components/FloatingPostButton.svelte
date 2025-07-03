@@ -18,6 +18,12 @@
   // リアクティブ翻訳システム
   const { t } = useTranslation();
   
+  // 定数定義
+  const MOBILE_BREAKPOINT = 768;
+  const SCROLL_DEBOUNCE_MS = 150;
+  const BUTTON_BOTTOM_OFFSET = '5rem';
+  const BUTTON_RIGHT_OFFSET = '1rem';
+  
   // プロップス
   interface Props {
     class?: string;
@@ -26,24 +32,21 @@
   const { class: className = '' }: Props = $props();
   
   // 状態管理
-  let isVisible = $state(true);
   let isScrolling = $state(false);
   let windowWidth = $state(typeof window !== 'undefined' ? window.innerWidth : 1024);
   
   // モバイル判定
-  const isMobile = $derived(windowWidth < 768);
+  const isMobile = $derived(windowWidth < MOBILE_BREAKPOINT);
   
   // 表示判定（モバイルかつスクロール中でない場合に表示）
   const shouldShow = $derived(isMobile && !isScrolling);
   
   // スクロール関連の状態
-  let scrollTimeout: number | undefined;
-  let lastScrollY = $state(0);
+  let scrollTimeout: ReturnType<typeof setTimeout> | undefined;
   
   onMount(() => {
     // 初期画面幅設定
     windowWidth = window.innerWidth;
-    lastScrollY = window.scrollY;
     
     // リサイズ監視
     const handleResize = () => {
@@ -63,8 +66,7 @@
       // 150ms後にスクロール停止と判定
       scrollTimeout = setTimeout(() => {
         isScrolling = false;
-        lastScrollY = window.scrollY;
-      }, 150);
+      }, SCROLL_DEBOUNCE_MS);
     };
     
     // イベントリスナー追加
@@ -86,8 +88,11 @@
   const handlePostClick = () => {
     console.log('🚀 [FloatingPostButton] Post button clicked');
     // TODO: 投稿作成画面への遷移を実装
-    // 現在は仮でデッキページに遷移
-    goto('/deck');
+    // 現在は機能未実装のため、アラートを表示
+    alert('投稿作成機能は現在開発中です');
+    
+    // 将来的には以下のような遷移を実装
+    // goto('/compose');
   };
 </script>
 
@@ -109,7 +114,7 @@
       {className}
     "
     onclick={handlePostClick}
-    aria-label={t('post.create')}
+    aria-label={t('navigation.compose')}
     aria-hidden={!shouldShow}
   >
     <!-- 投稿アイコン -->
@@ -118,7 +123,7 @@
         icon={ICONS.ADD}
         size="lg"
         color="white"
-        ariaLabel={t('post.create')}
+        ariaLabel={t('navigation.compose')}
         decorative={true}
       />
     </div>
@@ -137,6 +142,12 @@
 {/if}
 
 <style>
+  /* CSS変数定義 */
+  :root {
+    --button-bottom-offset: 5rem;
+    --button-right-offset: 1rem;
+  }
+
   /* フローティングボタンのアニメーション最適化 */
   button {
     /* GPU加速でスムーズなアニメーション */
@@ -180,20 +191,16 @@
     }
   }
   
-  /* モバイル特化の最適化 */
+  /* モバイル特化の最適化とセーフエリア対応 */
   @media (max-width: 767px) {
     button {
       /* モバイルでのタッチフィードバック最適化 */
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-    }
-  }
-  
-  /* セーフエリア対応 */
-  @media (max-width: 767px) {
-    button {
-      bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
-      right: calc(1rem + env(safe-area-inset-right, 0px));
+      
+      /* セーフエリア対応 */
+      bottom: calc(var(--button-bottom-offset, 5rem) + env(safe-area-inset-bottom, 0px));
+      right: calc(var(--button-right-offset, 1rem) + env(safe-area-inset-right, 0px));
     }
   }
 </style>
