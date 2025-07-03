@@ -13,6 +13,7 @@
   import AccountSwitcher from '$lib/components/AccountSwitcher.svelte';
   import PostCard from '$lib/components/PostCard.svelte';
   import InfiniteScroll from '$lib/components/timeline/InfiniteScroll.svelte';
+  import Refresher from '$lib/components/timeline/Refresher.svelte';
   import { ICONS } from '$lib/types/icon.js';
   import { deckStore } from '../store.svelte.js';
   import type { Column, ColumnWidth } from '../types.js';
@@ -575,6 +576,25 @@
   }
 
   /**
+   * Pull to Refresh処理
+   */
+  async function handlePullRefresh(event: { complete: () => Promise<void> }) {
+    try {
+      console.log('🔄 [DeckColumn] Pull to refresh triggered');
+      
+      // 既存のリフレッシュ機能を活用
+      await handleRefresh();
+      
+      console.log('✅ [DeckColumn] Pull to refresh completed');
+    } catch (error) {
+      console.error('❌ [DeckColumn] Pull to refresh failed:', error);
+    } finally {
+      // Refresherコンポーネントに完了通知
+      await event.complete();
+    }
+  }
+
+  /**
    * アカウント切り替え処理
    */
   async function handleAccountSelect(account: Account | 'all') {
@@ -800,7 +820,14 @@
     class="flex-1 overflow-y-auto overflow-x-hidden scrollbar-professional w-full min-w-0 max-w-full"
     bind:this={scrollElement}
   >
-    {#if posts.length > 0}
+    <Refresher 
+      onrefresh={handlePullRefresh}
+      refresherHeight={70}
+      pullMin={70}
+      pullMax={140}
+      disabled={isInitialLoading || isRefreshing}
+    >
+      {#if posts.length > 0}
       <!-- タイムライン表示 -->
       <div>
         {#each posts as post (post.uri)}
@@ -899,6 +926,7 @@
         </button>
       </div>
     {/if}
+    </Refresher>
   </div>
 </div>
 
