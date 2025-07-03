@@ -52,6 +52,17 @@
   let posts = $state<SimplePost[]>([]);
   let timelineError = $state<string | null>(null);
   let timelineErrorType = $state<TimelineErrorType | null>(null);
+  
+  // 無限スクロール関連の状態
+  let cursor = $state<string | undefined>(undefined);
+  let hasMore = $state(true);
+  let infiniteScrollLoading = $state(false);
+  let newPostsCount = $state(0);
+  
+  // 新しいポスト取得機能関連
+  let showNewPostsIndicator = $state(false);
+  let lastRefreshTime = $state<Date | null>(null);
+  let autoRefreshInterval: number | null = null;
 
   // ===================================================================
   // アバター表示用のロジック - アバターキャッシュ統合
@@ -219,12 +230,27 @@
       console.log('🎛️ [DeckColumn] Starting auto-load for column:', column.id);
       handleAutoLoad();
     }
+    
+    // 5分ごとの自動リフレッシュを設定（ホームタイムラインのみ）
+    if (column.algorithm === 'home') {
+      autoRefreshInterval = setInterval(() => {
+        if (!isRefreshing && !infiniteScrollLoading) {
+          handleSilentRefresh();
+        }
+      }, 5 * 60 * 1000); // 5分
+    }
   });
 
   onDestroy(() => {
     // クリーンアップ（コールバック経由）
     if (onScrollElementUpdate) {
       onScrollElementUpdate(column.id, undefined);
+    }
+    
+    // 自動リフレッシュタイマーをクリア
+    if (autoRefreshInterval) {
+      clearInterval(autoRefreshInterval);
+      autoRefreshInterval = null;
     }
   });
 
@@ -281,8 +307,8 @@
       isInitialLoading = true;
       console.log('🎛️ [DeckColumn] Auto-loading content for column:', column.id);
       
-      // handleRefreshと同じロジックを使用
-      await handleRefresh();
+      // 初期読み込みロジックを使用
+      await handleRefresh(false);
       
       console.log('🎛️ [DeckColumn] Auto-load completed for column:', column.id);
     } catch (error) {
@@ -298,16 +324,21 @@
   // ===================================================================
 
   /**
-   * タイムライン読み込み（ホームフィード対応）
+   * タイムライン読み込み（リフレッシュ・初期読み込み対応）
    */
-  async function handleRefresh() {
+  async function handleRefresh(isRefresh: boolean = false) {
     if (isRefreshing) return;
 
     try {
       isRefreshing = true;
       timelineError = null;
       timelineErrorType = null;
-      console.log('🎛️ [DeckColumn] Loading timeline for column:', column.id);
+      
+      console.log('🎛️ [DeckColumn] Loading timeline for column:', {
+        columnId: column.id,
+        isRefresh,
+        algorithm: column.algorithm
+      });
       
       // ホームフィードのみ対応（段階的実装）
       if (column.algorithm === 'home') {
@@ -326,12 +357,30 @@
           agentStatus: agent.status 
         });
         
-        // タイムラインデータを取得（Agent注入）
-        const timelineData = await timelineService.getTimeline(targetAccount, agent);
+        // キャッシュをクリア（一時的なデバッグ対応）
+        if (!isRefresh && !hasTriedAutoLoad) {
+          timelineService.clearAllCache();
+          console.log('🔧 [DeckColumn] Cleared timeline cache for fresh load');
+        }
+        
+        // 拡張されたタイムラインサービスを使用
+        const result = isRefresh 
+          ? await timelineService.refreshTimeline(targetAccount, agent, column.algorithm)
+          : await timelineService.getTimelineWithCursor(targetAccount, agent, {
+              algorithm: column.algorithm,
+              limit: 50
+            });
+        
+        console.log('📊 [DeckColumn] Timeline API result:', {
+          feedLength: result.feed.length,
+          hasMore: result.hasMore,
+          cursor: result.cursor ? 'present' : 'none',
+          total: result.total
+        });
         
         // SimplePost形式に変換
-        const simplePosts: SimplePost[] = timelineData.map((item: any) => {
-          const post = item.post || item; // AT Protocolの構造に対応
+        const simplePosts: SimplePost[] = result.feed.map((item: any) => {
+          const post = item.post || item;
           return {
             uri: post.uri,
             cid: post.cid,
@@ -343,13 +392,12 @@
             },
             text: post.record?.text || '',
             createdAt: post.record?.createdAt || post.indexedAt,
-            embed: post.embed,        // 埋め込みコンテンツ（単一）
-            embeds: post.embeds,      // 埋め込みコンテンツ（複数）
+            embed: post.embed,
+            embeds: post.embeds,
             replyCount: post.replyCount,
             repostCount: post.repostCount,
             likeCount: post.likeCount,
             indexedAt: post.indexedAt,
-            // リポスト情報のマッピング
             reason: item.reason ? {
               $type: item.reason.$type,
               by: {
@@ -363,98 +411,24 @@
           };
         });
         
-        // 重複URI排除処理（each_key_duplicate エラー対策）
-        const deduplicationMap = new Map<string, SimplePost>();
-        const embedStats = { 
-          withEmbed: 0, 
-          withEmbeds: 0, 
-          total: 0,
-          embedTypes: {} as Record<string, number>,
-          embedsTypes: {} as Record<string, number>,
-          sampleEmbeds: [] as any[]
-        };
+        // 状態を更新
+        posts = simplePosts;
+        cursor = result.cursor;
+        hasMore = result.hasMore;
         
-        for (const post of simplePosts) {
-          // 重複チェック：URIが既に存在しない場合のみ追加
-          if (!deduplicationMap.has(post.uri)) {
-            deduplicationMap.set(post.uri, post);
-            
-            // 埋め込み統計の収集
-            if (post.embed) {
-              embedStats.withEmbed++;
-              const embedType = post.embed.$type || 'unknown';
-              embedStats.embedTypes[embedType] = (embedStats.embedTypes[embedType] || 0) + 1;
-              
-              // サンプルデータの収集（最初の3つまで）
-              if (embedStats.sampleEmbeds.length < 3) {
-                embedStats.sampleEmbeds.push({
-                  type: 'embed',
-                  $type: embedType,
-                  data: post.embed,
-                  postUri: post.uri
-                });
-              }
-            }
-            
-            if (post.embeds && post.embeds.length > 0) {
-              embedStats.withEmbeds++;
-              for (const embed of post.embeds) {
-                const embedType = embed.$type || 'unknown';
-                embedStats.embedsTypes[embedType] = (embedStats.embedsTypes[embedType] || 0) + 1;
-              }
-              
-              // サンプルデータの収集（最初の3つまで）
-              if (embedStats.sampleEmbeds.length < 3) {
-                embedStats.sampleEmbeds.push({
-                  type: 'embeds',
-                  count: post.embeds.length,
-                  $types: post.embeds.map(e => e.$type),
-                  data: post.embeds,
-                  postUri: post.uri
-                });
-              }
-            }
-            
-            embedStats.total++;
-          }
+        if (isRefresh && result.newPostsCount !== undefined) {
+          newPostsCount = result.newPostsCount;
+          console.log('🔄 [DeckColumn] Refresh completed:', {
+            newPostsCount: result.newPostsCount,
+            totalPosts: posts.length
+          });
         }
         
-        // 順序を保持した重複排除済み配列
-        const deduplicatedPosts = Array.from(deduplicationMap.values());
-        
-        console.log('📋 [DeckColumn] Timeline deduplication stats:', {
-          originalCount: simplePosts.length,
-          deduplicatedCount: deduplicatedPosts.length,
-          duplicatesRemoved: simplePosts.length - deduplicatedPosts.length,
-          embedStats
+        console.log('✅ [DeckColumn] Timeline loaded:', {
+          posts: posts.length,
+          hasMore: result.hasMore,
+          cursor: result.cursor ? result.cursor.slice(0, 10) + '...' : 'none'
         });
-        
-        // 詳細なembed統計表示
-        if (embedStats.withEmbed > 0 || embedStats.withEmbeds > 0) {
-          console.log('🎯 [DeckColumn] EMBED DETAILS:', {
-            totalPostsWithEmbeds: embedStats.withEmbed + embedStats.withEmbeds,
-            singleEmbeds: embedStats.withEmbed,
-            multipleEmbeds: embedStats.withEmbeds,
-            embedTypeBreakdown: embedStats.embedTypes,
-            embedsTypeBreakdown: embedStats.embedsTypes,
-            sampleData: embedStats.sampleEmbeds
-          });
-        } else {
-          console.warn('⚠️ [DeckColumn] NO EMBED DATA FOUND in timeline!', {
-            totalPosts: embedStats.total,
-            checkedPosts: deduplicatedPosts.length,
-            samplePosts: deduplicatedPosts.slice(0, 3).map(p => ({
-              uri: p.uri,
-              hasEmbed: !!p.embed,
-              hasEmbeds: !!(p.embeds && p.embeds.length > 0),
-              embedType: p.embed?.$type,
-              embedsCount: p.embeds?.length || 0
-            }))
-          });
-        }
-        
-        posts = deduplicatedPosts;
-        console.log('✅ [DeckColumn] Timeline loaded:', posts.length, 'posts');
       } else {
         // 他のフィードタイプは後の段階で実装
         console.log('ℹ️ [DeckColumn] Feed type not yet supported:', column.algorithm);
@@ -464,21 +438,129 @@
       console.error('🎛️ [DeckColumn] Failed to load timeline:', error);
       
       if (error instanceof TimelineError) {
-        // TimelineErrorの場合、適切なメッセージを表示
         timelineError = error.message;
         timelineErrorType = error.type;
         
-        // セッション期限切れの場合は特別な処理
         if (error.type === TimelineErrorType.SESSION_EXPIRED) {
           console.warn('🎛️ [DeckColumn] Session expired, user needs to re-login');
         }
       } else {
-        // その他のエラー
         timelineError = error instanceof Error ? error.message : 'タイムラインの読み込みに失敗しました';
         timelineErrorType = null;
       }
     } finally {
       isRefreshing = false;
+    }
+  }
+
+  /**
+   * 無限スクロール用の追加読み込み
+   */
+  async function handleLoadMore() {
+    if (infiniteScrollLoading || !hasMore || !cursor) {
+      console.log('🔄 [DeckColumn] Load more skipped:', {
+        infiniteScrollLoading,
+        hasMore,
+        hasCursor: !!cursor
+      });
+      return;
+    }
+
+    try {
+      infiniteScrollLoading = true;
+      console.log('🔄 [DeckColumn] Loading more posts:', {
+        currentCount: posts.length,
+        cursor: cursor.slice(0, 10) + '...'
+      });
+      
+      const targetAccount = displayAccounts[0];
+      if (!targetAccount) {
+        throw new Error('No account available for load more');
+      }
+      
+      const agent = await agentManager.getAgent(targetAccount);
+      const result = await timelineService.loadMorePosts(
+        targetAccount, 
+        agent, 
+        cursor, 
+        column.algorithm
+      );
+      
+      // 新しいポストを既存のポストに追加
+      const newSimplePosts: SimplePost[] = result.feed.map((item: any) => {
+        const post = item.post || item;
+        return {
+          uri: post.uri,
+          cid: post.cid,
+          author: {
+            did: post.author.did,
+            handle: post.author.handle,
+            displayName: post.author.displayName,
+            avatar: post.author.avatar
+          },
+          text: post.record?.text || '',
+          createdAt: post.record?.createdAt || post.indexedAt,
+          embed: post.embed,
+          embeds: post.embeds,
+          replyCount: post.replyCount,
+          repostCount: post.repostCount,
+          likeCount: post.likeCount,
+          indexedAt: post.indexedAt,
+          reason: item.reason ? {
+            $type: item.reason.$type,
+            by: {
+              did: item.reason.by.did,
+              handle: item.reason.by.handle,
+              displayName: item.reason.by.displayName,
+              avatar: item.reason.by.avatar
+            },
+            indexedAt: item.reason.indexedAt
+          } : undefined
+        };
+      });
+      
+      // 重複除去を行いながら追加
+      const existingUris = new Set(posts.map(p => p.uri));
+      const uniqueNewPosts = newSimplePosts.filter(p => !existingUris.has(p.uri));
+      
+      posts = [...posts, ...uniqueNewPosts];
+      cursor = result.cursor;
+      hasMore = result.hasMore;
+      
+      console.log('✅ [DeckColumn] Load more completed:', {
+        newPosts: uniqueNewPosts.length,
+        totalPosts: posts.length,
+        hasMore: result.hasMore,
+        nextCursor: result.cursor ? result.cursor.slice(0, 10) + '...' : 'none'
+      });
+    } catch (error) {
+      console.error('🔄 [DeckColumn] Load more failed:', error);
+      
+      // エラーをInfiniteScrollコンポーネントで表示
+      if (error instanceof TimelineError) {
+        timelineError = error.message;
+        timelineErrorType = error.type;
+      } else {
+        timelineError = 'さらに読み込みに失敗しました';
+      }
+    } finally {
+      infiniteScrollLoading = false;
+    }
+  }
+
+  /**
+   * エラー時のリトライ処理
+   */
+  async function handleRetry() {
+    timelineError = null;
+    timelineErrorType = null;
+    
+    if (posts.length === 0) {
+      // 初期読み込みの再試行
+      await handleRefresh(false);
+    } else {
+      // 無限スクロールの再試行
+      await handleLoadMore();
     }
   }
 
@@ -531,6 +613,68 @@
    */
   function handleCloseAccountSwitcher() {
     showAccountSwitcher = false;
+  }
+
+  /**
+   * 手動リフレッシュ（新しいポスト取得）
+   */
+  async function handleManualRefresh() {
+    console.log('🔄 [DeckColumn] Manual refresh triggered');
+    
+    showNewPostsIndicator = false;
+    newPostsCount = 0;
+    
+    await handleRefresh(true);
+    lastRefreshTime = new Date();
+    
+    // 新しいポストが見つかった場合の通知
+    if (newPostsCount > 0) {
+      showNewPostsIndicator = true;
+      setTimeout(() => {
+        showNewPostsIndicator = false;
+      }, 3000); // 3秒後に非表示
+    }
+  }
+
+  /**
+   * サイレントリフレッシュ（バックグラウンド更新）
+   */
+  async function handleSilentRefresh() {
+    try {
+      console.log('🔄 [DeckColumn] Silent refresh triggered');
+      
+      const targetAccount = displayAccounts[0];
+      if (!targetAccount || column.algorithm !== 'home') {
+        return;
+      }
+      
+      const agent = await agentManager.getAgent(targetAccount);
+      const result = await timelineService.refreshTimeline(
+        targetAccount, 
+        agent, 
+        column.algorithm
+      );
+      
+      // 新しいポストが見つかった場合のみ通知
+      if (result.newPostsCount && result.newPostsCount > 0) {
+        newPostsCount = result.newPostsCount;
+        showNewPostsIndicator = true;
+        
+        console.log('🔔 [DeckColumn] New posts available:', {
+          newPostsCount: result.newPostsCount,
+          totalPosts: result.total
+        });
+      }
+    } catch (error) {
+      console.warn('🔄 [DeckColumn] Silent refresh failed (non-critical):', error);
+    }
+  }
+
+  /**
+   * 新しいポストインジケーターをクリックした時の処理
+   */
+  async function handleNewPostsClick() {
+    await handleManualRefresh();
   }
 </script>
 
@@ -608,6 +752,30 @@
 
     <!-- ヘッダーボタン -->
     <div class="flex items-center gap-1">
+      <!-- 新しいポスト通知 -->
+      {#if showNewPostsIndicator && newPostsCount > 0}
+        <button 
+          class="px-3 py-1 rounded-full bg-primary text-white text-xs font-medium transition-all hover:bg-primary/90 animate-pulse"
+          onclick={handleNewPostsClick}
+          aria-label="新しいポストを表示"
+          title="{newPostsCount}件の新しいポスト"
+        >
+          +{newPostsCount}
+        </button>
+      {/if}
+      
+      <!-- リフレッシュボタン -->
+      <button 
+        class="w-8 h-8 rounded flex items-center justify-center transition-colors hover:bg-muted/20"
+        class:animate-spin={isRefreshing}
+        onclick={handleManualRefresh}
+        disabled={isRefreshing || infiniteScrollLoading}
+        aria-label="タイムラインを更新"
+        title="新しいポストを取得"
+      >
+        <Icon icon={ICONS.REFRESH} size="sm" color="themed" />
+      </button>
+      
       <!-- デッキ設定ボタン -->
       {#if onOpenDeckSettings}
         <button 
@@ -637,6 +805,18 @@
         {#each posts as post (post.uri)}
           <PostCard {post} columnWidth={column.settings.width} />
         {/each}
+        
+        <!-- 無限スクロールトリガー -->
+        <InfiniteScroll 
+          {hasMore}
+          isLoading={infiniteScrollLoading}
+          error={timelineError}
+          threshold={200}
+          debounceMs={300}
+          enableDebugLogs={false}
+          onLoadMore={handleLoadMore}
+          onRetry={handleRetry}
+        />
       </div>
     {:else if isInitialLoading}
       <!-- 初期読み込み中状態 -->
@@ -689,10 +869,10 @@
           {:else}
             <button 
               class="button-primary text-sm px-4 py-2"
-              onclick={handleRefresh}
-              disabled={isRefreshing}
+              onclick={handleRetry}
+              disabled={isRefreshing || infiniteScrollLoading}
             >
-              {isRefreshing ? '読み込み中...' : '再試行'}
+              {isRefreshing || infiniteScrollLoading ? '読み込み中...' : '再試行'}
             </button>
           {/if}
         </div>
@@ -711,10 +891,10 @@
         </p>
         <button 
           class="button-primary text-sm px-4 py-2"
-          onclick={handleRefresh}
-          disabled={isRefreshing}
+          onclick={() => handleRefresh(false)}
+          disabled={isRefreshing || infiniteScrollLoading}
         >
-          {isRefreshing ? m['deck.column.loading']() : m['deck.column.loadContent']()}
+          {isRefreshing || infiniteScrollLoading ? m['deck.column.loading']() : m['deck.column.loadContent']()}
         </button>
       </div>
     {/if}
