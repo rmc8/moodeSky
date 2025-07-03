@@ -17,6 +17,16 @@ export interface PostAuthor {
 }
 
 /**
+ * リポスト理由情報
+ * AT Protocol app.bsky.feed.defs#reasonRepost準拠
+ */
+export interface RepostReason {
+  $type: 'app.bsky.feed.defs#reasonRepost';
+  by: PostAuthor;
+  indexedAt: string;
+}
+
+/**
  * 投稿の基本情報
  */
 export interface SimplePost {
@@ -39,6 +49,9 @@ export interface SimplePost {
   replyCount?: number;
   repostCount?: number;
   likeCount?: number;
+  
+  // リポスト情報（リポストされた投稿の場合のみ）
+  reason?: RepostReason;
   
   // インデックス日時
   indexedAt: string;

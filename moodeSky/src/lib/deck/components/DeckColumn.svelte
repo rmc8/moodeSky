@@ -348,7 +348,18 @@
             replyCount: post.replyCount,
             repostCount: post.repostCount,
             likeCount: post.likeCount,
-            indexedAt: post.indexedAt
+            indexedAt: post.indexedAt,
+            // リポスト情報のマッピング
+            reason: item.reason ? {
+              $type: item.reason.$type,
+              by: {
+                did: item.reason.by.did,
+                handle: item.reason.by.handle,
+                displayName: item.reason.by.displayName,
+                avatar: item.reason.by.avatar
+              },
+              indexedAt: item.reason.indexedAt
+            } : undefined
           };
         });
         
