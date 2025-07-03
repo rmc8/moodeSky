@@ -103,46 +103,27 @@
   const validEmbeds = $derived(() => {
     const normalized = normalizedEmbeds();
     
-    if (debug) {
-      console.log('🔍 [EmbedRenderer] Starting validation:', {
-        embeds: embeds,
-        embedsType: Array.isArray(embeds) ? `Array(${embeds.length})` : typeof embeds,
-        normalized: normalized,
-        normalizedCount: normalized.length
-      });
-    }
     
     return normalized.filter((embed, index) => {
       try {
         if (!embed || typeof embed !== 'object') {
-          if (debug) console.warn(`🚫 [EmbedRenderer] Embed ${index} is not a valid object:`, { embed, type: typeof embed });
           return false;
         }
         
         // より緩和された基本的な検証
         if (!(embed as any).$type || typeof (embed as any).$type !== 'string') {
-          if (debug) console.warn(`🚫 [EmbedRenderer] Embed ${index} missing $type:`, { embed, hasType: !!(embed as any).$type, type: (embed as any).$type });
           return false;
         }
         
         // 基本的なAT Protocol埋め込みタイプかどうかチェック
         const isValidType = (embed as any).$type.startsWith('app.bsky.embed.');
         if (!isValidType) {
-          if (debug) console.warn(`🚫 [EmbedRenderer] Embed ${index} invalid $type:`, { embed, type: (embed as any).$type });
           return false;
         }
         
-        if (debug) {
-          console.log(`✅ [EmbedRenderer] Embed ${index} passed validation:`, { 
-            type: (embed as any).$type, 
-            hasValidStructure: !!embed,
-            embedKeys: Object.keys(embed)
-          });
-        }
         
         return true;
       } catch (error) {
-        if (debug) console.error(`❌ [EmbedRenderer] Error validating embed ${index}:`, { error, embed });
         if (onError) {
           onError(error as Error, embed);
         }
@@ -156,15 +137,9 @@
     try {
       const embedType = getEmbedType(embed);
       
-      if (debug) {
-        console.log(`Rendering embed ${index} of type: ${embedType}`, embed);
-      }
       
       return { type: embedType, embed, error: null };
     } catch (error) {
-      if (debug) {
-        console.error(`Error processing embed ${index}:`, error, embed);
-      }
       if (onError) {
         onError(error as Error, embed);
       }
@@ -223,16 +198,6 @@
 <!-- 埋め込みレンダラーコンテナ -->
 {#if validEmbeds().length > 0}
   <div class="w-full {additionalClass}">
-    <!-- デバッグ情報 -->
-    {#if debug && embedStats()}
-      <div class="mb-2 p-2 bg-muted/10 rounded text-xs text-secondary">
-        <strong>Embed Debug:</strong>
-        Total: {embedStats()?.total}, Valid: {embedStats()?.valid}
-        {#if embedStats()?.types && Object.keys(embedStats()?.types || {}).length > 0}
-          | Types: {Object.entries(embedStats()?.types || {}).map(([type, count]) => `${type}(${count})`).join(', ')}
-        {/if}
-      </div>
-    {/if}
 
     <!-- 埋め込みコンテンツ -->
     <div class="space-y-3">

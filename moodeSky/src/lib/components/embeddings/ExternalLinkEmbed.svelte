@@ -40,7 +40,7 @@
 
   // 外部リンクデータの正規化（embed vs embedView の違いを吸収）
   const linkData = $derived(() => {
-    const result = {
+    return {
       uri: embed.external.uri,
       title: embed.external.title || 'Untitled',
       description: embed.external.description || '',
@@ -48,15 +48,6 @@
         ? (typeof embed.external.thumb === 'string' ? embed.external.thumb : '#')
         : undefined
     };
-    
-    console.log('🔗 [ExternalLinkEmbed] Link data parsed:', {
-      hasThumb: !!result.thumb,
-      thumbUrl: result.thumb,
-      title: result.title,
-      description: result.description?.slice(0, 50) + '...'
-    });
-    
-    return result;
   });
 
   // ドメイン名を抽出
@@ -96,33 +87,14 @@
 
   // 画像読み込み完了ハンドラー
   const handleImageLoad = (event: Event) => {
-    console.log('🖼️ [ExternalLinkEmbed] Image loaded successfully:', {
-      url: linkData().thumb,
-      imageLoaded: imageLoaded,
-      imageError: imageError
-    });
     imageLoaded = true;
     imageError = false;
-    console.log('🖼️ [ExternalLinkEmbed] State after load:', {
-      imageLoaded: imageLoaded,
-      imageError: imageError
-    });
   };
 
   // 画像読み込みエラーハンドラー
   const handleImageError = (event: Event) => {
-    console.log('🚫 [ExternalLinkEmbed] Image load error:', {
-      url: linkData().thumb,
-      error: event,
-      imageLoaded: imageLoaded,
-      imageError: imageError
-    });
     imageLoaded = false;
     imageError = true;
-    console.log('🚫 [ExternalLinkEmbed] State after error:', {
-      imageLoaded: imageLoaded,
-      imageError: imageError
-    });
   };
 
   // タイトルとディスクリプションの切り詰め
