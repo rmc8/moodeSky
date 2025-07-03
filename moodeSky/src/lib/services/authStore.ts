@@ -1470,7 +1470,9 @@ export class AuthService {
    * セッション復元・更新
    * 既存セッションを検証し、統計情報も更新
    */
-  async refreshSession(accountId?: string): Promise<AuthResult<Account | Account[]>> {
+  async refreshSession(): Promise<AuthResult<Account[]>>;
+  async refreshSession(accountId: string): Promise<AuthResult<Account | null>>;
+  async refreshSession(accountId?: string): Promise<AuthResult<Account | Account[] | null>> {
     try {
       // 特定のアカウントまたは全アカウントを対象とする
       const accountsResult = accountId 
@@ -1481,7 +1483,7 @@ export class AuthService {
         return {
           success: false,
           error: accountsResult.error,
-        } as AuthResult<Account | Account[]>;
+        } as AuthResult<Account | Account[] | null>;
       }
 
       const accounts = Array.isArray(accountsResult.data) 
@@ -1492,7 +1494,7 @@ export class AuthService {
         return {
           success: true,
           data: accountId ? null : [],
-        } as AuthResult<Account | Account[]>;
+        } as AuthResult<Account | Account[] | null>;
       }
 
       const { BskyAgent } = await import('@atproto/api');
@@ -1551,7 +1553,7 @@ export class AuthService {
       }
 
       const result = accountId ? refreshedAccounts[0] || null : refreshedAccounts;
-      return { success: true, data: result } as AuthResult<Account | Account[]>;
+      return { success: true, data: result } as AuthResult<Account | Account[] | null>;
     } catch (error) {
       console.error('🔄 [AuthService] セッション復元処理中にエラー:', error);
       return {
@@ -1562,6 +1564,66 @@ export class AuthService {
         },
       };
     }
+  }
+
+  /**
+   * アカウントを追加（テスト用エイリアス）
+   */
+  async addAccount(account: Account): Promise<AuthResult<Account>> {
+    if (!account.session) {
+      return {
+        success: false,
+        error: {
+          type: 'AUTH_FAILED',
+          message: 'Account session is required'
+        }
+      };
+    }
+
+    return await this.saveAccount(
+      account.service,
+      account.session,
+      account.profile
+    );
+  }
+
+  /**
+   * アカウントを取得（テスト用エイリアス）
+   */
+  async getAccount(accountId: string): Promise<AuthResult<Account | null>> {
+    return await this.getAccountById(accountId);
+  }
+
+  /**
+   * 全セッションをリフレッシュ
+   */
+  async refreshAllSessions(): Promise<AuthResult<Account[]>> {
+    try {
+      const result = await this.refreshSession();
+      if (!result.success) {
+        return result as AuthResult<Account[]>;
+      }
+      
+      return {
+        success: true,
+        data: Array.isArray(result.data) ? result.data : (result.data ? [result.data] : [])
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          type: 'SESSION_EXPIRED',
+          message: `Failed to refresh all sessions: ${error}`
+        }
+      };
+    }
+  }
+
+  /**
+   * アカウント削除（テスト用エイリアス）
+   */
+  async removeAccount(accountId: string): Promise<AuthResult> {
+    return await this.deleteAccount(accountId);
   }
 
   /**
@@ -1663,10 +1725,10 @@ export class AuthService {
             errorMessage = 'Too many authentication attempts';
             break;
           default:
-            errorMessage = error.message || 'Reauthentication failed';
+            errorMessage = error instanceof Error ? error.message : 'Reauthentication failed';
         }
       } else if (error?.message) {
-        errorMessage = error.message;
+        errorMessage = error instanceof Error ? error.message : 'Unknown error';
       }
 
       return {

@@ -360,7 +360,7 @@ export class Logger {
    * エラー用ヘルパー
    */
   logError(error: Error, operation: string, context: LogContext = {}): void {
-    this.error(`Error in ${operation}: ${error.message}`, {
+    this.error(`Error in ${operation}: ${error instanceof Error ? error.message : 'Unknown error'}`, {
       ...context,
       operation,
       errorCode: error.name

@@ -73,6 +73,10 @@ jobs:
         with:
           workspaces: './moodeSky/src-tauri'
 
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+        continue-on-error: true
+
       - name: Rust format check (basic)
         run: cargo fmt --all -- --check
 

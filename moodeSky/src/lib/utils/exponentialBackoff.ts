@@ -140,7 +140,7 @@ export class ExponentialBackoff {
    * HTTPレスポンス用のリトライ判定
    */
   static isRetryableHttpError(error: Error): boolean {
-    const message = error.message.toLowerCase();
+    const message = (error instanceof Error ? error.message : '').toLowerCase();
     
     // ネットワークエラー
     if (message.includes('network') || message.includes('fetch')) {
@@ -169,7 +169,7 @@ export class ExponentialBackoff {
    * AT Protocol用のリトライ判定
    */
   static isRetryableATProtoError(error: Error): boolean {
-    const message = error.message.toLowerCase();
+    const message = (error instanceof Error ? error.message : '').toLowerCase();
     
     // AT Protocol固有のリトライ可能エラー
     if (message.includes('ratelimitexceeded')) {

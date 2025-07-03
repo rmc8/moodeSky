@@ -255,7 +255,7 @@ export class AvatarCacheErrorFactory {
       let isRetryable = false;
 
       // エラーメッセージから種類を推定
-      const message = error.message.toLowerCase();
+      const message = (error instanceof Error ? error.message : '').toLowerCase();
       
       if (message.includes('network') || message.includes('fetch')) {
         type = AvatarCacheErrorType.NETWORK_ERROR;
@@ -272,7 +272,7 @@ export class AvatarCacheErrorFactory {
       }
 
       return new AvatarCacheError(
-        error.message,
+        error instanceof Error ? error.message : 'Unknown error',
         type,
         AvatarCacheErrorSeverity.MEDIUM,
         {

@@ -1,0 +1,33 @@
+{
+  "hooks": {
+    "BeforeToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/typecheck.sh",
+            "description": "Run TypeScript type check before file modifications"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/desktop-notify.js",
+            "description": "Send desktop notification when task completes"
+          },
+          {
+            "type": "command", 
+            "command": ".claude/hooks/discord-notify.js",
+            "description": "Send Discord webhook notification when task completes"
+          }
+        ]
+      }
+    ]
+  }
+}

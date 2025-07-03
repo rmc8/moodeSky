@@ -14,12 +14,14 @@ TEST_RESULTS.md
 test-*.mjs
 test-*.js
 test-*.ts
+!src/test-setup.ts
 *-test.js
 *-test.mjs
 
 # Test routes and utilities  
 src/routes/test-*/
 src/**/test-*
+!src/test-setup.ts
 src/**/*TestUtils.ts
 src/**/*-test-utils.ts
 
