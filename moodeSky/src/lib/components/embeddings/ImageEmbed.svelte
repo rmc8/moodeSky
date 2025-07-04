@@ -328,13 +328,6 @@
     </div>
   {/if}
   
-  {#if images().length > 2 && displayOptions.showImageCount !== false && maxImages > 1}
-    <div class="mt-2 text-center">
-      <span class="text-secondary text-sm">
-        {images().length} 枚の画像
-      </span>
-    </div>
-  {/if}
 </div>
 
 <!--
