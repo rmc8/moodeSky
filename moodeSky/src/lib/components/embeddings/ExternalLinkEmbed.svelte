@@ -9,6 +9,8 @@
   import { ICONS } from '$lib/types/icon.js';
   import type { ExternalEmbed, ExternalEmbedView, EmbedDisplayOptions } from './types.js';
   import { DEFAULT_EMBED_DISPLAY_OPTIONS } from './types.js';
+  import Youtube from 'svelte-youtube-embed';
+  import { isYouTubeUrl, extractYouTubeId } from '$lib/utils/youtubeUtils.js';
 
   interface Props {
     /** 外部リンク埋め込みデータ */
@@ -48,6 +50,12 @@
         ? (typeof embed.external.thumb === 'string' ? embed.external.thumb : '#')
         : undefined
     };
+  });
+
+  // YouTube動画判定とVideo ID抽出
+  const isYouTube = $derived(() => isYouTubeUrl(linkData().uri));
+  const youtubeVideoId = $derived(() => {
+    return isYouTube() ? extractYouTubeId(linkData().uri) : null;
   });
 
   // ドメイン名を抽出
@@ -117,7 +125,45 @@
   class="w-full {additionalClass}"
   style="{displayOptions.maxWidth ? `max-width: ${displayOptions.maxWidth}px;` : ''}"
 >
-  <!-- リンクプレビューカード -->
+  {#if isYouTube() && youtubeVideoId}
+    <!-- YouTube動画埋め込み（動画+URL情報） -->
+    <div class="bg-card border border-subtle {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden {displayOptions.shadow ? 'shadow-sm' : ''}">
+      <!-- YouTube動画プレイヤー -->
+      <Youtube 
+        id={youtubeVideoId()} 
+        altThumb={true}
+        animations={true}
+        thumbnail=""
+        play_button=""
+      />
+      
+      <!-- 動画情報セクション -->
+      <div class="p-3 border-t border-subtle bg-muted/5">
+        <div class="space-y-1">
+          <!-- 動画タイトル -->
+          <h3 class="font-medium text-themed text-sm leading-tight line-clamp-2">
+            {truncateText(linkData().title, 80)}
+          </h3>
+          
+          <!-- 説明文 -->
+          {#if linkData().description}
+            <p class="text-secondary text-xs leading-relaxed line-clamp-2">
+              {truncateText(linkData().description, 120)}
+            </p>
+          {/if}
+          
+          <!-- ドメイン -->
+          <div class="flex items-center gap-1 mt-2">
+            <Icon icon={ICONS.LANGUAGE} size="xs" color="inactive" />
+            <span class="text-inactive text-xs truncate">
+              {domain()}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  {:else}
+    <!-- 通常のリンクプレビューカード -->
   <div
     class="group border-subtle bg-card hover:bg-muted/5 transition-colors cursor-pointer {displayOptions.rounded ? 'rounded-lg' : ''} overflow-hidden {displayOptions.shadow ? 'shadow-sm hover:shadow-md' : ''}"
     role="button"
@@ -233,6 +279,7 @@
       </div>
     {/if}
   </div>
+  {/if}
 </div>
 
 <!--
@@ -286,6 +333,7 @@
   .group:hover img {
     transform: scale(1.05);
   }
+
   
   /* フォーカス状態の視覚化 */
   [role="button"]:focus-visible {
