@@ -138,7 +138,14 @@
       />
       
       <!-- 動画情報セクション -->
-      <div class="p-3 border-t border-subtle bg-muted/5">
+      <div 
+        class="p-3 border-t border-subtle bg-muted/5 cursor-pointer hover:bg-muted/10 transition-colors"
+        onclick={handleLinkClick}
+        onkeydown={handleKeyDown}
+        role="button"
+        tabindex="0"
+        aria-label="YouTube動画を新しいタブで開く: {linkData().title}"
+      >
         <div class="space-y-1">
           <!-- 動画タイトル -->
           <h3 class="font-medium text-themed text-sm leading-tight line-clamp-2">
@@ -211,10 +218,6 @@
             </div>
           {/if}
           
-          <!-- 外部リンクアイコンオーバーレイ -->
-          <div class="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center">
-            <Icon icon={ICONS.OPEN_IN_NEW} size="xs" color="white" />
-          </div>
         </div>
         
         <!-- テキストコンテンツ -->
@@ -263,10 +266,6 @@
               </div>
             </div>
             
-            <!-- 外部リンクアイコン -->
-            <div class="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-              <Icon icon={ICONS.OPEN_IN_NEW} size="sm" color="secondary" />
-            </div>
           </div>
           
           <!-- 説明文 -->
