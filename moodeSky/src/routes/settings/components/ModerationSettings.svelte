@@ -341,7 +341,9 @@
                         content: '投稿本文',
                         hashtags: 'ハッシュタグ',
                         mentions: 'メンション',
-                        'alt-text': '画像説明'
+                        'alt-text': '画像説明',
+                        'display-name': '表示名',
+                        'bio': 'プロフィール文'
                       })[t]).join(', ')}
                     </div>
                   </div>

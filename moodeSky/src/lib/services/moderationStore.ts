@@ -341,7 +341,7 @@ export class ModerationStoreService {
   async removeMutedKeyword(id: string): Promise<ModerationResult> {
     const settingsResult = await this.loadModerationSettings();
     if (!settingsResult.success) {
-      return settingsResult;
+      return settingsResult as ModerationResult;
     }
 
     const settings = settingsResult.data!;
@@ -367,7 +367,7 @@ export class ModerationStoreService {
   async updateLabelModeration(label: ContentLabel, action: ModerationAction, enabled: boolean): Promise<ModerationResult> {
     const settingsResult = await this.loadModerationSettings();
     if (!settingsResult.success) {
-      return settingsResult;
+      return settingsResult as ModerationResult;
     }
 
     const settings = settingsResult.data!;

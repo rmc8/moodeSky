@@ -42,7 +42,7 @@
   let filterResult = $state<FilterResult | null>(null);
   let isFiltering = $state(false);
   let filterError = $state<string | null>(null);
-  let filteringTimeoutId: number | null = null;
+  let filteringTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   // デバウンス機能付きフィルタリング実行
   const debouncedPerformFiltering = () => {

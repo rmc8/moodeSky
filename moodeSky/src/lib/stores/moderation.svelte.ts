@@ -338,7 +338,7 @@ class ModerationStore {
   async refreshStats(): Promise<void> {
     try {
       const result = await moderationStoreService.getStats();
-      if (result.success) {
+      if (result.success && result.data !== undefined) {
         this.stats = result.data;
       }
     } catch (error) {

@@ -165,13 +165,15 @@
   }
 
   // SimplePost を AtProtoPost 形式に変換（モデレーション用）
-  const atProtoPost = $derived<AtProtoPost>(() => ({
+  const atProtoPost = $derived(() => ({
     uri: post.uri,
     cid: post.cid || '',
     record: {
       text: post.text,
       createdAt: post.createdAt,
-      facets: post.facets,
+      facets: post.facets?.map(facet => ({
+        features: (facet as any).features || []
+      })),
       embed: post.embed
     },
     author: {
@@ -179,9 +181,15 @@
       handle: post.author.handle,
       displayName: post.author.displayName
     },
-    labels: post.labels,
-    embed: post.embed
-  }));
+    labels: post.labels?.map(label => ({ val: label })),
+    embed: post.embed ? {
+      images: (post.embed as any)?.images?.map((img: any) => ({ alt: img.alt })),
+      external: (post.embed as any)?.external ? {
+        title: (post.embed as any).external.title,
+        description: (post.embed as any).external.description
+      } : undefined
+    } : undefined
+  } as AtProtoPost));
 
   // フィルタリング完了時のコールバック
   function handleFilterComplete(filterResult: any) {
