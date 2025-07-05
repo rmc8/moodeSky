@@ -42,29 +42,50 @@
   let filterResult = $state<FilterResult | null>(null);
   let isFiltering = $state(false);
   let filterError = $state<string | null>(null);
+  let filteringTimeoutId: number | null = null;
+
+  // デバウンス機能付きフィルタリング実行
+  const debouncedPerformFiltering = () => {
+    // 既存のタイマーをクリア
+    if (filteringTimeoutId !== null) {
+      clearTimeout(filteringTimeoutId);
+    }
+
+    // 新しいタイマーを設定（50ms後に実行）
+    filteringTimeoutId = setTimeout(() => {
+      performFiltering();
+      filteringTimeoutId = null;
+    }, 50);
+  };
 
   // フィルタリング実行
   const performFiltering = async () => {
+    // 既に処理中の場合は早期リターン（競合防止）
+    if (isFiltering) {
+      return;
+    }
+
     if (disableFiltering) {
       filterResult = null;
       return;
     }
 
-    // モデレーションストアが初期化されていない場合は初期化
-    if (!moderationStore.isInitialized) {
-      await moderationStore.initialize();
-    }
-
-    // フィルタリングが無効な場合はスキップ
-    if (!moderationStore.isFilteringActive) {
-      filterResult = null;
-      return;
-    }
-
+    // 早期にフラグを設定（競合防止）
     isFiltering = true;
     filterError = null;
 
     try {
+      // モデレーションストアが初期化されていない場合は初期化
+      if (!moderationStore.isInitialized) {
+        await moderationStore.initialize();
+      }
+
+      // フィルタリングが無効な場合はスキップ
+      if (!moderationStore.isFilteringActive) {
+        filterResult = null;
+        return;
+      }
+
       filterResult = await filterPost(post);
       
       // コールバックを実行
@@ -81,25 +102,23 @@
         });
       }
     } catch (error) {
-      filterError = `フィルタリングエラー: ${error}`;
-      console.error('Post filtering error:', error);
+      filterError = `フィルタリングエラー: ${error instanceof Error ? error.message : String(error)}`;
+      console.error('Post filtering error:', { error, postUri: post.uri });
     } finally {
       isFiltering = false;
     }
   };
 
-  // 投稿が変更された時にフィルタリングを再実行
+  // 統合された$effect（重複実行防止）
   $effect(() => {
-    performFiltering();
-  });
+    // 投稿データ・設定・初期化状態の変更を監視
+    const currentPost = post;
+    const settings = moderationStore.settings;
+    const isInitialized = moderationStore.isInitialized;
+    const filteringActive = moderationStore.isFilteringActive;
 
-  // モデレーション設定が変更された時にフィルタリングを再実行
-  $effect(() => {
-    // 設定変更を監視
-    moderationStore.settings;
-    if (moderationStore.isInitialized && !isFiltering) {
-      performFiltering();
-    }
+    // デバウンス機能付きで実行
+    debouncedPerformFiltering();
   });
 
   // フィルタリング統計情報（デバッグ用）

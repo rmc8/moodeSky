@@ -226,8 +226,9 @@
           
           <!-- キーワード入力 -->
           <div class="mb-3">
-            <label class="block text-sm font-medium text-themed mb-1">キーワード</label>
+            <label for="new-keyword" class="block text-sm font-medium text-themed mb-1">キーワード</label>
             <input
+              id="new-keyword"
               type="text"
               bind:value={newKeyword}
               placeholder="ミュートしたいキーワードを入力"
@@ -238,9 +239,9 @@
 
           <!-- マッチング種類 -->
           <div class="mb-3">
-            <label class="block text-sm font-medium text-themed mb-1">マッチング方法</label>
+            <label for="new-keyword-type" class="block text-sm font-medium text-themed mb-1">マッチング方法</label>
             <div class="custom-select">
-              <select bind:value={newKeywordType} disabled={isLoading}>
+              <select id="new-keyword-type" bind:value={newKeywordType} disabled={isLoading}>
                 <option value="partial">部分一致</option>
                 <option value="exact">完全一致</option>
                 <option value="regex">正規表現</option>
@@ -250,8 +251,8 @@
           </div>
 
           <!-- 対象範囲 -->
-          <div class="mb-3">
-            <label class="block text-sm font-medium text-themed mb-2">対象範囲</label>
+          <fieldset class="mb-3">
+            <legend class="block text-sm font-medium text-themed mb-2">対象範囲</legend>
             <div class="grid grid-cols-2 gap-2">
               {#each [
                 ['content', '投稿本文'],
@@ -271,7 +272,7 @@
                 </label>
               {/each}
             </div>
-          </div>
+          </fieldset>
 
           <!-- オプション -->
           <div class="mb-4">

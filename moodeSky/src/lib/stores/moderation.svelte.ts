@@ -33,16 +33,40 @@ class ModerationStore {
   /** 設定変更中フラグ */
   isUpdating = $state<boolean>(false);
 
+  /** 初期化処理のPromiseキャッシュ（シングルトン化） */
+  private initializationPromise: Promise<void> | null = null;
+
   constructor() {}
 
   /**
-   * ストアを初期化
+   * ストアを初期化（シングルトン化で重複実行防止）
    */
   async initialize(): Promise<void> {
+    // 既に初期化済みの場合は早期リターン
     if (this.isInitialized) {
       return;
     }
 
+    // 進行中の初期化があれば同じPromiseを返す（競合防止）
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+
+    // 初期化Promiseを作成・キャッシュ
+    this.initializationPromise = this.doInitialize();
+
+    try {
+      await this.initializationPromise;
+    } finally {
+      // 完了後にPromiseキャッシュをクリア
+      this.initializationPromise = null;
+    }
+  }
+
+  /**
+   * 実際の初期化処理
+   */
+  private async doInitialize(): Promise<void> {
     this.isLoading = true;
     this.error = null;
 
@@ -63,6 +87,7 @@ class ModerationStore {
     } catch (error) {
       this.error = `Failed to initialize moderation store: ${error}`;
       console.error('Moderation store initialization error:', error);
+      throw error; // 呼び出し元にエラーを伝播
     } finally {
       this.isLoading = false;
     }
