@@ -19,6 +19,7 @@
   import ThemeSettings from './components/ThemeSettings.svelte';
   import LanguageSettings from './components/LanguageSettings.svelte';
   import AccountSettings from './components/AccountSettings.svelte';
+  import ModerationSettings from './components/ModerationSettings.svelte';
   
   // ===================================================================
   // 状態管理
@@ -31,7 +32,7 @@
   let isLoading = $state(true);
   let errorMessage = $state('');
   let currentPath = $state($page.url.pathname);
-  let activeSection = $state<'theme' | 'language' | 'account' | 'notifications'>('theme');
+  let activeSection = $state<'theme' | 'language' | 'account' | 'moderation' | 'notifications'>('theme');
 
   // 現在のパスを監視
   $effect(() => {
@@ -159,6 +160,17 @@
               {t('settings.tabs.account')}
             </button>
             <button
+              class="px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
+              class:bg-primary={activeSection === 'moderation'}
+              class:text-[var(--color-background)]={activeSection === 'moderation'}
+              class:text-themed={activeSection !== 'moderation'}
+              class:hover:bg-muted={activeSection !== 'moderation'}
+              onclick={() => switchSection('moderation')}
+            >
+              <Icon icon={ICONS.PAN_TOOL} size="sm" class={activeSection === 'moderation' ? '!text-[var(--color-background)]' : 'text-themed'} />
+              モデレーション
+            </button>
+            <button
               class="px-4 py-2 rounded-md text-sm font-medium transition-colors opacity-50 cursor-not-allowed flex items-center gap-2"
               disabled
             >
@@ -176,6 +188,8 @@
             <LanguageSettings />
           {:else if activeSection === 'account'}
             <AccountSettings />
+          {:else if activeSection === 'moderation'}
+            <ModerationSettings />
           {:else if activeSection === 'notifications'}
             <!-- 通知設定（準備中） -->
             <div class="max-w-4xl mx-auto text-center py-12">

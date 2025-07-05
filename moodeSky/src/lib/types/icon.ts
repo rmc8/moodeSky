@@ -196,6 +196,24 @@ export const ICONS = {
   // 設定・スケジュール
   SCHEDULE: 'material-symbols:schedule',
   ANIMATION: 'material-symbols:animation',
+  
+  // モデレーション・セキュリティ
+  PAN_TOOL: 'material-symbols:pan-tool',
+  SHIELD: 'material-symbols:shield',
+  BLOCK: 'material-symbols:block',
+  
+  // 統計・分析
+  BAR_CHART: 'material-symbols:bar-chart',
+  ANALYTICS: 'material-symbols:analytics',
+  
+  // その他のUI要素
+  PLUS: 'material-symbols:add',
+  MINUS: 'material-symbols:remove',
+  X: 'material-symbols:close',
+  TRASH: 'material-symbols:delete',
+  EYE: 'material-symbols:visibility',
+  EYE_OFF: 'material-symbols:visibility-off',
+  CALENDAR: 'material-symbols:calendar-today',
 } as const;
 
 /**
