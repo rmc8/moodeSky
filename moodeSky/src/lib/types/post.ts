@@ -50,6 +50,9 @@ export interface SimplePost {
   embed?: Embed | EmbedView;
   embeds?: (Embed | EmbedView)[];
   
+  // モデレーションラベル
+  labels?: string[];
+  
   // 基本統計
   replyCount?: number;
   repostCount?: number;

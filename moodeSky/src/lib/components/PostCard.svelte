@@ -1,7 +1,8 @@
 <!--
   PostCard.svelte
-  シンプルなポスト表示カード
+  シンプルなポスト表示カード（モデレーション対応）
   段階的実装: 作者名、テキスト、日時、アクションボタン、埋め込みコンテンツ
+  コンテンツフィルタリング機能統合
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
@@ -10,18 +11,33 @@
   import RepostBadge from './post/RepostBadge.svelte';
   import EmbedRenderer from './embeddings/EmbedRenderer.svelte';
   import RichText from './post/RichText.svelte';
+  import PostFilter from './moderation/PostFilter.svelte';
   import { formatRelativeTime, formatAbsoluteTime } from '$lib/utils/relativeTime.js';
   import { ICONS } from '$lib/types/icon.js';
   import type { SimplePost } from '$lib/types/post.js';
   import type { ColumnWidth } from '$lib/deck/types.js';
+  import type { AtProtoPost } from '$lib/utils/contentFilter.js';
   
   interface Props {
     post: SimplePost;
     class?: string;
     columnWidth?: ColumnWidth;
+    /** モデレーション機能を無効にする */
+    disableModeration?: boolean;
+    /** モデレーション設定上書き許可 */
+    allowModerationOverride?: boolean;
+    /** デバッグモード */
+    debugModeration?: boolean;
   }
   
-  const { post, class: className = '', columnWidth }: Props = $props();
+  const { 
+    post, 
+    class: className = '', 
+    columnWidth, 
+    disableModeration = false,
+    allowModerationOverride = true,
+    debugModeration = false 
+  }: Props = $props();
   
   // モバイル判定用
   let windowWidth = $state(typeof window !== 'undefined' ? window.innerWidth : 1024);
@@ -147,14 +163,61 @@
     console.log('Navigate to repost user profile:', did, handle);
     // TODO: プロフィールページへのナビゲーション実装
   }
+
+  // SimplePost を AtProtoPost 形式に変換（モデレーション用）
+  const atProtoPost = $derived(() => ({
+    uri: post.uri,
+    cid: post.cid || '',
+    record: {
+      text: post.text,
+      createdAt: post.createdAt,
+      facets: post.facets?.map(facet => ({
+        features: (facet as any).features || []
+      })),
+      embed: post.embed
+    },
+    author: {
+      did: post.author.did,
+      handle: post.author.handle,
+      displayName: post.author.displayName
+    },
+    labels: post.labels?.map(label => ({ val: label })),
+    embed: post.embed ? {
+      images: (post.embed as any)?.images?.map((img: any) => ({ alt: img.alt })),
+      external: (post.embed as any)?.external ? {
+        title: (post.embed as any).external.title,
+        description: (post.embed as any).external.description
+      } : undefined
+    } : undefined
+  } as AtProtoPost));
+
+  // フィルタリング完了時のコールバック
+  function handleFilterComplete(filterResult: any) {
+    if (debugModeration && filterResult?.filtered) {
+      console.log('[PostCard] Content filtered:', {
+        postUri: post.uri,
+        authorHandle: post.author.handle,
+        filterResult
+      });
+    }
+  }
 </script>
 
-<article class="bg-card border-b border-subtle p-4 hover:bg-muted/5 transition-colors {className}">
-  <RepostBadge 
-    reason={post.reason}
-    onClick={handleRepostUserClick}
-    class="mb-2"
-  />
+<!-- モデレーション対応投稿カード -->
+<PostFilter 
+  post={atProtoPost()}
+  class={className}
+  disableFiltering={disableModeration}
+  allowOverride={allowModerationOverride}
+  onFilterComplete={handleFilterComplete}
+  debug={debugModeration}
+>
+  <article class="bg-card border-b border-subtle p-4 hover:bg-muted/5 transition-colors">
+    <RepostBadge 
+      reason={post.reason}
+      onClick={handleRepostUserClick}
+      class="mb-2"
+    />
   
   <header class="flex items-start gap-3 mb-3">
     <Avatar 
@@ -274,4 +337,5 @@
       class="ml-auto"
     />
   </footer>
-</article>
+  </article>
+</PostFilter>

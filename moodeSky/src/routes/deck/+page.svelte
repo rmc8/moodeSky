@@ -12,6 +12,7 @@
   import { deckStore } from '$lib/deck/store.svelte.js';
   import { avatarCache } from '$lib/stores/avatarCache.svelte.js';
   import { accountsStore } from '$lib/stores/accounts.svelte.js';
+  import { moderationStore } from '$lib/stores/moderation.svelte.js';
   
   
   // リアクティブ翻訳システム
@@ -114,6 +115,15 @@
         console.log('🔍 [DEBUG] Initializing avatar cache...');
         await avatarCache.initialize();
         console.log('🔍 [DEBUG] Avatar cache initialized successfully');
+
+        // モデレーションシステムを初期化
+        console.log('🔍 [DEBUG] Initializing moderation system...');
+        await moderationStore.initialize();
+        console.log('🔍 [DEBUG] Moderation system initialized successfully:', {
+          filteringActive: moderationStore.isFilteringActive,
+          activeKeywords: moderationStore.activeKeywordCount,
+          activeLabels: moderationStore.activeLabelCount
+        });
         
         console.log('🔍 [DEBUG] DeckStore state after init:', {
           isInitialized: deckStore.isInitialized,
