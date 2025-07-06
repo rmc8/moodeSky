@@ -1,4 +1,4 @@
-import { BskyAgent } from '@atproto/api';
+import { AtpAgent } from '@atproto/api';
 import type { 
   IAgent, 
   AgentInfo, 
@@ -15,7 +15,7 @@ import { authService } from './authStore.js';
  * タイムライン取得機能は除外し、基本的なプロフィール・通知機能のみ実装
  */
 export class Agent implements IAgent {
-  public readonly agent: BskyAgent;
+  public readonly agent: AtpAgent;
   public readonly account: Account;
   public status: AgentStatus = 'active';
   
@@ -35,8 +35,8 @@ export class Agent implements IAgent {
     this.account = account;
     this.lastUsedAt = new Date().toISOString();
     
-    // BskyAgent を初期化（セッション付き、persistSession対応）
-    this.agent = new BskyAgent({
+    // AtpAgent を初期化（セッション付き、persistSession対応）
+    this.agent = new AtpAgent({
       service: account.service,
       persistSession: persistSessionHandler || authService.createPersistSessionHandler(account.id)
     });
@@ -225,7 +225,7 @@ export class Agent implements IAgent {
    */
   dispose(): void {
     this.status = 'disposed';
-    // BskyAgent にはリソース解放メソッドがないため、状態のみ更新
+    // AtpAgent にはリソース解放メソッドがないため、状態のみ更新
   }
 
   /**

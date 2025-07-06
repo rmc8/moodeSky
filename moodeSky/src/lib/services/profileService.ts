@@ -6,7 +6,7 @@
  * キャッシュ機能・エラーハンドリング・レート制限対応
  */
 
-import { BskyAgent } from '@atproto/api';
+import { AtpAgent } from '@atproto/api';
 import { authService } from './authStore.js';
 
 /**
@@ -121,8 +121,8 @@ export class ProfileService {
         };
       }
 
-      // BskyAgent インスタンス作成
-      const agent = new BskyAgent({ service });
+      // AtpAgent インスタンス作成
+      const agent = new AtpAgent({ service });
       
       // 認証（アクセストークンが必要）
       if (!accessJwt) {
@@ -304,7 +304,7 @@ export class ProfileService {
       }
 
       const { session, service } = accountResult.data;
-      const agent = new BskyAgent({ service: service || 'https://bsky.social' });
+      const agent = new AtpAgent({ service: service || 'https://bsky.social' });
       
       // セッション復元
       await agent.resumeSession(session);
@@ -399,7 +399,7 @@ export class ProfileService {
       }
 
       const { session, service } = accountResult.data;
-      const agent = new BskyAgent({ service: service || 'https://bsky.social' });
+      const agent = new AtpAgent({ service: service || 'https://bsky.social' });
       
       // セッション復元
       await agent.resumeSession(session);
