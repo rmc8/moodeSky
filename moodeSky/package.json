@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@atproto/api": "^0.15.15",
+    "@atproto/api": "^0.15.23",
     "@iconify-json/material-symbols": "^1.2.26",
     "@iconify/svelte": "^5.0.0",
     "@inlang/paraglide-js": "^2.1.0",

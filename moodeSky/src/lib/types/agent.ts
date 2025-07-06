@@ -1,4 +1,4 @@
-import type { BskyAgent } from '@atproto/api';
+import type { AtpAgent } from '@atproto/api';
 import type { Account } from './auth.js';
 
 /**
@@ -9,8 +9,8 @@ export interface AgentInfo {
   /** 一意識別子 (Account.id と対応) */
   id: string;
   
-  /** BskyAgent インスタンス */
-  agent: BskyAgent;
+  /** AtpAgent インスタンス */
+  agent: AtpAgent;
   
   /** 関連するアカウント情報 */
   account: Account;

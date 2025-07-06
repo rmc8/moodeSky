@@ -86,7 +86,7 @@ export class AuthService {
           handle: sess?.handle 
         });
         
-        // 重要: エラーを再スローしてBskyAgentに失敗を通知
+        // 重要: エラーを再スローしてAtpAgentに失敗を通知
         throw error;
       }
     };
@@ -504,10 +504,10 @@ export class AuthService {
       }
 
       const account = accountResult.data;
-      const { BskyAgent } = await import('@atproto/api');
+      const { AtpAgent } = await import('@atproto/api');
 
-      // BskyAgentでセッション復元を試行
-      const agent = new BskyAgent({ 
+      // AtpAgentでセッション復元を試行
+      const agent = new AtpAgent({ 
         service: account.service,
         persistSession: this.createPersistSessionHandler(account.id)
       });
@@ -1392,7 +1392,7 @@ export class AuthService {
       }
 
       const account = accountResult.data;
-      const { BskyAgent } = await import('@atproto/api');
+      const { AtpAgent } = await import('@atproto/api');
       const { getTokenExpiration } = await import('../utils/jwt.js');
 
       // 更新前のrefreshJwt情報を記録
@@ -1406,8 +1406,8 @@ export class AuthService {
         beforeExpiration: beforeExpiration?.toISOString()
       });
 
-      // BskyAgentでセッション復元を試行
-      const agent = new BskyAgent({ 
+      // AtpAgentでセッション復元を試行
+      const agent = new AtpAgent({ 
         service: account.service,
         persistSession: this.createPersistSessionHandler(account.id)
       });
@@ -1497,15 +1497,15 @@ export class AuthService {
         } as AuthResult<Account | Account[] | null>;
       }
 
-      const { BskyAgent } = await import('@atproto/api');
+      const { AtpAgent } = await import('@atproto/api');
       const refreshedAccounts: Account[] = [];
 
       for (const account of accounts) {
         try {
           console.log(`🔄 [AuthService] セッション復元中: ${account.profile.handle}`);
           
-          // BskyAgentでセッション復元（persistSession対応）
-          const agent = new BskyAgent({ 
+          // AtpAgentでセッション復元（persistSession対応）
+          const agent = new AtpAgent({ 
             service: account.service,
             persistSession: this.createPersistSessionHandler(account.id)
           });
@@ -1645,10 +1645,10 @@ export class AuthService {
       }
 
       const existingAccount = accountResult.data;
-      const { BskyAgent } = await import('@atproto/api');
+      const { AtpAgent } = await import('@atproto/api');
 
       // 新しいAgentを作成して認証（persistSession対応）
-      const agent = new BskyAgent({
+      const agent = new AtpAgent({
         service: existingAccount.service,
         persistSession: this.createPersistSessionHandler(accountId)
       });
